@@ -1,0 +1,69 @@
+[game]
+name = "Saturn Bomberman (USA)"
+seeds = "tools/seeds.json"
+build = "build"
+
+[symbols]
+krnl_setjmp = 0x060061C4
+krnl_longjmp = 0x060061E6
+krnl_yield = 0x06006D36             # the scheduler's yield
+bomber_hit_flag = 0x0606CF2E        # in the hit routine, where r2 holds the 0x40 it ORs into a bomber's flags
+bomber_fire_under = 0x06015516      # in the bomber update, where r0 holds the fire map entry under the bomber
+bombers = 0x060D5F00                # 0x7C bytes a bomber, flags at +0x34
+fire_map = 0x060EC8B0
+
+# The boot chain: the NetLink loader /0, its trampoline, the launcher, IP.BIN as the launcher
+# leaves it, the loader FLD_KNL, the XBAND library and the game's kernel. tools/prepare.py makes
+# tramp.bin and ip-patched.bin. Where two load at one address, the log shows which one ran.
+[[module]]
+name = "BOOT"
+file = "build/extract/0"
+base = 0x06010000
+
+[[module]]
+name = "TRAMP"
+file = "build/tramp.bin"
+base = 0x00200000
+
+[[module]]
+name = "XS"
+file = "build/extract/NETLINK/XS028000.EXE"
+base = 0x00280000
+
+[[module]]
+name = "IP"
+file = "build/ip-patched.bin"
+base = 0x06002000
+seeds = [0x06002100, 0x06002E20]
+
+[[module]]
+name = "FLD"
+file = "build/extract/FLD_KNL.BIN"
+base = 0x00200000
+seeds = [0x002001A4]
+
+[[module]]
+name = "H2H"
+file = "build/extract/XBAND/H2HLIBUS.BIN"
+base = 0x06002F00
+seeds = [0x06003320]
+
+[[module]]
+name = "KRNL"
+file = "build/extract/BOMSS/0KRNL.BIN"
+base = 0x06006000
+
+[tasks]
+module = "KRNL"
+setjmp = "krnl_setjmp"
+longjmp = "krnl_longjmp"
+yields = ["krnl_setjmp", "krnl_yield"]
+unknown_yields = true
+
+[[hook]]
+module = "KRNL"
+at = "bomber_hit_flag"
+
+[[hook]]
+module = "KRNL"
+at = "bomber_fire_under"

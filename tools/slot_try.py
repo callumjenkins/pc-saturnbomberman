@@ -4,6 +4,7 @@ bomb set off at each candidate VBlank; prints which symbol each reel shows at th
 SETUP is the presses before the bomb goes off (walk, C); each candidate adds D:B."""
 import concurrent.futures, hashlib, os, subprocess, sys
 from PIL import Image
+from iterate import invincible
 from paths import BUILD, SAT, cue
 TITLE = "1900:START,1910:,2850:L+R+C+UP+RIGHT,3000:L+R+C+UP+RIGHT+START,3010:L+R+C+UP+RIGHT,3060:,3500:START,3510:,3900:START,3910:"
 base, setup, cands, end = open(sys.argv[1]).read().strip(), sys.argv[2], [int(x) for x in sys.argv[3].split(",")], int(sys.argv[4])
@@ -13,8 +14,8 @@ def run(d):
     os.makedirs(out, exist_ok=True)
     inp = f"{TITLE},{base}" + (f",{setup}" if setup else "") + f",{d}:B,{d + 4}:"
     subprocess.run([SAT, "--cue", cue(), "--out", out, "--headless", "--vblanks", str(end),
-                    "--shot", f"{end - 8},{end}", "--tasks", "060061C4:060061E6", "--input", inp,
-                    "--hook", "0606CF2E:r2=0", "--hook", "06015516:r0=0"], capture_output=True)
+                    "--shot", f"{end - 8},{end}", "--input", inp, *invincible()],
+                   capture_output=True)
     res = []
     for f in (end - 8, end):
         im = Image.open(f"{out}/shot-{f}.png").convert("RGB")

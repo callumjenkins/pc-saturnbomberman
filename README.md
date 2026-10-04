@@ -22,8 +22,9 @@ hardware log and the frames asked for as `shot-N.png`.
 
 ## Layout
 
-    tools/       iterate.py (recompile, build, run, add missed seeds), prepare.py, resume_points.py,
-                 seeds.json, and the stage tools step.py, stage_map.py, slot_try.py
+    game.toml    the programs saturn-recomp recompiles, names for addresses, the task switch and hooks
+    tools/       iterate.py (build if needed, run, learn missed seeds), prepare.py, seeds.json,
+                 and the stage tools step.py, stage_map.py, slot_try.py
     scripts/     scripted runs: Normal mode, battles, title codes, the slot machine
     inputs/      pad presses for the longer scripted runs
     tests/       frames.py: the scripted runs replayed and their frames compared with frames.json
