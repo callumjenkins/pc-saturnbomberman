@@ -1,0 +1,12 @@
+# BYOA: nothing from the disc goes in the repo.
+build/
+iso/
+*.cue
+*.bin
+*.BIN
+*.iso
+*.chd
+*.wav
+*.png
+__pycache__/
+*.pyc
