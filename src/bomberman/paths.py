@@ -2,12 +2,9 @@
 import glob
 import os
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TOOLS = f"{ROOT}/tools"
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BUILD = f"{ROOT}/build"
 EXTRACT = f"{BUILD}/extract"
-RUN = f"{BUILD}/run1"
-SAT = f"{BUILD}/recomp-build/saturn"
 
 
 def cue():

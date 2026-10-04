@@ -1,11 +1,19 @@
 [project]
-name = "pc-saturnbomberman"
+name = "bomberman"
 version = "0.1.0"
-requires-python = ">=3.10"
+description = "Saturn Bomberman (USA) recompiled with saturn-recomp"
+requires-python = ">=3.11"
 dependencies = ["saturnrecomp", "pillow"]
 
-[tool.uv]
-package = false
+[project.scripts]
+bomberman = "bomberman.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bomberman"]
 
 [tool.uv.sources]
 saturnrecomp = { path = "saturn-recomp", editable = true }

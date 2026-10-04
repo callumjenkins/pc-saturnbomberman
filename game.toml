@@ -1,6 +1,6 @@
 [game]
 name = "Saturn Bomberman (USA)"
-seeds = "tools/seeds.json"
+seeds = "seeds.json"
 build = "build"
 
 [symbols]
@@ -13,7 +13,7 @@ bombers = 0x060D5F00                # 0x7C bytes a bomber, flags at +0x34
 fire_map = 0x060EC8B0
 
 # The boot chain: the NetLink loader /0, its trampoline, the launcher, IP.BIN as the launcher
-# leaves it, the loader FLD_KNL, the XBAND library and the game's kernel. tools/prepare.py makes
+# leaves it, the loader FLD_KNL, the XBAND library and the game's kernel. `bomberman prepare` makes
 # tramp.bin and ip-patched.bin. Where two load at one address, the log shows which one ran.
 [[module]]
 name = "BOOT"
