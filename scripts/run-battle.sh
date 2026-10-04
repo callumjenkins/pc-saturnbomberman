@@ -8,4 +8,4 @@ v=6450
 for p in 2 3 4 5 6 7 8 9 10; do B="$B,$v:$p.A,$((v+8)):$p."; v=$((v+70)); done
 for w in $(seq $v 90 $((v+1200))); do B="$B,$w:A,$((w+8)):"; done
 B="$B${EXTRA:+,$EXTRA}"
-SATURN_ARGS="--multitap 2 --input $B" python3 tools/iterate.py "${1:-8880}" "${2:-7700,8880}" 40
+SATURN_ARGS="--multitap 2 --input $B" uv run --quiet tools/iterate.py "${1:-8880}" "${2:-7700,8880}" 40

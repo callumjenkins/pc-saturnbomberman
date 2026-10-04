@@ -1,6 +1,6 @@
 """Try detonation times for one slot reel in parallel: the cactus route, the presses so far, then a
 bomb set off at each candidate VBlank; prints which symbol each reel shows at the end (* still moving).
-    python tools/slot_try.py PRESSES_FILE "SETUP" D1,D2,... END
+    uv run tools/slot_try.py PRESSES_FILE "SETUP" D1,D2,... END
 SETUP is the presses before the bomb goes off (walk, C); each candidate adds D:B."""
 import concurrent.futures, hashlib, os, subprocess, sys
 from PIL import Image

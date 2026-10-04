@@ -6,4 +6,4 @@ cd "$(dirname "$0")/.."
 K=$1
 IN="1900:START,1910:,2850:$K,3000:$K+START,3010:$K,3060:"
 for t in 3500 3900; do IN="$IN,$t:START,$((t+10)):"; done
-SATURN_ARGS="--input $IN${EXTRA:+,$EXTRA} $DUMP" python3 tools/iterate.py "${2:-6000}" "${3:-4800,6000}" 40
+SATURN_ARGS="--input $IN${EXTRA:+,$EXTRA} $DUMP" uv run --quiet tools/iterate.py "${2:-6000}" "${3:-4800,6000}" 40

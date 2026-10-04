@@ -1,6 +1,8 @@
 """Run the recompiled game until it stops; while it stops at a call to an
 address inside a module's image that discovery missed, add that address as a
-seed, recompile and go again."""
+seed, recompile and go again.
+
+RUN_OUT sends the run to another directory. RUN_ONCE runs the current build once, adding no seeds."""
 import json
 import os
 import re
@@ -61,7 +63,7 @@ def recompile(seeds):
         spec = f"{n}={f}@{b:08X}" + ("+" + ",".join(f"{x:08X}" for x in s) if s else "")
         args.append(spec)
     hooks = [a for h in HOOKS for a in ("--hook", h)]
-    subprocess.run([sys.executable, "-m", "saturnkit.recomp", "--out", f"{BUILD}/recomp", *hooks, *args],
+    subprocess.run([sys.executable, "-m", "saturnrecomp.recomp", "--out", f"{BUILD}/recomp", *hooks, *args],
                    cwd=ROOT, check=True, capture_output=True)
     subprocess.run(["cmake", "-S", "recomp", "-B", "recomp-build", "-G", "Ninja",
                     "-DCMAKE_CXX_COMPILER=clang++"], cwd=BUILD, check=True, capture_output=True)
@@ -69,7 +71,7 @@ def recompile(seeds):
 
 
 def run(vblanks, shots):
-    out = RUN
+    out = os.environ.get("RUN_OUT", RUN)
     subprocess.run(["rm", "-rf", out])
     os.makedirs(out)
     p = subprocess.run([SAT, "--cue", cue(), "--out", out, "--headless",
@@ -86,9 +88,14 @@ def main():
     vblanks = int(sys.argv[1]) if len(sys.argv) > 1 else 1800
     shots = sys.argv[2] if len(sys.argv) > 2 else "120,300,600,900,1200,1800"
     limit = int(sys.argv[3]) if len(sys.argv) > 3 else 40
+    if os.environ.get("RUN_ONCE"):
+        print(run(vblanks, shots))
+        return
     seeds = load_seeds()
     if os.environ.get("RECOMPILE") or not os.path.exists(SAT):
         recompile(seeds)
+    else:
+        subprocess.run(["ninja", "-C", "recomp-build"], cwd=BUILD, check=True, capture_output=True)
     for i in range(limit):
         log = run(vblanks, shots)
         m = re.search(r"FATAL\] (?:call to ([0-9A-F]{8}), not an entry of an active module"

@@ -1,5 +1,5 @@
 """Gunman world from its code, the presses so far, then the stage at VBlank END as a map.
-    python tools/step.py END "VBLANK:BUTTONS,..."
+    uv run tools/step.py END "VBLANK:BUTTONS,..."
 # rock, o soft block, f fire, % building/edge (NBG2 not floor), P pad 1's bomber, s other sprites (enemies, bombs, fire)."""
 import os, struct, subprocess, sys
 from paths import ROOT, RUN

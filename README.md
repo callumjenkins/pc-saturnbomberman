@@ -1,8 +1,7 @@
 # pc-saturnbomberman
 
 Saturn Bomberman (USA) recompiled to run natively on PC, built on
-[saturnkit](https://github.com/callumjenkins/saturnkit) (a fork of
-[vs-sr-dev/saturnkit](https://github.com/vs-sr-dev/saturnkit)).
+[saturn-recomp](https://github.com/callumjenkins/saturn-recomp).
 
 The repository holds tools and scripts only. Bring your own disc: nothing from it goes in the repo,
 and everything made from it goes in `build/`, which git ignores.
@@ -13,11 +12,12 @@ and everything made from it goes in `build/`, which git ignores.
 git clone --recursive git@github.com:callumjenkins/pc-saturnbomberman.git
 cd pc-saturnbomberman
 # put the Redump .cue and .bin files for Saturn Bomberman (USA) (1S) in iso/, or set BOMBERMAN_CUE
-python3 tools/prepare.py           # extracts the disc into build/
+uv sync                            # a Python environment with saturn-recomp in it
+uv run tools/prepare.py            # extracts the disc into build/
 scripts/run-normal.sh              # recompiles and builds on the first run, then plays Normal mode headless
 ```
 
-The build needs Python 3, CMake, Ninja, clang and SDL3. Results go to `build/run1/`: `log.txt`, the
+The build needs uv, CMake, Ninja, clang and SDL3. Results go to `build/run1/`: `log.txt`, the
 hardware log and the frames asked for as `shot-N.png`.
 
 ## Layout
@@ -26,8 +26,15 @@ hardware log and the frames asked for as `shot-N.png`.
                  seeds.json, and the stage tools step.py, stage_map.py, slot_try.py
     scripts/     scripted runs: Normal mode, battles, title codes, the slot machine
     inputs/      pad presses for the longer scripted runs
-    saturnkit/   the recompiler and runtime (submodule)
+    tests/       frames.py: the scripted runs replayed and their frames compared with frames.json
+    saturn-recomp/ the recompiler and runtime (submodule)
     iso/, build/ your disc and everything made from it (ignored)
+
+## Testing
+
+`uv run tests/frames.py` rebuilds, replays nine scripted runs in parallel (about a minute) and fails
+if a frame differs from `tests/frames.json` or a run hits a fatal error. When a change to the frames
+is meant, check them in `build/test/NAME/` and record them with `--update`.
 
 ## Runs
 

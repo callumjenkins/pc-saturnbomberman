@@ -1,12 +1,12 @@
 """The disc's files, and the two images the build needs that are not files on it, into build/.
-    python tools/prepare.py"""
+    uv run tools/prepare.py"""
 import os
 import subprocess
 import sys
 
 from paths import BUILD, EXTRACT, ROOT, cue
 
-subprocess.run([sys.executable, "-m", "saturnkit.disc", cue(), "--extract", EXTRACT], cwd=ROOT, check=True)
+subprocess.run([sys.executable, "-m", "saturnrecomp.disc", cue(), "--extract", EXTRACT], cwd=ROOT, check=True)
 
 # The NetLink loader /0 copies this trampoline to 0x00200000 and jumps to it.
 boot = open(f"{EXTRACT}/0", "rb").read()

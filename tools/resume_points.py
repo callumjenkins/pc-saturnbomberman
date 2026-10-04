@@ -4,17 +4,15 @@ setjmp) and comes back at that call's return address, which is inside a
 function rather than at an entry, so the build needs it as a seed. A function
 yields if it calls one that does, so the set grows from the kernel's own.
 
-    python tools/resume_points.py [--check]    # prints the KRNL addresses; --check compares with seeds.json
+    uv run tools/resume_points.py [--check]    # prints the KRNL addresses; --check compares with seeds.json
 """
 import json
 import os
 import sys
 
-from paths import EXTRACT, ROOT, TOOLS
-
-sys.path.insert(0, ROOT)
-from saturnkit import sh2
-from saturnkit.recomp import discover
+from paths import EXTRACT, TOOLS
+from saturnrecomp import sh2
+from saturnrecomp.recomp import discover
 
 BASE = 0x06006000
 YIELDS = {0x060061C4, 0x06006D36}          # setjmp, the scheduler's yield
