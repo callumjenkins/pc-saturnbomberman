@@ -9,11 +9,13 @@ SLOTS = 50
 ENEMY_SLOTS = range(10, SLOTS)
 
 SOLID, SOFT, BOMB, FIRE = 0x80, 0x10, 0x20, 0x07
+CANNON = 0x0300                                   # both bits: a cannon, which keeps a bomber in it until A fires it out
 
 
 @dataclass(frozen=True)
 class Thing:
     slot: int
+    update: int                                  # the object's update function: its kind
     cell: tuple[int, int]
     x: float                                     # pixels
     y: float
@@ -26,12 +28,18 @@ class Stage:
     enemies: tuple[Thing, ...]
     exit: tuple[int, int]
 
+    @property
+    def cores(self):
+        """The Core Mechanisms left, which keep the exit shut."""
+        return tuple(e for e in self.enemies if e.update == GAME.symbols["core_mechanism"])
+
     def at(self, c):
         x, y = c
         return self.cells[y * 64 + x] if 0 <= x < 64 and 0 <= y < 64 else SOLID
 
     def passable(self, c):
-        return not self.at(c) & (SOLID | SOFT | BOMB)
+        v = self.at(c)
+        return not v & (SOLID | SOFT | BOMB) and v & CANNON != CANNON
 
 
 def _things(raw, slots, skip=0x80):
@@ -42,7 +50,7 @@ def _things(raw, slots, skip=0x80):
         if int.from_bytes(s[0x30:0x34], "big") == idle or s[0x34] & skip:
             continue
         cell = int.from_bytes(s[0x44:0x46], "big")
-        out.append(Thing(k, (cell % 64, cell // 64),
+        out.append(Thing(k, int.from_bytes(s[0x30:0x34], "big"), (cell % 64, cell // 64),
                          int.from_bytes(s[0x48:0x4C], "big") / 65536, int.from_bytes(s[0x4C:0x50], "big") / 65536))
     return out
 

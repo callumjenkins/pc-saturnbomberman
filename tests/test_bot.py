@@ -1,5 +1,5 @@
 """The bot's planning on hand-drawn maps: # solid, o soft block, . floor, the bomber at its cell."""
-from bomberman import bot, state
+from bomberman import bot, run, state
 
 
 def stage(rows, me, enemies=(), exit=(0, 0)):
@@ -8,7 +8,7 @@ def stage(rows, me, enemies=(), exit=(0, 0)):
     for y, row in enumerate(rows):
         for x, ch in enumerate(row):
             cells[y * 64 + x] = codes[ch]
-    thing = lambda c: state.Thing(0, c, c[0] * 16, c[1] * 16)
+    thing = lambda c: state.Thing(0, 0, c, c[0] * 16, c[1] * 16)
     return state.Stage(tuple(cells), thing(me), tuple(thing(e) for e in enemies), exit)
 
 
@@ -55,3 +55,14 @@ def test_a_bomb_blocks_the_way():
                 "#######"]
     reachable, _ = bot.paths(stage(corridor, (1, 1)), (1, 1))
     assert set(reachable) == {(1, 1)}
+
+
+def test_goes_for_the_core_mechanism_and_leaves_the_enemy():
+    s = stage(ROOM, (1, 1), enemies=[(2, 1)])
+    core = state.Thing(11, run.GAME.symbols["core_mechanism"], (5, 3), 80, 48)
+    s = state.Stage(s.cells, s.me, s.enemies + (core,), s.exit)
+    moves, bomb = bot.plan(s, fire=2)
+    x, y = 1, 1
+    for d in moves:
+        x, y = x + bot.DIRS[d][0], y + bot.DIRS[d][1]
+    assert bomb and (5, 3) in bot.blast(s, (x, y), fire=2)[0]

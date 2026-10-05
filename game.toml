@@ -15,6 +15,7 @@ bomber_touched = 0x0605E512         # in the touch check, where r3 holds the obj
 # +0x48 and +0x4C x and y in 16.16 pixels.
 objects = 0x060D5F00
 idle_object = 0x060143D8
+core_mechanism = 0x0607466C         # the update function of a Core Mechanism: the exit opens once none is left
 # The stage map: 64x64 cells, a word each, the cell (x, y) at y*64+x. 0x80 solid (walls, hard blocks,
 # a standing enemy), 0x10 soft block, 0x20 bomb, the low 3 bits fire.
 cells = 0x060EC8B0

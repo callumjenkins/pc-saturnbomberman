@@ -48,20 +48,25 @@ def blast(stage, c, fire):
 
 
 def plan(stage, fire):
-    """Where to go next and whether to bomb there: a cell whose blast reaches an enemy, else one that
-    breaks the soft block nearest an enemy, else the exit once no enemy is left."""
+    """Where to go next and whether to bomb there: a cell whose blast reaches a target, else one that
+    breaks the soft block nearest a target, else the exit once none is left. The targets are the Core
+    Mechanisms, which alone keep the exit shut, or every enemy in a stage without them, such as a
+    boss's."""
     reachable, path = paths(stage, stage.me.cell)
-    if not stage.enemies:
+    foes = stage.cores or stage.enemies
+    if not stage.cores and stage.exit in reachable and stage.exit != stage.me.cell:
+        return path(stage.exit), False
+    if not foes:
         if stage.exit in reachable:
             return path(stage.exit), False
         targets = {stage.exit}
     else:
-        targets = {e.cell for e in stage.enemies}
+        targets = {e.cell for e in foes}
     best = None
     for c in reachable:
         hit, soft = blast(stage, c, fire)
         steps = len(path(c))
-        if hit & targets and stage.enemies:
+        if hit & targets and foes:
             score = (0, steps)
         elif soft:
             near = min(abs(s[0] - t[0]) + abs(s[1] - t[1]) for s in soft for t in targets)
@@ -120,6 +125,12 @@ def play(r, limit, log=print, fire=2):
             r.step(4)
             r.pad("")
             r.step(6)
+            continue
+        if stage.at(stage.me.cell) & state.CANNON == state.CANNON:
+            r.pad("A")                           # in a cannon: fire out of it
+            r.step(10)
+            r.pad("")
+            r.step(60)
             continue
         moves, bomb = plan(stage, fire)
         if not moves and (not bomb or stage.at(stage.me.cell) & state.BOMB):
