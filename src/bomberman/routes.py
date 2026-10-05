@@ -79,11 +79,17 @@ def yuna(start=4200, end=4260):
                  TO_BATTLE + hold + taps(range(5900, 7001, 90), "A", 8), 6900, "6900")
 
 
+# Normal Game's stages a world. A higher number loads, but reads the stage tables past their end.
+STAGES = {1: 7, 2: 10, 3: 10, 4: 10, 5: 10}
+
+
 def stage(world, number):
     """Stage WORLD-NUMBER as the game shows it (from 1), through Normal Game's start with the world and
     stage written over the ones it chose. START skips the opening movie, and play starts at about
     VBlank 5620."""
     from .run import GAME
+    if not 1 <= number <= STAGES.get(world, 0):
+        raise ValueError(f"no stage {world}-{number}: " + ", ".join(f"{w}-1 to {w}-{n}" for w, n in STAGES.items()))
     value = f"{world - 1:02X}{number - 1:02X}"
     names = ("stage", "stage_2", "stage_3", "stage_saved")
     return Route(f"stage {world}-{number}, from Normal Game with the stage select",

@@ -53,7 +53,10 @@ def main(argv=None):
                 world, number = map(int, (args.which or "").split("-"))
             except ValueError:
                 ap.error("run stage needs WORLD-STAGE, such as 3-2")
-            route = routes.stage(world, number)
+            try:
+                route = routes.stage(world, number)
+            except ValueError as e:
+                ap.error(str(e))
         else:
             route = routes.ROUTES[args.route]()
         if args.invincible:
