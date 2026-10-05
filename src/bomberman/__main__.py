@@ -33,6 +33,7 @@ def clear_stage(world, number, limit, window):
         cleared = bot.play(r, limit)
         presses = [p for p in r.presses if int(p.split(":")[0]) >= start]
         r.frame().save_png(os.path.join(r.out, f"end-{r.vblank}.png"))
+        open(os.path.join(r.out, "presses.txt"), "w").write(",".join(presses) + "\n")
         print(f"{world}-{number}: {'cleared' if cleared else 'not cleared'} at VBlank {r.vblank}, {len(presses)} presses")
     if cleared:
         path = os.path.join(ROOT, "inputs", "clears", f"{world}-{number}.txt")
