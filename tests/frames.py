@@ -12,6 +12,7 @@ import json
 import os
 import sys
 
+from PIL import Image
 from saturnrecomp import build
 
 from bomberman import routes, run
@@ -31,6 +32,19 @@ def replay(name):
         path = f"{out}/shot-{v}.png"
         frames[v] = hashlib.md5(open(path, "rb").read()).hexdigest() if os.path.exists(path) else None
     return frames, [line for line in log.splitlines() if "FATAL" in line]
+
+
+def agent_matches():
+    """Whether the yuna route played through the agent, a VBlank at a time near the end, gives the
+    frame the --input run did."""
+    route = routes.ROUTES["yuna"]()
+    end = int(route.shots)
+    with run.play(f"{BUILD}/test/agent", route, until=end - 10) as r:
+        while r.vblank < end:
+            r.step(1)
+        frame = r.frame()
+    shot = Image.open(f"{BUILD}/test/yuna/shot-{end}.png").convert("RGB")
+    return shot.size == (frame.width, frame.height) and shot.tobytes() == frame.rgb
 
 
 def main():
@@ -61,6 +75,11 @@ def main():
         status = "FAIL" if bad else "recorded" if args.update else "ok"
         detail = "; ".join([*(f"frame {v} differs" for v in diffs if not args.update), *(f.strip() for f in fatal)])
         print(f"{status:8} {name}" + (f": {detail}" if detail and bad else ""))
+    if "yuna" in names and not args.update:
+        ok = agent_matches()
+        failed += not ok
+        print(f"{'ok' if ok else 'FAIL':8} agent: the yuna route played through the agent"
+              + ("" if ok else " gives a different frame"))
     if args.update:
         json.dump(expected, open(EXPECTED, "w"), indent=1, sort_keys=True)
         open(EXPECTED, "a").write("\n")

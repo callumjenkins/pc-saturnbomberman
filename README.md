@@ -54,10 +54,14 @@ Options:
 - `--recompile` forces a recompile, which takes about 45 s.
 - `--once` runs the current build once without learning seeds.
 
+A program can play the game too: `bomberman.run.play(out, route, until)` starts a run for
+`saturnrecomp.agent`, optionally with a route's presses played up to a VBlank first.
+
 Anything after `--` goes to the saturn executable, such as `-- --dump 6000` for the video memories.
 
 ## Testing
 
 `uv run tests/frames.py` rebuilds, replays ten routes in parallel (about a minute) and fails if a
-frame differs from `tests/frames.json` or a run hits a fatal error. When a change to the frames is
+frame differs from `tests/frames.json` or a run hits a fatal error. It also plays the yuna route
+through saturn-recomp's agent and checks that it ends on the same frame as the scripted run. When a change to the frames is
 meant, check them in `build/test/NAME/` and record them with `--update`.
