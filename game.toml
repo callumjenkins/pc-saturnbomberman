@@ -9,6 +9,7 @@ krnl_longjmp = 0x060061E6
 krnl_yield = 0x06006D36             # the scheduler's yield
 bomber_hit_flag = 0x0606CF2E        # in the hit routine, where r2 holds the 0x40 it ORs into a bomber's flags
 bomber_fire_under = 0x06015516      # in the bomber update, where r0 holds the fire map entry under the bomber
+bomber_touched = 0x0605E512         # in the touch check, where r3 holds the object state word; any of bits 0x1228 skips the hit
 # The stage's objects, 0x7C bytes each: slots 0-9 the bombers, enemies from 10. At +0x30 the update
 # function (idle_object when the slot is free), +0x34 flags (0x80 gone, 0x40 hit), +0x44 the cell,
 # +0x48 and +0x4C x and y in 16.16 pixels.
@@ -80,3 +81,7 @@ at = "bomber_hit_flag"
 [[hook]]
 module = "KRNL"
 at = "bomber_fire_under"
+
+[[hook]]
+module = "KRNL"
+at = "bomber_touched"

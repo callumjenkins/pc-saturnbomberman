@@ -11,7 +11,8 @@ GAME = config.load(f"{ROOT}/game.toml")
 def invincible_hooks():
     """Hooks that keep every bomber from being hit, though enemies still die."""
     s = GAME.symbols
-    return ["--hook", f"{s['bomber_hit_flag']:08X}:r2=0", "--hook", f"{s['bomber_fire_under']:08X}:r0=0"]
+    return ["--hook", f"{s['bomber_hit_flag']:08X}:r2=0", "--hook", f"{s['bomber_fire_under']:08X}:r0=0",
+            "--hook", f"{s['bomber_touched']:08X}:r3=8"]
 
 
 def saturn_args(route, vblanks=None, shots=None, extra=(), more=()):
