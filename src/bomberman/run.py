@@ -4,6 +4,7 @@ import os
 from saturnrecomp import agent, build, config, learn
 
 from .paths import BUILD, ROOT, cue
+from .prepare import check_prepared
 
 GAME = config.load(f"{ROOT}/game.toml")
 
@@ -25,6 +26,7 @@ def saturn_args(route, vblanks=None, shots=None, extra=(), more=()):
 def run(route, out, vblanks=None, shots=None, extra=(), more=(), learn_seeds=True, recompile=False, log=print):
     """The run into `out`, and its log. With `learn_seeds`, it builds first if it has to, and while
     the game stops at code discovery missed, adds the seed, recompiles and runs again."""
+    check_prepared()
     args = saturn_args(route, vblanks, shots, extra, more)
     if not learn_seeds:
         return learn.run(GAME, args, out)
@@ -35,6 +37,7 @@ def run(route, out, vblanks=None, shots=None, extra=(), more=(), learn_seeds=Tru
 def play(out, route=None, until=0, invincible=False, window=False, more=()):
     """A run for a program to play (saturnrecomp.agent), on the current build. With a route, its
     presses before VBlank `until` are played first, and its saturn arguments apply."""
+    check_prepared()
     args = ["--cue", cue(), "--save", "-", *([] if window else ["--headless"]), *(route.args if route else ()),
             *(invincible_hooks() if invincible or (route and route.invincible) else []), *more]
     r = agent.start(GAME.saturn, args, out)

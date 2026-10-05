@@ -9,6 +9,7 @@ from saturnrecomp import disc
 from .paths import BUILD, EXTRACT, ROOT, cue
 
 MANIFEST = f"{ROOT}/disc.json"
+PREPARED = f"{BUILD}/prepared.json"            # the disc prepare checked and extracted, by its files' sizes and times
 
 
 def expected():
@@ -26,19 +27,23 @@ def check_disc():
                          f"{want['product']} {want['version']}:\n  " + "\n  ".join(errors))
 
 
-def check_header():
-    """The quick check for a launch: the disc's product and version, from IP.BIN."""
-    want = expected()
+def check_prepared():
+    """Stop unless build/ was prepared from the disc a run would read, unchanged since."""
     try:
-        ip = disc.Disc(cue()).ip
-    except (disc.DiscError, ValueError, OSError) as e:
+        before = json.load(open(PREPARED))
+    except (OSError, ValueError):
+        raise SystemExit("the disc has not been prepared: run bomberman prepare")
+    try:
+        now = disc.fingerprint(cue())
+    except (disc.DiscError, OSError) as e:
         raise SystemExit(f"{cue()} cannot be read: {e}")
-    if (ip.product, ip.version) != (want["product"], want["version"]):
-        raise SystemExit(f"{cue()} is {ip.product} {ip.version}; this port supports Saturn Bomberman (USA) "
-                         f"{want['product']} {want['version']}")
+    if now != before:
+        raise SystemExit(f"the disc changed since it was prepared ({cue()}): run bomberman prepare")
 
 
 def prepare():
+    if os.path.exists(PREPARED):
+        os.remove(PREPARED)
     check_disc()
     subprocess.run([sys.executable, "-m", "saturnrecomp.disc", cue(), "--extract", EXTRACT], cwd=ROOT, check=True)
 
@@ -51,4 +56,6 @@ def prepare():
     ip = bytearray(open(f"{EXTRACT}/SAMPLEIP.BIN", "rb").read().ljust(0x1000, b"\0"))
     ip[0x270:0x274] = (0x00200000).to_bytes(4, "big")
     open(f"{BUILD}/ip-patched.bin", "wb").write(ip)
+    with open(PREPARED, "w") as f:
+        json.dump(disc.fingerprint(cue()), f, indent=1)
     print(f"prepared {os.path.relpath(BUILD, ROOT)}/")

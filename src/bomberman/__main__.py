@@ -83,7 +83,7 @@ def main(argv=None):
     if args.command == "prepare":
         prepare.prepare()
     elif args.command == "play":
-        prepare.check_header()
+        prepare.check_prepared()
         run.build.ensure(run.GAME)
         out = f"{run.BUILD}/play"
         os.makedirs(out, exist_ok=True)
