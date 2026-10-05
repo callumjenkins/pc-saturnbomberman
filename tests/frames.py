@@ -18,7 +18,7 @@ from bomberman import routes, run
 from bomberman.paths import BUILD, ROOT
 
 EXPECTED = f"{ROOT}/tests/frames.json"
-RUNS = ["normal", "single", "battle", *routes.WORLDS, "slot"]
+RUNS = ["normal", "single", "battle", *routes.WORLDS, "slot", "yuna"]
 
 
 def replay(name):

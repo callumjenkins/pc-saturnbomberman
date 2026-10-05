@@ -43,6 +43,7 @@ The build needs uv, CMake, Ninja, clang and SDL3. A run's results go to `build/r
 | `hige`, `mage`, `gunman`, `tyranno`, `mujoe` | a world's first stage, from the title's held code |
 | `cactus` | Gunman world 3-1 with the cactus turned into the slot machine |
 | `slot` | the slot machine won: three fires and the Fire Up picked up |
+| `yuna` | Battle's L+R hold, then character select with Yuna and Manto |
 | `code KEYS` | a title-screen code such as `L,R,Y,UP` (`--hold L+R` holds buttons under it), then Normal mode |
 
 Options:
@@ -57,6 +58,6 @@ Anything after `--` goes to the saturn executable, such as `-- --dump 6000` for 
 
 ## Testing
 
-`uv run tests/frames.py` rebuilds, replays nine routes in parallel (about a minute) and fails if a
+`uv run tests/frames.py` rebuilds, replays ten routes in parallel (about a minute) and fails if a
 frame differs from `tests/frames.json` or a run hits a fatal error. When a change to the frames is
 meant, check them in `build/test/NAME/` and record them with `--update`.

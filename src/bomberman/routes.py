@@ -70,6 +70,14 @@ def battle():
     return Route("the 10-player battle on two multitaps", presses, 8880, "7700,8880", args=("--multitap", "2"))
 
 
+def yuna(start=4200, end=4260):
+    """L+R held on Battle's "Which Mode?" screen (up from about 4100 to 5900) from `start` to `end`,
+    then A through to character select. A hold of 60 VBlanks or more adds Yuna and Manto."""
+    hold = (f"{start}:L+R", f"{end}:") if end else ()
+    return Route("Yuna and Manto unlocked, at character select",
+                 TO_BATTLE + hold + taps(range(5900, 7001, 90), "A", 8), 6900, "6900")
+
+
 def world(name):
     """The world's code held while "Press Start" shows, through START, then on to its first stage."""
     held = WORLDS[name]
@@ -110,4 +118,4 @@ def slot():
 
 ROUTES = {"normal": normal, "single": single, "battle": battle,
           **{name: (lambda name=name: world(name)) for name in WORLDS},
-          "cactus": cactus, "slot": slot}
+          "cactus": cactus, "slot": slot, "yuna": yuna}
