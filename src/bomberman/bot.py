@@ -142,6 +142,11 @@ def play(r, limit, log=print, fire=2):
         for d in moves[:8]:
             if not walk(r, d):
                 stuck += 1
+                # a bomber that cannot move is often in a scene with dialogue, which A and C move on
+                r.pad("A" if stuck % 2 else "C")
+                r.step(4)
+                r.pad("")
+                r.step(10)
                 break
         else:
             stuck = 0
@@ -152,7 +157,7 @@ def play(r, limit, log=print, fire=2):
                 r.step(4)
                 r.pad("")
                 r.step(2)
-        if stuck > 20:
+        if stuck > 200:
             log(f"{r.vblank}: stuck at {stage.me.cell}")
             return False
     return False
