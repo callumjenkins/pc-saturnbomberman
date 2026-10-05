@@ -58,7 +58,7 @@ def main(argv=None):
     sub.add_parser("routes")
     b = sub.add_parser("bot")
     b.add_argument("stage", help="such as 3-2")
-    b.add_argument("--limit", type=int, default=12000, help="VBlanks to try for, 60 a second")
+    b.add_argument("--limit", type=int, default=22000, help="VBlanks to try for, 60 a second; a stage gives 6:00, about 21600")
     b.add_argument("--window", action="store_true", help="play it in a window")
     b.add_argument("--video", action="store_true", help="record it as video.mp4 beside its log")
     r = sub.add_parser("run")
