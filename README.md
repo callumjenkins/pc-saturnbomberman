@@ -26,7 +26,7 @@ file on it with its size and SHA-1, and `prepare` stops before extracting anythi
 differs, is missing or is extra, naming each one. The check reads the disc's contents rather than
 its layout, so a Redump set and a single .bin with a .cue both pass. An audio track that differs
 from the Redump dump's, or is missing, is only a warning: an .iso of the data track alone passes
-with 29 of them, and plays without the music.
+with 29 of them, though the CD music lives on those tracks.
 
 `play` keeps the game's saves in `~/.local/share/saturn-recomp/MK-81070_V1.003/backup.bin` (or
 under `$XDG_DATA_HOME`), out of `build/`, so cleaning the build leaves them alone. Scripted runs,
