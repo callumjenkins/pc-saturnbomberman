@@ -42,12 +42,12 @@ class Stage:
         return not v & (SOLID | SOFT | BOMB) and v & CANNON != CANNON
 
 
-def _things(raw, slots, skip=0x80):
+def _things(raw, slots):
     idle = GAME.symbols["idle_object"]
     out = []
     for k in slots:
         s = raw[k * SLOT:(k + 1) * SLOT]
-        if int.from_bytes(s[0x30:0x34], "big") == idle or s[0x34] & skip:
+        if int.from_bytes(s[0x30:0x34], "big") == idle or s[0x34] & 0x80:
             continue
         cell = int.from_bytes(s[0x44:0x46], "big")
         out.append(Thing(k, int.from_bytes(s[0x30:0x34], "big"), (cell % 64, cell // 64),
@@ -74,6 +74,7 @@ def read(r):
     objs = r.read(sym["objects"], SLOT * SLOTS)
     bomber = _things(objs, [0])
     exit_cell = int.from_bytes(r.read(sym["exit_cell"], 2), "big")
-    # 0x20 marks an object that is not an enemy, such as a bomb, which shares the enemies' slots
-    return Stage(cells, bomber[0] if bomber else None, tuple(_things(objs, ENEMY_SLOTS, skip=0xA0)),
-                 (exit_cell % 64, exit_cell // 64))
+    # a bomb is an object in the enemies' slots too, on a cell the map marks as holding one
+    # (a slot can also hold a cell off the map, in a stage that keeps other things there)
+    enemies = tuple(t for t in _things(objs, ENEMY_SLOTS) if t.cell[1] < 64 and not cells[t.cell[1] * 64 + t.cell[0]] & BOMB)
+    return Stage(cells, bomber[0] if bomber else None, enemies, (exit_cell % 64, exit_cell // 64))

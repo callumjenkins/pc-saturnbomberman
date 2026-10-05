@@ -75,6 +75,11 @@ def plan(stage, fire):
             continue
         if best is None or score < best[0]:
             best = (score, c)
+    if best is None and foes:
+        # nothing in reach, as against a boss: blast from the nearest cell, where each new bomb lands in
+        # the last one's fire and goes off at once
+        near = min(reachable, key=lambda c: (min(abs(c[0] - t[0]) + abs(c[1] - t[1]) for t in targets), len(path(c))))
+        return path(near), True
     return (path(best[1]), True) if best else ([], False)
 
 
@@ -133,7 +138,7 @@ def play(r, limit, log=print, fire=2):
             r.step(60)
             continue
         moves, bomb = plan(stage, fire)
-        if not moves and (not bomb or stage.at(stage.me.cell) & state.BOMB):
+        if not moves and not bomb:
             r.pad("B")                           # sets off a remote-control bomb, which waits for it
             r.step(4)
             r.pad("")
