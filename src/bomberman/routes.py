@@ -26,6 +26,7 @@ class Route:
     shots: str
     args: tuple[str, ...] = ()                   # more of saturn's arguments, such as --multitap
     invincible: bool = False
+    writes: tuple[str, ...] = ()                 # memory set on the way, as saturn's --write: "VBLANK:ADDR=HEX"
 
 
 def tap(at, buttons, held):
@@ -76,6 +77,18 @@ def yuna(start=4200, end=4260):
     hold = (f"{start}:L+R", f"{end}:") if end else ()
     return Route("Yuna and Manto unlocked, at character select",
                  TO_BATTLE + hold + taps(range(5900, 7001, 90), "A", 8), 6900, "6900")
+
+
+def stage(world, number):
+    """Stage WORLD-NUMBER as the game shows it (from 1), through Normal Game's start with the world and
+    stage written over the ones it chose. START skips the opening movie, and play starts at about
+    VBlank 5620."""
+    from .run import GAME
+    value = f"{world - 1:02X}{number - 1:02X}"
+    names = ("stage", "stage_2", "stage_3", "stage_saved")
+    return Route(f"stage {world}-{number}, from Normal Game with the stage select",
+                 TO_NORMAL + tap(4200, "START", 10) + tap(4500, "START", 10), 5700, "5700",
+                 writes=tuple(f"4250:{GAME.symbols[n]:08X}={value}" for n in names))
 
 
 def world(name):

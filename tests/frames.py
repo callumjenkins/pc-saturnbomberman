@@ -19,12 +19,13 @@ from bomberman import routes, run
 from bomberman.paths import BUILD, ROOT
 
 EXPECTED = f"{ROOT}/tests/frames.json"
-RUNS = ["normal", "single", "battle", *routes.WORLDS, "slot", "yuna"]
+RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", *routes.WORLDS, "slot", "yuna"]},
+        "stage-5-3": lambda: routes.stage(5, 3)}
 
 
 def replay(name):
     """The run's frames as {VBlank: md5}, and its fatal errors."""
-    route = routes.ROUTES[name]()
+    route = RUNS[name]()
     out = f"{BUILD}/test/{name}"
     log = run.run(route, out, learn_seeds=False)
     frames = {}
@@ -35,15 +36,15 @@ def replay(name):
 
 
 def agent_matches():
-    """Whether the yuna route played through the agent, a VBlank at a time near the end, gives the
-    frame the --input run did."""
-    route = routes.ROUTES["yuna"]()
+    """Whether stage 5-3 played through the agent, its write included, and a VBlank at a time for the
+    last 100, gives the frame the scripted run did."""
+    route = RUNS["stage-5-3"]()
     end = int(route.shots)
-    with run.play(f"{BUILD}/test/agent", route, until=end - 10) as r:
+    with run.play(f"{BUILD}/test/agent", route, until=end - 100) as r:
         while r.vblank < end:
-            r.step(1)
+            run.advance(r, route, r.vblank + 1)
         frame = r.frame()
-    shot = Image.open(f"{BUILD}/test/yuna/shot-{end}.png").convert("RGB")
+    shot = Image.open(f"{BUILD}/test/stage-5-3/shot-{end}.png").convert("RGB")
     return shot.size == (frame.width, frame.height) and shot.tobytes() == frame.rgb
 
 
@@ -75,10 +76,10 @@ def main():
         status = "FAIL" if bad else "recorded" if args.update else "ok"
         detail = "; ".join([*(f"frame {v} differs" for v in diffs if not args.update), *(f.strip() for f in fatal)])
         print(f"{status:8} {name}" + (f": {detail}" if detail and bad else ""))
-    if "yuna" in names and not args.update:
+    if "stage-5-3" in names and not args.update:
         ok = agent_matches()
         failed += not ok
-        print(f"{'ok' if ok else 'FAIL':8} agent: the yuna route played through the agent"
+        print(f"{'ok' if ok else 'FAIL':8} agent: stage 5-3 played through the agent"
               + ("" if ok else " gives a different frame"))
     if args.update:
         json.dump(expected, open(EXPECTED, "w"), indent=1, sort_keys=True)

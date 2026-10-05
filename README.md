@@ -44,6 +44,7 @@ The build needs uv, CMake, Ninja, clang and SDL3. A run's results go to `build/r
 | `cactus` | Gunman world 3-1 with the cactus turned into the slot machine |
 | `slot` | the slot machine won: three fires and the Fire Up picked up |
 | `yuna` | Battle's L+R hold, then character select with Yuna and Manto |
+| `stage W-S` | any stage, such as `stage 3-2` as the game shows it: Normal Game with the world and stage written in |
 | `code KEYS` | a title-screen code such as `L,R,Y,UP` (`--hold L+R` holds buttons under it), then Normal mode |
 
 Options:
@@ -61,7 +62,7 @@ Anything after `--` goes to the saturn executable, such as `-- --dump 6000` for 
 
 ## Testing
 
-`uv run tests/frames.py` rebuilds, replays ten routes in parallel (about a minute) and fails if a
-frame differs from `tests/frames.json` or a run hits a fatal error. It also plays the yuna route
+`uv run tests/frames.py` rebuilds, replays eleven routes in parallel (about a minute) and fails if a
+frame differs from `tests/frames.json` or a run hits a fatal error. It also plays stage 5-3
 through saturn-recomp's agent and checks that it ends on the same frame as the scripted run. When a change to the frames is
 meant, check them in `build/test/NAME/` and record them with `--update`.

@@ -17,7 +17,8 @@ def invincible_hooks():
 def saturn_args(route, vblanks=None, shots=None, extra=(), more=()):
     presses = ",".join((*route.presses, *extra))
     return ["--cue", cue(), "--headless", "--vblanks", str(vblanks or route.vblanks), "--shot", shots or route.shots,
-            "--input", presses, *route.args, *(invincible_hooks() if route.invincible else []), *more]
+            "--input", presses, *route.args, *(invincible_hooks() if route.invincible else []),
+            *(["--write", ",".join(route.writes)] if route.writes else []), *more]
 
 
 def run(route, out, vblanks=None, shots=None, extra=(), more=(), learn_seeds=True, recompile=False, log=print):
@@ -32,20 +33,35 @@ def run(route, out, vblanks=None, shots=None, extra=(), more=(), learn_seeds=Tru
 
 def play(out, route=None, until=0, invincible=False, window=False, more=()):
     """A run for a program to play (saturnrecomp.agent), on the current build. With a route, its
-    presses up to VBlank `until` are played first, and its saturn arguments apply."""
+    presses before VBlank `until` are played first, and its saturn arguments apply."""
     args = ["--cue", cue(), *([] if window else ["--headless"]), *(route.args if route else ()),
             *(invincible_hooks() if invincible or (route and route.invincible) else []), *more]
     r = agent.start(GAME.saturn, args, out)
-    presses = sorted(route.presses if route else (), key=lambda p: int(p.split(":", 1)[0]))
-    for press in presses:
-        at, buttons = press.split(":", 1)
-        if int(at) > until:
-            break
-        if int(at) > r.vblank:
-            r.step(int(at) - r.vblank)
-        pad, _, buttons = buttons.rpartition(".")
-        r.pad(buttons, int(pad) if pad else 1)
+    if route and until:
+        advance(r, route, until)
     return r
+
+
+def advance(r, route, to):
+    """Play the route's presses and writes from the run's VBlank to just before `to`, and run on to
+    VBlank `to`. One at `to` is left for the next call."""
+    events = [(int(p.split(":", 1)[0]), "press", p.split(":", 1)[1]) for p in route.presses]
+    events += [(int(w.split(":", 1)[0]), "write", w.split(":", 1)[1]) for w in route.writes]
+    for at, kind, what in sorted(events, key=lambda e: e[0]):
+        if at < r.vblank:
+            continue
+        if at >= to:
+            break
+        if at > r.vblank:
+            r.step(at - r.vblank)
+        if kind == "press":
+            pad, _, buttons = what.rpartition(".")
+            r.pad(buttons, int(pad) if pad else 1)
+        else:
+            addr, data = what.split("=")
+            r.write(int(addr, 16), bytes.fromhex(data))
+    if to > r.vblank:
+        r.step(to - r.vblank)
 
 
 def out_dir(name):
