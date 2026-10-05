@@ -23,9 +23,10 @@ The build needs uv, CMake, Ninja, clang and SDL3. A run's results go to `build/r
 
 The port supports one disc: Saturn Bomberman (USA), MK-81070 V1.003. `disc.json` lists every
 file on it with its size and SHA-1, and `prepare` stops before extracting anything if a file
-differs, is missing or is extra, naming each one. Any image of that disc passes, whatever its
-layout: a Redump set, a single .bin or an .iso. An audio track that differs from the Redump dump's
-is only a warning, since it changes the music and not the code.
+differs, is missing or is extra, naming each one. The check reads the disc's contents rather than
+its layout, so a Redump set and a single .bin with a .cue both pass. An audio track that differs
+from the Redump dump's, or is missing, is only a warning: an .iso of the data track alone passes
+with 29 of them, and plays without the music.
 
 `play` keeps the game's saves in `~/.local/share/saturn-recomp/MK-81070_V1.003/backup.bin` (or
 under `$XDG_DATA_HOME`), out of `build/`, so cleaning the build leaves them alone. Scripted runs,
