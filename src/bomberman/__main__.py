@@ -5,7 +5,9 @@
     bomberman run code KEYS [--hold BUTTONS] [options]
     bomberman run stage WORLD-STAGE [options]    such as 3-2, as the game shows it
     bomberman run clear WORLD-STAGE [options]    a stage the bot cleared, replayed
+    bomberman run attempt WORLD-STAGE [options]  the bot's last run at a stage, cleared or not
     bomberman bot WORLD-STAGE [--limit N]        clear a stage, invincible, and save its presses
+--video on run or bot also records the run as video.mp4 in its directory.
 A run builds the game first if it has to, plays the route headless into build/run/ROUTE (log.txt and
 shot-N.png) and learns seeds while the game stops at code discovery missed."""
 import argparse
@@ -26,10 +28,12 @@ def stage_arg(ap, text):
     return world, number
 
 
-def clear_stage(world, number, limit, window):
+def clear_stage(world, number, limit, window, video=False):
     route = routes.stage(world, number)
     start = 5700
-    with run.play(run.out_dir(f"bot-{world}-{number}"), route, until=start, invincible=True, window=window) as r:
+    out = run.out_dir(f"bot-{world}-{number}")
+    more = ["--video", os.path.join(out, "video.mp4")] if video else []
+    with run.play(out, route, until=start, invincible=True, window=window, more=more) as r:
         cleared = bot.play(r, limit)
         presses = [p for p in r.presses if int(p.split(":")[0]) >= start]
         r.frame().save_png(os.path.join(r.out, f"end-{r.vblank}.png"))
@@ -56,8 +60,9 @@ def main(argv=None):
     b.add_argument("stage", help="such as 3-2")
     b.add_argument("--limit", type=int, default=12000, help="VBlanks to try for, 60 a second")
     b.add_argument("--window", action="store_true", help="play it in a window")
+    b.add_argument("--video", action="store_true", help="record it as video.mp4 beside its log")
     r = sub.add_parser("run")
-    r.add_argument("route", choices=[*routes.ROUTES, "code", "stage", "clear"])
+    r.add_argument("route", choices=[*routes.ROUTES, "code", "stage", "clear", "attempt"])
     r.add_argument("which", nargs="?", help="code: its presses in turn, such as L,R,Y,UP; stage: such as 3-2")
     r.add_argument("--hold", default="", help="code: buttons held under every press, such as L+R")
     r.add_argument("--vblanks", type=int, help="how long to run, at 60 VBlanks a second")
@@ -67,13 +72,14 @@ def main(argv=None):
     r.add_argument("--recompile", action="store_true", help="recompile first, about 45 s")
     r.add_argument("--once", action="store_true", help="run the current build once and learn no seeds")
     r.add_argument("--out", help="the run's directory (default build/run/ROUTE)")
+    r.add_argument("--video", action="store_true", help="record it as video.mp4 beside its log")
     args = ap.parse_args(argv)
 
     if args.command == "prepare":
         prepare.prepare()
     elif args.command == "bot":
         world, number = stage_arg(ap, args.stage)
-        clear_stage(world, number, args.limit, args.window)
+        clear_stage(world, number, args.limit, args.window, args.video)
     elif args.command == "routes":
         for name, make in routes.ROUTES.items():
             print(f"{name:10} {make().about}")
@@ -84,10 +90,11 @@ def main(argv=None):
             if not args.which:
                 ap.error("run code needs KEYS")
             route = routes.code(args.which, args.hold)
-        elif args.route in ("stage", "clear"):
+        elif args.route in ("stage", "clear", "attempt"):
             world, number = stage_arg(ap, args.which)
+            make = {"stage": routes.stage, "clear": routes.clear, "attempt": routes.attempt}[args.route]
             try:
-                route = routes.stage(world, number) if args.route == "stage" else routes.clear(world, number)
+                route = make(world, number)
             except (ValueError, FileNotFoundError) as e:
                 ap.error(str(e))
         else:
@@ -95,8 +102,11 @@ def main(argv=None):
         if args.invincible:
             route = dataclasses.replace(route, invincible=True)
         extra = args.extra.split(",") if args.extra else ()
-        name = f"{args.route}-{args.which}" if args.route in ("stage", "clear") else args.route
-        print(run.run(route, args.out or run.out_dir(name), args.vblanks, args.shots, extra, more,
+        name = f"{args.route}-{args.which}" if args.route in ("stage", "clear", "attempt") else args.route
+        out = args.out or run.out_dir(name)
+        if args.video:
+            more = [*more, "--video", os.path.join(os.path.abspath(out), "video.mp4")]
+        print(run.run(route, out, args.vblanks, args.shots, extra, more,
                       learn_seeds=not args.once, recompile=args.recompile,
                       log=lambda s: print(s, flush=True)))
 

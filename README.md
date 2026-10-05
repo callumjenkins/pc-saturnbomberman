@@ -59,7 +59,9 @@ Options:
 
 `uv run bomberman bot 3-2` plays a Normal Game stage with the bomber invincible: it bombs every enemy,
 breaking soft blocks to reach them, then walks to the exit. A cleared stage's presses go to
-`inputs/clears/`, and `bomberman run clear 3-2` replays them as an ordinary route. It reads the stage
+`inputs/clears/`, and `bomberman run clear 3-2` replays them as an ordinary route.
+`bomberman run attempt 3-2` replays the bot's last run at a stage whether it cleared or not, and
+`--video` on any run or on the bot records it as `video.mp4` beside its log, with sound. It reads the stage
 from RAM (`src/bomberman/state.py`, with the addresses named in `game.toml`) and plays through
 saturn-recomp's agent. `uv run pytest tests/test_bot.py` checks its planning on hand-drawn maps.
 

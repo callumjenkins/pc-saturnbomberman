@@ -107,6 +107,17 @@ def clear(world, number):
                  invincible=True, writes=base.writes)
 
 
+def attempt(world, number):
+    """The bot's last run at stage WORLD-NUMBER, cleared or not, replayed from the presses it left in
+    build/run/bot-WORLD-NUMBER/; the run ends a few seconds after its last press."""
+    from .run import out_dir
+    base = stage(world, number)
+    presses = tuple(open(f"{out_dir(f'bot-{world}-{number}')}/presses.txt").read().strip().split(","))
+    end = int(presses[-1].split(":")[0]) + 300
+    return Route(f"the bot's last run at stage {world}-{number}", base.presses + presses, end, str(end),
+                 invincible=True, writes=base.writes)
+
+
 def world(name):
     """The world's code held while "Press Start" shows, through START, then on to its first stage."""
     held = WORLDS[name]
