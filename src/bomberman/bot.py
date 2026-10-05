@@ -3,7 +3,7 @@ soft blocks to reach them, then walks to the exit. It plays through saturnrecomp
 it makes replay the same run as a route."""
 import collections
 
-from . import state
+from . import routes, state
 
 DIRS = {"UP": (0, -1), "DOWN": (0, 1), "LEFT": (-1, 0), "RIGHT": (1, 0)}
 
@@ -120,11 +120,15 @@ def stage_number(r):
 def play(r, limit, log=print, fire=2):
     """Play the stage the run is in until it changes or `limit` VBlanks pass; whether it was cleared."""
     start, end = stage_number(r), r.vblank + limit
-    stuck = 0
+    final = start == bytes([len(routes.STAGES) - 1, routes.STAGES[len(routes.STAGES)] - 1])
+    stuck, gone_since = 0, None
     while r.vblank < end:
         if stage_number(r) != start:
             return True
         stage = state.read(r)
+        gone_since = (gone_since or r.vblank) if stage.me is None else None
+        if final and gone_since and r.vblank - gone_since > 1800:
+            return True                          # the last boss leads to the ending, not to another stage
         if stage.me is None:                     # a cutscene or a change of scene: C and START move them on
             r.pad("C" if (r.vblank // 10) % 2 else "START")
             r.step(4)

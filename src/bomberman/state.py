@@ -47,7 +47,9 @@ def _things(raw, slots):
     out = []
     for k in slots:
         s = raw[k * SLOT:(k + 1) * SLOT]
-        if int.from_bytes(s[0x30:0x34], "big") == idle or s[0x34] & 0x80:
+        update = int.from_bytes(s[0x30:0x34], "big")
+        # an update function outside the game's code means the array holds something else, as in the ending
+        if update == idle or s[0x34] & 0x80 or not 0x06000000 <= update < 0x06100000:
             continue
         cell = int.from_bytes(s[0x44:0x46], "big")
         out.append(Thing(k, int.from_bytes(s[0x30:0x34], "big"), (cell % 64, cell // 64),
