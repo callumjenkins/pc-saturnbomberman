@@ -13,17 +13,29 @@ git clone --recursive git@github.com:callumjenkins/pc-saturnbomberman.git
 cd pc-saturnbomberman
 # put the Redump .cue and .bin files for Saturn Bomberman (USA) (1S) in iso/, or set BOMBERMAN_CUE
 uv sync                       # a Python environment with saturn-recomp and this repo's package in it
-uv run bomberman prepare      # extracts the disc into build/
-uv run bomberman run normal   # recompiles and builds on the first run, then plays Normal mode headless
+uv run bomberman prepare      # checks the disc, then extracts it into build/
+uv run bomberman play         # recompiles and builds on the first run, then plays in a window
+uv run bomberman run normal   # or a scripted run, headless
 ```
 
 The build needs uv, CMake, Ninja, clang and SDL3. A run's results go to `build/run/ROUTE/`:
 `log.txt`, the hardware log and the frames asked for as `shot-N.png`.
 
+The port supports one disc: Saturn Bomberman (USA), MK-81070 V1.003. `disc.json` lists every
+file on it with its size and SHA-1, and `prepare` stops before extracting anything if a file
+differs, is missing or is extra, naming each one. Any image of that disc passes, whatever its
+layout: a Redump set, a single .bin or an .iso. An audio track that differs from the Redump dump's
+is only a warning, since it changes the music and not the code.
+
+`play` keeps the game's saves in `~/.local/share/saturn-recomp/MK-81070_V1.003/backup.bin` (or
+under `$XDG_DATA_HOME`), out of `build/`, so cleaning the build leaves them alone. Scripted runs,
+the bot and the tests start with no saves and keep none.
+
 ## Layout
 
     game.toml              the programs saturn-recomp recompiles, names for addresses, the task switch and hooks
     seeds.json             the function seeds runs have learned
+    disc.json              the supported disc's files and audio tracks, by size and SHA-1
     src/bomberman/         routes.py (the scripted runs as pad presses), run.py, prepare.py, the CLI
     src/bomberman/research/  one-off tools: stage maps from dumps, slot reel timing, the Yuna unlock
     inputs/                pad presses for the longer routes

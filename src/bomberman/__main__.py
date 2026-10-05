@@ -1,5 +1,6 @@
 """Saturn Bomberman on saturn-recomp.
-    bomberman prepare                     extract the disc into build/
+    bomberman prepare                     check the disc and extract it into build/
+    bomberman play [-- SATURN_ARGS...]    play in a window, saves kept in the user's data directory
     bomberman routes                      list the scripted runs
     bomberman run ROUTE [options] [-- SATURN_ARGS...]
     bomberman run code KEYS [--hold BUTTONS] [options]
@@ -12,6 +13,7 @@ A run builds the game first if it has to, plays the route headless into build/ru
 shot-N.png) and learns seeds while the game stops at code discovery missed."""
 import argparse
 import dataclasses
+import subprocess
 import sys
 
 import os
@@ -55,6 +57,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="bomberman", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="command", required=True)
     sub.add_parser("prepare")
+    sub.add_parser("play")
     sub.add_parser("routes")
     b = sub.add_parser("bot")
     b.add_argument("stage", help="such as 3-2")
@@ -79,6 +82,12 @@ def main(argv=None):
 
     if args.command == "prepare":
         prepare.prepare()
+    elif args.command == "play":
+        prepare.check_header()
+        run.build.ensure(run.GAME)
+        out = f"{run.BUILD}/play"
+        os.makedirs(out, exist_ok=True)
+        raise SystemExit(subprocess.run([run.GAME.saturn, "--cue", run.cue(), "--out", out, *more]).returncode)
     elif args.command == "bot":
         world, number = stage_arg(ap, args.stage)
         clear_stage(world, number, args.limit, args.window, args.video, args.items)

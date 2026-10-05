@@ -1,4 +1,4 @@
-"""One run of a route on the recompiled game, headless."""
+"""One run of a route on the recompiled game, headless. A run starts with no saves and keeps none."""
 import os
 
 from saturnrecomp import agent, build, config, learn
@@ -17,7 +17,7 @@ def invincible_hooks():
 
 def saturn_args(route, vblanks=None, shots=None, extra=(), more=()):
     presses = ",".join((*route.presses, *extra))
-    return ["--cue", cue(), "--headless", "--vblanks", str(vblanks or route.vblanks), "--shot", shots or route.shots,
+    return ["--cue", cue(), "--headless", "--save", "-", "--vblanks", str(vblanks or route.vblanks), "--shot", shots or route.shots,
             "--input", presses, *route.args, *(invincible_hooks() if route.invincible else []),
             *(["--write", ",".join(route.writes)] if route.writes else []), *more]
 
@@ -35,7 +35,7 @@ def run(route, out, vblanks=None, shots=None, extra=(), more=(), learn_seeds=Tru
 def play(out, route=None, until=0, invincible=False, window=False, more=()):
     """A run for a program to play (saturnrecomp.agent), on the current build. With a route, its
     presses before VBlank `until` are played first, and its saturn arguments apply."""
-    args = ["--cue", cue(), *([] if window else ["--headless"]), *(route.args if route else ()),
+    args = ["--cue", cue(), "--save", "-", *([] if window else ["--headless"]), *(route.args if route else ()),
             *(invincible_hooks() if invincible or (route and route.invincible) else []), *more]
     r = agent.start(GAME.saturn, args, out)
     if route and until:
