@@ -34,17 +34,23 @@ class Stage:
         return not self.at(c) & (SOLID | SOFT | BOMB)
 
 
-def _things(raw, slots):
+def _things(raw, slots, skip=0x80):
     idle = GAME.symbols["idle_object"]
     out = []
     for k in slots:
         s = raw[k * SLOT:(k + 1) * SLOT]
-        if int.from_bytes(s[0x30:0x34], "big") == idle or s[0x34] & 0x80:
+        if int.from_bytes(s[0x30:0x34], "big") == idle or s[0x34] & skip:
             continue
         cell = int.from_bytes(s[0x44:0x46], "big")
         out.append(Thing(k, (cell % 64, cell // 64),
                          int.from_bytes(s[0x48:0x4C], "big") / 65536, int.from_bytes(s[0x4C:0x50], "big") / 65536))
     return out
+
+
+def cell(r, c):
+    """One cell of the map: a 2-byte read, for checking under the bomber as it walks."""
+    x, y = c
+    return int.from_bytes(r.read(GAME.symbols["cells"] + 2 * (y * 64 + x), 2), "big")
 
 
 def me(r):
@@ -60,5 +66,6 @@ def read(r):
     objs = r.read(sym["objects"], SLOT * SLOTS)
     bomber = _things(objs, [0])
     exit_cell = int.from_bytes(r.read(sym["exit_cell"], 2), "big")
-    return Stage(cells, bomber[0] if bomber else None, tuple(_things(objs, ENEMY_SLOTS)),
+    # 0x20 marks an object that is not an enemy, such as a bomb, which shares the enemies' slots
+    return Stage(cells, bomber[0] if bomber else None, tuple(_things(objs, ENEMY_SLOTS, skip=0xA0)),
                  (exit_cell % 64, exit_cell // 64))

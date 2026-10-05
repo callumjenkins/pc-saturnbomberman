@@ -75,7 +75,8 @@ def plan(stage, fire):
 
 def walk(r, d):
     """Hold d until the bomber stands on the next cell in that direction, aligned to it. False if it
-    did not get there."""
+    did not get there. A bomb dropped on fire goes off at once, so it drops one on every burning cell
+    it crosses: with invincibility that keeps a blast going wherever it walks."""
     me = state.me(r)
     if me is None:
         return True
@@ -89,6 +90,11 @@ def walk(r, d):
         if me is None:                            # gone: the exit took it
             arrived = True
             break
+        under = state.cell(r, me.cell)
+        if under & state.FIRE and not under & state.BOMB:
+            r.pad(d + "+C")
+            r.step(2)
+            r.pad(d)
         if me.cell == goal and abs(me.x - goal[0] * 16) < 2 and abs(me.y - goal[1] * 16) < 3:
             arrived = True
             break
@@ -109,12 +115,18 @@ def play(r, limit, log=print, fire=2):
         if stage_number(r) != start:
             return True
         stage = state.read(r)
-        if stage.me is None:
-            r.step(10)
+        if stage.me is None:                     # a cutscene or a change of scene: C and START move them on
+            r.pad("C" if (r.vblank // 10) % 2 else "START")
+            r.step(4)
+            r.pad("")
+            r.step(6)
             continue
         moves, bomb = plan(stage, fire)
         if not moves and (not bomb or stage.at(stage.me.cell) & state.BOMB):
-            r.step(20)                           # nothing to do until a bomb goes off
+            r.pad("B")                           # sets off a remote-control bomb, which waits for it
+            r.step(4)
+            r.pad("")
+            r.step(16)
             continue
         for d in moves[:8]:
             if not walk(r, d):
