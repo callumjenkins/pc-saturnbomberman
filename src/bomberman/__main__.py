@@ -28,10 +28,10 @@ def stage_arg(ap, text):
     return world, number
 
 
-def clear_stage(world, number, limit, window, video=False):
-    route = routes.stage(world, number)
+def clear_stage(world, number, limit, window, video=False, items=False):
+    route = routes.stage(world, number, items)
     start = 5700
-    out = run.out_dir(f"bot-{world}-{number}")
+    out = run.out_dir(f"bot-{world}-{number}{routes.tag(items)}")
     more = ["--video", os.path.join(out, "video.mp4")] if video else []
     with run.play(out, route, until=start, invincible=True, window=window, more=more) as r:
         cleared = bot.play(r, limit)
@@ -40,10 +40,10 @@ def clear_stage(world, number, limit, window, video=False):
         open(os.path.join(r.out, "presses.txt"), "w").write(",".join(presses) + "\n")
         print(f"{world}-{number}: {'cleared' if cleared else 'not cleared'} at VBlank {r.vblank}, {len(presses)} presses")
     if cleared:
-        path = os.path.join(ROOT, "inputs", "clears", f"{world}-{number}.txt")
+        path = os.path.join(ROOT, "inputs", "clears", f"{world}-{number}{routes.tag(items)}.txt")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         open(path, "w").write(",".join(presses) + "\n")
-        print(f"saved {os.path.relpath(path, ROOT)}: uv run bomberman run clear {world}-{number}")
+        print(f"saved {os.path.relpath(path, ROOT)}: uv run bomberman run clear {world}-{number}{' --items' if items else ''}")
 
 
 def main(argv=None):
@@ -61,6 +61,7 @@ def main(argv=None):
     b.add_argument("--limit", type=int, default=22000, help="VBlanks to try for, 60 a second; a stage gives 6:00, about 21600")
     b.add_argument("--window", action="store_true", help="play it in a window")
     b.add_argument("--video", action="store_true", help="record it as video.mp4 beside its log")
+    b.add_argument("--items", action="store_true", help="start with every item (the title's held code)")
     r = sub.add_parser("run")
     r.add_argument("route", choices=[*routes.ROUTES, "code", "stage", "clear", "attempt"])
     r.add_argument("which", nargs="?", help="code: its presses in turn, such as L,R,Y,UP; stage: such as 3-2")
@@ -73,13 +74,14 @@ def main(argv=None):
     r.add_argument("--once", action="store_true", help="run the current build once and learn no seeds")
     r.add_argument("--out", help="the run's directory (default build/run/ROUTE)")
     r.add_argument("--video", action="store_true", help="record it as video.mp4 beside its log")
+    r.add_argument("--items", action="store_true", help="stage, clear, attempt: with every item")
     args = ap.parse_args(argv)
 
     if args.command == "prepare":
         prepare.prepare()
     elif args.command == "bot":
         world, number = stage_arg(ap, args.stage)
-        clear_stage(world, number, args.limit, args.window, args.video)
+        clear_stage(world, number, args.limit, args.window, args.video, args.items)
     elif args.command == "routes":
         for name, make in routes.ROUTES.items():
             print(f"{name:10} {make().about}")
@@ -94,7 +96,7 @@ def main(argv=None):
             world, number = stage_arg(ap, args.which)
             make = {"stage": routes.stage, "clear": routes.clear, "attempt": routes.attempt}[args.route]
             try:
-                route = make(world, number)
+                route = make(world, number, args.items)
             except (ValueError, FileNotFoundError) as e:
                 ap.error(str(e))
         else:
@@ -102,7 +104,7 @@ def main(argv=None):
         if args.invincible:
             route = dataclasses.replace(route, invincible=True)
         extra = args.extra.split(",") if args.extra else ()
-        name = f"{args.route}-{args.which}" if args.route in ("stage", "clear", "attempt") else args.route
+        name = f"{args.route}-{args.which}{routes.tag(args.items)}" if args.route in ("stage", "clear", "attempt") else args.route
         out = args.out or run.out_dir(name)
         if args.video:
             more = [*more, "--video", os.path.join(os.path.abspath(out), "video.mp4")]

@@ -40,11 +40,12 @@ The build needs uv, CMake, Ninja, clang and SDL3. A run's results go to `build/r
 | `normal` | the title, the story intro and stage 1 |
 | `single` | a single battle on one pad, set up through to the match |
 | `battle` | the 10-player battle on two multitaps |
-| `hige`, `mage`, `gunman`, `tyranno`, `mujoe` | a world's first stage, from the title's held code |
+| `items` | Normal Game with every item, from the title's held code (L+R+A+UP+LEFT) |
+| `mage`, `gunman`, `tyranno`, `mujoe` | a world's first stage, from the title's held code |
 | `cactus` | Gunman world 3-1 with the cactus turned into the slot machine |
 | `slot` | the slot machine won: three fires and the Fire Up picked up |
 | `yuna` | Battle's L+R hold, then character select with Yuna and Manto |
-| `stage W-S` | any stage, such as `stage 3-2` as the game shows it: Normal Game with the world and stage written in. World 1 has 7 stages, worlds 2 to 5 have 10 |
+| `stage W-S` | any stage, such as `stage 3-2` as the game shows it: Normal Game with the world and stage written in. Worlds 1 to 5 have 7, 9, 9, 10 and 10, each ending in its boss. `--items` starts with every item |
 | `code KEYS` | a title-screen code such as `L,R,Y,UP` (`--hold L+R` holds buttons under it), then Normal mode |
 
 Options:

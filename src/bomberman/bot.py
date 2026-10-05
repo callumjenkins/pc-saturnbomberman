@@ -137,6 +137,8 @@ def play(r, limit, log=print, fire=2):
             if bomb and len(moves) <= 8:
                 r.pad("C")
                 r.step(4)
+                r.pad("B")                       # sets off a remote-control bomb at once; nothing without one
+                r.step(4)
                 r.pad("")
                 r.step(2)
         if stuck > 20:

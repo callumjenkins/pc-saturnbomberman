@@ -8,9 +8,9 @@ from dataclasses import dataclass
 
 from .paths import ROOT
 
-# The title's held codes for each world (Sega Retro's hidden content).
+# The title's held codes for each world (Sega Retro's hidden content), and the one for every item.
+ITEMS = "L+R+A+UP+LEFT"
 WORLDS = {
-    "hige": "L+R+A+UP+LEFT",
     "mage": "L+R+B+UP+LEFT",
     "gunman": "L+R+C+UP+RIGHT",
     "tyranno": "L+R+X+UP+RIGHT",
@@ -79,50 +79,61 @@ def yuna(start=4200, end=4260):
                  TO_BATTLE + hold + taps(range(5900, 7001, 90), "A", 8), 6900, "6900")
 
 
-# Normal Game's stages a world. A higher number loads, but reads the stage tables past their end.
-STAGES = {1: 7, 2: 10, 3: 10, 4: 10, 5: 10}
+# Normal Game's stages a world, its boss's included: clearing the last leads to the next world's first.
+# A higher number loads, but reads the stage tables past their end.
+STAGES = {1: 7, 2: 9, 3: 9, 4: 10, 5: 10}
 
 
-def stage(world, number):
+def stage(world, number, items=False):
     """Stage WORLD-NUMBER as the game shows it (from 1), through Normal Game's start with the world and
-    stage written over the ones it chose. START skips the opening movie, and play starts at about
-    VBlank 5620."""
+    stage written over the ones it chose; START skips the opening movie. Play starts at about VBlank
+    5620, or 5000 with every item (the title's held code), whose start comes sooner."""
     from .run import GAME
     if not 1 <= number <= STAGES.get(world, 0):
         raise ValueError(f"no stage {world}-{number}: " + ", ".join(f"{w}-1 to {w}-{n}" for w, n in STAGES.items()))
     value = f"{world - 1:02X}{number - 1:02X}"
     names = ("stage", "stage_2", "stage_3", "stage_saved")
-    return Route(f"stage {world}-{number}, from Normal Game with the stage select",
-                 TO_NORMAL + tap(4200, "START", 10) + tap(4500, "START", 10), 5700, "5700",
-                 writes=tuple(f"4250:{GAME.symbols[n]:08X}={value}" for n in names))
+    if items:
+        presses, at = world_presses(ITEMS) + tap(4200, "START", 10), 3950
+    else:
+        presses, at = TO_NORMAL + tap(4200, "START", 10) + tap(4500, "START", 10), 4250
+    return Route(f"stage {world}-{number}{' with every item' if items else ''}, from Normal Game with the stage select",
+                 presses, 5700, "5700", writes=tuple(f"{at}:{GAME.symbols[n]:08X}={value}" for n in names))
 
 
-def clear(world, number):
+def clear(world, number, items=False):
     """Stage WORLD-NUMBER cleared by the bot (bomberman bot), replayed from the presses it saved in
     inputs/clears/; the run ends a few seconds after its last press, on the next stage's start."""
-    base = stage(world, number)
-    presses = presses_file(f"clears/{world}-{number}.txt")
+    base = stage(world, number, items)
+    presses = presses_file(f"clears/{world}-{number}{'-items' if items else ''}.txt")
     end = int(presses[-1].split(":")[0]) + 300
     return Route(f"stage {world}-{number} cleared by the bot", base.presses + presses, end, str(end),
                  invincible=True, writes=base.writes)
 
 
-def attempt(world, number):
+def attempt(world, number, items=False):
     """The bot's last run at stage WORLD-NUMBER, cleared or not, replayed from the presses it left in
     build/run/bot-WORLD-NUMBER/; the run ends a few seconds after its last press."""
     from .run import out_dir
-    base = stage(world, number)
-    presses = tuple(open(f"{out_dir(f'bot-{world}-{number}')}/presses.txt").read().strip().split(","))
+    base = stage(world, number, items)
+    presses = tuple(open(f"{out_dir(f'bot-{world}-{number}{tag(items)}')}/presses.txt").read().strip().split(","))
     end = int(presses[-1].split(":")[0]) + 300
     return Route(f"the bot's last run at stage {world}-{number}", base.presses + presses, end, str(end),
                  invincible=True, writes=base.writes)
 
 
+def world_presses(held):
+    return tap(1900, "START", 10) + (f"2850:{held}", f"3000:{held}+START", f"3010:{held}", "3060:") + \
+        taps((3500, 3900), "START", 10)
+
+
 def world(name):
     """The world's code held while "Press Start" shows, through START, then on to its first stage."""
-    held = WORLDS[name]
+    held = ITEMS if name == "items" else WORLDS[name]
     presses = tap(1900, "START", 10) + (f"2850:{held}", f"3000:{held}+START", f"3010:{held}", "3060:")
-    return Route(f"{name.capitalize()} world's first stage, from the title's held code",
+    about = "Normal Game with every item, from the title's held code" if name == "items" else \
+        f"{name.capitalize()} world's first stage, from the title's held code"
+    return Route(about,
                  presses + taps((3500, 3900), "START", 10), 6000, "4800,6000")
 
 
@@ -156,6 +167,11 @@ def slot():
                  invincible=True)
 
 
+def tag(items):
+    return "-items" if items else ""
+
+
 ROUTES = {"normal": normal, "single": single, "battle": battle,
+          "items": lambda: world("items"),
           **{name: (lambda name=name: world(name)) for name in WORLDS},
           "cactus": cactus, "slot": slot, "yuna": yuna}
