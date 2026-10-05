@@ -18,8 +18,8 @@ the next work and does not replace those decisions.
   the recorded baseline and stale-build detection, are still open.
 - 2026-10-05: from phase 4 step 2, saves. They go to the user's data directory by default
   (`--save` in saturn-recomp), and routes, the bot and the tests run with `--save -`.
-  `bomberman play` launches the game in a window. No route yet makes the game write a save, so the
-  write path has not run on Bomberman.
+  `bomberman play` launches the game in a window. Bomberman itself appears to save nothing (Master
+  Game may keep a score), so the engine's unit tests cover writing, reading back and deleting saves.
 
 ## What the comparison established
 
