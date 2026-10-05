@@ -97,6 +97,16 @@ def stage(world, number):
                  writes=tuple(f"4250:{GAME.symbols[n]:08X}={value}" for n in names))
 
 
+def clear(world, number):
+    """Stage WORLD-NUMBER cleared by the bot (bomberman bot), replayed from the presses it saved in
+    inputs/clears/; the run ends a few seconds after its last press, on the next stage's start."""
+    base = stage(world, number)
+    presses = presses_file(f"clears/{world}-{number}.txt")
+    end = int(presses[-1].split(":")[0]) + 300
+    return Route(f"stage {world}-{number} cleared by the bot", base.presses + presses, end, str(end),
+                 invincible=True, writes=base.writes)
+
+
 def world(name):
     """The world's code held while "Press Start" shows, through START, then on to its first stage."""
     held = WORLDS[name]

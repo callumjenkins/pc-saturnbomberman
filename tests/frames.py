@@ -20,7 +20,7 @@ from bomberman.paths import BUILD, ROOT
 
 EXPECTED = f"{ROOT}/tests/frames.json"
 RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", *routes.WORLDS, "slot", "yuna"]},
-        "stage-5-3": lambda: routes.stage(5, 3)}
+        "stage-5-3": lambda: routes.stage(5, 3), "clear-1-1": lambda: routes.clear(1, 1)}
 
 
 def replay(name):

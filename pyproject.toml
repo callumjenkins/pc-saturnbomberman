@@ -5,6 +5,9 @@ description = "Saturn Bomberman (USA) recompiled with saturn-recomp"
 requires-python = ">=3.11"
 dependencies = ["saturnrecomp", "pillow"]
 
+[dependency-groups]
+dev = ["pytest>=8"]
+
 [project.scripts]
 bomberman = "bomberman.__main__:main"
 

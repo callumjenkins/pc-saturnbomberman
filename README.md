@@ -55,6 +55,14 @@ Options:
 - `--recompile` forces a recompile, which takes about 45 s.
 - `--once` runs the current build once without learning seeds.
 
+## The bot
+
+`uv run bomberman bot 3-2` plays a Normal Game stage with the bomber invincible: it bombs every enemy,
+breaking soft blocks to reach them, then walks to the exit. A cleared stage's presses go to
+`inputs/clears/`, and `bomberman run clear 3-2` replays them as an ordinary route. It reads the stage
+from RAM (`src/bomberman/state.py`, with the addresses named in `game.toml`) and plays through
+saturn-recomp's agent. `uv run pytest tests/test_bot.py` checks its planning on hand-drawn maps.
+
 A program can play the game too: `bomberman.run.play(out, route, until)` starts a run for
 `saturnrecomp.agent`, optionally with a route's presses played up to a VBlank first.
 
@@ -62,7 +70,7 @@ Anything after `--` goes to the saturn executable, such as `-- --dump 6000` for 
 
 ## Testing
 
-`uv run tests/frames.py` rebuilds, replays eleven routes in parallel (about a minute) and fails if a
+`uv run tests/frames.py` rebuilds, replays twelve routes in parallel (about a minute) and fails if a
 frame differs from `tests/frames.json` or a run hits a fatal error. It also plays stage 5-3
 through saturn-recomp's agent and checks that it ends on the same frame as the scripted run. When a change to the frames is
 meant, check them in `build/test/NAME/` and record them with `--update`.

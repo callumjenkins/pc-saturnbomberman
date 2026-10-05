@@ -9,8 +9,15 @@ krnl_longjmp = 0x060061E6
 krnl_yield = 0x06006D36             # the scheduler's yield
 bomber_hit_flag = 0x0606CF2E        # in the hit routine, where r2 holds the 0x40 it ORs into a bomber's flags
 bomber_fire_under = 0x06015516      # in the bomber update, where r0 holds the fire map entry under the bomber
-bombers = 0x060D5F00                # 0x7C bytes a bomber, flags at +0x34
-fire_map = 0x060EC8B0
+# The stage's objects, 0x7C bytes each: slots 0-9 the bombers, enemies from 10. At +0x30 the update
+# function (idle_object when the slot is free), +0x34 flags (0x80 gone, 0x40 hit), +0x44 the cell,
+# +0x48 and +0x4C x and y in 16.16 pixels.
+objects = 0x060D5F00
+idle_object = 0x060143D8
+# The stage map: 64x64 cells, a word each, the cell (x, y) at y*64+x. 0x80 solid (walls, hard blocks,
+# a standing enemy), 0x10 soft block, 0x20 bomb, the low 3 bits fire.
+cells = 0x060EC8B0
+exit_cell = 0x060D7E8C              # a word: the cell the exit opens on once no enemy is left
 # World then stage, a byte each, both from 0. The routine that starts Normal Game sets all four pairs,
 # to the held code's world or to stage_saved's when continuing; a stage select writes them after it.
 stage = 0x060C179A
