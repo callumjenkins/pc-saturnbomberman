@@ -11,6 +11,16 @@ scenarios, addresses and reference expectations belong here.
 The existing `saturn-recomp/PLAN.md` records its completed restructuring. This document describes
 the next work and does not replace those decisions.
 
+## Progress
+
+- 2026-10-05: phase 0 steps 2 and 3. `disc.json` lists the supported disc's files, and `prepare`
+  checks the disc against it first (`saturnrecomp.disc --manifest` and `--check`). Steps 1 and 4,
+  the recorded baseline and stale-build detection, are still open.
+- 2026-10-05: from phase 4 step 2, saves. They go to the user's data directory by default
+  (`--save` in saturn-recomp), and routes, the bot and the tests run with `--save -`.
+  `bomberman play` launches the game in a window. No route yet makes the game write a save, so the
+  write path has not run on Bomberman.
+
 ## What the comparison established
 
 Daytona has three custom C++ generators in its game repository, for the i960, TGP and sound 68000.
