@@ -25,7 +25,7 @@ RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", 
         **{name: routes.ROUTES[name] for name in ["die", "continue", "save", "pause", "battle-round"]},
         **{name: routes.ROUTES[name] for name in routes.ROUTES if name.startswith("arena-")},
         "clear-M-1": lambda: routes.clear(routes.MASTER, 1),
-        **{name: routes.ROUTES[name] for name in ["master", "master-boss", "master-result"]}}
+        **{name: routes.ROUTES[name] for name in ["master", "master-boss", "master-result", "mad-bomber"]}}
 # Lines a run's log must hold, for what a frame does not show.
 LOG_LINES = {"save": ["BUP: wrote BOMBERSS_01 (12 bytes)"], "master-result": ["BUP: wrote BOMBERSS_02 (240 bytes)"]}
 

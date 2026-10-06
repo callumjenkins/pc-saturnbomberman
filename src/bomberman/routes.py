@@ -3,6 +3,7 @@
 A press is one of the saturn executable's --input steps, "VBLANK:BUTTONS", and an empty BUTTONS
 lets go. Menus are stepped by time, so a route only holds while the game takes the same time to
 get there, which a deterministic run does."""
+import dataclasses
 import os
 from dataclasses import dataclass
 
@@ -85,6 +86,33 @@ def arena(n, sky="day"):
         presses += (f"{pick - 40}:",)
     return Route(f"a single battle in arena {n}, {ARENAS[n - 1]}{'' if not k else f', under the {sky} sky'}",
                  presses + taps((pick, pick + 90), "A", 8), pick + 600, f"{pick - 20},{pick + 600}")
+
+
+# The rules screen's rows, top to bottom, each stepped on by RIGHT: wins to take the match (3, from
+# 1 to 5), minutes a round (3, from 1 to 5), then on or off: positions shuffled each round, sudden
+# death until one is left, Devil items, Mad Bomber (the fallen bomb from the sidelines), and a
+# bonus game between rounds.
+RULES = ("battles", "time", "shuffle", "no_draw", "devil", "mad_bomber", "bonus_game")
+RULES_UP, RULES_DONE = 5000, 5030             # in a single battle: rows take presses from, and A accepts them at
+
+
+def with_rules(route, **steps):
+    """A single-battle route with the rules screen changed: for each rule named, DOWN to its row and
+    RIGHT that many times, 30 VBlanks a press. Everything from the rules' A on comes that much later."""
+    buttons, row = [], 0
+    for name, n in sorted(steps.items(), key=lambda kv: RULES.index(kv[0])):
+        buttons += ["DOWN"] * (RULES.index(name) - row) + ["RIGHT"] * n
+        row = RULES.index(name)
+    delay = 30 * len(buttons)
+
+    def later(at):
+        return at + delay if at >= RULES_DONE else at
+
+    presses = tuple(f"{later(int(at))}:{b}" for at, b in (p.split(":") for p in route.presses))
+    presses += tuple(p for k, b in enumerate(buttons) for p in tap(RULES_UP + 30 * k, b, 8))
+    return dataclasses.replace(route, presses=presses, vblanks=later(route.vblanks),
+                               shots=",".join(str(later(int(v))) for v in route.shots.split(",")),
+                               about=route.about + ", with " + ", ".join(f"{k} +{v}" for k, v in steps.items()))
 
 
 def battle():
@@ -274,11 +302,12 @@ def paused():
 
 
 def battle_round():
-    """The single battle played to its end, pad 1 dropping one bomb at the start: sudden death,
-    then the 3 WIN MATCH results with the round's winner, and C on to round two, whose HUD counts
-    that win."""
-    return Route("a single battle's round played out, its results, then round two",
-                 single().presses + tap(6500, "C", 4) + tap(16100, "C", 8), 16400, "16090,16400")
+    """The single battle played to its end, pad 1 dropping one bomb at the start. Sudden death
+    starts with a minute left (VBlank 13600): pressure blocks drop in a spiral from the edge, one
+    in mid-fall at 14410. Then the 3 WIN MATCH results with the round's winner, and C on to round
+    two, whose HUD counts that win."""
+    return Route("a single battle's round played out through sudden death, its results, then round two",
+                 single().presses + tap(6500, "C", 4) + tap(16100, "C", 8), 16400, "13600,14410,16090,16400")
 
 
 def master():
@@ -301,6 +330,17 @@ def master_result():
                  presses, 21700, "20500,20800,21250,21700", invincible=True)
 
 
+def mad_bomber():
+    """A single battle with Mad Bomber on. Pad 1 walks into its own bomb's blast (dead at about
+    VBlank 7020), flies off and rides a hovercraft round the edge, moved by UP and DOWN. C throws a
+    bomb in from the edge (7400), and its blast takes the CPU by the right wall (7448), who joins it on
+    the edge. A Mad Bomber scores kills but never comes back into the arena."""
+    presses = single().presses + tap(6650, "C", 6) + tap(6700, "A", 6) + tap(6760, "B", 6) + tap(6800, "DOWN", 20)
+    presses += tuple(p for k in range(3) for p in tap(7150 + 100 * k, ("UP", "DOWN")[k // 4 % 2], 30) + tap(7190 + 100 * k, "C", 6))
+    return with_rules(Route("a single battle with Mad Bomber: pad 1 dies, throws from the edge and takes a CPU",
+                            presses, 7420, "6880,7220,7268,7420"), mad_bomber=1)
+
+
 def tag(items):
     return "-items" if items else ""
 
@@ -311,6 +351,7 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           "cactus": cactus, "slot": slot, "yuna": yuna,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
           "pause": paused, "battle-round": battle_round,
+          "mad-bomber": mad_bomber,
           "master": master, "master-boss": master_boss, "master-result": master_result,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},
           **{f"arena-{n}-{sky}": (lambda n=n, sky=sky: arena(n, sky)) for n in range(1, len(ARENAS) + 1) for sky in SKIES[1:]}}
