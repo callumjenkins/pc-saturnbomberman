@@ -19,7 +19,7 @@ import sys
 
 import os
 
-from . import bot, compare, prepare, routes, run, videos
+from . import bot, compare, lab, prepare, routes, run, videos
 from .paths import ROOT
 
 
@@ -83,6 +83,30 @@ def main(argv=None):
     v.add_argument("stages", nargs="*", help="such as 3-2 or M-4 (default: every saved clear)")
     v.add_argument("--jobs", type=int, default=6)
     v.add_argument("--route", action="append", default=[], help="a route's video instead, kept as mechanics/ROUTE.mp4")
+    lab_parser = sub.add_parser("lab", help="research tools, each printing a short summary (bomberman.lab)")
+    labs = lab_parser.add_subparsers(dest="tool", required=True)
+    v = labs.add_parser("verify", help="a route on ours and on Beetle Saturn, by the game's tick")
+    v.add_argument("route", choices=list(routes.ROUTES))
+    v.add_argument("--from", dest="start", type=int, help="first VBlank compared (default: 400 before the end)")
+    v.add_argument("--every", type=int, default=4)
+    v = labs.add_parser("sheet", help="a route's frame-test shots on one image")
+    v.add_argument("route")
+    v.add_argument("--crop", help="X0,Y0,X1,Y1")
+    v.add_argument("--columns", type=int, default=4)
+    v = labs.add_parser("watch", help="stores to LO:HI during a route, by the function that made them")
+    v.add_argument("route", choices=list(routes.ROUTES))
+    v.add_argument("range", help="LO:HI in hex")
+    v.add_argument("--from", dest="start", type=int, default=0)
+    v.add_argument("--to", type=int)
+    v = labs.add_parser("disasm", help="instructions from ADDR")
+    v.add_argument("addr")
+    v.add_argument("count", nargs="?", type=int, default=40)
+    v.add_argument("--module")
+    v = labs.add_parser("ramdiff", help="bytes in LO:HI that differ between VBlanks A and B of a route")
+    v.add_argument("route", choices=list(routes.ROUTES))
+    v.add_argument("a", type=int)
+    v.add_argument("b", type=int)
+    v.add_argument("range", help="LO:HI in hex")
     c = sub.add_parser("compare", help="a route on our build against Mednafen's Saturn, by the game's tick")
     c.add_argument("route", choices=list(routes.ROUTES))
     c.add_argument("--core", default=os.environ.get("SATURN_REFERENCE_CORE"),
@@ -106,6 +130,19 @@ def main(argv=None):
                 print(videos.record_route(name))
         else:
             videos.record_all(set(args.stages), args.jobs)
+    elif args.command == "lab":
+        span = lambda text: tuple(int(x, 16) for x in text.split(":"))
+        if args.tool == "verify":
+            route = routes.ROUTES[args.route]()
+            lab.verify(route, args.start or max(0, route.vblanks - 400), args.every)
+        elif args.tool == "sheet":
+            print(lab.sheet(args.route, tuple(map(int, args.crop.split(","))) if args.crop else None, args.columns))
+        elif args.tool == "watch":
+            print("\n".join(lab.watch(routes.ROUTES[args.route](), *span(args.range), args.start, args.to)))
+        elif args.tool == "disasm":
+            print("\n".join(lab.disasm(int(args.addr, 16), args.count, args.module)))
+        else:
+            print("\n".join(lab.ramdiff(routes.ROUTES[args.route](), args.a, args.b, *span(args.range))) or "no difference")
     elif args.command == "compare":
         if not args.core or not args.bios:
             ap.error("compare needs --core and --bios, or SATURN_REFERENCE_CORE and SATURN_BIOS")

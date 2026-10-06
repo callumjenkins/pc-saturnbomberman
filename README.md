@@ -149,6 +149,12 @@ frame differs from `tests/frames.json` or a run hits a fatal error. It also play
 through saturn-recomp's agent and checks that it ends on the same frame as the scripted run. When a change to the frames is
 meant, check them in `build/test/NAME/` and record them with `--update`.
 
+## Researching the game
+
+`docs/RESEARCH.md` holds the method behind the routes: lining runs up with Beetle Saturn, the open arena
+where mechanics are tested, the menu timings, the controls and the traps. `bomberman lab` has the tools
+it uses: `verify`, `sheet`, `watch`, `disasm` and `ramdiff`.
+
 ## Comparing with Mednafen
 
 `bomberman compare ROUTE` plays a route on our build and then on Beetle Saturn (Mednafen's Saturn
