@@ -8,7 +8,8 @@
     bomberman run clear WORLD-STAGE [options]    a stage the bot cleared, replayed
     bomberman run attempt WORLD-STAGE [options]  the bot's last run at a stage, cleared or not
     bomberman bot WORLD-STAGE [--limit N]        clear a stage, invincible, and save its presses
---video on run or bot also records the run as video.mp4 in its directory.
+--video on run or bot also records the run as video.mp4 in its directory; a clear's is also kept
+in $BOMBERMAN_RUNS (bomberman videos).
 A run builds the game first if it has to, plays the route headless into build/run/ROUTE (log.txt and
 shot-N.png) and learns seeds while the game stops at code discovery missed."""
 import argparse
@@ -18,7 +19,7 @@ import sys
 
 import os
 
-from . import bot, compare, prepare, routes, run
+from . import bot, compare, prepare, routes, run, videos
 from .paths import ROOT
 
 
@@ -78,6 +79,9 @@ def main(argv=None):
     r.add_argument("--out", help="the run's directory (default build/run/ROUTE)")
     r.add_argument("--video", action="store_true", help="record it as video.mp4 beside its log")
     r.add_argument("--items", action="store_true", help="stage, clear, attempt: with every item")
+    v = sub.add_parser("videos", help="videos of the saved clears, kept in $BOMBERMAN_RUNS")
+    v.add_argument("stages", nargs="*", help="such as 3-2 or M-4 (default: every saved clear)")
+    v.add_argument("--jobs", type=int, default=6)
     c = sub.add_parser("compare", help="a route on our build against Mednafen's Saturn, by the game's tick")
     c.add_argument("route", choices=list(routes.ROUTES))
     c.add_argument("--core", default=os.environ.get("SATURN_REFERENCE_CORE"),
@@ -95,6 +99,8 @@ def main(argv=None):
         out = f"{run.BUILD}/play"
         os.makedirs(out, exist_ok=True)
         raise SystemExit(subprocess.run([run.GAME.saturn, "--cue", run.cue(), "--out", out, *more]).returncode)
+    elif args.command == "videos":
+        videos.record_all(set(args.stages), args.jobs)
     elif args.command == "compare":
         if not args.core or not args.bios:
             ap.error("compare needs --core and --bios, or SATURN_REFERENCE_CORE and SATURN_BIOS")
@@ -136,6 +142,8 @@ def main(argv=None):
         print(run.run(route, out, args.vblanks, args.shots, extra, more,
                       learn_seeds=not args.once, recompile=args.recompile,
                       log=lambda s: print(s, flush=True)))
+        if args.video and args.route == "clear":
+            print("kept", videos.keep(os.path.join(os.path.abspath(out), "video.mp4"), world, number, args.items))
 
 
 if __name__ == "__main__":

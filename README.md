@@ -103,6 +103,12 @@ saturn-recomp's agent. `uv run pytest tests/test_bot.py` checks its planning on 
 A program can play the game too: `bomberman.run.play(out, route, until)` starts a run for
 `saturnrecomp.agent`, optionally with a route's presses played up to a VBlank first.
 
+`bomberman videos` replays every saved clear in `inputs/clears/` with `--video`, and keeps each one,
+starting just before its stage, as `clears/WORLD-STAGE.mp4` in `$BOMBERMAN_RUNS`
+(`~/saturn-recomp/pc-saturnbomberman-runs` by default). Each new recording replaces the last, and
+`bomberman run clear 3-2 --video` keeps its video there too. Name stages to record only those:
+`bomberman videos 3-2 M-4`.
+
 Anything after `--` goes to the saturn executable, such as `-- --dump 6000` for the video memories.
 
 ## Testing
