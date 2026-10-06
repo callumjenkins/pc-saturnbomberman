@@ -73,7 +73,10 @@ no licence of its own yet.
 | `arena-N-night`, `-orange`, `-white` | arena N (1 to 8) as one of its three variants, picked by holding X+Y+Z on the stage wheel and pressing UP to change the sky; each sky changes the arena's layout and gimmicks |
 | `slot` | the slot machine won: three fires and the Fire Up picked up |
 | `yuna` | Battle's L+R hold, then character select with Yuna and Manto |
-| `stage W-S` | any stage, such as `stage 3-2` as the game shows it: Normal Game with the world and stage written in. Worlds 1 to 5 have 7, 9, 9, 10 and 10, each ending in its boss. `--items` starts with every item |
+| `master` | Master Game: the temple intro and its first floor |
+| `master-boss` | Master Game's first boss, on floor 4, beaten by the bot, then floor 5 |
+| `master-result` | Master Game's floor 1 cleared, floor 2's clock run out, the RESULT and TOP 10 CHALLENGERS screens (saved as BOMBERSS_02), then TRY AGAIN |
+| `stage W-S` | any stage, such as `stage 3-2` as the game shows it: Normal Game with the world and stage written in. Worlds 1 to 5 have 7, 9, 9, 10 and 10, each ending in its boss. `--items` starts with every item. `stage M-F` is Master Game's floor F, 1 to 20 |
 | `code KEYS` | a title-screen code such as `L,R,Y,UP` (`--hold L+R` holds buttons under it), then Normal mode |
 
 Options:
@@ -89,6 +92,9 @@ Options:
 `uv run bomberman bot 3-2` plays a Normal Game stage with the bomber invincible: it bombs every enemy,
 breaking soft blocks to reach them, then walks to the exit. A cleared stage's presses go to
 `inputs/clears/`, and `bomberman run clear 3-2` replays them as an ordinary route.
+`bomberman bot M-4` plays Master Game's floor 4 the same way, taking the ladder that drops at the top of
+the field once no enemy is left. It has cleared floors 1 to 8, both bosses included, but not floor 9,
+whose floating enemies it never catches.
 `bomberman run attempt 3-2` replays the bot's last run at a stage whether it cleared or not, and
 `--video` on any run or on the bot records it as `video.mp4` beside its log, with sound. It reads the stage
 from RAM (`src/bomberman/state.py`, with the addresses named in `game.toml`) and plays through

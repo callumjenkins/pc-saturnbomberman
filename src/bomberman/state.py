@@ -10,6 +10,8 @@ ENEMY_SLOTS = range(10, SLOTS)
 
 SOLID, SOFT, BOMB, FIRE = 0x80, 0x10, 0x20, 0x07
 CANNON = 0x0300                                   # both bits: a cannon, which keeps a bomber in it until A fires it out
+MASTER_WORLD = 8                                  # stage_2's world in Master Game, with the floor after it
+LADDER = (14, 17)                                 # where Master Game's ladder drops, once no enemy is left
 
 
 @dataclass(frozen=True)
@@ -79,4 +81,7 @@ def read(r):
     # a bomb is an object in the enemies' slots too, on a cell the map marks as holding one
     # (a slot can also hold a cell off the map, in a stage that keeps other things there)
     enemies = tuple(t for t in _things(objs, ENEMY_SLOTS) if t.cell[1] < 64 and not cells[t.cell[1] * 64 + t.cell[0]] & BOMB)
-    return Stage(cells, bomber[0] if bomber else None, enemies, (exit_cell % 64, exit_cell // 64))
+    exit = (exit_cell % 64, exit_cell // 64)
+    if r.read(sym["stage_2"], 1)[0] == MASTER_WORLD:
+        exit = LADDER if not enemies else (-1, -1)
+    return Stage(cells, bomber[0] if bomber else None, enemies, exit)

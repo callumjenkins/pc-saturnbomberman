@@ -113,8 +113,10 @@ def walk(r, d):
 
 
 def stage_number(r):
+    """World and stage, or in Master Game its world and floor."""
     from .run import GAME
-    return r.read(GAME.symbols["stage"], 2)
+    master = r.read(GAME.symbols["stage_2"], 2)
+    return master if master[0] == state.MASTER_WORLD else r.read(GAME.symbols["stage"], 2)
 
 
 def play(r, limit, log=print, fire=2):

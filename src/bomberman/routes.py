@@ -45,6 +45,8 @@ def presses_file(name):
 TO_NORMAL = taps((1900, 2500, 3000, 3400), "START", 10)
 # ... and from the mode select down to Battle
 TO_BATTLE = TO_NORMAL + tap(3700, "DOWN", 8) + tap(3760, "START", 10)
+# ... or two down to Master Game, whose temple intro leads to its first floor at about VBlank 6600
+TO_MASTER = TO_NORMAL + taps((3700, 3760), "DOWN", 8) + tap(3820, "START", 10)
 
 
 def normal():
@@ -110,13 +112,38 @@ def yuna(start=4200, end=4260):
 STAGES = {1: 7, 2: 9, 3: 9, 4: 10, 5: 10}
 
 
+# Master Game's floors, named as stage M-1 to M-20: a boss on every fourth.
+MASTER = "M"
+FLOORS = 20
+
+
+def floor(number):
+    """Master Game's floor NUMBER, from 1. The game sets stage_2 to world 8 and floor 0 at about
+    VBlank 6536, then loads the floor, so the floor written just after is the one that loads. Play
+    starts at about 6600."""
+    from .run import GAME
+    if not 1 <= number <= FLOORS:
+        raise ValueError(f"no floor {number}: Master Game has M-1 to M-{FLOORS}")
+    writes = (f"6537:{GAME.symbols['stage_2']:08X}=08{number - 1:02X}",) if number > 1 else ()
+    return Route(f"Master Game's floor {number}", TO_MASTER, 6700, "6700", writes=writes)
+
+
+def stage_start(world):
+    """The VBlank play starts at in a stage route without items."""
+    return 6600 if world == MASTER else 5700
+
+
 def stage(world, number, items=False):
     """Stage WORLD-NUMBER as the game shows it (from 1), through Normal Game's start with the world and
     stage written over the ones it chose; START skips the opening movie. Play starts at about VBlank
-    5620, or 5000 with every item (the title's held code), whose start comes sooner."""
+    5620, or 5000 with every item (the title's held code), whose start comes sooner. World M is Master
+    Game's floors."""
     from .run import GAME
+    if world == MASTER and not items:
+        return floor(number)
     if not 1 <= number <= STAGES.get(world, 0):
-        raise ValueError(f"no stage {world}-{number}: " + ", ".join(f"{w}-1 to {w}-{n}" for w, n in STAGES.items()))
+        raise ValueError(f"no stage {world}-{number}: " + ", ".join(f"{w}-1 to {w}-{n}" for w, n in STAGES.items())
+                         + f", or Master Game's {MASTER}-1 to {MASTER}-{FLOORS} without items")
     value = f"{world - 1:02X}{number - 1:02X}"
     names = ("stage", "stage_2", "stage_3", "stage_saved")
     if items:
@@ -254,6 +281,26 @@ def battle_round():
                  single().presses + tap(6500, "C", 4) + tap(16100, "C", 8), 16400, "16090,16400")
 
 
+def master():
+    return Route("Master Game: the temple intro and its first floor", TO_MASTER, 6700, "5500,6700")
+
+
+def master_boss():
+    """Floor 4's boss, the first Bomber Instructor, beaten by the bot, the ladder taken and floor 5."""
+    base = clear(MASTER, 4)
+    return Route("Master Game's first boss beaten, on to floor 5", base.presses, 14900, f"{base.shots},14900",
+                 invincible=True, writes=base.writes)
+
+
+def master_result():
+    """Floor 1 cleared by the bot, then floor 2's clock run out: RESULT, START to the TOP 10
+    CHALLENGERS table, which the game saves as BOMBERSS_02, START to its TRY AGAIN or QUIT, and
+    TRY AGAIN back to floor 1."""
+    presses = clear(MASTER, 1).presses + taps((20600, 21000, 21400), "START", 8)
+    return Route("Master Game run out of time: its result, the TOP 10 table saved, and TRY AGAIN",
+                 presses, 21700, "20500,20800,21250,21700", invincible=True)
+
+
 def tag(items):
     return "-items" if items else ""
 
@@ -264,5 +311,6 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           "cactus": cactus, "slot": slot, "yuna": yuna,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
           "pause": paused, "battle-round": battle_round,
+          "master": master, "master-boss": master_boss, "master-result": master_result,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},
           **{f"arena-{n}-{sky}": (lambda n=n, sky=sky: arena(n, sky)) for n in range(1, len(ARENAS) + 1) for sky in SKIES[1:]}}

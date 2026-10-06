@@ -4,7 +4,7 @@
     bomberman routes                      list the scripted runs
     bomberman run ROUTE [options] [-- SATURN_ARGS...]
     bomberman run code KEYS [--hold BUTTONS] [options]
-    bomberman run stage WORLD-STAGE [options]    such as 3-2, as the game shows it
+    bomberman run stage WORLD-STAGE [options]    such as 3-2, as the game shows it, or M-5 for Master Game's fifth floor
     bomberman run clear WORLD-STAGE [options]    a stage the bot cleared, replayed
     bomberman run attempt WORLD-STAGE [options]  the bot's last run at a stage, cleared or not
     bomberman bot WORLD-STAGE [--limit N]        clear a stage, invincible, and save its presses
@@ -24,15 +24,15 @@ from .paths import ROOT
 
 def stage_arg(ap, text):
     try:
-        world, number = map(int, (text or "").split("-"))
+        world, number = (text or "").split("-")
+        return (world if world == routes.MASTER else int(world)), int(number)
     except ValueError:
-        ap.error("a stage is WORLD-STAGE, such as 3-2")
-    return world, number
+        ap.error(f"a stage is WORLD-STAGE, such as 3-2, or {routes.MASTER}-FLOOR for Master Game")
 
 
 def clear_stage(world, number, limit, window, video=False, items=False):
     route = routes.stage(world, number, items)
-    start = 5700
+    start = routes.stage_start(world)
     out = run.out_dir(f"bot-{world}-{number}{routes.tag(items)}")
     more = ["--video", os.path.join(out, "video.mp4")] if video else []
     with run.play(out, route, until=start, invincible=True, window=window, more=more) as r:
