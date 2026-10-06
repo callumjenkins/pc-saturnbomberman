@@ -1,31 +1,127 @@
 {
+ "arena-1-night": {
+  "6480": "d46f1c514f3c0f179771088d6a945cf6",
+  "7100": "4314ba2e1f8cae84b2ab84ce062c3847"
+ },
+ "arena-1-orange": {
+  "6680": "c7a8b7c55fd1837a5d722718be79deb4",
+  "7300": "7a7b9ef30f07ad4833234aff5a365b20"
+ },
+ "arena-1-white": {
+  "6880": "8b3e1fa2af687ce3fb6ce565825d27fb",
+  "7500": "30b73a8e9821188ff2cd3861abaaf987"
+ },
  "arena-2": {
   "6260": "80f476d5aa0baefbcc9d08a33cc0d415",
   "6880": "cff4dda4392b0b74bd3788aafc8c7daa"
+ },
+ "arena-2-night": {
+  "6560": "d0acacdbb164cd6379c4a9fc237cbc75",
+  "7180": "54f8c553628aff530c80f5c25e838453"
+ },
+ "arena-2-orange": {
+  "6760": "829df1581874ad34fd55d91620ad50e3",
+  "7380": "384f1aefb5551188b879b3414d885a3e"
+ },
+ "arena-2-white": {
+  "6960": "3e3e141b8ccdc9544b0c641346b55a6e",
+  "7580": "5b9706270c2bdb36973bd883663376f0"
  },
  "arena-3": {
   "6340": "13929e7b6c1cea07ec5e3db647775a26",
   "6960": "11b68331aa6ab2dc97ee6c589df3d5ea"
  },
+ "arena-3-night": {
+  "6640": "25528cc910bd1008e2ed97dc6ba0609f",
+  "7260": "d5e1fb52b93e148693357aa146daf2a6"
+ },
+ "arena-3-orange": {
+  "6840": "1dd55d0524ed97853ee118117e54432f",
+  "7460": "42e2408a273c40159d750fbd5f72d75f"
+ },
+ "arena-3-white": {
+  "7040": "b4ec1ba59846f5931d2fd48a56347620",
+  "7660": "060f3e00890660530e4e318895e8f541"
+ },
  "arena-4": {
   "6420": "ec3edbf4a4a2c3baea26de59464de6e3",
   "7040": "230938ff2aeabcb91a4bcfb22fb63c67"
+ },
+ "arena-4-night": {
+  "6720": "3ccbbb875a282a10626ac80535165db1",
+  "7340": "5a875bd2361e767f4de291a4745279bb"
+ },
+ "arena-4-orange": {
+  "6920": "87b5bec643cc57ba0492a0567ac1b05e",
+  "7540": "c607f1fe2b9d48c8b1f3ea85df6bb096"
+ },
+ "arena-4-white": {
+  "7120": "7e1df70d32ae3fdc679fe4fb03239005",
+  "7740": "656dc19070b1fde599a18fc3856cce37"
  },
  "arena-5": {
   "6500": "96092bffdaf10416ed568863f5c48304",
   "7120": "52dadbabc1b40019500dfc6fca3f35cb"
  },
+ "arena-5-night": {
+  "6800": "5a03b2cbc1a39ddd612da49e11b426dc",
+  "7420": "e1ab784f66f30e79a8d4330331446a74"
+ },
+ "arena-5-orange": {
+  "7000": "0956b23bd0318761dabb797ebecc8c8d",
+  "7620": "2c46c88717e6ae2122679cfd4782fd01"
+ },
+ "arena-5-white": {
+  "7200": "0d7360c3392fad154dc403c162e5c0eb",
+  "7820": "3f037f6cf8e3b92e9a0f952e678b0545"
+ },
  "arena-6": {
   "6580": "19ebc6286d85a199b22e78adea939666",
   "7200": "1020d2aa6527531b52358ec2e7e0d4bd"
+ },
+ "arena-6-night": {
+  "6880": "eae81a4766ee344818df789c0b0c3961",
+  "7500": "a1eb298aa76b670fbe768f47ae7a9837"
+ },
+ "arena-6-orange": {
+  "7080": "a24d6bb81f3994e9adb2f120fcfb2ad6",
+  "7700": "b8fa5ae3fae120f88c76ac008a4b8dde"
+ },
+ "arena-6-white": {
+  "7280": "ae54cfc4d9710387e2ed2bb2fb4b7080",
+  "7900": "6ff57908dafe28e3f0c140c20858a34b"
  },
  "arena-7": {
   "6660": "a34412fd17372f0888391e3722e2563a",
   "7280": "0f4f24ab072578ffa11558d619c1ecde"
  },
+ "arena-7-night": {
+  "6960": "ce9fa8cc26a12102eb4c49354912057e",
+  "7580": "bfb5f007bb449628854c5d1051cb5f2b"
+ },
+ "arena-7-orange": {
+  "7160": "245080c1e63d17e62351259e9e68bfd3",
+  "7780": "516533869c66fe4a9af7e08842043c1a"
+ },
+ "arena-7-white": {
+  "7360": "3ec000aec213a1e59b4fc0b6b5b85f12",
+  "7980": "1def7c22bafe5a6b05ac03ba8e90e859"
+ },
  "arena-8": {
   "6740": "62d2381a2077d47552e6f52c880da993",
   "7360": "c02bf2acf418d6fc4f0c1cf440e04a4e"
+ },
+ "arena-8-night": {
+  "7040": "1a23e776039ab76873a8b91f7b0a6dbf",
+  "7660": "2483b7c72d396909349fedbafda68fe3"
+ },
+ "arena-8-orange": {
+  "7240": "437122a0532c06ecf71c27ba9608f7fb",
+  "7860": "c6dd987ff436068f074732de1e9b8b8d"
+ },
+ "arena-8-white": {
+  "7440": "1a6f6b7173c2e42a44b558b08025c9f3",
+  "8060": "26c3fc415f060067444eaf29c6c1d346"
  },
  "battle": {
   "7700": "3b042ebb2ba799d1e4dc01a43fb3287f",

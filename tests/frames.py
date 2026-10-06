@@ -23,7 +23,7 @@ RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", 
         "stage-5-3": lambda: routes.stage(5, 3), "clear-1-1": lambda: routes.clear(1, 1),
         "clear-1-7": lambda: routes.clear(1, 7),
         **{name: routes.ROUTES[name] for name in ["die", "continue", "save", "pause", "battle-round"]},
-        **{f"arena-{n}": routes.ROUTES[f"arena-{n}"] for n in range(2, len(routes.ARENAS) + 1)}}
+        **{name: routes.ROUTES[name] for name in routes.ROUTES if name.startswith("arena-")}}
 # Lines a run's log must hold, for what a frame does not show.
 LOG_LINES = {"save": ["BUP: wrote BOMBERSS_01 (12 bytes)"]}
 
