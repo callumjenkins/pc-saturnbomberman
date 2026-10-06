@@ -407,6 +407,46 @@ def dino_hatch():
                  6935, "6840,6890,6935")
 
 
+# Item kinds, from each one given to pad 1 (item-N): what changed in the bomber, or what the icon shows
+# where nothing in it did.
+ITEM_KINDS = {1: "fire up", 2: "bomb up", 3: "skate", 4: "a bomb kind", 5: "?", 6: "?", 7: "a timed state",
+              8: "clock", 9: "1UP", 10: "speed down", 11: "kick", 12: "glove", 13: "a bomb kind",
+              14: "a bomb kind", 15: "an ability", 16: "skull", 17: "heart", 18: "apple", 19: "ice cream",
+              20: "a bomb kind", 21: "egg", 22: "a timed state", 23: "a bomb kind", 24: "a bomb kind"}
+ITEM_CELL, ITEM_SLOT = (8, 17), 60             # the soft block beside pad 1's start; a slot no battle uses
+
+
+def hide(kind, cell=ITEM_CELL, slot=ITEM_SLOT, at=6600):
+    """Writes that hide an item of `kind` in the soft block at `cell`."""
+    from .run import GAME
+    x, y = cell
+    return (f"{at}:{GAME.symbols['hidden_items'] + (y * 64 + x) * 2:08X}={slot:04X}",
+            f"{at}:{GAME.symbols['item_slots'] + slot * 8:08X}=0000000000{kind:02X}0000")
+
+
+def item(kind):
+    """A single battle where pad 1 bombs the block beside it, with item `kind` hidden in it, and picks the
+    item up: revealed at 6890, taken by 6966."""
+    return Route(f"a single battle where pad 1 uncovers and takes item {kind} ({ITEM_KINDS[kind]})",
+                 single().presses + presses_file("item-presses.txt"), 6966, "6890,6966", writes=hide(kind))
+
+
+def egg_burn():
+    """An egg uncovered beside pad 1 (6890), then pad 1's next bomb beside it (7072) goes off: the egg is
+    fried (7097) and gone by 7122."""
+    return Route("a single battle where pad 1 uncovers an egg and its next bomb fries it",
+                 single().presses + presses_file("egg-burn-presses.txt"), 7122, "6890,7072,7097,7122",
+                 writes=hide(21))
+
+
+def egg_second():
+    """Pad 1 hatches one egg and rides (7032), then uncovers a second and walks onto it (7458): the dino's
+    count of eggs eaten (+0x64) goes to 1, and nothing in the picture changes."""
+    return Route("a single battle where pad 1 rides a hatched dino onto a second egg",
+                 single().presses + presses_file("egg-second-presses.txt"), 7458, "7032,7458",
+                 writes=hide(21) + hide(21, (9, 17), ITEM_SLOT + 1))
+
+
 def tag(items):
     return "-items" if items else ""
 
@@ -417,6 +457,7 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           "cactus": cactus, "slot": slot, "yuna": yuna,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
           "pause": paused, "battle-round": battle_round,
+          **{f"item-{k}": (lambda k=k: item(k)) for k in ITEM_KINDS}, "egg-burn": egg_burn, "egg-second": egg_second,
           "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},

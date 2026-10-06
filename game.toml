@@ -13,11 +13,13 @@ bomber_fire_under = 0x06015516      # in the bomber update, where r0 holds the f
 bomber_touched = 0x0605E512         # in the touch check, where r3 holds the object state word; any of bits 0x1228 skips the hit
 # The stage's objects, 0x7C bytes each: slots 0-9 the bombers, enemies from 10. At +0x30 the update
 # function (idle_object when the slot is free), +0x34 flags (0x80 gone, 0x40 hit), +0x44 the cell,
-# +0x48 and +0x4C x and y in 16.16 pixels. A bomber's +0x54 is the slot of the dino it rides, +0x5E has
-# 0x0800 while it rides one, +0x64 its fire, +0x6C its bombs, and the byte at +0x70 is 0x01 with kick.
+# +0x48 and +0x4C x and y in 16.16 pixels. A bomber's byte at +0x37 is its hearts, +0x3A its speed
+# (a skate adds 0x20), +0x54 the slot of the dino it rides, +0x5E has 0x0800 while it rides one, +0x64 its
+# fire, +0x6C its bombs. The byte at +0x70 holds its abilities (0x01 kick, 0x02 glove, 0x08 item 15's)
+# and +0x71 its bomb kind (one bit each for items 4, 13, 14, 20, 23 and 24).
 objects = 0x060D5F00
 idle_object = 0x060143D8
-dino = 0x0601B5CC                   # a dino's update function; its object's +0x54 is its rider's slot, +0x70 its colour
+dino = 0x0601B5CC                   # a dino's update function; its object's +0x54 is its rider's slot, +0x64 the eggs it has eaten since, +0x70 its colour
 # A byte a bomber slot: the colour of the dino the bomber is created riding, when its +0x5E has 0x0800 then.
 # 1 pink (jumps), 2 blue (kicks bombs into the air), 3 green (dashes), 4 yellow (roars), 5 purple (sound
 # waves); 0, 6 and 7 draw other dinos. A battle clears it, and the bombers' fields, about 20 VBlanks before
@@ -25,8 +27,12 @@ dino = 0x0601B5CC                   # a dino's update function; its object's +0x
 dino_colours = 0x060D82D4
 core_mechanism = 0x0607466C         # the update function of a Core Mechanism: the exit opens once none is left
 # The stage map: 64x64 cells, a word each, the cell (x, y) at y*64+x. 0x80 solid (walls, hard blocks,
-# a standing enemy), 0x10 soft block, 0x20 bomb, the low 3 bits fire.
+# a standing enemy), 0x40 an item, 0x10 soft block, 0x20 bomb, the low 3 bits fire.
 cells = 0x060EC8B0
+# Items: a word a cell, laid out as cells, whose low byte is the cell's slot in item_slots (0: none). A
+# soft block whose word names a slot drops that slot's item when it breaks.
+hidden_items = 0x060F08B0
+item_slots = 0x060DFB96             # 8 bytes a slot, slots 1-75: the byte at +5 is the item's kind (routes.ITEM_KINDS)
 exit_cell = 0x060D7E8C              # a word: the cell the exit opens on once no enemy is left
 # World then stage, a byte each, both from 0. The routine that starts Normal Game sets all four pairs,
 # to the held code's world or to stage_saved's when continuing; a stage select writes them after it.

@@ -27,7 +27,8 @@ RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", 
         "clear-M-1": lambda: routes.clear(routes.MASTER, 1),
         **{name: routes.ROUTES[name] for name in ["master", "master-boss", "master-result", "mad-bomber",
                                                      "team", "five-minutes", "bonus-game",
-                                                     "kick-goal", "dino-hatch", *routes.DINO_ROUTES]}}
+                                                     "kick-goal", "dino-hatch", *routes.DINO_ROUTES,
+                                                     *(f"item-{k}" for k in routes.ITEM_KINDS), "egg-burn", "egg-second"]}}
 # Lines a run's log must hold, for what a frame does not show.
 LOG_LINES = {"save": ["BUP: wrote BOMBERSS_01 (12 bytes)"], "master-result": ["BUP: wrote BOMBERSS_02 (240 bytes)"]}
 

@@ -76,6 +76,9 @@ no licence of its own yet.
 | `dino-hatch` | a CPU uncovers an egg and hatches a green dino |
 | `dino-pink`, `-green`, `-yellow`, `-purple`, `-blue` | pad 1 created riding that dino (two writes, see `dino_colours` in `game.toml`), using its power: jump, dash, roar, sound waves, a bomb kicked into the air |
 | `dino-burn` | pad 1's own bomb knocks its dino out and leaves it standing |
+| `item-1` to `item-24` | an item of that kind hidden in the block beside pad 1 (two writes, see `hidden_items` in `game.toml`), uncovered and taken; `routes.ITEM_KINDS` names them |
+| `egg-burn` | an egg uncovered beside pad 1, then fried by pad 1's next bomb |
+| `egg-second` | pad 1 hatches an egg, then rides onto a second one: its dino counts the egg and looks no different |
 | `mad-bomber` | a single battle with the Mad Bomber rule: pad 1 dies, rides a hovercraft round the edge, and a bomb it throws takes a CPU |
 | `arena-2` to `arena-8` | a single battle in each of the other normal-size arenas: Soccer Stadium, Jungle Trap, Desert Twister, Space Colony, Bouncing Bomber, Ninja House and Factory Floor. `single` plays the first, Path to Glory, and `battle` the one wide arena, Field of Glory |
 | `arena-N-night`, `-orange`, `-white` | arena N (1 to 8) as one of its three variants, picked by holding X+Y+Z on the stage wheel and pressing UP to change the sky; each sky changes the arena's layout and gimmicks |
