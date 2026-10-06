@@ -1,0 +1,11 @@
+{
+"about": "the pink dino jumps along the open row: 2 cells as a baby, 4 grown once, 7 grown twice",
+"colour": 1,
+"stage": 0,
+"presses": [
+"7400:RIGHT+A",
+"7420:"
+],
+"writes": [],
+"end": 7520
+}

@@ -80,6 +80,9 @@ no licence of its own yet.
 | `egg-burn` | an egg uncovered beside pad 1, then fried by pad 1's next bomb |
 | `egg-second` | pad 1 hatches an egg, then rides onto a second one: its dino counts the egg and looks no different |
 | `dino-evolve` | pad 1's dino eats a second and a third egg, and with the third it grows bigger, with spines |
+| `open-arena` | a 1-v-1 in Path to Glory under the white sky, which has no soft blocks, with the CPU walled into its corner without bombs: where the mechanics below are played |
+| `dino-pink-jump-0` to `-2`, `dino-pink-hard-0` to `-2`, `dino-green-dash-0` to `-2`, `dino-purple-waves-0` to `-2`, `dino-blue-edge-0` to `-2` | each dino's ability at each stage (the number: eggs eaten since it hatched, fed from soft blocks written into the map); see `inputs/mechanics/` |
+| `dino-blue-onto-bomb`, `kick-item-wall`, `glove-throw`, `glove-bounce`, `glove-wrap` | kicked and thrown bombs: stopping beside a bomb, stopping at the wall, bouncing off a hard block and coming down on the far side |
 | `mad-bomber` | a single battle with the Mad Bomber rule: pad 1 dies, rides a hovercraft round the edge, and a bomb it throws takes a CPU |
 | `arena-2` to `arena-8` | a single battle in each of the other normal-size arenas: Soccer Stadium, Jungle Trap, Desert Twister, Space Colony, Bouncing Bomber, Ninja House and Factory Floor. `single` plays the first, Path to Glory, and `battle` the one wide arena, Field of Glory |
 | `arena-N-night`, `-orange`, `-white` | arena N (1 to 8) as one of its three variants, picked by holding X+Y+Z on the stage wheel and pressing UP to change the sky; each sky changes the arena's layout and gimmicks |
@@ -118,6 +121,8 @@ A program can play the game too: `bomberman.run.play(out, route, until)` starts 
 `bomberman videos` replays every saved clear in `inputs/clears/` with `--video`, and keeps each one,
 starting just before its stage, as `clears/WORLD-STAGE.mp4` in `$BOMBERMAN_RUNS`
 (`~/saturn-recomp/pc-saturnbomberman-runs` by default). Each new recording replaces the last, and
+Each of the mechanic routes was played on Beetle Saturn as well when it was recorded, with the same
+presses and writes lined up by the game's tick, and pad 1, its dino and every bomb matched.
 `bomberman run clear 3-2 --video` keeps its video there too. `bomberman videos --route dino-evolve`
 records a route instead, as `mechanics/ROUTE.mp4`. Name stages to record only those:
 `bomberman videos 3-2 M-4`.

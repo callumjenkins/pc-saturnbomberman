@@ -115,6 +115,67 @@ def with_rules(route, **steps):
                                about=route.about + ", with " + ", ".join(f"{k} +{v}" for k, v in steps.items()))
 
 
+PLAYERS_UP, PLAYERS_DONE = 4690, 4760          # in a single battle: the players list takes presses from, and A leaves it at
+
+
+def with_players(route, off=()):
+    """A single-battle route with the players named in `off` (2 to 5) turned from COM to OFF on the battle
+    screen: DOWN to each and RIGHT, 20 VBlanks a press. Everything from the list's A on, writes and
+    shots included, comes that much later."""
+    buttons, row = [], 1
+    for n in sorted(off):
+        buttons += ["DOWN"] * (n - row) + ["RIGHT"]
+        row = n
+    delay = 20 * len(buttons)
+
+    def later(at):
+        return at + delay if at >= PLAYERS_DONE else at
+
+    presses = tuple(f"{later(int(at))}:{b}" for at, b in (p.split(":", 1) for p in route.presses))
+    presses += tuple(p for k, b in enumerate(buttons) for p in tap(PLAYERS_UP + 20 * k, b, 8))
+    writes = tuple(f"{later(int(at))}:{w}" for at, w in (x.split(":", 1) for x in route.writes))
+    return dataclasses.replace(route, presses=presses, writes=writes, vblanks=later(route.vblanks),
+                               shots=",".join(str(later(int(v))) for v in route.shots.split(",")),
+                               about=route.about + f", players {', '.join(map(str, sorted(off)))} off")
+
+
+OPEN_MOUNT = 6970                              # in open_arena: after it clears the bombers, before it creates pad 1
+OPEN_CPU_WALLS = ((53, 27), (54, 26))          # solid cells, never drawn, beside the CPU's start in the corner (54,27)
+
+
+def open_arena():
+    """A 1-v-1 in Path to Glory under the white sky, which has no soft blocks: players 3 to 5 off, the
+    stage wheel's sky turned with X+Y+Z and UP. Pad 1 starts at (38,17) and can move from about 7360, the CPU
+    from about 7210. Before then the CPU is walled into its corner by solid cells the arena never draws, with its
+    bombs (its +0x6C) at 0, so it stays out of the way. A CPU that can wander moves differently in Beetle
+    Saturn, whose loads take longer, and its bombs come back when it reaches pad 1."""
+    from .run import GAME
+    base = with_players(single(), off=(3, 4, 5))
+    presses = tuple(p for p in base.presses if int(p.split(":")[0]) < 6000) + presses_file("open-arena-presses.txt")
+    return Route("a 1-v-1 battle in Path to Glory under the white sky, with no soft blocks and a CPU without bombs",
+                 presses, 7600, "7400,7600",
+                 writes=(f"7100:{GAME.symbols['objects'] + 0x7C + 0x6C:08X}=00000000",
+                         *(f"7100:{GAME.symbols['cells'] + (y * 64 + x) * 2:08X}=0080" for x, y in OPEN_CPU_WALLS)))
+
+
+def mechanic(name):
+    """inputs/mechanics/NAME.json played in open_arena: pad 1 on the dino of that colour (0: none), the
+    presses and writes recorded when the mechanic was first checked, and shots over its last two seconds.
+    Each was checked against Beetle Saturn when it was recorded: pad 1, its dino and the bombs matched."""
+    import json
+    from .run import GAME
+    d = json.load(open(os.path.join(ROOT, "inputs", "mechanics", f"{name}.json")))
+    base = open_arena()
+    mount = (f"{OPEN_MOUNT}:{GAME.symbols['objects'] + 0x5E:08X}=0800",
+             f"{OPEN_MOUNT}:{GAME.symbols['dino_colours']:08X}={d['colour']:02X}") if d["colour"] else ()
+    end = d["end"]
+    return Route(d["about"], base.presses + tuple(d["presses"]), end, f"{end - 120},{end - 60},{end}",
+                 writes=base.writes + mount + tuple(d["writes"]))
+
+
+MECHANICS = tuple(sorted(f[:-5] for f in os.listdir(os.path.join(ROOT, "inputs", "mechanics")) if f.endswith(".json")))
+
+
 def battle():
     """Ten players on two multitaps: pads 2 to 10 each press A to join."""
     presses = TO_BATTLE + taps((4250, 4600), "A", 8) + tap(4850, "RIGHT", 8) + tap(4900, "A", 8)
@@ -467,7 +528,8 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
           "pause": paused, "battle-round": battle_round,
           **{f"item-{k}": (lambda k=k: item(k)) for k in ITEM_KINDS}, "egg-burn": egg_burn, "egg-second": egg_second,
-          "dino-evolve": dino_evolve,
+          "dino-evolve": dino_evolve, "open-arena": open_arena,
+          **{name: (lambda name=name: mechanic(name)) for name in MECHANICS},
           "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},

@@ -162,6 +162,26 @@
   "6780": "f37d1161b9f613ebae483b1459f857a7",
   "6800": "002156853a8720366ab5aef7852d05e6"
  },
+ "dino-blue-edge-0": {
+  "7712": "5f32a1317fe4d485e4fe6a895c2812e8",
+  "7772": "b87c40d677813758406530132fb0124d",
+  "7832": "937596c0ab0ba5b945598f605a10a770"
+ },
+ "dino-blue-edge-1": {
+  "8088": "df9371f2d687e1a32d41d08991389bd2",
+  "8148": "69b514e15a1147283bf85f3839064b1a",
+  "8208": "a773be6694faedeb5cff4b171ef94bb0"
+ },
+ "dino-blue-edge-2": {
+  "8464": "6eec976fca4e7fe6170138d65c9bd41e",
+  "8524": "4651049bc62d5b66fad6f2714e56d8f2",
+  "8584": "4d59a71fd46b1c9a342d02fe66e522c7"
+ },
+ "dino-blue-onto-bomb": {
+  "7556": "fec7e56d6087eb6d0195bf735cf688c3",
+  "7616": "1764c78eddeb316019890ec612ae0267",
+  "7676": "2519d2bdbf8e8f358058e2e559616472"
+ },
  "dino-burn": {
   "6875": "c5739c898c258d30bd6a87ef1640f563",
   "6900": "ca4b3b0a804631c6bc2e7f95812c418e",
@@ -177,6 +197,21 @@
   "6700": "7922abf5f9e23617ae6c5d4471c934bd",
   "6790": "b4bd2e639966a385a93bccfd94073f2e"
  },
+ "dino-green-dash-0": {
+  "7356": "34da2055451a45aa69fb87bbafd399f9",
+  "7416": "6d9f55df0670380efa2744d149d2995d",
+  "7476": "252375d5034827adb39c6fddf05deea6"
+ },
+ "dino-green-dash-1": {
+  "7756": "772cecea8c2aa4bf97b23dd140b27343",
+  "7816": "ec8d0906b1cf4bdeb79c56c7beb9abfb",
+  "7876": "916797457285527950218496727eb4ae"
+ },
+ "dino-green-dash-2": {
+  "8164": "f0b825572a1d9ce7095cbaa2457b8b82",
+  "8224": "13069d58cfb7d58ee28879364ebcf8db",
+  "8284": "73c09054dda2a23d8b52b0ddf25c1116"
+ },
  "dino-hatch": {
   "6840": "5f0c62df6e4b74c093d6c3df545acbc1",
   "6890": "78b039f41469826a674aacc1f5713412",
@@ -186,10 +221,55 @@
   "6700": "11ab9b59919d18dac72894bcd9c87250",
   "6790": "b8f285138cea2725715bebbf3f7425b3"
  },
+ "dino-pink-hard-0": {
+  "7428": "3e3fe7238ea6e22c36347ebc2f367a78",
+  "7488": "14e28c045db63a54844aef51bdc9158b",
+  "7548": "fd5a36496c861007be218d592333eb84"
+ },
+ "dino-pink-hard-1": {
+  "7836": "f52f7c8bff08b5c18b5d223331909d35",
+  "7896": "85e439619bd9f9d25d7284c5fdb07aa8",
+  "7956": "ec80fe2b4141d45eef07c4b06a5d7b46"
+ },
+ "dino-pink-hard-2": {
+  "8244": "498992cf0040127f8f3e1328aca87891",
+  "8304": "282daea7c14b315a3cda1a8d617e3e87",
+  "8364": "a5657ae4b6e6418cb32939fa39356547"
+ },
+ "dino-pink-jump-0": {
+  "7400": "559e717421047742b959dabf83ca3671",
+  "7460": "311afb4656650b560d5b5d661a77f967",
+  "7520": "af609ad49886774501ac1978300928aa"
+ },
+ "dino-pink-jump-1": {
+  "7800": "b164e89ac41b8a1a825e6af1da986975",
+  "7860": "4396020539370de213279d1c345f8756",
+  "7920": "dd81754e6e4460dda2d349813611ce53"
+ },
+ "dino-pink-jump-2": {
+  "8208": "f23b25c5d1e1bfec045e7a26dafc6d83",
+  "8268": "c12ce84f4411623c7bc5aa6d9c9683a0",
+  "8328": "e7207dc04fe44e094af8b459dd5906fd"
+ },
  "dino-purple": {
   "6700": "575de03b593c8b7888de6889275688c4",
   "6810": "2946018ec25228e4d591aed323be2c34",
   "6880": "95c717cb5beff8d8ffac74d450190eb2"
+ },
+ "dino-purple-waves-0": {
+  "7393": "f0f496ecd6bfc4df433a7d036b801deb",
+  "7453": "5e8246f9cf99a6d704eeae5efc64205e",
+  "7513": "9be085454a665075ac6db9899c713d79"
+ },
+ "dino-purple-waves-1": {
+  "7841": "a88e99e75fc60297fcda63063b3fe3d8",
+  "7901": "1ec5c61c1e12dce8e7028b4549d1a443",
+  "7961": "38c0867b2880cc443961c9efe5054ebb"
+ },
+ "dino-purple-waves-2": {
+  "8289": "e436dbbd1027eb5616fa971b8093dbee",
+  "8349": "e26070eb865a54b095ad3d2124de31a9",
+  "8409": "a1373c327624b34ba94ee98b4440acc4"
  },
  "dino-yellow": {
   "6700": "9b359b1c752b3e86bbacfbc79f2b909e",
@@ -207,6 +287,21 @@
  },
  "five-minutes": {
   "6590": "e21b78eebad538976a46744cd64e1577"
+ },
+ "glove-bounce": {
+  "7862": "5bf8b459d902499eb98b96925d01dac2",
+  "7922": "e5228f2e723b5839d10ecc3b479efc7e",
+  "7982": "73677829503b7e27891d6fadbde03ec1"
+ },
+ "glove-throw": {
+  "7862": "31de7ec2ce34e7f9eb5bbc97b42bd31d",
+  "7922": "15bd702b00d79cb3b095b53cf7ed1c41",
+  "7982": "e937bb18b7457c70493c6819e358ec81"
+ },
+ "glove-wrap": {
+  "7862": "0d8729e62127bbeb6c1252a72c3aae03",
+  "7922": "3510b496b7fb215f4ee8931c2342bae0",
+  "7982": "2792484feb2d3476caaf1cddfb9d25f7"
  },
  "gunman": {
   "4800": "df910d9420fcb0c3c8e2a6138316c757",
@@ -316,6 +411,11 @@
   "7651": "491d9baa737dfd1d7670a1921b8d5868",
   "7671": "1f65ad02a73776f977916ce26e4fac27"
  },
+ "kick-item-wall": {
+  "7840": "6893dbed595e12194a80446df9f06cd9",
+  "7900": "d4009230ab3d6d18fcc8c6c68d42cf91",
+  "7960": "752a1853f5732a0d61bb4174fba9a2e4"
+ },
  "mad-bomber": {
   "7060": "f97981b2e60dbbb61aec83df434fcf34",
   "7400": "85f34273ac4185f06ca73f81f08ccb70",
@@ -349,6 +449,10 @@
   "6300": "600747549283947e2fbe07d4d80b3f94",
   "8100": "96060ab00762bae4bcd82431bb8bec3b",
   "9000": "e9bc447e4333517876ec0ab781ae18c7"
+ },
+ "open-arena": {
+  "7400": "1599204f9af1b75a1cdf605ea153e8fc",
+  "7600": "3c33a6c398921a3c2ce879877f671838"
  },
  "pause": {
   "6028": "0862f3e5866f193f6df7c6e1a593fcce",

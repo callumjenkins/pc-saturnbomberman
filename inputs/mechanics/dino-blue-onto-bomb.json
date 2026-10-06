@@ -1,0 +1,31 @@
+{
+"about": "the blue dino kicks a bomb towards another one where it would land: it stops beside it",
+"colour": 2,
+"stage": 0,
+"presses": [
+"7400:RIGHT",
+"7416:",
+"7416:RIGHT",
+"7432:",
+"7432:RIGHT",
+"7448:",
+"7448:RIGHT",
+"7464:",
+"7464:C",
+"7468:",
+"7468:LEFT",
+"7484:",
+"7484:LEFT",
+"7500:",
+"7500:LEFT",
+"7516:",
+"7516:C",
+"7520:",
+"7520:LEFT",
+"7536:",
+"7536:RIGHT+A",
+"7556:"
+],
+"writes": [],
+"end": 7676
+}

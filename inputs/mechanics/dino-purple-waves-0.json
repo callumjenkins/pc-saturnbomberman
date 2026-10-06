@@ -1,0 +1,23 @@
+{
+"about": "the purple dino's sound waves set off a bomb at their reach: 2 cells as a baby, 3, then 4",
+"colour": 5,
+"stage": 0,
+"presses": [
+"7400:RIGHT",
+"7416:",
+"7416:RIGHT",
+"7432:",
+"7432:C",
+"7436:",
+"7436:LEFT",
+"7452:",
+"7452:LEFT",
+"7468:",
+"7468:RIGHT",
+"7469:",
+"7469:A",
+"7475:"
+],
+"writes": [],
+"end": 7513
+}

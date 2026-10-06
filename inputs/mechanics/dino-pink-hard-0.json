@@ -1,0 +1,15 @@
+{
+"about": "the pink dino jumps down from an odd column, over the hard blocks below: a baby can't, grown it clears them",
+"colour": 1,
+"stage": 0,
+"presses": [
+"7400:RIGHT",
+"7416:",
+"7416:DOWN",
+"7418:",
+"7428:DOWN+A",
+"7448:"
+],
+"writes": [],
+"end": 7548
+}

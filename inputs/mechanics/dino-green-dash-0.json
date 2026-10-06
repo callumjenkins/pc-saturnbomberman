@@ -1,0 +1,15 @@
+{
+"about": "the green dino dashes along the row to the wall: 2 px a VBlank as a baby, 3, then 4",
+"colour": 3,
+"stage": 0,
+"presses": [
+"7400:LEFT",
+"7402:",
+"7408:RIGHT",
+"7410:RIGHT+A",
+"7416:RIGHT",
+"7476:"
+],
+"writes": [],
+"end": 7476
+}
