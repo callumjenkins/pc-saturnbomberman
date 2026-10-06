@@ -363,6 +363,50 @@ def bonus_game():
                             presses, 17050, "16150,16600,16750,16900,17050"), battles=3, bonus_game=1)
 
 
+def kick_goal():
+    """Soccer Stadium with kick written into pad 1 (its +0x70) and pad 1 invincible, played through the
+    agent: it bombs its way down to row 21, sets a bomb by the left goal and kicks it in. The bomb goes off
+    in the goal at once (7671), about 110 VBlanks before its fuse would have run out."""
+    from .run import GAME
+    base = arena(2)
+    return Route("Soccer Stadium: a bomb kicked into the left goal goes off there at once",
+                 base.presses + presses_file("kick-goal-presses.txt"), 7680, "7651,7671",
+                 invincible=True, writes=(f"6700:{GAME.symbols['objects'] + 0x70:08X}=01",))
+
+
+# Pad 1 is created riding a dino when its +0x5E has 0x0800 and dino_colours names a colour. A single battle
+# clears both at about VBlank 6336 and creates pad 1 at 6354.
+DINOS = {"pink": 1, "blue": 2, "green": 3, "yellow": 4, "purple": 5}
+
+
+def dino(colour, presses, shots, about):
+    from .run import GAME
+    writes = (f"6345:{GAME.symbols['objects'] + 0x5E:08X}=0800", f"6345:{GAME.symbols['dino_colours']:08X}={DINOS[colour]:02X}")
+    end = max(int(v) for v in shots.split(","))
+    return Route(f"a single battle with pad 1 on the {colour} dino: {about}", single().presses + presses, end, shots,
+                 writes=writes)
+
+
+RIDE = tap(6720, "RIGHT", 30) + tap(6760, "A", 20)
+DINO_ROUTES = {
+    "dino-pink": lambda: dino("pink", RIDE, "6700,6790", "A jumps it into the air"),
+    "dino-green": lambda: dino("green", RIDE, "6700,6790", "A dashes it along the row"),
+    "dino-yellow": lambda: dino("yellow", RIDE, "6700,6810", "A roars"),
+    "dino-purple": lambda: dino("purple", RIDE, "6700,6810,6880", "A sends out sound waves"),
+    "dino-blue": lambda: dino("blue", tap(6710, "C", 6) + tap(6730, "RIGHT", 24) + tap(6770, "LEFT+A", 30),
+                              "6760,6780,6800", "LEFT and A kick its bomb into the air"),
+    "dino-burn": lambda: dino("green", tap(6710, "C", 6), "6875,6900,6925",
+                              "its own bomb knocks the dino out and the bomber is left standing"),
+}
+
+
+def dino_hatch():
+    """A CPU's blast uncovers an egg at (14,26) (VBlank 6840), a CPU walks onto it and rides the green
+    dino that hatches (6935)."""
+    return Route("a single battle where a CPU uncovers an egg and hatches a green dino", single().presses,
+                 6935, "6840,6890,6935")
+
+
 def tag(items):
     return "-items" if items else ""
 
@@ -373,7 +417,7 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           "cactus": cactus, "slot": slot, "yuna": yuna,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
           "pause": paused, "battle-round": battle_round,
-          "mad-bomber": mad_bomber, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
+          "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},
           **{f"arena-{n}-{sky}": (lambda n=n, sky=sky: arena(n, sky)) for n in range(1, len(ARENAS) + 1) for sky in SKIES[1:]}}
