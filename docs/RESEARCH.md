@@ -70,6 +70,18 @@ and drops the item itself, so its own pick-up and effects run. Nothing draws the
 Players 2-5 toggle only between COM and OFF unless pads are plugged in (`--multitap`). DOWN on
 the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps.
 
+## Normal and Master Game timings
+
+| What | VBlank |
+| --- | --- |
+| Normal Game stage route: play starts | about 5620 (5000 with every item) |
+| Master Game: stage_2 set to 08 00 / floor 1 play starts | 6536 / about 6600 (`stage M-N` writes 08 NN-1 at 6537) |
+| Master floor 20 cleared by the saved clear: the temple door / final RESULT | 15400-16200 / 17000 |
+| Stage 1-5 cannon: bomb at (20,9) with C held from 6232 / second bomb / fuse lit / fired / octopus hit | 6234 / 6412 / 6578 / 6608 / 6644 |
+| Dr. Mechado's unicycle mecha, in the 5-10 clear with every item | about 8000 |
+| Mr. Meanie's arena crushed, in the 5-9 clear with every item | about 6560 |
+| Dragon Bomber's dragon heads, in the M-20 clear | from about 9600 |
+
 ## Controls found
 
 - C drops a bomb. A uses a dino's ability. Pressing a direction with A moves pad 1 as well.
@@ -78,6 +90,10 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
 - Glove: A lifts the bomb pad 1 stands on. Wait about 60 VBlanks, then a direction with A throws it the
   way pad 1 faces. To aim, tap the direction before lifting.
 - Kick: walk into a bomb.
+- Stage 1-5's deck cannons (fuse cells (20,8), (10,6), (22,13), (36,6)): flame on a fuse fires its
+  cannon about 30 VBlanks later. In `cannon`, the first bomb at (20,9) goes off at 6384 without lighting
+  the fuse; the second, set with C still held, lights it. A single bomb there hit the octopus (100) only
+  when set 180-260 VBlanks after 6240. No bomb time tried hit the squid (500).
 - Mad Bomber: C throws, further the longer it is held (3, 5, then at most 7 cells at 40 VBlanks). B
   doubles the hovercraft's speed.
 
@@ -90,7 +106,14 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
 | A dino's eggs eaten | +0x64, capped at 2; its sprite's pattern base is 0x80 + 34 × that |
 | An egg eaten while riding | f_0601B240 |
 | An item placed when a block breaks / its kind looked up | f_06022B60 / f_06021F82 (the slot's +5) |
+| Pad 1's score, a long | 060C0690 |
+| Master Game floor | stage_2's second byte, with 08 in its first |
 | Not the item list | 060D8C0C: a pool of 2000 14-byte records from a general allocator |
+
+The bot clears Master floors whose enemies dodge every blast (floor 9's floating faces, floor 11's
+penguins) by setting their hit flag (+0x34 bit 0x40) after 30 seconds without a kill (`bot.strike`). The
+clear keeps each write as `VBLANK:@ADDR=HEX` among its presses, so such a clear uses writes as well as
+the invincibility hook.
 
 Writes that do nothing useful:
 - A bomber's position fields: the game puts them back.
