@@ -107,7 +107,26 @@ Anything after `--` goes to the saturn executable, such as `-- --dump 6000` for 
 
 ## Testing
 
-`uv run tests/frames.py` rebuilds, replays twelve routes in parallel (about a minute) and fails if a
+`uv run tests/frames.py` rebuilds, replays every route in parallel (about five minutes) and fails if a
 frame differs from `tests/frames.json` or a run hits a fatal error. It also plays stage 5-3
 through saturn-recomp's agent and checks that it ends on the same frame as the scripted run. When a change to the frames is
 meant, check them in `build/test/NAME/` and record them with `--update`.
+
+## Comparing with Mednafen
+
+`bomberman compare ROUTE` plays a route on our build and then on Beetle Saturn (Mednafen's Saturn
+as a libretro core), and reports how many dots of each shot differ. Pictures of ours, the core's
+and the differing dots go to `build/compare/ROUTE/`. `--every N` adds a shot every N VBlanks.
+
+```sh
+export SATURN_REFERENCE_CORE=path/to/mednafen_saturn_libretro.so SATURN_BIOS=path/to/bios
+uv run bomberman compare normal --every 500
+```
+
+The core boots the real BIOS and takes a drive's time over its disc reads, so the two runs are lined
+up by the game's own frame count (`tick` in `game.toml`), which stops while the game loads.
+saturn-recomp's README says how to build the core. Only routes made of presses on one pad can be
+compared: the core has no hooks, writes or multitap here.
+
+The title and menus match exactly. In play the enemies drift a few dots apart, because the game
+runs some tasks on every VBlank while it loads, and the core's loads are longer than ours.

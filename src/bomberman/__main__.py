@@ -18,7 +18,7 @@ import sys
 
 import os
 
-from . import bot, prepare, routes, run
+from . import bot, compare, prepare, routes, run
 from .paths import ROOT
 
 
@@ -78,6 +78,13 @@ def main(argv=None):
     r.add_argument("--out", help="the run's directory (default build/run/ROUTE)")
     r.add_argument("--video", action="store_true", help="record it as video.mp4 beside its log")
     r.add_argument("--items", action="store_true", help="stage, clear, attempt: with every item")
+    c = sub.add_parser("compare", help="a route on our build against Mednafen's Saturn, by the game's tick")
+    c.add_argument("route", choices=list(routes.ROUTES))
+    c.add_argument("--core", default=os.environ.get("SATURN_REFERENCE_CORE"),
+                   help="Beetle Saturn's libretro core (default $SATURN_REFERENCE_CORE)")
+    c.add_argument("--bios", default=os.environ.get("SATURN_BIOS"),
+                   help="the folder holding mpr-17933.bin (default $SATURN_BIOS)")
+    c.add_argument("--every", type=int, help="a shot every N VBlanks as well as the route's own")
     args = ap.parse_args(argv)
 
     if args.command == "prepare":
@@ -88,6 +95,15 @@ def main(argv=None):
         out = f"{run.BUILD}/play"
         os.makedirs(out, exist_ok=True)
         raise SystemExit(subprocess.run([run.GAME.saturn, "--cue", run.cue(), "--out", out, *more]).returncode)
+    elif args.command == "compare":
+        if not args.core or not args.bios:
+            ap.error("compare needs --core and --bios, or SATURN_REFERENCE_CORE and SATURN_BIOS")
+        route = routes.ROUTES[args.route]()
+        shots = {int(s) for s in route.shots.split(",") if s}
+        if args.every:
+            shots |= set(range(args.every, max(shots) + 1, args.every))
+        for line in compare.compare(route, args.route, args.core, args.bios, shots):
+            print(line)
     elif args.command == "bot":
         world, number = stage_arg(ap, args.stage)
         clear_stage(world, number, args.limit, args.window, args.video, args.items)
