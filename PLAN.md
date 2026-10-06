@@ -2,6 +2,7 @@
 
 Written 2026-10-05. Proposed work across `pc-saturnbomberman` and `saturn-recomp`, following a
 source comparison with alphanu1's Daytona arcade recompilation. No implementation is included.
+Updated 2026-10-06 to include original-code accounting and evidence for recreation completeness.
 
 The goal is a dependable Bomberman build: independently checked pictures and sound, predictable
 local multiplayer, and setup that catches problems before play. Keep the existing engine/game
@@ -52,14 +53,15 @@ The investigation also found implementation constraints:
 | --- | --- | --- | --- |
 | 0 | Reproducible baseline and verified disc | Both repositories | First |
 | 1 | Independent graphics and audio comparisons | Bomberman scenarios; generic comparison tools in engine | 0 |
-| 2 | Execution coverage and missing gameplay routes | Both repositories | 0; use 1 for reference checks |
+| 2 | Original-to-recomp inventory, gap report, execution coverage and missing gameplay routes | Both repositories | 0; use 1 for reference checks |
 | 3 | Multiple physical controllers and replay | Engine; Bomberman player mapping | 0 |
 | 4 | Saved settings and a playable launch flow | Engine host; Bomberman setup and launcher | 0, 3 |
 | 5 | Portable runtime and build matrix | Engine; game smoke tests | Start audit after 0; finish against 1–4 |
 | 6 | Profiled GPU experiment with software comparison | Engine | 1, 5, and measured need |
 
-Phases 1 and 3 can progress independently. Coverage reporting can start while reference capture
-is being investigated. GPU work is a separate milestone after the initial playable release.
+Phases 1 and 3 can progress independently. Start phase 2 with the original-to-recomp inventory
+and unknown-region report while reference capture is being investigated. GPU work is a separate
+milestone after the initial playable release.
 
 ## Phase 0: establish the baseline and reject unsupported discs
 
@@ -117,26 +119,88 @@ Full SH-2/device lockstep is a later investigation if these comparisons expose p
 cannot be isolated. Our safe-point timing and dual CPUs make Daytona's trace scheme a design
 reference, not a directly reusable implementation.
 
-## Phase 2: report exercised code and cover ordinary failure paths
+## Phase 2: account for original code and validate exercised paths
+
+Keep four claims separate: original regions accounted for, code translated, code exercised and
+behaviour checked against an independent reference. Each report must name its denominator and
+scope. Discovering and translating every known entry does not establish that discovery found
+every original instruction, and visiting every entry does not exercise every branch or state.
+
+### 2a: map original regions to their implementation
+
+1. Inventory the entire supported disc, then identify executable images and their load paths.
+   Start from the original files, not just `game.toml`'s configured modules. Include both SH-2s,
+   boot code, overlays, copied or decompressed code and the sound CPU's programs. Record load
+   addresses and observed image changes; distinguish programs that reuse an address. Record
+   BIOS and hardware services supplied by the runtime as dependencies outside the disc inventory.
+2. Give each region a documented treatment: translated code, interpreted code, preserved data,
+   replaced service, deliberate exclusion or unknown. Keep code/data classification and its
+   evidence separate from implementation treatment so a region used as both remains visible.
+   Link the 68000 programs to Musashi and their memory/device integration. Explain exclusions
+   individually, and keep excluded behaviour outside any completeness claim.
+3. Emit a machine-readable map from original file hash and offset through module/image identity
+   and guest address to generated C++ functions and source locations. Preserve provenance through
+   preparation patches, copies and decompression. Include build identity, config, seeds, resume
+   points and generator identity. Where compiler debug information permits, extend the map to
+   native address ranges and identify optimised-away or unmappable locations explicitly.
+4. Allow one original instruction to map to several generated locations and several instructions
+   to share a native range. Count unique original instruction addresses within each image,
+   including delay slots, rather than adding overlapping function sizes or counting task resume
+   entries as independent original functions. Check that every discovered instruction has a
+   generated implementation or an explicit alternative treatment.
+5. Extend discovery's existing `gaps()` analysis into a report of all unclassified ranges, with
+   file offsets, guest addresses, sizes and supporting evidence. Keep confirmed untranslated code,
+   unknown regions, translated-but-unvisited code and unresolved indirect targets separate. An
+   unresolved indirect target may dispatch successfully at runtime; an unclassified range may be
+   data or padding. Neither is automatically missing gameplay.
+6. Investigate unknown regions using independent disassembly, references, loader behaviour and
+   reference execution traces. Record why a classification changed. Review data classifications
+   too: a discovery heuristic can misclassify code as data. Prioritise observed original execution
+   without a corresponding implementation, then likely code and unexplained load paths. Preserve
+   remaining unknowns rather than assigning them a category to reach a percentage.
+
+Acceptance: every disc file appears in the inventory, every identified executable image has a
+region report, and every discovered instruction has a traceable treatment. Reconcile unique byte
+counts without double-counting overlaps. Test shared code, delay slots, reused load addresses,
+preparation patches and deliberately omitted translations with synthetic fixtures. Produce both
+a searchable map and a concise gap summary under ignored `build/`, tied to the exact inputs and
+build. Track tooling and classification rationale without committing disc-derived code or data.
+Inventory completeness alone is not a claim of behavioural equivalence.
+
+### 2b: compare original execution and cover ordinary failure paths
 
 1. Add optional execution instrumentation at generated function entries, with module identity
    and guest address. Include task resume entries and observed indirect targets. First measure
    function coverage; add branch detail only where it answers a concrete missing-path question.
 2. Emit machine-readable per-route coverage and merge it against the matching build's discovered
-   entry set. Distinguish compiled-but-unvisited entries, visited entries and unknown targets.
-   Never imply that the discovered set contains every function in the game.
-3. Keep game state labels in Bomberman. Associate routes with the menus, stage transitions,
+   entry set and the region inventory. Distinguish compiled-but-unvisited entries, visited entries
+   and unknown targets. Never imply that the discovered set contains every function in the game.
+3. Prototype guest instruction or basic-block tracing in the pinned reference from phase 1.
+   Record CPU, active image and guest address, expanding blocks to instruction addresses where
+   needed. Compare original execution with the translation map to find executed instructions
+   without an implementation, including ones absent from discovery. Keep reference execution and
+   recomp execution as separate measurements; reference traces establish coverage only for the
+   routes captured. This address-set comparison does not require full device lockstep.
+4. Keep game state labels in Bomberman. Associate routes with the menus, stage transitions,
    bosses and outcomes they test, and label invincibility or memory edits in the report.
-4. Add deterministic routes for taking damage, losing a life, game over, continue, pause/resume,
+5. Add deterministic routes for taking damage, losing a life, game over, continue, pause/resume,
    battle results/rematch and supported save/load behaviour. Include ordinary play without
    invincibility. Use uncovered entries to direct investigation, not as a demand for 100% coverage.
-5. Convert frame regressions to decoded-pixel expectations with useful diff output. Make baseline
+6. Convert frame regressions to decoded-pixel expectations with useful diff output. Make baseline
    updates explicit; a missing frame, fatal error or failed process must never become a passing
    baseline update. Add selected audio and state checks where a picture misses the behaviour.
+7. Extend independent comparisons beyond pictures and audio to selected game-state checkpoints,
+   memory writes and event timing. Specify equivalent initial state, inputs and alignment on both
+   implementations. Use instruction tests and isolated-function comparisons to investigate
+   translation errors, while retaining independent checks because the recompiler and its own
+   interpreter can share the same semantic mistake.
 
 Acceptance: reports identify at least one previously untested path and the route added for it.
 Instrumentation leaves frame, audio and state results unchanged. Regression runs disable seed
 learning and fail on unknown targets; exploratory runs retain the existing learning loop.
+An intentionally omitted translation is detected by the reference-trace comparison even when
+absent from the discovered entry set. Every observed original instruction is mapped or reported
+as an explicit gap; lack of reference trace support is reported as an uncompleted check.
 
 ## Phase 3: make local multiplayer work with physical controllers
 
@@ -237,6 +301,12 @@ Daytona's sound hardware and supported instruction set do not establish compatib
 
 Online multiplayer, widescreen, higher simulation rates and support for additional disc revisions
 are outside the initial release milestone. Each can use the validation and player setup work here.
+See [IDEATION.md](IDEATION.md) for enhancement ideas, feasibility estimates and possible later work.
+
+An unconditional proof of identical behaviour in every circumstance is outside these phases.
+That would require formal equivalence under an explicit CPU, device and timing model, including
+the runtime's replacements and scheduling. Rebuilding an original SH-2 binary byte-for-byte is a
+different objective from validating this SH-2-to-native-PC translation.
 
 ## Verification and delivery
 
@@ -250,6 +320,18 @@ The first playable-release milestone comprises phases 0–5, with the supported 
 to those actually validated. It requires documented reference differences, ordinary failure-path
 coverage, independently working player slots, persistent saves/settings and a tested setup path.
 GPU acceleration and a sound CPU recompiler do not block it.
+
+Publish a validation report for each release, tied to the disc revision, source/build hashes,
+toolchain, runtime settings, reference version and test corpus. Include region accounting,
+confirmed untranslated code, unknown bytes, explicit replacements/exclusions, execution coverage
+with named denominators, independent comparison results and remaining differences. Account for
+audio tracks as well as executable files; a data-only disc cannot substantiate a complete sound
+comparison. A claim of complete code accounting requires no unexplained regions in its declared
+scope, with evidence supporting each classification. A claim that all reference-observed code is
+implemented requires no unexplained executed addresses in those traces. Neither claim establishes
+all possible gameplay behaviour. State bounded claims and their exceptions instead of issuing an
+unqualified "100% recreation" certificate. Unresolved inventory or reference findings remain
+visible in the playable release's report and block any stronger claim they contradict.
 
 ## ADR sweep
 
@@ -266,10 +348,13 @@ Record decisions when implementation or plan approval settles these tradeoffs:
 | Settings and save ownership | Shared runtime storage contract with per-game identity; migration from run output | Engine and game ADRs as needed |
 | Launcher dependency | Small dedicated frontend or embedded UI library | Repository introducing the dependency |
 | Reference capture contract | Pinned reference, reproducible setup and explicit timing alignment | Engine ADR if it becomes a durable tool interface |
+| Code provenance and coverage format | Image identity, transformations and many-to-many mappings; generated metadata or compiler debug information | Engine ADR if a durable cross-tool format is established |
 | GPU boundary | Framebuffer presentation only or a new renderer consuming captured hardware state | Engine ADR if phase 6 proceeds |
 
 Use the established agent-home ADR locations. Routine reversible tool flags and test scenarios
 need no architecture record. Recheck this list after the portability and launcher prototypes.
+The 2026-10-06 addition sets validation scope and acceptance checks. It leaves the report format
+and reference tracing integration open, so no new architectural decision is settled here.
 
 ## Sources
 
