@@ -247,10 +247,12 @@ def clear(world, number, items=False):
     """Stage WORLD-NUMBER cleared by the bot (bomberman bot), replayed from the presses it saved in
     inputs/clears/; the run ends a few seconds after its last press, on the next stage's start."""
     base = stage(world, number, items)
-    presses = presses_file(f"clears/{world}-{number}{'-items' if items else ''}.txt")
-    end = int(presses[-1].split(":")[0]) + 300
+    saved = presses_file(f"clears/{world}-{number}{'-items' if items else ''}.txt")
+    presses = tuple(p for p in saved if ":@" not in p)
+    writes = tuple(p.replace(":@", ":") for p in saved if ":@" in p)       # the bot's strikes (bot.strike)
+    end = int(saved[-1].split(":")[0]) + 300
     return Route(f"stage {world}-{number} cleared by the bot", base.presses + presses, end, str(end),
-                 invincible=True, writes=base.writes)
+                 invincible=True, writes=base.writes + writes)
 
 
 def attempt(world, number, items=False):
@@ -258,10 +260,12 @@ def attempt(world, number, items=False):
     build/run/bot-WORLD-NUMBER/; the run ends a few seconds after its last press."""
     from .run import out_dir
     base = stage(world, number, items)
-    presses = tuple(open(f"{out_dir(f'bot-{world}-{number}{tag(items)}')}/presses.txt").read().strip().split(","))
-    end = int(presses[-1].split(":")[0]) + 300
+    saved = tuple(open(f"{out_dir(f'bot-{world}-{number}{tag(items)}')}/presses.txt").read().strip().split(","))
+    presses = tuple(p for p in saved if ":@" not in p)
+    writes = tuple(p.replace(":@", ":") for p in saved if ":@" in p)
+    end = int(saved[-1].split(":")[0]) + 300
     return Route(f"the bot's last run at stage {world}-{number}", base.presses + presses, end, str(end),
-                 invincible=True, writes=base.writes)
+                 invincible=True, writes=base.writes + writes)
 
 
 def world_presses(held):
@@ -517,6 +521,14 @@ def dino_evolve():
                  writes=sum((hide(21, (x, 17), ITEM_SLOT + i) for i, x in enumerate((8, 9, 10))), ()))
 
 
+def master_ending():
+    """Floor 20's clear replayed (Dragon Bomber beaten), then the ending: the temple door opens (15400 to
+    16200) and RESULT ranks the run (17000)."""
+    base = clear(MASTER, 20)
+    return Route("Master Game finished: floor 20 cleared, the temple door and the final RESULT", base.presses, 17000,
+                 "15400,15800,16200,17000", invincible=True, writes=base.writes)
+
+
 def tag(items):
     return "-items" if items else ""
 
@@ -532,5 +544,6 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           **{name: (lambda name=name: mechanic(name)) for name in MECHANICS},
           "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
+          "master-ending": master_ending,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},
           **{f"arena-{n}-{sky}": (lambda n=n, sky=sky: arena(n, sky)) for n in range(1, len(ARENAS) + 1) for sky in SKIES[1:]}}

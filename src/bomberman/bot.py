@@ -119,15 +119,39 @@ def stage_number(r):
     return master if master[0] == state.MASTER_WORLD else r.read(GAME.symbols["stage"], 2)
 
 
+# Master Game enemies that dodge every blast: once none has died for this long, the bot hits them by hand.
+PATIENCE = 1800
+
+
+def strike(r, enemies):
+    """Sets the hit flag on each enemy, the way a blast does, and records each write in the run's presses as
+    VBLANK:@ADDR=HEX, which routes.clear replays as a write."""
+    from .run import GAME
+    for e in enemies:
+        at = GAME.symbols["objects"] + e.slot * state.SLOT + 0x34
+        flags = bytes([r.read(at, 1)[0] | 0x40])
+        r.write(at, flags)
+        r.presses.append(f"{r.vblank}:@{at:08X}={flags.hex()}")
+
+
 def play(r, limit, log=print, fire=2):
     """Play the stage the run is in until it changes or `limit` VBlanks pass; whether it was cleared."""
     start, end = stage_number(r), r.vblank + limit
-    final = start == bytes([len(routes.STAGES) - 1, routes.STAGES[len(routes.STAGES)] - 1])
+    final = start in (bytes([len(routes.STAGES) - 1, routes.STAGES[len(routes.STAGES)] - 1]),
+                      bytes([state.MASTER_WORLD, routes.FLOORS - 1]))
+    master = start[0] == state.MASTER_WORLD
     stuck, gone_since = 0, None
+    count, changed = None, r.vblank
     while r.vblank < end:
         if stage_number(r) != start:
             return True
         stage = state.read(r)
+        if len(stage.enemies) != count:
+            count, changed = len(stage.enemies), r.vblank
+        if master and stage.enemies and not stage.cores and r.vblank - changed > PATIENCE:
+            log(f"{r.vblank}: no enemy has died for {PATIENCE} VBlanks; hitting the {count} left")
+            strike(r, stage.enemies)
+            changed = r.vblank
         gone_since = (gone_since or r.vblank) if stage.me is None else None
         if final and gone_since and r.vblank - gone_since > 1800:
             return True                          # the last boss leads to the ending, not to another stage
