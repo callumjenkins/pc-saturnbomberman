@@ -1,4 +1,32 @@
 {
+ "arena-2": {
+  "6260": "80f476d5aa0baefbcc9d08a33cc0d415",
+  "6880": "cff4dda4392b0b74bd3788aafc8c7daa"
+ },
+ "arena-3": {
+  "6340": "13929e7b6c1cea07ec5e3db647775a26",
+  "6960": "11b68331aa6ab2dc97ee6c589df3d5ea"
+ },
+ "arena-4": {
+  "6420": "ec3edbf4a4a2c3baea26de59464de6e3",
+  "7040": "230938ff2aeabcb91a4bcfb22fb63c67"
+ },
+ "arena-5": {
+  "6500": "96092bffdaf10416ed568863f5c48304",
+  "7120": "52dadbabc1b40019500dfc6fca3f35cb"
+ },
+ "arena-6": {
+  "6580": "19ebc6286d85a199b22e78adea939666",
+  "7200": "1020d2aa6527531b52358ec2e7e0d4bd"
+ },
+ "arena-7": {
+  "6660": "a34412fd17372f0888391e3722e2563a",
+  "7280": "0f4f24ab072578ffa11558d619c1ecde"
+ },
+ "arena-8": {
+  "6740": "62d2381a2077d47552e6f52c880da993",
+  "7360": "c02bf2acf418d6fc4f0c1cf440e04a4e"
+ },
  "battle": {
   "7700": "3b042ebb2ba799d1e4dc01a43fb3287f",
   "8880": "96750668d715fe11afdaf403ca5e002f"

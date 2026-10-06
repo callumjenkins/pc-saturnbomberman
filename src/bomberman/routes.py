@@ -59,6 +59,21 @@ def single():
                  TO_BATTLE + taps(range(4400, 6301, 90), "A", 8), 8400, "6500,8400")
 
 
+# The arenas of a normal-size battle, as the stage wheel names them; RIGHT turns it to the next.
+# A wide battle, the 10-player size, has one arena, Field of Glory.
+ARENAS = ("Path to Glory", "Soccer Stadium", "Jungle Trap", "Desert Twister", "Space Colony",
+          "Bouncing Bomber", "Ninja House", "Factory Floor")
+
+
+def arena(n):
+    """The single battle in arena N (from 1), turned to on the stage wheel (up from about VBlank 6140)
+    and picked with A. The match starts about 380 VBlanks after the pick."""
+    pick = 6200 + 80 * (n - 1)
+    presses = TO_BATTLE + taps(range(4400, 6111, 90), "A", 8) + taps(range(6200, pick, 80), "RIGHT", 8)
+    return Route(f"a single battle in arena {n}, {ARENAS[n - 1]}",
+                 presses + taps((pick, pick + 90), "A", 8), pick + 600, f"{pick - 20},{pick + 600}")
+
+
 def battle():
     """Ten players on two multitaps: pads 2 to 10 each press A to join."""
     presses = TO_BATTLE + taps((4250, 4600), "A", 8) + tap(4850, "RIGHT", 8) + tap(4900, "A", 8)
@@ -237,4 +252,5 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           **{name: (lambda name=name: world(name)) for name in WORLDS},
           "cactus": cactus, "slot": slot, "yuna": yuna,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
-          "pause": paused, "battle-round": battle_round}
+          "pause": paused, "battle-round": battle_round,
+          **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)}}

@@ -69,6 +69,7 @@ no licence of its own yet.
 | `save` | GAME OVER, SAVE GAME in slot 1, QUIT, then LOAD GAME from the title and slot 1 played |
 | `pause` | stage 1-1 paused and resumed |
 | `battle-round` | a single battle's round played out, its results, then round two |
+| `arena-2` to `arena-8` | a single battle in each of the other normal-size arenas: Soccer Stadium, Jungle Trap, Desert Twister, Space Colony, Bouncing Bomber, Ninja House and Factory Floor. `single` plays the first, Path to Glory, and `battle` the one wide arena, Field of Glory |
 | `slot` | the slot machine won: three fires and the Fire Up picked up |
 | `yuna` | Battle's L+R hold, then character select with Yuna and Manto |
 | `stage W-S` | any stage, such as `stage 3-2` as the game shows it: Normal Game with the world and stage written in. Worlds 1 to 5 have 7, 9, 9, 10 and 10, each ending in its boss. `--items` starts with every item |
