@@ -552,6 +552,42 @@ def cannon():
                  invincible=True, writes=base.writes)
 
 
+# The bosses, by stage: Normal Game's world bosses and Master Game's Bomber Masters.
+BOSSES = {(1, 7): "Castle Joe", (2, 9): "J Ninja", (3, 9): "Rodeon", (4, 5): "Egg Birdon", (4, 10): "Crator",
+          (5, 9): "Mr. Meanie's mech", (5, 10): "Dr. Mechado", ("M", 4): "Bomb Kami Bomber",
+          ("M", 8): "Debugon Bomber", ("M", 12): "Jokkii Bomber", ("M", 16): "Miyagi Bomber",
+          ("M", 20): "Dragon Bomber"}
+
+
+def boss(world, number, length=7200):
+    """The boss stage with pad 1 invincible and still for two minutes, so the boss runs through its attacks
+    unharmed; a shot every 10 seconds."""
+    base = stage(world, number)
+    start = stage_start(world)
+    return Route(f"{BOSSES[world, number]} left alone for two minutes", base.presses, start + length,
+                 ",".join(str(v) for v in range(start + 600, start + length + 1, 600)), invincible=True,
+                 writes=base.writes)
+
+
+def boss_late(world, number, cut, items=False, length=3600):
+    """A saved clear of the boss stage played to VBlank `cut`, past the boss's change of phase, then pad 1
+    still for a minute; a shot every 10 seconds."""
+    base = clear(world, number, items)
+    presses = tuple(p for p in base.presses if int(p.split(":")[0]) < cut) + (f"{cut}:",)
+    writes = tuple(w for w in base.writes if int(w.split(":")[0]) < cut)
+    return Route(f"{BOSSES[world, number]} after the clear's first hits, left alone for a minute", presses,
+                 cut + length, ",".join(str(v) for v in range(cut + 600, cut + length + 1, 600)), invincible=True,
+                 writes=writes)
+
+
+BOSS_ROUTES = {
+    **{f"boss-{w}-{n}": (lambda w=w, n=n: boss(w, n)) for w, n in BOSSES},
+    "boss-5-9-crushed": lambda: boss_late(5, 9, 6700, items=True),
+    "boss-5-10-mecha": lambda: boss_late(5, 10, 8100, items=True),
+    "boss-M-20-late": lambda: boss_late("M", 20, 9000),
+}
+
+
 def master_ending():
     """Floor 20's clear replayed (Dragon Bomber beaten), then the ending: the temple door opens (15400 to
     16200) and RESULT ranks the run (17000)."""
@@ -583,6 +619,6 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           **{name: (lambda name=name: mechanic(name)) for name in MECHANICS},
           "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
-          "master-ending": master_ending, "cannon": cannon,
+          "master-ending": master_ending, "cannon": cannon, **BOSS_ROUTES,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},
           **{f"arena-{n}-{sky}": (lambda n=n, sky=sky: arena(n, sky)) for n in range(1, len(ARENAS) + 1) for sky in SKIES[1:]}}

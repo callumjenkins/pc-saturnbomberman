@@ -96,6 +96,8 @@ no licence of its own yet.
 | `master` | Master Game: the temple intro and its first floor |
 | `master-boss` | Master Game's first boss, on floor 4, beaten by the bot, then floor 5 |
 | `cannon` | stage 1-5, the pirate ship: a bomb's blast lights a deck cannon's fuse, and the shot hits the octopus in the sea (100 points) |
+| `boss-W-N` | a boss stage (`boss-1-7` Castle Joe to `boss-5-10` Dr. Mechado, `boss-M-4` to `boss-M-20` the Bomber Masters) with pad 1 invincible and still for two minutes, so the boss shows its attacks unharmed |
+| `boss-5-9-crushed`, `boss-5-10-mecha`, `boss-M-20-late` | the saved clear played past the boss's change of phase (Mr. Meanie's arena crushed, Dr. Mechado's unicycle mecha, Dragon Bomber's dragon heads), then pad 1 still for a minute |
 | `master-ending` | Master Game's floor 20 cleared, the temple door and the final RESULT |
 | `master-result` | Master Game's floor 1 cleared, floor 2's clock run out, the RESULT and TOP 10 CHALLENGERS screens (saved as BOMBERSS_02), then TRY AGAIN |
 | `stage W-S` | any stage, such as `stage 3-2` as the game shows it: Normal Game with the world and stage written in. Worlds 1 to 5 have 7, 9, 9, 10 and 10, each ending in its boss. `--items` starts with every item. `stage M-F` is Master Game's floor F, 1 to 20 |
