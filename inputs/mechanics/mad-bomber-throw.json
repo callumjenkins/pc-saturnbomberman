@@ -1,0 +1,23 @@
+{
+"about": "Mad Bomber: pad 1 dies on its own bomb, rides the hovercraft and throws a bomb in, C held 40 VBlanks: it lands 7 cells in",
+"colour": 0,
+"stage": 0,
+"arena": {
+"off": [
+4,
+5
+],
+"rules": {
+"mad_bomber": 1
+}
+},
+"presses": [
+"7580:C",
+"7584:",
+"7902:C",
+"7942:"
+],
+"writes": [],
+"end": 8012,
+"shots": "7902,7972,8012"
+}

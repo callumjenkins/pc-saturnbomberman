@@ -1,0 +1,41 @@
+{
+"about": "No Draw: at 0:00 sudden death goes on until pad 1 is crushed, and the CPU takes the round",
+"colour": 0,
+"stage": 0,
+"arena": {
+"rules": {
+"time": 7,
+"no_draw": 1
+},
+"free_cpus": true
+},
+"presses": [
+"7930:RIGHT",
+"7946:",
+"7946:RIGHT",
+"7962:",
+"7962:RIGHT",
+"7978:",
+"7978:RIGHT",
+"7994:",
+"7994:RIGHT",
+"8010:",
+"8010:RIGHT",
+"8026:",
+"8026:RIGHT",
+"8042:",
+"8042:RIGHT",
+"8058:",
+"8058:DOWN",
+"8072:",
+"8072:DOWN",
+"8088:",
+"8088:DOWN",
+"8104:",
+"8104:DOWN",
+"8120:"
+],
+"writes": [],
+"end": 11830,
+"shots": "11410,11590,11830"
+}

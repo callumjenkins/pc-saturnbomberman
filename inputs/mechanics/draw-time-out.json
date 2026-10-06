@@ -1,0 +1,40 @@
+{
+"about": "no No Draw: pad 1 and the CPU both last to 0:00, and the round is a DRAW",
+"colour": 0,
+"stage": 0,
+"arena": {
+"rules": {
+"time": 7
+},
+"free_cpus": true
+},
+"presses": [
+"7840:RIGHT",
+"7856:",
+"7856:RIGHT",
+"7872:",
+"7872:RIGHT",
+"7888:",
+"7888:RIGHT",
+"7904:",
+"7904:RIGHT",
+"7920:",
+"7920:RIGHT",
+"7936:",
+"7936:RIGHT",
+"7952:",
+"7952:RIGHT",
+"7968:",
+"7968:DOWN",
+"7982:",
+"7982:DOWN",
+"7998:",
+"7998:DOWN",
+"8014:",
+"8014:DOWN",
+"8030:"
+],
+"writes": [],
+"end": 11740,
+"shots": "11320,11500,11740"
+}

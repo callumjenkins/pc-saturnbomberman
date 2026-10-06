@@ -89,16 +89,17 @@ def arena(n, sky="day"):
 
 
 # The rules screen's rows, top to bottom, each stepped on by RIGHT: wins to take the match (3, from
-# 1 to 5), minutes a round (3, from 1 to 5), then on or off: positions shuffled each round, sudden
+# 1 to 5), minutes a round (3, from 1 to 9, after 9 back to 1), then on or off: positions shuffled each round, sudden
 # death until one is left, Devil items, Mad Bomber (the fallen bomb from the sidelines), and a
 # bonus game between rounds.
 RULES = ("battles", "time", "shuffle", "no_draw", "devil", "mad_bomber", "bonus_game")
 RULES_UP, RULES_DONE = 5000, 5030             # in a single battle: rows take presses from, and A accepts them at
 
 
-def with_rules(route, **steps):
+def with_rules(route, com_level=1, **steps):
     """A single-battle route with the rules screen changed: for each rule named, DOWN to its row and
-    RIGHT that many times, 30 VBlanks a press. Everything from the rules' A on comes that much later."""
+    RIGHT that many times, 30 VBlanks a press. Everything from the rules' A on comes that much later.
+    `com_level` (1 to 3) is set by RIGHT between the rules' A and the next, which moves the cursor to it."""
     buttons, row = [], 0
     for name, n in sorted(steps.items(), key=lambda kv: RULES.index(kv[0])):
         buttons += ["DOWN"] * (RULES.index(name) - row) + ["RIGHT"] * n
@@ -110,6 +111,9 @@ def with_rules(route, **steps):
 
     presses = tuple(f"{later(int(at))}:{b}" for at, b in (p.split(":") for p in route.presses))
     presses += tuple(p for k, b in enumerate(buttons) for p in tap(RULES_UP + 30 * k, b, 8))
+    presses += tuple(p for k in range(com_level - 1) for p in tap(later(RULES_DONE) + 20 + 30 * k, "RIGHT", 8))
+    if com_level != 1:
+        steps = {**steps, "com_level": com_level}
     return dataclasses.replace(route, presses=presses, vblanks=later(route.vblanks),
                                shots=",".join(str(later(int(v))) for v in route.shots.split(",")),
                                about=route.about + ", with " + ", ".join(f"{k} +{v}" for k, v in steps.items()))
@@ -140,37 +144,52 @@ def with_players(route, off=()):
 
 
 OPEN_MOUNT = 6970                              # in open_arena: after it clears the bombers, before it creates pad 1
-OPEN_CPU_WALLS = ((53, 27), (54, 26))          # solid cells, never drawn, beside the CPU's start in the corner (54,27)
+# Solid cells, never drawn, that wall CPU k into the corner it starts in: CPU 1 at (54,27), CPU 2 at (54,17).
+OPEN_CPU_WALLS = {1: ((53, 27), (54, 26)), 2: ((53, 17), (54, 18))}
 
 
-def open_arena():
-    """A 1-v-1 in Path to Glory under the white sky, which has no soft blocks: players 3 to 5 off, the
-    stage wheel's sky turned with X+Y+Z and UP. Pad 1 starts at (38,17) and can move from about 7360, the CPU
-    from about 7210. Before then the CPU is walled into its corner by solid cells the arena never draws, with its
-    bombs (its +0x6C) at 0, so it stays out of the way. A CPU that can wander moves differently in Beetle
-    Saturn, whose loads take longer, and its bombs come back when it reaches pad 1."""
+def open_arena(off=(3, 4, 5), **rules):
+    """A battle in Path to Glory under the white sky, which has no soft blocks: the players in `off` turned
+    off, the rules changed as with_rules, the stage wheel's sky turned with X+Y+Z and UP. Pad 1 starts at
+    (38,17) and can move from about 7360, the CPUs from about 7210. Before then each CPU is walled into its
+    corner by solid cells the arena never draws, with its bombs (its +0x6C) at 0, so it stays out of the
+    way. A CPU that can wander moves differently in Beetle Saturn, whose loads take longer, and its bombs
+    come back when it reaches pad 1. Changed rules make everything from the rules screen on later; the
+    route's `about` says by how much, and OPEN_MOUNT moves with it."""
     from .run import GAME
-    base = with_players(single(), off=(3, 4, 5))
-    presses = tuple(p for p in base.presses if int(p.split(":")[0]) < 6000) + presses_file("open-arena-presses.txt")
-    return Route("a 1-v-1 battle in Path to Glory under the white sky, with no soft blocks and a CPU without bombs",
-                 presses, 7600, "7400,7600",
-                 writes=(f"7100:{GAME.symbols['objects'] + 0x7C + 0x6C:08X}=00000000",
-                         *(f"7100:{GAME.symbols['cells'] + (y * 64 + x) * 2:08X}=0080" for x, y in OPEN_CPU_WALLS)))
+    ruled = with_rules(single(), **rules) if rules else single()
+    delay = ruled.vblanks - single().vblanks
+    base = with_players(ruled, off=off)
+    presses = tuple(p for p in base.presses if int(p.split(":")[0]) < 6000 + delay)
+    presses += tuple(f"{int(at) + delay}:{b}" for at, b in (p.split(":", 1) for p in presses_file("open-arena-presses.txt")))
+    at = 7100 + delay
+    players = 5 - len(off)
+    cpus = range(1, players)
+    writes = tuple(f"{at}:{GAME.symbols['objects'] + k * 0x7C + 0x6C:08X}=00000000" for k in cpus)
+    writes += tuple(f"{at}:{GAME.symbols['cells'] + (y * 64 + x) * 2:08X}=0080" for k in cpus for x, y in OPEN_CPU_WALLS[k])
+    return Route(f"a {players}-player battle in Path to Glory under the white sky, with no soft blocks and CPUs walled in"
+                 + (f", rules {rules}, {delay} VBlanks later" if rules else ""),
+                 presses, 7600 + delay, f"{7400 + delay},{7600 + delay}", writes=writes)
 
 
 def mechanic(name):
     """inputs/mechanics/NAME.json played in open_arena: pad 1 on the dino of that colour (0: none), the
-    presses and writes recorded when the mechanic was first checked, and shots over its last two seconds.
-    Each was checked against Beetle Saturn when it was recorded: pad 1, its dino and the bombs matched."""
+    presses and writes recorded when the mechanic was first checked, and its shots, by default over its
+    last two seconds. Its "arena" names the players off, the rules, and whether the CPUs go free. The
+    ones without free CPUs were checked against Beetle Saturn when recorded: pad 1, its dino and the
+    bombs matched."""
     import json
     from .run import GAME
     d = json.load(open(os.path.join(ROOT, "inputs", "mechanics", f"{name}.json")))
-    base = open_arena()
-    mount = (f"{OPEN_MOUNT}:{GAME.symbols['objects'] + 0x5E:08X}=0800",
-             f"{OPEN_MOUNT}:{GAME.symbols['dino_colours']:08X}={d['colour']:02X}") if d["colour"] else ()
+    arena = d.get("arena", {})
+    base = open_arena(off=tuple(arena.get("off", (3, 4, 5))), **arena.get("rules", {}))
+    mount_at = OPEN_MOUNT + base.vblanks - open_arena().vblanks
+    mount = (f"{mount_at}:{GAME.symbols['objects'] + 0x5E:08X}=0800",
+             f"{mount_at}:{GAME.symbols['dino_colours']:08X}={d['colour']:02X}") if d["colour"] else ()
+    walls = tuple(w for w in base.writes if not (arena.get("free_cpus") and w.endswith("=0080")))
     end = d["end"]
-    return Route(d["about"], base.presses + tuple(d["presses"]), end, f"{end - 120},{end - 60},{end}",
-                 writes=base.writes + mount + tuple(d["writes"]))
+    return Route(d["about"], base.presses + tuple(d["presses"]), end, d.get("shots", f"{end - 120},{end - 60},{end}"),
+                 writes=walls + mount + tuple(d["writes"]))
 
 
 MECHANICS = tuple(sorted(f[:-5] for f in os.listdir(os.path.join(ROOT, "inputs", "mechanics")) if f.endswith(".json")))
@@ -477,7 +496,8 @@ def dino_hatch():
 ITEM_KINDS = {1: "fire up", 2: "bomb up", 3: "skate", 4: "a bomb kind", 5: "?", 6: "?", 7: "a timed state",
               8: "clock", 9: "1UP", 10: "speed down", 11: "kick", 12: "glove", 13: "a bomb kind",
               14: "a bomb kind", 15: "an ability", 16: "skull", 17: "heart", 18: "apple", 19: "ice cream",
-              20: "a bomb kind", 21: "egg", 22: "a timed state", 23: "a bomb kind", 24: "a bomb kind"}
+              20: "a bomb kind", 21: "egg", 22: "a timed state", 23: "a bomb kind", 24: "a bomb kind", 25: "?",
+              26: "devil (only with the Devil rule)"}
 ITEM_CELL, ITEM_SLOT = (8, 17), 60             # the soft block beside pad 1's start; a slot no battle uses
 
 
@@ -529,6 +549,13 @@ def master_ending():
                  "15400,15800,16200,17000", invincible=True, writes=base.writes)
 
 
+def com_level(level):
+    """A single battle with the CPUs at Com Level `level`, pad 1 idle in its corner. At 3 they bomb about
+    twice as often as at 1 and kill each other inside 40 seconds; 1 and 2 played the same 40 seconds."""
+    return with_rules(Route(f"a single battle with the CPUs at Com Level {level}, pad 1 idle",
+                            single().presses, 8900, "7200,8000,8900"), com_level=level)
+
+
 def tag(items):
     return "-items" if items else ""
 
@@ -541,6 +568,7 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           "pause": paused, "battle-round": battle_round,
           **{f"item-{k}": (lambda k=k: item(k)) for k in ITEM_KINDS}, "egg-burn": egg_burn, "egg-second": egg_second,
           "dino-evolve": dino_evolve, "open-arena": open_arena,
+          **{f"com-level-{n}": (lambda n=n: com_level(n)) for n in (1, 3)},
           **{name: (lambda name=name: mechanic(name)) for name in MECHANICS},
           "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,

@@ -29,7 +29,7 @@ RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", 
                                                      "team", "five-minutes", "bonus-game",
                                                      "kick-goal", "dino-hatch", *routes.DINO_ROUTES,
                                                      *(f"item-{k}" for k in routes.ITEM_KINDS), "egg-burn", "egg-second", "dino-evolve",
-                                                     "open-arena", *routes.MECHANICS]}}
+                                                     "open-arena", *routes.MECHANICS, "com-level-1", "com-level-3"]}}
 # Lines a run's log must hold, for what a frame does not show.
 LOG_LINES = {"save": ["BUP: wrote BOMBERSS_01 (12 bytes)"], "master-result": ["BUP: wrote BOMBERSS_02 (240 bytes)"]}
 

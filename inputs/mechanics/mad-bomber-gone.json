@@ -1,0 +1,21 @@
+{
+"about": "Mad Bomber: pad 1 on the hovercraft is taken off the edge as the clock passes 1:00",
+"colour": 0,
+"stage": 0,
+"arena": {
+"off": [
+4,
+5
+],
+"rules": {
+"mad_bomber": 1
+}
+},
+"presses": [
+"7580:C",
+"7584:"
+],
+"writes": [],
+"end": 14860,
+"shots": "14560,14740,14860"
+}
