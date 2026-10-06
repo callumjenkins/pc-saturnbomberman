@@ -69,6 +69,9 @@ no licence of its own yet.
 | `save` | GAME OVER, SAVE GAME in slot 1, QUIT, then LOAD GAME from the title and slot 1 played |
 | `pause` | stage 1-1 paused and resumed |
 | `battle-round` | a single battle's round played out through sudden death (pressure blocks dropping in from the edge), its results, then round two |
+| `team` | Mode turned to Team: the Team Battle screen, then a match with a team HUD |
+| `five-minutes` | a single battle with the rules screen's Time stepped to five minutes |
+| `bonus-game` | Bonus Game on and a one-win match: VICTORY!, then the BOMBER CATCHER crane game |
 | `mad-bomber` | a single battle with the Mad Bomber rule: pad 1 dies, rides a hovercraft round the edge, and a bomb it throws takes a CPU |
 | `arena-2` to `arena-8` | a single battle in each of the other normal-size arenas: Soccer Stadium, Jungle Trap, Desert Twister, Space Colony, Bouncing Bomber, Ninja House and Factory Floor. `single` plays the first, Path to Glory, and `battle` the one wide arena, Field of Glory |
 | `arena-N-night`, `-orange`, `-white` | arena N (1 to 8) as one of its three variants, picked by holding X+Y+Z on the stage wheel and pressing UP to change the sky; each sky changes the arena's layout and gimmicks |

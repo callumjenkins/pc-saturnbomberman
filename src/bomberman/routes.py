@@ -341,6 +341,28 @@ def mad_bomber():
                             presses, 7420, "6880,7220,7268,7420"), mad_bomber=1)
 
 
+def team():
+    """Mode turned to Team on the battle screen (RIGHT at 4610). After character select, the Team
+    Battle screen places each player on White, Red, Blue, Yellow or Green: A alone puts four on White
+    and one on Red (6620), and the match's HUD counts wins by team (7520)."""
+    presses = TO_BATTLE + taps(range(4400, 4581, 90), "A", 8) + tap(4610, "RIGHT", 8) + taps(range(4680, 5900, 90), "A", 8)
+    return Route("a team battle: the Team Battle screen, then the match with a team HUD",
+                 presses + taps(range(6100, 7400, 90), "A", 8), 7520, "6620,7520")
+
+
+def five_minutes():
+    return with_rules(Route("a single battle with five-minute rounds", single().presses, 6500, "6500"), time=2)
+
+
+def bonus_game():
+    """The battle-round with Bonus Game on and the match won at one win: the winner's VICTORY!, then
+    BOMBER CATCHER, a crane over prizes, steered with C (the claw down at about 17050), and the
+    battle screen for the next match."""
+    presses = battle_round().presses[:-2] + taps(range(15900, 17000, 300), "C", 8)
+    return with_rules(Route("a one-win match, its VICTORY! and the BOMBER CATCHER bonus game",
+                            presses, 17050, "16150,16600,16750,16900,17050"), battles=3, bonus_game=1)
+
+
 def tag(items):
     return "-items" if items else ""
 
@@ -351,7 +373,7 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           "cactus": cactus, "slot": slot, "yuna": yuna,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
           "pause": paused, "battle-round": battle_round,
-          "mad-bomber": mad_bomber,
+          "mad-bomber": mad_bomber, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},
           **{f"arena-{n}-{sky}": (lambda n=n, sky=sky: arena(n, sky)) for n in range(1, len(ARENAS) + 1) for sky in SKIES[1:]}}
