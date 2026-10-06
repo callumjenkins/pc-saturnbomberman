@@ -32,6 +32,13 @@ with 29 of them, though the CD music lives on those tracks.
 under `$XDG_DATA_HOME`), out of `build/`, so cleaning the build leaves them alone. Scripted runs,
 the bot and the tests start with no saves and keep none.
 
+## Licence
+
+`game.toml` builds the runtime with `SATURN_VDP1_GPL=ON`, so VDP1 draws by Mednafen's rules and
+matches Mednafen's frames to the pixel (saturn-recomp's `THIRD_PARTY.md`). A build is therefore a
+GPL work: anyone given one must be offered its complete source under the GPL. This repository has
+no licence of its own yet.
+
 ## Layout
 
     game.toml              the programs saturn-recomp recompiles, names for addresses, the task switch and hooks

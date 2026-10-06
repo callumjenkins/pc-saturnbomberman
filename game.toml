@@ -2,6 +2,7 @@
 name = "Saturn Bomberman (USA)"
 seeds = "seeds.json"
 build = "build"
+cmake = ["SATURN_VDP1_GPL=ON"]     # VDP1 by Mednafen's rules: builds are GPL (saturn-recomp THIRD_PARTY.md)
 
 [symbols]
 krnl_setjmp = 0x060061C4
