@@ -220,6 +220,14 @@ def paused():
                  "6028,6140,6400", writes=base.writes)
 
 
+def battle_round():
+    """The single battle played to its end, pad 1 dropping one bomb at the start: sudden death,
+    then the 3 WIN MATCH results with the round's winner, and C on to round two, whose HUD counts
+    that win."""
+    return Route("a single battle's round played out, its results, then round two",
+                 single().presses + tap(6500, "C", 4) + tap(16100, "C", 8), 16400, "16090,16400")
+
+
 def tag(items):
     return "-items" if items else ""
 
@@ -229,4 +237,4 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           **{name: (lambda name=name: world(name)) for name in WORLDS},
           "cactus": cactus, "slot": slot, "yuna": yuna,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
-          "pause": paused}
+          "pause": paused, "battle-round": battle_round}
