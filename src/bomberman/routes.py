@@ -541,6 +541,17 @@ def dino_evolve():
                  writes=sum((hide(21, (x, 17), ITEM_SLOT + i) for i, x in enumerate((8, 9, 10))), ()))
 
 
+def cannon():
+    """Stage 1-5, the pirate ship: pad 1, invincible, bombs its way to (20,9) below a deck cannon and sets a
+    bomb at 6232 with C held, so it sets a second as soon as the first has gone (6412). The second's blast
+    lights the cannon's fuse (6578), the cannon fires (6608), and the ball hits the octopus in the sea for
+    100 points (6662)."""
+    base = stage(1, 5)
+    return Route("the pirate ship's cannon fired by a bomb's blast, hitting the octopus in the sea",
+                 base.presses + presses_file("cannon-presses.txt") + tap(6440, "C", 4), 6662, "6578,6608,6626,6662",
+                 invincible=True, writes=base.writes)
+
+
 def master_ending():
     """Floor 20's clear replayed (Dragon Bomber beaten), then the ending: the temple door opens (15400 to
     16200) and RESULT ranks the run (17000)."""
@@ -572,6 +583,6 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           **{name: (lambda name=name: mechanic(name)) for name in MECHANICS},
           "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
-          "master-ending": master_ending,
+          "master-ending": master_ending, "cannon": cannon,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},
           **{f"arena-{n}-{sky}": (lambda n=n, sky=sky: arena(n, sky)) for n in range(1, len(ARENAS) + 1) for sky in SKIES[1:]}}

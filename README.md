@@ -95,6 +95,7 @@ no licence of its own yet.
 | `yuna` | Battle's L+R hold, then character select with Yuna and Manto |
 | `master` | Master Game: the temple intro and its first floor |
 | `master-boss` | Master Game's first boss, on floor 4, beaten by the bot, then floor 5 |
+| `cannon` | stage 1-5, the pirate ship: a bomb's blast lights a deck cannon's fuse, and the shot hits the octopus in the sea (100 points) |
 | `master-ending` | Master Game's floor 20 cleared, the temple door and the final RESULT |
 | `master-result` | Master Game's floor 1 cleared, floor 2's clock run out, the RESULT and TOP 10 CHALLENGERS screens (saved as BOMBERSS_02), then TRY AGAIN |
 | `stage W-S` | any stage, such as `stage 3-2` as the game shows it: Normal Game with the world and stage written in. Worlds 1 to 5 have 7, 9, 9, 10 and 10, each ending in its boss. `--items` starts with every item. `stage M-F` is Master Game's floor F, 1 to 20 |
