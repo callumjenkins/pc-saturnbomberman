@@ -56,6 +56,11 @@ the bot and the tests start with no saves and keep none.
 | `items` | Normal Game with every item, from the title's held code (L+R+A+UP+LEFT) |
 | `mage`, `gunman`, `tyranno`, `mujoe` | a world's first stage, from the title's held code |
 | `cactus` | Gunman world 3-1 with the cactus turned into the slot machine |
+| `die` | stage 1-1 with a life lost to the bomber's own bomb, and the stage restarted |
+| `game-over` | stage 1-1's three lives lost, to the GAME OVER menu |
+| `continue` | GAME OVER, then CONTINUE |
+| `save` | GAME OVER, SAVE GAME in slot 1, QUIT, then LOAD GAME from the title and slot 1 played |
+| `pause` | stage 1-1 paused and resumed |
 | `slot` | the slot machine won: three fires and the Fire Up picked up |
 | `yuna` | Battle's L+R hold, then character select with Yuna and Manto |
 | `stage W-S` | any stage, such as `stage 3-2` as the game shows it: Normal Game with the world and stage written in. Worlds 1 to 5 have 7, 9, 9, 10 and 10, each ending in its boss. `--items` starts with every item |

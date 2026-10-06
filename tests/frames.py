@@ -21,11 +21,14 @@ from bomberman.paths import BUILD, ROOT
 EXPECTED = f"{ROOT}/tests/frames.json"
 RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", "items", *routes.WORLDS, "slot", "yuna"]},
         "stage-5-3": lambda: routes.stage(5, 3), "clear-1-1": lambda: routes.clear(1, 1),
-        "clear-1-7": lambda: routes.clear(1, 7)}
+        "clear-1-7": lambda: routes.clear(1, 7),
+        **{name: routes.ROUTES[name] for name in ["die", "continue", "save", "pause"]}}
+# Lines a run's log must hold, for what a frame does not show.
+LOG_LINES = {"save": ["BUP: wrote BOMBERSS_01 (12 bytes)"]}
 
 
 def replay(name):
-    """The run's frames as {VBlank: md5}, and its fatal errors."""
+    """The run's frames as {VBlank: md5}, and its problems: fatal errors and missing log lines."""
     route = RUNS[name]()
     out = f"{BUILD}/test/{name}"
     log = run.run(route, out, learn_seeds=False)
@@ -33,7 +36,9 @@ def replay(name):
     for v in route.shots.split(","):
         path = f"{out}/shot-{v}.png"
         frames[v] = hashlib.md5(open(path, "rb").read()).hexdigest() if os.path.exists(path) else None
-    return frames, [line for line in log.splitlines() if "FATAL" in line]
+    problems = [line for line in log.splitlines() if "FATAL" in line]
+    problems += [f"no log line {want!r}" for want in LOG_LINES.get(name, []) if want not in log]
+    return frames, problems
 
 
 def agent_matches():
@@ -58,9 +63,7 @@ def main():
     unknown = [n for n in names if n not in RUNS]
     if unknown:
         raise SystemExit(f"no run named {', '.join(unknown)}; the runs are {', '.join(RUNS)}")
-    if not os.path.exists(run.GAME.saturn):
-        raise SystemExit("no build yet: bomberman run any route once")
-    build.build(run.GAME)
+    build.ensure(run.GAME)
 
     expected = json.load(open(EXPECTED)) if os.path.exists(EXPECTED) else {}
     with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as ex:
@@ -68,14 +71,16 @@ def main():
 
     failed = 0
     for name in names:
-        frames, fatal = results[name]
-        if args.update:
+        frames, problems = results[name]
+        problems = problems + [f"no frame {v}" for v in frames if frames[v] is None]
+        # a run with a problem is never recorded as the expected one
+        if args.update and not problems:
             expected[name] = frames
         diffs = [v for v in frames if frames[v] != expected.get(name, {}).get(v)]
-        bad = fatal or (diffs and not args.update)
+        bad = problems or (diffs and not args.update)
         failed += bool(bad)
         status = "FAIL" if bad else "recorded" if args.update else "ok"
-        detail = "; ".join([*(f"frame {v} differs" for v in diffs if not args.update), *(f.strip() for f in fatal)])
+        detail = "; ".join([*(f"frame {v} differs" for v in diffs if not args.update), *(p.strip() for p in problems)])
         print(f"{status:8} {name}" + (f": {detail}" if detail and bad else ""))
     if "stage-5-3" in names and not args.update:
         ok = agent_matches()

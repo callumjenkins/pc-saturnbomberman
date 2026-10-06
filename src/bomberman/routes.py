@@ -167,6 +167,59 @@ def slot():
                  invincible=True)
 
 
+# Stage 1-1 without invincibility: the bomber drops a bomb where it starts and stands in the blast,
+# losing a life each time. Three lives, so the fourth ends the game, with its menu up from about 9640.
+DEATHS = (5700, 6580, 7460, 8340)
+GAME_OVER_MENU = 9644
+
+
+def deaths(n):
+    base = stage(1, 1)
+    return base, base.presses + taps(DEATHS[:n], "C", 4)
+
+
+def die():
+    base, presses = deaths(1)
+    return Route("stage 1-1, a life lost to the bomber's own bomb, and the stage restarted",
+                 presses, 6500, "5860,6500", writes=base.writes)
+
+
+def game_over():
+    base, presses = deaths(4)
+    return Route("stage 1-1's lives all lost, to the GAME OVER menu", presses, GAME_OVER_MENU + 60,
+                 str(GAME_OVER_MENU + 60), writes=base.writes)
+
+
+def continued():
+    """CONTINUE, the menu's first choice, then START on the stage card."""
+    base, presses = deaths(4)
+    presses += tap(GAME_OVER_MENU, "C", 8) + taps((10000, 10150), "START", 8)
+    return Route("GAME OVER, then CONTINUE: stage 1-1 again with three lives", presses, 10500, "9900,10500",
+                 writes=base.writes)
+
+
+def save():
+    """SAVE GAME into slot 1 (the game writes BOMBERSS_01), QUIT to the title, then Normal Game's
+    LOAD GAME, whose list shows slot 1 as STAGE 1-1, and slot 1 loaded and played. The run's saves
+    last for the run alone, so it starts with every slot empty."""
+    base, presses = deaths(4)
+    m = GAME_OVER_MENU
+    presses += tap(m, "DOWN", 8) + tap(m + 38, "C", 8) + taps((m + 136, m + 174, m + 212), "UP", 8)
+    presses += tap(m + 250, "C", 8) + taps((10132, 10170), "DOWN", 8) + tap(10208, "C", 8)
+    presses += taps((11446, 11604, 11762), "START", 8) + tap(11860, "DOWN", 8) + tap(11908, "START", 8)
+    presses += tap(12016, "DOWN", 8) + tap(12064, "C", 8) + taps((12172, 12320), "START", 8)
+    return Route("GAME OVER, SAVE GAME in slot 1, QUIT, then LOAD GAME from the title and slot 1 played",
+                 presses, 12700, "9900,12010,12700", writes=base.writes)
+
+
+def paused():
+    """START pauses stage 1-1 at 5:47, with PAUSE over the field and the clock held, and START again
+    goes on."""
+    base = stage(1, 1)
+    return Route("stage 1-1 paused and resumed", base.presses + taps((5900, 6148), "START", 8), 6400,
+                 "6028,6140,6400", writes=base.writes)
+
+
 def tag(items):
     return "-items" if items else ""
 
@@ -174,4 +227,6 @@ def tag(items):
 ROUTES = {"normal": normal, "single": single, "battle": battle,
           "items": lambda: world("items"),
           **{name: (lambda name=name: world(name)) for name in WORLDS},
-          "cactus": cactus, "slot": slot, "yuna": yuna}
+          "cactus": cactus, "slot": slot, "yuna": yuna,
+          "die": die, "game-over": game_over, "continue": continued, "save": save,
+          "pause": paused}
