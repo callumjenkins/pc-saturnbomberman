@@ -79,6 +79,7 @@ no licence of its own yet.
 | `item-1` to `item-24` | an item of that kind hidden in the block beside pad 1 (two writes, see `hidden_items` in `game.toml`), uncovered and taken; `routes.ITEM_KINDS` names them |
 | `egg-burn` | an egg uncovered beside pad 1, then fried by pad 1's next bomb |
 | `egg-second` | pad 1 hatches an egg, then rides onto a second one: its dino counts the egg and looks no different |
+| `dino-evolve` | pad 1's dino eats a second and a third egg, and with the third it grows bigger, with spines |
 | `mad-bomber` | a single battle with the Mad Bomber rule: pad 1 dies, rides a hovercraft round the edge, and a bomb it throws takes a CPU |
 | `arena-2` to `arena-8` | a single battle in each of the other normal-size arenas: Soccer Stadium, Jungle Trap, Desert Twister, Space Colony, Bouncing Bomber, Ninja House and Factory Floor. `single` plays the first, Path to Glory, and `battle` the one wide arena, Field of Glory |
 | `arena-N-night`, `-orange`, `-white` | arena N (1 to 8) as one of its three variants, picked by holding X+Y+Z on the stage wheel and pressing UP to change the sky; each sky changes the arena's layout and gimmicks |
@@ -117,7 +118,8 @@ A program can play the game too: `bomberman.run.play(out, route, until)` starts 
 `bomberman videos` replays every saved clear in `inputs/clears/` with `--video`, and keeps each one,
 starting just before its stage, as `clears/WORLD-STAGE.mp4` in `$BOMBERMAN_RUNS`
 (`~/saturn-recomp/pc-saturnbomberman-runs` by default). Each new recording replaces the last, and
-`bomberman run clear 3-2 --video` keeps its video there too. Name stages to record only those:
+`bomberman run clear 3-2 --video` keeps its video there too. `bomberman videos --route dino-evolve`
+records a route instead, as `mechanics/ROUTE.mp4`. Name stages to record only those:
 `bomberman videos 3-2 M-4`.
 
 Anything after `--` goes to the saturn executable, such as `-- --dump 6000` for the video memories.

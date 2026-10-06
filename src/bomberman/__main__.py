@@ -82,6 +82,7 @@ def main(argv=None):
     v = sub.add_parser("videos", help="videos of the saved clears, kept in $BOMBERMAN_RUNS")
     v.add_argument("stages", nargs="*", help="such as 3-2 or M-4 (default: every saved clear)")
     v.add_argument("--jobs", type=int, default=6)
+    v.add_argument("--route", action="append", default=[], help="a route's video instead, kept as mechanics/ROUTE.mp4")
     c = sub.add_parser("compare", help="a route on our build against Mednafen's Saturn, by the game's tick")
     c.add_argument("route", choices=list(routes.ROUTES))
     c.add_argument("--core", default=os.environ.get("SATURN_REFERENCE_CORE"),
@@ -100,7 +101,11 @@ def main(argv=None):
         os.makedirs(out, exist_ok=True)
         raise SystemExit(subprocess.run([run.GAME.saturn, "--cue", run.cue(), "--out", out, *more]).returncode)
     elif args.command == "videos":
-        videos.record_all(set(args.stages), args.jobs)
+        if args.route:
+            for name in args.route:
+                print(videos.record_route(name))
+        else:
+            videos.record_all(set(args.stages), args.jobs)
     elif args.command == "compare":
         if not args.core or not args.bios:
             ap.error("compare needs --core and --bios, or SATURN_REFERENCE_CORE and SATURN_BIOS")

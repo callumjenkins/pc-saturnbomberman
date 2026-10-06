@@ -47,6 +47,21 @@ def record(world, number, items):
     return keep(video, world, number, items)
 
 
+def record_route(name, lead=600):
+    """A route's video, from `lead` VBlanks before its first shot, kept as mechanics/NAME.mp4."""
+    route = routes.ROUTES[name]()
+    out = run.out_dir(name)
+    video = os.path.join(os.path.abspath(out), "video.mp4")
+    run.run(route, out, more=["--video", video], learn_seeds=False)
+    start = max(0, min(int(s) for s in route.shots.split(",")) - lead)
+    dest = os.path.join(runs_dir(), "mechanics", f"{name}.mp4")
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{start / 60:.2f}", "-i", video, "-c", "copy",
+                    dest + ".new.mp4"], check=True)
+    os.replace(dest + ".new.mp4", dest)
+    return dest
+
+
 def record_all(which=None, jobs=6, log=print):
     """Records the clears named (WORLD-STAGE), or all saved ones, a few at a time."""
     clears = [c for c in saved_clears() if not which or f"{c[0]}-{c[1]}" in which]

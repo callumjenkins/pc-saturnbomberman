@@ -447,6 +447,15 @@ def egg_second():
                  writes=hide(21) + hide(21, (9, 17), ITEM_SLOT + 1))
 
 
+def dino_evolve():
+    """Pad 1 rides a hatched dino (7092), then eats a second egg (7608) and a third (8268): each raises the
+    dino's count of eggs eaten (+0x64), to its cap of 2, and with the third the dino grows bigger, with
+    spines on its back."""
+    return Route("a single battle where pad 1's dino eats two more eggs and grows",
+                 single().presses + presses_file("dino-evolve-presses.txt"), 8388, "7092,7608,8268,8388",
+                 writes=sum((hide(21, (x, 17), ITEM_SLOT + i) for i, x in enumerate((8, 9, 10))), ()))
+
+
 def tag(items):
     return "-items" if items else ""
 
@@ -458,6 +467,7 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
           "pause": paused, "battle-round": battle_round,
           **{f"item-{k}": (lambda k=k: item(k)) for k in ITEM_KINDS}, "egg-burn": egg_burn, "egg-second": egg_second,
+          "dino-evolve": dino_evolve,
           "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},
