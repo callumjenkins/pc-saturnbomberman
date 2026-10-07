@@ -14,13 +14,18 @@ the next work and does not replace those decisions.
 
 ## Progress
 
-- 2026-10-05: phase 0 steps 2 and 3. `disc.json` lists the supported disc's files, and `prepare`
-  checks the disc against it first (`saturnrecomp.disc --manifest` and `--check`). Steps 1 and 4,
-  the recorded baseline and stale-build detection, are still open.
-- 2026-10-05: from phase 4 step 2, saves. They go to the user's data directory by default
-  (`--save` in saturn-recomp), and routes, the bot and the tests run with `--save -`.
-  `bomberman play` launches the game in a window. Bomberman itself appears to save nothing (Master
-  Game may keep a score), so the engine's unit tests cover writing, reading back and deleting saves.
+Where each phase stands, as of 2026-10-07. The research findings are in `docs/RESEARCH.md`, the
+videos of clears and mechanics in `$BOMBERMAN_RUNS`.
+
+| Phase | State |
+| --- | --- |
+| 0 | Steps 2 and 3 done: `disc.json` lists the supported disc's files and `prepare` checks the disc against it first. A run stops if the disc changed since `prepare`, and saturn-recomp recompiles when its inputs change (part of step 4). Step 1, the recorded baseline, is open. |
+| 1 | Pictures: `bomberman compare` plays a route on ours and on Beetle Saturn, lined up by the game's tick, and `compare --arenas` checks every arena under every sky. Menus, arenas and pad 1's own play match exactly; what differs is load timing and CPU drift, documented in RESEARCH.md. Sound is not compared yet. |
+| 2 | Every Normal Game stage (45 of 45) and every Master Game floor cleared by the bot, with routes for deaths, continues, saves, pause, bosses, battle options and each dino's ability. `bomberman lab coverage` counts the code that has run: 82% of the kernel's code bytes after the tests, clears and two play sessions. Discovery predicts every entry the game used to stop at, so a build needs no learned seeds. The original-to-recomp map (2a) is open. |
+| 3 | In progress: several gamepads, a player each, hotplug without moving other players, per-player recording, port 2's own pad, and virtual-controller tests. Saved bindings move to phase 4. |
+| 4 | `bomberman play` plays in a window with saves in the user's data directory, apart from `build/`; each session is kept for `bomberman replay`. Settings and a launcher are open. |
+| 5 | Begun alongside the playtest builds: the window on OpenGL 3.2, the game's tasks on Windows fibers and macOS ucontext. |
+| 6 | Not started. |
 
 ## What the comparison established
 

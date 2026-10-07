@@ -21,10 +21,22 @@ uv run bomberman run normal   # or a scripted run, headless
 The build needs uv, CMake, Ninja, clang and SDL3. A run's results go to `build/run/ROUTE/`:
 `log.txt`, the hardware log and the frames asked for as `shot-N.png`.
 
-Each `play` session is kept in `build/play/SESSION/` (`build/play/latest` is the last): the pad as
-the game read it, the clock and saves it started with, and the log, including a crash's report.
+Each `play` session is kept in `build/play/SESSION/` (`build/play/latest` is the last): the pads as
+the game read them, the clock and saves it started with, saturn's arguments, and the log, including a
+crash's report.
 `uv run bomberman replay [SESSION] --video` plays it again headless, the same way, into its
 `replay/` directory.
+
+### Controllers
+
+The keyboard is player 1: arrows, Enter for Start, Z X C for A B C, A S D for X Y Z, Q W for L R.
+Each gamepad becomes a player as it connects, the first one player 1 beside the keyboard, the next
+player 2, and so on; the log names who is who. A pad unplugged frees its player and moves nobody else,
+and plugged back in it gets the same player again, unless another pad of the same model left too.
+
+Two players need nothing more: player 2 is the Saturn's second port. For three or more, the Saturn
+needs multitaps: `uv run bomberman play -- --multitap 1` gives players 1-6 on port 1 and 7 on port 2,
+and `--multitap 2` players 1-12 across both, which is what the 10-player battle uses.
 
 The port supports one disc: Saturn Bomberman (USA), MK-81070 V1.003. `disc.json` lists every
 file on it with its size and SHA-1, and `prepare` stops before extracting anything if a file

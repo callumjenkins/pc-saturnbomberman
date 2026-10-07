@@ -10,6 +10,7 @@ import concurrent.futures
 import hashlib
 import json
 import os
+import subprocess
 import sys
 
 from PIL import Image
@@ -61,6 +62,33 @@ def agent_matches():
     return shot.size == (frame.width, frame.height) and shot.tobytes() == frame.rgb
 
 
+def controllers_match():
+    """Problems with the 10-player battle played on ten SDL virtual gamepads instead of a script: its
+    frames must be the scripted run's, and its recording the script. It runs in a window, offscreen,
+    paced to real time."""
+    route = RUNS["battle"]()
+    out = f"{BUILD}/test/controllers"
+    os.makedirs(out, exist_ok=True)
+    args = run.saturn_args(route)
+    args.remove("--headless")
+    args[args.index("--input")] = "--virtual-input"
+    env = {**os.environ, "SDL_VIDEO_DRIVER": "offscreen", "SDL_AUDIO_DRIVER": "dummy"}
+    with open(f"{out}/log.txt", "w") as log:
+        subprocess.run([run.GAME.saturn, "--out", out, "--record-input", f"{out}/input.txt", *args],
+                       stdout=log, stderr=subprocess.STDOUT, env=env, timeout=600)
+    problems = [f"frame {v} differs" for v in route.shots.split(",")
+                if not os.path.exists(f"{out}/shot-{v}.png") or
+                Image.open(f"{out}/shot-{v}.png").tobytes() != Image.open(f"{BUILD}/test/battle/shot-{v}.png").tobytes()]
+
+    def steps(presses):
+        return sorted((int(at), held if "." in held else "1." + held)
+                      for at, held in (p.split(":") for p in presses if p))
+    recorded = open(f"{out}/input.txt").read().split(",") if os.path.exists(f"{out}/input.txt") else []
+    if steps(recorded) != steps(route.presses):
+        problems.append("the recording is not the script")
+    return problems
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--update", action="store_true")
@@ -75,6 +103,7 @@ def main():
     expected = json.load(open(EXPECTED)) if os.path.exists(EXPECTED) else {}
     with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as ex:
         results = dict(zip(names, ex.map(replay, names)))
+    controllers = "battle" in names and not args.update and not results["battle"][1]
 
     failed = 0
     for name in names:
@@ -94,6 +123,11 @@ def main():
         failed += not ok
         print(f"{'ok' if ok else 'FAIL':8} agent: stage 5-3 played through the agent"
               + ("" if ok else " gives a different frame"))
+    if controllers:
+        problems = controllers_match()
+        failed += bool(problems)
+        print(f"{'FAIL' if problems else 'ok':8} controllers: the battle on ten virtual gamepads"
+              + (f": {'; '.join(problems)}" if problems else ""))
     if args.update:
         json.dump(expected, open(EXPECTED, "w"), indent=1, sort_keys=True)
         open(EXPECTED, "a").write("\n")

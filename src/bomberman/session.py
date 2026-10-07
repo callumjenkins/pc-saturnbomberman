@@ -1,8 +1,9 @@
 """Play sessions kept for replay: `bomberman play` records each into build/play/SESSION, and
 `bomberman replay` plays one again headless, the same way, with its log and optionally a video.
 
-A session keeps the pad as the game read it (input.txt), the clock it started at, the saves it started
-with, and the log, so a crash can be replayed and looked into.
+A session keeps the pads as the game read them (input.txt), the clock it started at, the saves it
+started with, saturn's own arguments (args.txt, such as --multitap) and the log, so a crash can be
+replayed and looked into.
 """
 import datetime
 import os
@@ -56,6 +57,7 @@ def play(more=()):
     os.makedirs(out)
     clock = started.isoformat()
     open(f"{out}/clock.txt", "w").write(clock + "\n")
+    open(f"{out}/args.txt", "w").write("".join(a + "\n" for a in more))
     save = user_save()
     if save:
         shutil.copy(save, f"{out}/backup-at-start.bin")
@@ -82,7 +84,9 @@ def replay(name="latest", video=False, window=False, more=()):
     save = "-"
     if os.path.exists(f"{session}/backup-at-start.bin"):
         save = shutil.copy(f"{session}/backup-at-start.bin", f"{out}/backup.bin")
-    args = [run.GAME.saturn, "--cue", run.cue(), "--out", out, "--save", save,
+    played = f"{session}/args.txt"
+    played = open(played).read().split("\n")[:-1] if os.path.exists(played) else []
+    args = [run.GAME.saturn, "--cue", run.cue(), "--out", out, "--save", save, *played,
             "--clock", open(f"{session}/clock.txt").read().strip(),
             *(["--input", f"@{recorded}"] if presses else []), "--vblanks", str(last + 600),
             "--coverage", f"{out}/coverage.txt", *([] if window else ["--headless"]),
