@@ -14,6 +14,10 @@ the next one. `game.toml` names the addresses; this file holds the method, the t
   - `lab watch ROUTE LO:HI` lists the stores into a range, grouped by the function that made them.
   - `lab disasm ADDR [N]` disassembles from the game's kernel (KRNL) or whichever module holds ADDR.
   - `lab ramdiff ROUTE A B LO:HI` lists the bytes of a range that changed between two VBlanks.
+  - `lab census ROUTE` (or a stage, `3-2`, played invincible and still, or `--clear` for its saved
+    clear) counts the stage's objects by kind (+0x55) as it plays: how many, the fastest each moved,
+    the update functions each ran and when first, and each object that appeared or went. On 1-1 it
+    shows two enemy kinds walking at about 30 px/s and three still objects.
 - Write scenario scripts with the helpers in `bomberman.lab`: `tap`, `bomber`, `bombs`,
   `dino_stage`, `hide_in_block`, and `logged_writes`, which records a scenario's writes so it can be
   saved as a route. Move pad 1 a cell at a time with `bot.walk`.

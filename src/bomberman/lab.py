@@ -7,6 +7,8 @@
     disasm ADDR [N]   N instructions from ADDR, in whichever module holds it
     ramdiff ROUTE A B LO:HI   the bytes in a range that differ between VBlanks A and B of the route
     coverage          which recompiled code the frame tests' runs and the bot's clears have run, by module
+    census ROUTE      the stage's objects by kind as the route plays: how many, the fastest each moved,
+                      the update functions each ran, and the objects that appeared or went
 
 The helpers below are for scenario scripts played through the agent (see docs/RESEARCH.md).
 """
@@ -269,3 +271,53 @@ def coverage(never_file=None):
     if never_file:
         open(never_file, "w").write("\n".join(never) + "\n")
     return lines
+# ---- census -----------------------------------------------------------------------------------------
+def objects(read):
+    """{slot: (kind, update, cell, x, y)} for the live objects in slots 10-49: enemies, bombs, cores. The
+    kind is the byte at +0x55, which stays when an enemy changes its update function from state to state."""
+    raw = read(OBJECTS, SLOT * state.SLOTS)
+    return {t.slot: (raw[t.slot * SLOT + 0x55], t.update, t.cell, t.x, t.y)
+            for t in state._things(raw, state.ENEMY_SLOTS)}
+
+
+def tally(samples):
+    """Lines from [(VBlank, objects())]: per kind, how many at the first sample and after, the fastest move
+    in pixels a second, and each update function it ran with the VBlank first seen and its share of the
+    samples; then each object that appeared or went after the first sample."""
+    first_v = samples[0][0]
+    kinds = collections.defaultdict(lambda: {"counts": [], "speed": 0.0, "fns": {}})
+    events = []
+    for (v0, a), (v1, b) in zip(samples, samples[1:]):
+        for k, (kind, u, _, x, y) in b.items():
+            if k in a and a[k][0] == kind:
+                d = max(abs(x - a[k][3]), abs(y - a[k][4]))
+                if d < 64:                       # a jump further is a slot reused, not a move
+                    kinds[kind]["speed"] = max(kinds[kind]["speed"], d * 60 / (v1 - v0))
+            else:
+                events.append(f"{v1}: slot {k} kind {kind:02X} appears at {b[k][2]}, {u:08X}")
+        events += [f"{v1}: slot {k} kind {a[k][0]:02X} gone from {a[k][2]}" for k in a if k not in b or b[k][0] != a[k][0]]
+    for v, objs in samples:
+        counts = collections.Counter(kind for kind, *_ in objs.values())
+        for kind in set(counts) | set(kinds):
+            kinds[kind]["counts"].append(counts.get(kind, 0))
+        for kind, u, *_ in objs.values():
+            fn = kinds[kind]["fns"].setdefault(u, [v, 0])
+            fn[1] += 1
+    lines = []
+    for kind, k in sorted(kinds.items()):
+        total = sum(n for _, n in k["fns"].values())
+        fns = ", ".join(f"{u:08X} from {v} {100 * n // total}%" for u, (v, n) in sorted(k["fns"].items(), key=lambda f: f[1][0]))
+        lines.append(f"kind {kind:02X}: {k['counts'][0]} at {first_v}, {min(k['counts'])}-{max(k['counts'])} after, "
+                     f"fastest {k['speed']:.0f} px/s; {fns}")
+    return lines + events
+
+
+def census(route, start, end, every=10, name="census"):
+    """tally() of the route's objects from VBlank `start` to `end`, read every `every` VBlanks, played in
+    build/lab/NAME."""
+    samples = []
+    with run.play(f"{BUILD}/lab/{name}", route, until=start) as r:
+        while r.vblank <= end:
+            samples.append((r.vblank, objects(r.read)))
+            run.advance(r, route, r.vblank + every)
+    return tally(samples)

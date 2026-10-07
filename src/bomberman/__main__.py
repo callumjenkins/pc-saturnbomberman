@@ -115,6 +115,12 @@ def main(argv=None):
     v.add_argument("a", type=int)
     v.add_argument("b", type=int)
     v.add_argument("range", help="LO:HI in hex")
+    v = labs.add_parser("census", help="a stage's objects by update function as a route plays")
+    v.add_argument("route", help="a route, or a stage such as 3-2 or M-5 with pad 1 invincible and still")
+    v.add_argument("--from", dest="start", type=int, help="first VBlank (default: the stage's start)")
+    v.add_argument("--to", type=int, help="last VBlank (default: the route's end, or two minutes into a stage)")
+    v.add_argument("--every", type=int, default=10)
+    v.add_argument("--clear", action="store_true", help="a stage's saved clear instead, to its end")
     c = sub.add_parser("compare", help="a route on our build against Mednafen's Saturn, by the game's tick")
     c.add_argument("route", nargs="?", choices=list(routes.ROUTES))
     c.add_argument("--arenas", action="store_true", help="every arena under every sky, from the pick into play")
@@ -158,6 +164,16 @@ def main(argv=None):
             never = f"{lab.BUILD}/lab/never-ran.txt"
             os.makedirs(os.path.dirname(never), exist_ok=True)
             print("\n".join(lab.coverage(never)) + f"\nfunctions that never ran: {never}")
+        elif args.tool == "census":
+            if args.route in routes.ROUTES:
+                route, start = routes.ROUTES[args.route](), 0
+            else:
+                world, number = stage_arg(ap, args.route)
+                items = args.clear and not os.path.exists(os.path.join(ROOT, "inputs", "clears", f"{world}-{number}.txt"))
+                start = 5000 if items else routes.stage_start(world)
+                route = routes.clear(world, number, items) if args.clear else \
+                    dataclasses.replace(routes.stage(world, number), invincible=True, vblanks=start + 7200)
+            print("\n".join(lab.census(route, args.start or start, args.to or route.vblanks, args.every, f"census-{args.route}{'-clear' if args.clear else ''}")))
         else:
             print("\n".join(lab.ramdiff(routes.ROUTES[args.route](), args.a, args.b, *span(args.range))) or "no difference")
     elif args.command == "compare":
