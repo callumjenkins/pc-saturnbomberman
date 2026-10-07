@@ -38,7 +38,7 @@ def replay(name):
     """The run's frames as {VBlank: md5}, and its problems: fatal errors and missing log lines."""
     route = RUNS[name]()
     out = f"{BUILD}/test/{name}"
-    log = run.run(route, out, learn_seeds=False)
+    log = run.run(route, out, more=["--coverage", f"{out}/coverage.txt"], learn_seeds=False)
     frames = {}
     for v in route.shots.split(","):
         path = f"{out}/shot-{v}.png"

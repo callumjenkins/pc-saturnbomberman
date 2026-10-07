@@ -102,6 +102,8 @@ def main(argv=None):
     v.add_argument("addr")
     v.add_argument("count", nargs="?", type=int, default=40)
     v.add_argument("--module")
+    v = labs.add_parser("coverage", help="which recompiled code the recorded runs have run, by module")
+    v.add_argument("--clears", action="store_true", help="first replay every saved clear with coverage on")
     v = labs.add_parser("ramdiff", help="bytes in LO:HI that differ between VBlanks A and B of a route")
     v.add_argument("route", choices=list(routes.ROUTES))
     v.add_argument("a", type=int)
@@ -141,6 +143,12 @@ def main(argv=None):
             print("\n".join(lab.watch(routes.ROUTES[args.route](), *span(args.range), args.start, args.to)))
         elif args.tool == "disasm":
             print("\n".join(lab.disasm(int(args.addr, 16), args.count, args.module)))
+        elif args.tool == "coverage":
+            if args.clears:
+                lab.run_clears_with_coverage()
+            never = f"{lab.BUILD}/lab/never-ran.txt"
+            os.makedirs(os.path.dirname(never), exist_ok=True)
+            print("\n".join(lab.coverage(never)) + f"\nfunctions that never ran: {never}")
         else:
             print("\n".join(lab.ramdiff(routes.ROUTES[args.route](), args.a, args.b, *span(args.range))) or "no difference")
     elif args.command == "compare":

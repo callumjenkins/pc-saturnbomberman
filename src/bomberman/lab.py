@@ -6,6 +6,7 @@
     watch ROUTE LO:HI stores to a memory range during the route, grouped by the function that made them
     disasm ADDR [N]   N instructions from ADDR, in whichever module holds it
     ramdiff ROUTE A B LO:HI   the bytes in a range that differ between VBlanks A and B of the route
+    coverage          which recompiled code the frame tests' runs and the bot's clears have run, by module
 
 The helpers below are for scenario scripts played through the agent (see docs/RESEARCH.md).
 """
@@ -215,3 +216,51 @@ def ramdiff(route, a, b, lo, hi):
         run.advance(r, route, b)
         second = r.read(lo, hi - lo)
     return [f"{lo + i:08X} (+{i:X}): {x:02X} -> {y:02X}" for i, (x, y) in enumerate(zip(first, second)) if x != y]
+
+
+# ---- coverage ---------------------------------------------------------------------------------------
+def read_coverage(paths):
+    """{module: {address: (instructions, ran in any of them)}} from runs' --coverage files."""
+    out = collections.defaultdict(dict)
+    for path in paths:
+        for line in open(path):
+            name, addr, n, ran = line.split()
+            a, was = int(addr, 16), out[name].get(int(addr, 16), (0, False))
+            out[name][a] = (int(n), was[1] or ran == "1")
+    return out
+
+
+def run_clears_with_coverage(jobs=8):
+    """Replays every saved clear with --coverage, into build/run/clear-*/coverage.txt."""
+    from concurrent.futures import ThreadPoolExecutor
+    from . import routes, videos
+    run.check_prepared()
+    run.build.ensure(run.GAME, log=lambda s: None)
+
+    def one(c):
+        world, number, items = c
+        out = run.out_dir(f"clear-{world}-{number}{routes.tag(items)}")
+        run.run(routes.clear(world, number, items), out, more=["--coverage", f"{out}/coverage.txt"], learn_seeds=False)
+    with ThreadPoolExecutor(jobs) as pool:
+        list(pool.map(one, videos.saved_clears()))
+
+
+def coverage(never_file=None):
+    """Lines per module: functions and instructions found, and how many ran, over every coverage file in
+    build/test and build/run. Instructions are counted per function, so code two functions share is
+    counted in each. `never_file` gets the functions that never ran, one "MODULE ADDRESS INSTRUCTIONS" a line."""
+    paths = glob.glob(f"{BUILD}/test/*/coverage.txt") + glob.glob(f"{BUILD}/run/*/coverage.txt")
+    if not paths:
+        raise SystemExit("no coverage files: run tests/frames.py, or bomberman lab coverage --clears")
+    table = read_coverage(paths)
+    lines = [f"{len(paths)} runs"]
+    never = []
+    for name, funcs in table.items():
+        ran = [n for n, r in funcs.values() if r]
+        found = sum(n for n, _ in funcs.values())
+        lines.append(f"{name:6} {len(ran):6} of {len(funcs):6} functions ran ({100 * len(ran) / len(funcs):5.1f}%), "
+                     f"{sum(ran):7} of {found:7} instructions ({100 * sum(ran) / found:5.1f}%)")
+        never += [f"{name} {a:08X} {n}" for a, (n, r) in sorted(funcs.items()) if not r]
+    if never_file:
+        open(never_file, "w").write("\n".join(never) + "\n")
+    return lines
