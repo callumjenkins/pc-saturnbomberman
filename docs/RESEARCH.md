@@ -151,6 +151,16 @@ found code (77%), in 4,602 of its 11,806 functions. H2H, which holds 6 KB of cod
 sessions the same day ran 364 functions nothing else had, taking KRNL to 496 KB (82%): the series
 setup, team battles, the standings, records, Killed By, the awards and the save screens.
 
+## Learned seeds
+
+`seeds.json` holds the 199 KRNL addresses the game stopped at in earlier runs ("no function at"). None
+was missing code: all lie inside functions discovery finds. 197 are where a task resumes after a call
+to a function that jumps to the yield (06006D36) as its tail, and two are entries into the C library's
+block copy through its table at 060944B0. Since saturn-recomp 7c83ccf, discovery predicts all of them.
+A build with no learned KRNL seeds passed the 141 frame tests, ran every saved clear to its end, and
+replayed both of Callum's 2026-10-07 sessions to the same saves. The file stays as the learning loop's
+record, and a new entry in it means discovery missed something worth a look.
+
 ## Adding a mechanic route
 
 1. Script it through the agent with the lab helpers, in `open_arena` where it can be.
