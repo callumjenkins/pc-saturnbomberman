@@ -1,5 +1,6 @@
 # A playtest release, started by `python -m saturnrecomp.playtest game.toml publish` (see saturn-recomp's
-# playtest-release.yml). PLAYTEST_CI_TOKEN is the playtest Worker's CI_TOKEN.
+# playtest-release.yml). PLAYTEST_CI_TOKEN is the playtest Worker's CI_TOKEN; PLAYTEST_ANDROID_KEYSTORE and
+# its password sign the Android app.
 name: playtest
 
 on:
@@ -16,5 +17,7 @@ jobs:
       build: ${{ inputs.build }}
     secrets:
       ci_token: ${{ secrets.PLAYTEST_CI_TOKEN }}
+      android_keystore: ${{ secrets.PLAYTEST_ANDROID_KEYSTORE }}
+      android_keystore_password: ${{ secrets.PLAYTEST_ANDROID_KEYSTORE_PASSWORD }}
     permissions:
       contents: write
