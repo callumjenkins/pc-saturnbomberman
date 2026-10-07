@@ -11,6 +11,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import time
 
 from . import run
 from .paths import BUILD
@@ -27,16 +28,26 @@ def user_save():
 
 
 def tee(args, log_path):
-    """Runs saturn, its output shown and kept in log_path; its exit code."""
+    """Runs saturn with its output going straight to log_path, so the file has every line however
+    this process fares, and shown as it comes; the exit, a signal by name, ends the file."""
     with open(log_path, "w") as log:
-        p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace")
-        for line in p.stdout:
-            sys.stdout.write(line)
-            log.write(line)
-            log.flush()
-        code = p.wait()
+        p = subprocess.Popen(args, stdout=log, stderr=subprocess.STDOUT)
+    shown = 0
+    while True:
+        done = p.poll() is not None
+        with open(log_path, errors="replace") as log:
+            log.seek(shown)
+            text = log.read()
+        shown += len(text.encode(errors="replace"))
+        sys.stdout.write(text)
+        sys.stdout.flush()
+        if done:
+            break
+        time.sleep(0.5)
+    code = p.returncode
+    with open(log_path, "a") as log:
         log.write(f"exit: {signal.Signals(-code).name if code < 0 else code}\n")
-        return code
+    return code
 
 
 def play(more=()):
