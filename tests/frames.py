@@ -72,6 +72,7 @@ def controllers_match():
     args = run.saturn_args(route)
     args.remove("--headless")
     args[args.index("--input")] = "--virtual-input"
+    args += ["--settings", "-"]                 # the default bindings, whatever the player's file says
     env = {**os.environ, "SDL_VIDEO_DRIVER": "offscreen", "SDL_AUDIO_DRIVER": "dummy"}
     with open(f"{out}/log.txt", "w") as log:
         subprocess.run([run.GAME.saturn, "--out", out, "--record-input", f"{out}/input.txt", *args],

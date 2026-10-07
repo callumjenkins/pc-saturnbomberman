@@ -38,6 +38,15 @@ Two players need nothing more: player 2 is the Saturn's second port. For three o
 needs multitaps: `uv run bomberman play -- --multitap 1` gives players 1-6 on port 1 and 7 on port 2,
 and `--multitap 2` players 1-12 across both, which is what the 10-player battle uses.
 
+### Settings
+
+The first windowed run writes `settings.ini` beside the saves (`~/.local/share/saturn-recomp/` on
+Linux), with every setting explained: fullscreen and window size, volume, player 1's keys, and the
+gamepad buttons, stick and trigger travel. A `[gamepad GUID]` section rebinds one model only; the log
+gives each pad's GUID as it connects. A value that doesn't read keeps its default, and the log says
+which. Headless runs, tests and replays ignore the file, and `--settings -` makes a windowed run
+ignore it too.
+
 The port supports one disc: Saturn Bomberman (USA), MK-81070 V1.003. `disc.json` lists every
 file on it with its size and SHA-1, and `prepare` stops before extracting anything if a file
 differs, is missing or is extra, naming each one. The check reads the disc's contents rather than
