@@ -7,7 +7,7 @@ cmake = ["SATURN_VDP1_GPL=ON"]     # VDP1 by Mednafen's rules: builds are GPL (s
 # Builds for playtesters: saturn-recomp's playtest/README.md. Their sessions are measured against the
 # routes' and the clears' coverage.
 [playtest]
-endpoint = "https://saturn-playtest.WORKERS_SUBDOMAIN.workers.dev"
+endpoint = "https://saturn-playtest.colour-clock-cloud.workers.dev"
 repo = "callumjenkins/pc-saturnbomberman"
 disc = "disc.json"
 coverage = ["build/test/*/coverage.txt", "build/run/*/coverage.txt", "build/play/*/replay/coverage.txt"]
