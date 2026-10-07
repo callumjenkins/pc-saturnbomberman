@@ -246,9 +246,10 @@ def run_clears_with_coverage(jobs=8):
 
 
 def coverage(never_file=None):
-    """Lines per module: functions and instructions found, and how many ran, over every coverage file in
-    build/test and build/run. Instructions are counted per function, so code two functions share is
-    counted in each. `never_file` gets the functions that never ran, one "MODULE ADDRESS INSTRUCTIONS" a line."""
+    """Lines per module: functions found and how many ran, and the code bytes they cover, over every
+    coverage file in build/test and build/run. Bytes are counted once however many functions share them,
+    taking each function as its instruction count from its start. `never_file` gets the functions that
+    never ran, one "MODULE ADDRESS INSTRUCTIONS" a line."""
     paths = glob.glob(f"{BUILD}/test/*/coverage.txt") + glob.glob(f"{BUILD}/run/*/coverage.txt")
     if not paths:
         raise SystemExit("no coverage files: run tests/frames.py, or bomberman lab coverage --clears")
@@ -256,10 +257,14 @@ def coverage(never_file=None):
     lines = [f"{len(paths)} runs"]
     never = []
     for name, funcs in table.items():
-        ran = [n for n, r in funcs.values() if r]
-        found = sum(n for n, _ in funcs.values())
-        lines.append(f"{name:6} {len(ran):6} of {len(funcs):6} functions ran ({100 * len(ran) / len(funcs):5.1f}%), "
-                     f"{sum(ran):7} of {found:7} instructions ({100 * sum(ran) / found:5.1f}%)")
+        found, ran = set(), set()
+        for a, (n, r) in funcs.items():
+            found.update(range(a, a + 2 * n, 2))
+            if r:
+                ran.update(range(a, a + 2 * n, 2))
+        hit = sum(r for _, r in funcs.values())
+        lines.append(f"{name:6} {hit:6} of {len(funcs):6} functions ran ({100 * hit / len(funcs):5.1f}%), "
+                     f"{2 * len(ran):7} of {2 * len(found):7} code bytes ({100 * len(ran) / len(found):5.1f}%)")
         never += [f"{name} {a:08X} {n}" for a, (n, r) in sorted(funcs.items()) if not r]
     if never_file:
         open(never_file, "w").write("\n".join(never) + "\n")

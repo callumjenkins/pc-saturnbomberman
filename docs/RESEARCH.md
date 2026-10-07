@@ -120,6 +120,16 @@ Writes that do nothing useful:
 - Map cells after the arena is drawn: the logic changes, the picture doesn't.
 - A dino's egg count on its own: the sprite set and animation pointers don't follow.
 
+## What has run
+
+Every frame test writes `coverage.txt` beside its shots: each recompiled function, and whether it ran.
+`bomberman lab coverage` adds them up per module, and `--clears` first replays every saved clear with
+coverage on. The functions that never ran go to `build/lab/never-ran.txt`, which is where to look for
+unseen enemy attacks, boss phases and rules.
+
+On 2026-10-07, after the 140 frame tests and every saved clear, KRNL had run 465 KB of its 607 KB of
+found code (77%), in 4,602 of its 11,806 functions. H2H, which holds 6 KB of code, had run only 7% of it.
+
 ## Adding a mechanic route
 
 1. Script it through the agent with the lab helpers, in `open_arena` where it can be.
