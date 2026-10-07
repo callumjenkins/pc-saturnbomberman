@@ -8,6 +8,7 @@ import datetime
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 
@@ -33,7 +34,9 @@ def tee(args, log_path):
             sys.stdout.write(line)
             log.write(line)
             log.flush()
-        return p.wait()
+        code = p.wait()
+        log.write(f"exit: {signal.Signals(-code).name if code < 0 else code}\n")
+        return code
 
 
 def play(more=()):
