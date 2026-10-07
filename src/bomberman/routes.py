@@ -175,19 +175,27 @@ def open_arena(off=(3, 4, 5), **rules):
 def mechanic(name):
     """inputs/mechanics/NAME.json played in open_arena: pad 1 on the dino of that colour (0: none), the
     presses and writes recorded when the mechanic was first checked, and its shots, by default over its
-    last two seconds. Its "arena" names the players off, the rules, and whether the CPUs go free. The
+    last two seconds. Its "arena" names the players off, the rules, and whether the CPUs go free; or its
+    "normal" names a Normal Game stage to play instead, the VBlank its own presses take over from, and
+    whether pad 1 is invincible. The
     ones without free CPUs were checked against Beetle Saturn when recorded: pad 1, its dino and the
     bombs matched."""
     import json
     from .run import GAME
     d = json.load(open(os.path.join(ROOT, "inputs", "mechanics", f"{name}.json")))
+    end = d["end"]
+    if "normal" in d:
+        n = d["normal"]
+        base = stage(*n["stage"])
+        early = tuple(p for p in base.presses if int(p.split(":", 1)[0]) < n["from"])
+        return Route(d["about"], early + tuple(d["presses"]), end, d.get("shots", f"{end - 120},{end - 60},{end}"),
+                     invincible=n.get("invincible", False), writes=tuple(d["writes"]))
     arena = d.get("arena", {})
     base = open_arena(off=tuple(arena.get("off", (3, 4, 5))), **arena.get("rules", {}))
     mount_at = OPEN_MOUNT + base.vblanks - open_arena().vblanks
     mount = (f"{mount_at}:{GAME.symbols['objects'] + 0x5E:08X}=0800",
              f"{mount_at}:{GAME.symbols['dino_colours']:08X}={d['colour']:02X}") if d["colour"] else ()
     walls = tuple(w for w in base.writes if not (arena.get("free_cpus") and w.endswith("=0080")))
-    end = d["end"]
     return Route(d["about"], base.presses + tuple(d["presses"]), end, d.get("shots", f"{end - 120},{end - 60},{end}"),
                  writes=walls + mount + tuple(d["writes"]))
 

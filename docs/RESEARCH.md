@@ -94,6 +94,10 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
   cannon about 30 VBlanks later. In `cannon`, the first bomb at (20,9) goes off at 6384 without lighting
   the fuse; the second, set with C still held, lights it. A single bomb there hit the octopus (100) only
   when set 180-260 VBlanks after 6240. No bomb time tried hit the squid (500).
+- Normal Game growth: power-ups fill the dino's growth meter, the egg beside the heart in the HUD, and
+  an ice cream (kind 19) fills it at once. Kills only add score. A full meter grows the dino one stage
+  as the next stage starts: it flashes white, the meter empties, and +0x64 steps up
+  (`mechanic("dino-grow-normal")`, grown at 10422). Where the meter is held is not yet found.
 - Mad Bomber: C throws, further the longer it is held (3, 5, then at most 7 cells at 40 VBlanks). B
   doubles the hovercraft's speed.
 
@@ -115,6 +119,9 @@ penguins) by setting their hit flag (+0x34 bit 0x40) after 30 seconds without a 
 clear keeps each write as `VBLANK:@ADDR=HEX` among its presses, so such a clear uses writes as well as
 the invincibility hook.
 
+`bot.play` alternates C and START through scene changes, so it can leave the next stage paused at its
+banner, with the timer stopped. Tap START once after it returns before reading anything in that stage.
+
 Writes that do nothing useful:
 - A bomber's position fields: the game puts them back.
 - Map cells after the arena is drawn: the logic changes, the picture doesn't.
@@ -134,7 +141,8 @@ found code (77%), in 4,602 of its 11,806 functions. H2H, which holds 6 KB of cod
 
 1. Script it through the agent with the lab helpers, in `open_arena` where it can be.
 2. Save `inputs/mechanics/NAME.json`. It holds `about`, `colour` (0: no dino), `stage`, `arena` (`off`,
-   `rules`, `free_cpus`), the presses and the logged writes from the arena's start, `end`, and
+   `rules`, `free_cpus`) or `normal` (`stage` as [world, number], `from`, `invincible`),
+   the presses and the logged writes from the arena's start, `end`, and
    optionally `shots`. `routes.mechanic(NAME)` plays it.
 3. Run `bomberman lab verify NAME`. It should match all the way, unless CPUs are free.
 4. Run `uv run tests/frames.py --update NAME`, after checking the shots on one contact sheet.
