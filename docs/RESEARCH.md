@@ -38,7 +38,7 @@ What it cannot follow:
 Pad 1's own actions match exactly once nothing else interferes.
 
 `bomberman compare --arenas` picks each of the 8 arenas under each of the 4 skies from the stage wheel.
-On 2026-10-07, 271 of the 288 frames before play were exact. The rest came from blocks' shine and
+On 2026-10-07, 270 of the 288 frames before play were exact. The rest came from blocks' shine and
 glow animations a frame apart, and from our match timer starting a frame earlier (2:59 against 3:00).
 None of them was a difference in what is drawn. In play the CPUs drift apart as usual.
 

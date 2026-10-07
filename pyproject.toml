@@ -3,6 +3,7 @@ name = "bomberman"
 version = "0.1.0"
 description = "Saturn Bomberman (USA) recompiled with saturn-recomp"
 requires-python = ">=3.11"
+license = "MIT"
 dependencies = ["saturnrecomp", "pillow"]
 
 [dependency-groups]

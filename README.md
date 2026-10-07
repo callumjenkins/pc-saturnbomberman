@@ -37,12 +37,26 @@ with 29 of them, though the CD music lives on those tracks.
 under `$XDG_DATA_HOME`), out of `build/`, so cleaning the build leaves them alone. Scripted runs,
 the bot and the tests start with no saves and keep none.
 
+## Playtesting
+
+Playtest builds are GitHub prereleases tagged `playtest-BUILD`, made by saturn-recomp's playtest
+tools (`saturn-recomp/playtest/README.md`). Testers bring their own disc, and each session they play
+comes back to be reviewed. `[playtest]` in `game.toml` names the Worker, and a session's new code is
+measured against the coverage of the routes, the clears and the replayed play sessions.
+
+```sh
+export SATURN_PLAYTEST_ADMIN_TOKEN=...
+uv run python -m saturnrecomp.playtest game.toml invite "Sam"
+uv run python -m saturnrecomp.playtest game.toml publish
+uv run python -m saturnrecomp.playtest game.toml pull
+```
+
 ## Licence
 
 `game.toml` builds the runtime with `SATURN_VDP1_GPL=ON`, so VDP1 draws by Mednafen's rules and
 matches Mednafen's frames to the pixel (saturn-recomp's `THIRD_PARTY.md`). A build is therefore a
-GPL work: anyone given one must be offered its complete source under the GPL. This repository has
-no licence of its own yet.
+GPL work: anyone given one must be offered its complete source under the GPL. Playtest releases are
+built without it, so they are MIT. The repository itself is MIT-licensed (`LICENSE`).
 
 ## Layout
 
