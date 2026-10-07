@@ -37,6 +37,16 @@ What it cannot follow:
 
 Pad 1's own actions match exactly once nothing else interferes.
 
+`bomberman compare --arenas` picks each of the 8 arenas under each of the 4 skies from the stage wheel.
+On 2026-10-07, 271 of the 288 frames before play were exact. The rest came from blocks' shine and
+glow animations a frame apart, and from our match timer starting a frame earlier (2:59 against 3:00).
+None of them was a difference in what is drawn. In play the CPUs drift apart as usual.
+
+A play session doesn't replay on the core for long. The core starts with a blank backup memory, so
+Bomber Stadium's save prompts differ, and once a match ends at a different time the presses land on
+other screens. Callum's 05:01 session matched for the 20 s compared in its first battle and parted
+after that.
+
 ## The open arena
 
 `routes.open_arena(off=..., **rules)` is where mechanics are tested. It is Path to Glory under the white

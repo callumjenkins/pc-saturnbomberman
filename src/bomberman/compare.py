@@ -53,3 +53,33 @@ def compare(route, name, core_so, bios, shots=None, log=print):
         report.append(f"the core never reached the rest: it ran {2 * shots[-1] + 3600} frames")
     open(f"{out}/report.txt", "w").write("\n".join(report) + "\n")
     return report
+
+
+def _arena(job):
+    n, sky, core_so, bios = job
+    from . import routes
+    route = routes.arena(n, sky)
+    pick = int(route.shots.split(",")[0]) + 20
+    shots = range(pick + 300, pick + 601, 10)
+    rows = [line.split() for line in compare(route, f"arena-{n}-{sky}", core_so, bios, shots, log=lambda s: None)[1:]
+            if line.strip()[:1].isdigit()]
+    dots = [(int(v) - pick, int(d)) for v, _, d, _ in rows]
+    before = [d for at, d in dots if at < ARENA_PLAY]
+    return (f"{routes.ARENAS[n - 1]:16} {sky:6} before play {sum(d == 0 for d in before)}/{len(before)} frames exact, "
+            f"most dots {max(before)}; in play most dots {max(d for at, d in dots if at >= ARENA_PLAY)}")
+
+
+ARENA_PLAY = 390   # VBlanks from the pick to the first frame bombers can move
+
+
+def arenas(core_so, bios, jobs=8, log=print):
+    """Every arena under every sky, compared every 10 VBlanks from 300 after the pick, while the arena is
+    drawn and READY shows, into the match's first seconds; a line each. In play the CPUs drift apart."""
+    from concurrent.futures import ProcessPoolExecutor
+    from . import routes
+    check_prepared()
+    run.build.ensure(run.GAME, log=lambda s: None)
+    work = [(n, sky, core_so, bios) for n in range(1, len(routes.ARENAS) + 1) for sky in routes.SKIES]
+    with ProcessPoolExecutor(jobs) as pool:
+        for line in pool.map(_arena, work):
+            log(line)

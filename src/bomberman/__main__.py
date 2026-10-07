@@ -10,6 +10,7 @@
     bomberman run clear WORLD-STAGE [options]    a stage the bot cleared, replayed
     bomberman run attempt WORLD-STAGE [options]  the bot's last run at a stage, cleared or not
     bomberman bot WORLD-STAGE [--limit N]        clear a stage, invincible, and save its presses
+    bomberman compare ROUTE | --arenas    against Mednafen's Saturn: a route, or every arena under every sky
 --video on run or bot also records the run as video.mp4 in its directory; a clear's is also kept
 in $BOMBERMAN_RUNS (bomberman videos).
 A run builds the game first if it has to, plays the route headless into build/run/ROUTE (log.txt and
@@ -115,7 +116,8 @@ def main(argv=None):
     v.add_argument("b", type=int)
     v.add_argument("range", help="LO:HI in hex")
     c = sub.add_parser("compare", help="a route on our build against Mednafen's Saturn, by the game's tick")
-    c.add_argument("route", choices=list(routes.ROUTES))
+    c.add_argument("route", nargs="?", choices=list(routes.ROUTES))
+    c.add_argument("--arenas", action="store_true", help="every arena under every sky, from the pick into play")
     c.add_argument("--core", default=os.environ.get("SATURN_REFERENCE_CORE"),
                    help="Beetle Saturn's libretro core (default $SATURN_REFERENCE_CORE)")
     c.add_argument("--bios", default=os.environ.get("SATURN_BIOS"),
@@ -161,6 +163,11 @@ def main(argv=None):
     elif args.command == "compare":
         if not args.core or not args.bios:
             ap.error("compare needs --core and --bios, or SATURN_REFERENCE_CORE and SATURN_BIOS")
+        if args.arenas:
+            compare.arenas(os.path.expanduser(args.core), os.path.expanduser(args.bios))
+            return
+        if not args.route:
+            ap.error("compare needs a route, or --arenas")
         route = routes.ROUTES[args.route]()
         shots = {int(s) for s in route.shots.split(",") if s}
         if args.every:
