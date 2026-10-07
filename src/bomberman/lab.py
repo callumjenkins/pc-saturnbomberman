@@ -247,10 +247,10 @@ def run_clears_with_coverage(jobs=8):
 
 def coverage(never_file=None):
     """Lines per module: functions found and how many ran, and the code bytes they cover, over every
-    coverage file in build/test and build/run. Bytes are counted once however many functions share them,
+    coverage file in build/test, build/run and the replayed play sessions. Bytes are counted once however many functions share them,
     taking each function as its instruction count from its start. `never_file` gets the functions that
     never ran, one "MODULE ADDRESS INSTRUCTIONS" a line."""
-    paths = glob.glob(f"{BUILD}/test/*/coverage.txt") + glob.glob(f"{BUILD}/run/*/coverage.txt")
+    paths = [p for d in ("test/*", "run/*", "play/*/replay") for p in glob.glob(f"{BUILD}/{d}/coverage.txt")]
     if not paths:
         raise SystemExit("no coverage files: run tests/frames.py, or bomberman lab coverage --clears")
     table = read_coverage(paths)

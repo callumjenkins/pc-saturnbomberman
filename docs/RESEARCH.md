@@ -137,6 +137,10 @@ unseen enemy attacks, boss phases and rules.
 On 2026-10-07, after the 140 frame tests and every saved clear, KRNL had run 465 KB of its 607 KB of
 found code (77%), in 4,602 of its 11,806 functions. H2H, which holds 6 KB of code, had run only 7% of it.
 
+`bomberman replay` writes coverage too, into the session's `replay/`. Two of Callum's Bomber Stadium
+sessions the same day ran 364 functions nothing else had, taking KRNL to 496 KB (82%): the series
+setup, team battles, the standings, records, Killed By, the awards and the save screens.
+
 ## Adding a mechanic route
 
 1. Script it through the agent with the lab helpers, in `open_arena` where it can be.

@@ -85,7 +85,7 @@ def replay(name="latest", video=False, window=False, more=()):
     args = [run.GAME.saturn, "--cue", run.cue(), "--out", out, "--save", save,
             "--clock", open(f"{session}/clock.txt").read().strip(),
             *(["--input", f"@{recorded}"] if presses else []), "--vblanks", str(last + 600),
-            *([] if window else ["--headless"]),
+            "--coverage", f"{out}/coverage.txt", *([] if window else ["--headless"]),
             *(["--video", os.path.abspath(f"{out}/video.mp4")] if video else []), *more]
     code = tee(args, f"{out}/log.txt")
     print(f"replayed into {out}, code {code}")
