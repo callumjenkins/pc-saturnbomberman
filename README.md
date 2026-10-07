@@ -21,6 +21,11 @@ uv run bomberman run normal   # or a scripted run, headless
 The build needs uv, CMake, Ninja, clang and SDL3. A run's results go to `build/run/ROUTE/`:
 `log.txt`, the hardware log and the frames asked for as `shot-N.png`.
 
+Each `play` session is kept in `build/play/SESSION/` (`build/play/latest` is the last): the pad as
+the game read it, the clock and saves it started with, and the log, including a crash's report.
+`uv run bomberman replay [SESSION] --video` plays it again headless, the same way, into its
+`replay/` directory.
+
 The port supports one disc: Saturn Bomberman (USA), MK-81070 V1.003. `disc.json` lists every
 file on it with its size and SHA-1, and `prepare` stops before extracting anything if a file
 differs, is missing or is extra, naming each one. The check reads the disc's contents rather than

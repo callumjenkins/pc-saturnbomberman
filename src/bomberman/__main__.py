@@ -1,6 +1,8 @@
 """Saturn Bomberman on saturn-recomp.
     bomberman prepare                     check the disc and extract it into build/
-    bomberman play [-- SATURN_ARGS...]    play in a window, saves kept in the user's data directory
+    bomberman play [-- SATURN_ARGS...]    play in a window, saves kept in the user's data directory; the
+                                          session (pad, clock, log) is kept in build/play/SESSION
+    bomberman replay [SESSION] [--video]  a session played again headless (the latest by default)
     bomberman routes                      list the scripted runs
     bomberman run ROUTE [options] [-- SATURN_ARGS...]
     bomberman run code KEYS [--hold BUTTONS] [options]
@@ -14,12 +16,11 @@ A run builds the game first if it has to, plays the route headless into build/ru
 shot-N.png) and learns seeds while the game stops at code discovery missed."""
 import argparse
 import dataclasses
-import subprocess
 import sys
 
 import os
 
-from . import bot, compare, lab, prepare, routes, run, videos
+from . import bot, compare, lab, prepare, routes, run, session, videos
 from .paths import ROOT
 
 
@@ -59,6 +60,10 @@ def main(argv=None):
     sub = ap.add_subparsers(dest="command", required=True)
     sub.add_parser("prepare")
     sub.add_parser("play")
+    rp = sub.add_parser("replay")
+    rp.add_argument("session", nargs="?", default="latest")
+    rp.add_argument("--video", action="store_true", help="record it as replay/video.mp4 in the session")
+    rp.add_argument("--window", action="store_true", help="play it in a window")
     sub.add_parser("routes")
     b = sub.add_parser("bot")
     b.add_argument("stage", help="such as 3-2")
@@ -123,9 +128,11 @@ def main(argv=None):
     elif args.command == "play":
         prepare.check_prepared()
         run.build.ensure(run.GAME)
-        out = f"{run.BUILD}/play"
-        os.makedirs(out, exist_ok=True)
-        raise SystemExit(subprocess.run([run.GAME.saturn, "--cue", run.cue(), "--out", out, *more]).returncode)
+        raise SystemExit(session.play(more))
+    elif args.command == "replay":
+        prepare.check_prepared()
+        run.build.ensure(run.GAME)
+        raise SystemExit(session.replay(args.session, args.video, args.window, more))
     elif args.command == "videos":
         if args.route:
             for name in args.route:
