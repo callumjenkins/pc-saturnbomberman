@@ -90,6 +90,31 @@ def controllers_match():
     return problems
 
 
+# Runs started again from a dump of the machine taken at this VBlank (saturn-recomp's state.cpp).
+DUMPS = {"battle": 7000, "clear-1-7": 8000, "master-boss": 13000, "save": 9000}
+
+
+def dump_matches(name):
+    """Problems with the run loaded from a dump taken partway: its frames after the dump must be the
+    scripted run's, so a part of the machine the dump leaves out shows up here."""
+    route, at = RUNS[name](), DUMPS[name]
+    out = f"{BUILD}/test/dump-{name}"
+    os.makedirs(out, exist_ok=True)
+    dump = f"{out}/state.bin"
+    with open(f"{out}/log-dump.txt", "w") as log:
+        subprocess.run([run.GAME.saturn, "--out", out, *run.saturn_args(route, vblanks=at + 60, shots=str(at)),
+                        "--state-out", dump, "--state-at", str(at)], stdout=log, stderr=subprocess.STDOUT, timeout=600)
+    if not os.path.exists(dump):
+        return ["no dump was written"]
+    with open(f"{out}/log.txt", "w") as log:
+        subprocess.run([run.GAME.saturn, "--out", out, *run.saturn_args(route), "--state-in", dump],
+                       stdout=log, stderr=subprocess.STDOUT, timeout=600)
+    problems = [line.strip() for line in open(f"{out}/log.txt") if "FATAL" in line]
+    return problems + [f"frame {v} differs" for v in route.shots.split(",") if int(v) > at and (
+        not os.path.exists(f"{out}/shot-{v}.png") or
+        Image.open(f"{out}/shot-{v}.png").tobytes() != Image.open(f"{BUILD}/test/{name}/shot-{v}.png").tobytes())]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--update", action="store_true")
@@ -105,6 +130,9 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as ex:
         results = dict(zip(names, ex.map(replay, names)))
     controllers = "battle" in names and not args.update and not results["battle"][1]
+    dumped = [n for n in DUMPS if n in names and not args.update and not results[n][1]]
+    with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as ex:
+        dumps = dict(zip(dumped, ex.map(dump_matches, dumped)))
 
     failed = 0
     for name in names:
@@ -128,6 +156,10 @@ def main():
         problems = controllers_match()
         failed += bool(problems)
         print(f"{'FAIL' if problems else 'ok':8} controllers: the battle on ten virtual gamepads"
+              + (f": {'; '.join(problems)}" if problems else ""))
+    for name, problems in dumps.items():
+        failed += bool(problems)
+        print(f"{'FAIL' if problems else 'ok':8} dump: {name} from a dump at VBlank {DUMPS[name]}"
               + (f": {'; '.join(problems)}" if problems else ""))
     if args.update:
         json.dump(expected, open(EXPECTED, "w"), indent=1, sort_keys=True)
