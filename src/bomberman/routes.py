@@ -263,7 +263,10 @@ def stage(world, number, items=False, coop=False):
                          + f", or Master Game's {MASTER}-1 to {MASTER}-{FLOORS} without items")
     value = f"{world - 1:02X}{number - 1:02X}"
     names = ("stage", "stage_2", "stage_3", "stage_saved")
-    if items:
+    if items and coop:
+        presses = ("1000:2.",) + world_presses(ITEMS) + tap(4000, "DOWN", 8) + tap(4100, "START", 10)
+        presses, at = presses + tap(4400, "START", 10), 4150
+    elif items:
         presses, at = world_presses(ITEMS) + tap(4200, "START", 10), 3950
     elif coop:
         presses = ("1000:2.",) + TO_NORMAL + tap(4200, "START", 10) + tap(4400, "DOWN", 8) + tap(4800, "START", 10)
@@ -601,15 +604,18 @@ def coop_start():
                  writes=base.writes)
 
 
-def coop_boss(world, number, flight):
-    """The boss stage's saved co-op clear, pictured every second from the boss's last moments through
-    the two bombers boarding the ship and flying off (`flight`, from its first frame), to the end."""
-    base = clear(world, number, coop=True)
-    shots = ",".join(str(v) for v in range(flight - 60, base.vblanks + 1, 60))
-    return dataclasses.replace(base, about=f"{BOSSES[world, number]} beaten by two: both board the ship", shots=shots)
+def coop_boss(world, number, items=False):
+    """The boss stage's saved co-op clear, pictured every second over its last 25 seconds: the boss's end,
+    then the two bombers leaving together."""
+    base = clear(world, number, items, coop=True)
+    shots = ",".join(str(v) for v in range(base.vblanks - 1500, base.vblanks + 1, 60))
+    return dataclasses.replace(base, about=f"{BOSSES[world, number]} beaten by two, and the way out", shots=shots)
 
 
-COOP_ROUTES = {"coop-start": coop_start, "coop-1-7": lambda: coop_boss(1, 7, 10400)}
+COOP_ROUTES = {"coop-start": coop_start,
+               **{f"coop-{w}-{n}": (lambda w=w, n=n: coop_boss(w, n, items=(w, n) == (5, 10)))
+                  for w, n in BOSSES if w != MASTER and os.path.exists(os.path.join(
+                      ROOT, "inputs", "clears", f"{w}-{n}{'-items' if (w, n) == (5, 10) else ''}-coop.txt"))}}
 
 
 BOSS_ROUTES = {

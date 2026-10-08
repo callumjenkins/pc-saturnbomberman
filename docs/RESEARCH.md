@@ -96,6 +96,19 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
 | Mr. Meanie's arena crushed, in the 5-9 clear with every item | about 6560 |
 | Dragon Bomber's dragon heads, in the M-20 clear | from about 9600 |
 
+## Two players in Normal Game
+
+With a pad in port 2, Normal Game asks for 1 PLAYER GAME or 2 PLAYER GAME (from about VBlank 4300 in
+`stage`, 3950 with every item). Pad 2 also joins a 1-player game by pressing START in play, where the
+HUD's right half says PRESS START. Pad 2 is the black bomber, with its own score, and the two share
+the lives. After a boss, both board the ship together. `--coop` on `stage`, `clear`, `attempt` and
+`bot` picks 2 PLAYER GAME with pad 2 idle; every world boss has a co-op clear (`coop-W-N` frame tests),
+4-10 in about 25 000 VBlanks, 5-10 with every item. `coop-start` matches Beetle Saturn exactly until
+play begins.
+
+An invincible bomber outlasts the stage's 6:00: the timer then shows minutes and seconds past it
+(21'03 and the like), on one player as on two.
+
 ## Controls found
 
 - C drops a bomb. A uses a dino's ability. Pressing a direction with A moves pad 1 as well.
