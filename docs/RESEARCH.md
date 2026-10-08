@@ -102,8 +102,10 @@ With a pad in port 2, Normal Game asks for 1 PLAYER GAME or 2 PLAYER GAME (from 
 `stage`, 3950 with every item). Pad 2 also joins a 1-player game by pressing START in play, where the
 HUD's right half says PRESS START. Pad 2 is the black bomber, with its own score, and the two share
 the lives. After a boss, both board the ship together. `--coop` on `stage`, `clear`, `attempt` and
-`bot` picks 2 PLAYER GAME with pad 2 idle; every world boss has a co-op clear (`coop-W-N` frame tests),
-4-10 in about 25 000 VBlanks, 5-10 with every item. `coop-start` matches Beetle Saturn exactly until
+`bot` picks 2 PLAYER GAME with pad 2 idle. Every Normal Game stage but 4-4 has a co-op clear in
+`inputs/clears/` (2-5, 3-3, 4-9 and 5-10 with every item); the bosses' are frame tests (`coop-W-N`).
+On 4-4 the shared lives run out though both are invincible: something there kills without the
+blast or touch the hooks stop, and idle pad 2 never moves away from it. `coop-start` matches Beetle Saturn exactly until
 play begins.
 
 An invincible bomber outlasts the stage's 6:00: the timer then shows minutes and seconds past it
