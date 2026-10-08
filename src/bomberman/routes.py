@@ -152,7 +152,7 @@ def open_arena(off=(3, 4, 5), **rules):
     """A battle in Path to Glory under the white sky, which has no soft blocks: the players in `off` turned
     off, the rules changed as with_rules, the stage wheel's sky turned with X+Y+Z and UP. Pad 1 starts at
     (38,17) and can move from about 7360, the CPUs from about 7210. Before then each CPU is walled into its
-    corner by solid cells the arena never draws, with its bombs (its +0x6C) at 0, so it stays out of the
+    corner by solid cells the arena never draws, with the bombs it can have out (+0x6E) at 0, so it stays out of the
     way. A CPU that can wander moves differently in Beetle Saturn, whose loads take longer, and its bombs
     come back when it reaches pad 1. Changed rules make everything from the rules screen on later; the
     route's `about` says by how much, and OPEN_MOUNT moves with it."""

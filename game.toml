@@ -13,6 +13,22 @@ disc = "disc.json"
 coverage = ["build/test/*/coverage.txt", "build/run/*/coverage.txt", "build/play/*/replay/coverage.txt"]
 boxart = "https://cdn.thegamesdb.net/images/original/boxart/front/11326-1.jpg"   # TheGamesDB's, the US box
 
+# A stage start in Normal Game, which a session's Continue rebuilds through the stage select when the
+# session's dump won't load (saturn-recomp's playtest/README.md). stage_2 changes as each stage loads,
+# while the bomber still has what it carries over. Stage 1-1, a world's intro (stage FF), Master Game
+# (08xx) and the battles (09xx) are left to the dump or the replay.
+[checkpoint]
+keep = [["stage_2", 2], ["score", 8], ["lives", 1], ["dino_colours", 1], ["growth_points", 20],
+        ["objects+0x37", 1], ["objects+0x3A", 1], ["objects+0x5E", 1], ["objects+0x64", 2], ["objects+0x6E", 2],
+        ["objects+0x70", 2]]
+accept = [[0x0001, 0x0006], [0x0100, 0x0108], [0x0200, 0x0208], [0x0300, 0x0309], [0x0400, 0x0409]]
+presses = ["1900:START", "1910:", "2500:START", "2510:", "3000:START", "3010:", "3400:START", "3410:",
+           "4200:START", "4210:", "4500:START", "4510:"]
+writes = ["4250:stage=stage_2", "4250:stage_2", "4250:stage_3=stage_2", "4250:stage_saved=stage_2",
+          "4600:score", "4600:lives", "4600:dino_colours", "4600:growth_points", "4600:objects+0x37",
+          "4600:objects+0x3A", "4600:objects+0x5E&08", "4600:objects+0x64", "4600:objects+0x6E", "4600:objects+0x70"]
+resume = 4610
+
 [symbols]
 krnl_setjmp = 0x060061C4
 krnl_longjmp = 0x060061E6
@@ -24,7 +40,7 @@ bomber_touched = 0x0605E512         # in the touch check, where r3 holds the obj
 # function (idle_object when the slot is free), +0x34 flags (0x80 gone, 0x40 hit), +0x44 the cell,
 # +0x48 and +0x4C x and y in 16.16 pixels. A bomber's byte at +0x37 is its hearts, +0x3A its speed
 # (a skate adds 0x20), +0x54 the slot of the dino it rides, +0x5E has 0x0800 while it rides one, +0x64 its
-# fire, +0x6C its bombs. The byte at +0x70 holds its abilities (0x01 kick, 0x02 glove, 0x08 item 15's)
+# fire, +0x6E how many bombs it can have out (a bomb-up adds 1). The byte at +0x70 holds its abilities (0x01 kick, 0x02 glove, 0x08 item 15's)
 # and +0x71 its bomb kind (one bit each for items 4, 13, 14, 20, 23 and 24).
 objects = 0x060D5F00
 idle_object = 0x060143D8
@@ -34,6 +50,10 @@ dino = 0x0601B5CC                   # a dino's update function; its object's +0x
 # waves); 0, 6 and 7 draw other dinos. A battle clears it, and the bombers' fields, about 20 VBlanks before
 # it creates them.
 dino_colours = 0x060D82D4
+# Normal Game's growth meter (the HUD's egg): a long per bomber slot and dino colour, at 20 × slot + 4 × (colour - 1).
+# Every point a bomber scores while riding goes into its dino's colour, and the total is never reset during a game.
+# A dino starts a stage at its first size under 5000, its second under 15000, and its last from there.
+growth_points = 0x060D82DC
 core_mechanism = 0x0607466C         # the update function of a Core Mechanism: the exit opens once none is left
 # The stage map: 64x64 cells, a word each, the cell (x, y) at y*64+x. 0x80 solid (walls, hard blocks,
 # a standing enemy), 0x40 an item, 0x10 soft block, 0x20 bomb, the low 3 bits fire.
@@ -49,6 +69,7 @@ stage = 0x060C179A
 stage_2 = 0x060C029C
 stage_3 = 0x060C029E
 stage_saved = 0x060C17A0
+score = 0x060C0690                  # a long a pad: its Normal Game score
 lives = 0x060C063E                  # a byte: pad 1's lives left in Normal Game: 3 at its start, 0 while the last is played
 tick = 0x06006104                   # the kernel's count of the game's frames: it stops while the game loads
 

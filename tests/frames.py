@@ -7,6 +7,7 @@ right, such as a VDP2 feature that now draws, so look at the frames in build/tes
 recording them with --update."""
 import argparse
 import concurrent.futures
+import dataclasses
 import hashlib
 import json
 import os
@@ -115,6 +116,55 @@ def dump_matches(name):
         Image.open(f"{out}/shot-{v}.png").tobytes() != Image.open(f"{BUILD}/test/{name}/shot-{v}.png").tobytes())]
 
 
+# Runs whose last stage start, rebuilt through game.toml's [checkpoint], must play as the run itself does.
+CHECKPOINTS = ["clear-1-1", "dino-grow-normal"]
+
+
+def checkpoint_matches(name):
+    """Problems with the run's last stage start rebuilt from its --progress line: 700 VBlanks after each
+    run creates pad 1's bomber, the kept ranges (the bits a write masks) and pad 1's dino must be the
+    run's. Frames differ in what the game animates by its frame count, which the rebuild starts afresh."""
+    route, cp = RUNS[name](), run.GAME.checkpoint
+    end = route.vblanks                         # a clear's route ends on the next stage's card, which takes START after about 300 VBlanks
+    route = dataclasses.replace(route, presses=route.presses + (f"{end + 300}:START", f"{end + 310}:"), vblanks=end + 1500)
+    out = f"{BUILD}/test/checkpoint-{name}"
+    os.makedirs(out, exist_ok=True)
+    progress = f"{out}/progress.txt"
+    if os.path.exists(progress):
+        os.remove(progress)
+    run.run(route, out, more=["--progress", progress, "--progress-keep", cp.keep_arg], learn_seeds=False)
+    lines = [line for line in open(progress).read().splitlines() if cp.rebuild(line)] if os.path.exists(progress) else []
+    if not lines:
+        return ["no stage start to rebuild"]
+    rebuilt = routes.Route("rebuilt", tuple(cp.presses), cp.resume, "", writes=tuple(cp.rebuild(lines[-1])))
+    idle, objects = run.GAME.symbols["idle_object"], run.GAME.symbols["objects"]
+    masks = {k: mask for _, _, k, mask in cp.writes if mask}      # the bits a rebuild carries, of a range it masks
+
+    def state(r, route, since):
+        """The kept ranges and pad 1's dino (its eggs eaten and colour) once the bomber made after
+        VBlank `since` has played 700 VBlanks; None if no bomber is made."""
+        run.advance(r, route, since)
+        for made in (False, True):
+            while (r.read32(objects + 0x30) == idle) != made and r.vblank < since + 3000:
+                run.advance(r, route, r.vblank + 1)
+        if r.vblank >= since + 3000:
+            return None
+        run.advance(r, route, r.vblank + 700)
+        me = r.read(objects, 0x7C)
+        dino = r.read(objects + me[0x55] * 0x7C, 0x7C) if me[0x5E] & 0x08 else bytes(0x7C)
+        kept = [r.read(a, n) for a, n in cp.keep]
+        kept = [bytes(b & m for b, m in zip(k, masks[i])) if i in masks else k for i, k in enumerate(kept)]
+        return [k.hex() for k in kept] + [dino[0x64:0x66].hex(), dino[0x70:0x72].hex()]
+    with run.play(f"{out}/run", route) as r:
+        theirs = state(r, route, int(lines[-1].split()[0]))
+    with run.play(f"{out}/rebuilt", rebuilt) as r:
+        ours = state(r, rebuilt, cp.resume)
+    if theirs is None or ours is None:
+        return [f"no bomber made after the {'run' if theirs is None else 'rebuild'}'s stage start"]
+    names = [f"{a:08X}" for a, _ in cp.keep] + ["the dino's eggs", "the dino's colour"]
+    return [f"{n}: {o} where the run has {t}" for n, t, o in zip(names, theirs, ours) if t != o]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--update", action="store_true")
@@ -131,8 +181,10 @@ def main():
         results = dict(zip(names, ex.map(replay, names)))
     controllers = "battle" in names and not args.update and not results["battle"][1]
     dumped = [n for n in DUMPS if n in names and not args.update and not results[n][1]]
+    checked = [n for n in CHECKPOINTS if n in names and not args.update and not results[n][1]]
     with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as ex:
         dumps = dict(zip(dumped, ex.map(dump_matches, dumped)))
+        rebuilt = dict(zip(checked, ex.map(checkpoint_matches, checked)))
 
     failed = 0
     for name in names:
@@ -160,6 +212,10 @@ def main():
     for name, problems in dumps.items():
         failed += bool(problems)
         print(f"{'FAIL' if problems else 'ok':8} dump: {name} from a dump at VBlank {DUMPS[name]}"
+              + (f": {'; '.join(problems)}" if problems else ""))
+    for name, problems in rebuilt.items():
+        failed += bool(problems)
+        print(f"{'FAIL' if problems else 'ok':8} checkpoint: {name}'s last stage start rebuilt"
               + (f": {'; '.join(problems)}" if problems else ""))
     if args.update:
         json.dump(expected, open(EXPECTED, "w"), indent=1, sort_keys=True)

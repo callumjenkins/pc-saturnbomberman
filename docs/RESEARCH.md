@@ -108,10 +108,14 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
   cannon about 30 VBlanks later. In `cannon`, the first bomb at (20,9) goes off at 6384 without lighting
   the fuse; the second, set with C still held, lights it. A single bomb there hit the octopus (100) only
   when set 180-260 VBlanks after 6240. No bomb time tried hit the squid (500).
-- Normal Game growth: power-ups fill the dino's growth meter, the egg beside the heart in the HUD, and
-  an ice cream (kind 19) fills it at once. Kills only add score. A full meter grows the dino one stage
-  as the next stage starts: it flashes white, the meter empties, and +0x64 steps up
-  (`mechanic("dino-grow-normal")`, grown at 10422). Where the meter is held is not yet found.
+- Normal Game growth: the egg beside the heart in the HUD shows the points pad 1 has scored while
+  riding its current dino's colour (`growth_points`). Points scored on foot count for nothing, and a
+  power-up is worth no points, so it adds nothing. An ice cream (kind 19) is worth 4000, which the
+  HUD already draws as a full egg. Kills and Core Mechanisms add their score. At 5000 the dino grows one stage
+  as the next stage starts, and again at 15000. It flashes white and +0x64 steps up
+  (`mechanic("dino-grow-normal")`, grown at 10422). The total carries on, so the egg after a growth
+  starts part full with what was scored past the threshold. The check is f_0601B068, and the
+  thresholds are a table at 060B46B8 that has the same 5000 and 15000 for every colour.
 - Mad Bomber: C throws, further the longer it is held (3, 5, then at most 7 cells at 40 VBlanks). B
   doubles the hovercraft's speed.
 
@@ -125,6 +129,7 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
 | An egg eaten while riding | f_0601B240 |
 | An item placed when a block breaks / its kind looked up | f_06022B60 / f_06021F82 (the slot's +5) |
 | Pad 1's score, a long | 060C0690 |
+| Points scored, added to the score and, while riding, to `growth_points` | f_06021604 |
 | Master Game floor | stage_2's second byte, with 08 in its first |
 | Not the item list | 060D8C0C: a pool of 2000 14-byte records from a general allocator |
 
