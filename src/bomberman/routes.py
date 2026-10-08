@@ -176,8 +176,8 @@ def mechanic(name):
     """inputs/mechanics/NAME.json played in open_arena: pad 1 on the dino of that colour (0: none), the
     presses and writes recorded when the mechanic was first checked, and its shots, by default over its
     last two seconds. Its "arena" names the players off, the rules, and whether the CPUs go free; or its
-    "normal" names a Normal Game stage to play instead, the VBlank its own presses take over from, and
-    whether pad 1 is invincible. The
+    "normal" names a Normal Game stage to play instead, the VBlank its own presses take over from,
+    whether pad 1 is invincible, and whether it is a 2 PLAYER GAME ("coop"). The
     ones without free CPUs were checked against Beetle Saturn when recorded: pad 1, its dino and the
     bombs matched."""
     import json
@@ -186,10 +186,10 @@ def mechanic(name):
     end = d["end"]
     if "normal" in d:
         n = d["normal"]
-        base = stage(*n["stage"])
+        base = stage(*n["stage"], coop=n.get("coop", False))
         early = tuple(p for p in base.presses if int(p.split(":", 1)[0]) < n["from"])
         return Route(d["about"], early + tuple(d["presses"]), end, d.get("shots", f"{end - 120},{end - 60},{end}"),
-                     invincible=n.get("invincible", False), writes=tuple(d["writes"]))
+                     invincible=n.get("invincible", False), writes=base.writes + tuple(d["writes"]))
     arena = d.get("arena", {})
     base = open_arena(off=tuple(arena.get("off", (3, 4, 5))), **arena.get("rules", {}))
     mount_at = OPEN_MOUNT + base.vblanks - open_arena().vblanks

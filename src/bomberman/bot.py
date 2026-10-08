@@ -83,32 +83,32 @@ def plan(stage, fire):
     return (path(best[1]), True) if best else ([], False)
 
 
-def walk(r, d):
+def walk(r, d, pad=1):
     """Hold d until the bomber stands on the next cell in that direction, aligned to it. False if it
     did not get there. A bomb dropped on fire goes off at once, so it drops one on every burning cell
     it crosses: with invincibility that keeps a blast going wherever it walks."""
-    me = state.me(r)
+    me = state.me(r, pad)
     if me is None:
         return True
     dx, dy = DIRS[d]
     goal = (me.cell[0] + dx, me.cell[1] + dy)
-    r.pad(d)
+    r.pad(d, pad)
     arrived = False
     for _ in range(30):
         r.step(2)
-        me = state.me(r)
+        me = state.me(r, pad)
         if me is None:                            # gone: the exit took it
             arrived = True
             break
         under = state.cell(r, me.cell)
         if under & state.FIRE and not under & state.BOMB:
-            r.pad(d + "+C")
+            r.pad(d + "+C", pad)
             r.step(2)
-            r.pad(d)
+            r.pad(d, pad)
         if me.cell == goal and abs(me.x - goal[0] * 16) < 2 and abs(me.y - goal[1] * 16) < 3:
             arrived = True
             break
-    r.pad("")
+    r.pad("", pad)
     return arrived
 
 
@@ -195,4 +195,59 @@ def play(r, limit, log=print, fire=2):
         if stuck > 200:
             log(f"{r.vblank}: stuck at {stage.me.cell}")
             return False
+    return False
+
+
+def route_through_blocks(stage, start, goal):
+    """The presses from start to goal, walking through soft blocks as though broken; None if walls block it."""
+    prev = {start: None}
+    q = collections.deque([start])
+    while q:
+        c = q.popleft()
+        if c == goal:
+            break
+        for d, (dx, dy) in DIRS.items():
+            n = (c[0] + dx, c[1] + dy)
+            v = stage.at(n)
+            if n not in prev and (stage.passable(n) or v & state.SOFT and not v & state.SOLID or n == goal):
+                prev[n] = (c, d)
+                q.append(n)
+    if goal not in prev:
+        return None
+    out, c = [], goal
+    while prev[c]:
+        c, d = prev[c]
+        out.append(d)
+    return out[::-1]
+
+
+def go(r, goal, pad=1, wait=200):
+    """Walks the pad's bomber to `goal`, bombing each soft block on the way and waiting out its blast; for
+    invincible runs. Whether it got there."""
+    for _ in range(20):
+        me = state.me(r, pad)
+        if me is None:
+            return False
+        if me.cell == goal:
+            return True
+        stage = state.read(r)
+        moves = route_through_blocks(stage, me.cell, goal)
+        if moves is None:
+            return False
+        c = me.cell
+        for d in moves:
+            n = (c[0] + DIRS[d][0], c[1] + DIRS[d][1])
+            if stage.at(n) & state.SOFT:
+                r.pad("C", pad)
+                r.step(4)
+                r.pad("B", pad)                  # sets off a remote-control bomb at once; nothing without one
+                r.step(4)
+                r.pad("", pad)
+                r.step(wait)
+                break
+            if not walk(r, d, pad):
+                return state.me(r, pad) is not None and state.me(r, pad).cell == goal
+            c = n
+        else:
+            return state.me(r, pad) is not None and state.me(r, pad).cell == goal
     return False

@@ -92,10 +92,19 @@ def parse_writes(writes):
     return out
 
 
-def snapshot(read):
-    """What verify compares: pad 1's cell and flags (+0x34, +0x5E), and every bomb."""
+# Pad 1's bomber on the screen, x and y: what the camera's position shows.
+SCREEN = 0x060C38D4
+
+
+def snapshot(read, two=False):
+    """What verify compares: pad 1's cell and flags (+0x34, +0x5E), and every bomb. With `two`, also
+    pad 2's cell and flags and where pad 1 is on the screen."""
     me = read(OBJECTS, SLOT)
-    return cell_of(me), me[0x34] & 0x80, me[0x5E], bombs(read)
+    out = cell_of(me), me[0x34] & 0x80, me[0x5E], bombs(read)
+    if two:
+        p2 = read(OBJECTS + SLOT, SLOT)
+        out += (cell_of(p2), p2[0x34] & 0x80, p2[0x5E], read(SCREEN, 4).hex())
+    return out
 
 
 def verify(route, start, every, log=print):
@@ -110,15 +119,16 @@ def verify(route, start, every, log=print):
     run.check_prepared()
     run.build.ensure(run.GAME, log=lambda s: None)
     shots = list(range(start, route.vblanks + 1, every))
+    two = any(p.split(":", 1)[1].startswith("2.") for p in route.presses)
     tick, ticks, ours = GAME.symbols["tick"], {}, {}
     with run.play(f"{BUILD}/lab/verify", route) as r:
         while r.vblank <= shots[-1]:
             ticks[r.vblank] = r.read32(tick)
             if r.vblank in shots:
-                ours[r.vblank] = snapshot(r.read)
+                ours[r.vblank] = snapshot(r.read, two)
             run.advance(r, route, r.vblank + 1)
     writes = parse_writes(route.writes)
-    core = reference.Core(core_so, bios, cue(), save_dir=f"{BUILD}/lab")
+    core = reference.Core(core_so, bios, cue(), save_dir=f"{BUILD}/lab", ports=2 if two else 1)
     memory = core.lib.retro_get_memory_data(reference.MEMORY_SYSTEM_RAM)
 
     def poke(addr, data):
@@ -132,7 +142,7 @@ def verify(route, start, every, log=print):
         for addr, data in writes.get(v, []):
             poke(addr, data)
         if v in ours:
-            theirs[v] = snapshot(core.read)
+            theirs[v] = snapshot(core.read, two)
 
     reference.play_synced(core, tick, ticks, reference.presses(",".join(route.presses)),
                           sorted(set(writes) | set(shots)), 4 * route.vblanks, on)

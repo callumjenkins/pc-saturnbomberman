@@ -70,9 +70,9 @@ def cell(r, c):
     return int.from_bytes(r.read(GAME.symbols["cells"] + 2 * (y * 64 + x), 2), "big")
 
 
-def me(r):
-    """Pad 1's bomber alone: one read of its slot, for following it as it walks."""
-    found = _things(r.read(GAME.symbols["objects"], SLOT), [0])
+def me(r, pad=1):
+    """A pad's bomber alone: one read of its slot, for following it as it walks."""
+    found = _things(r.read(GAME.symbols["objects"] + (pad - 1) * SLOT, SLOT), [0])
     return found[0] if found else None
 
 
