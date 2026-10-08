@@ -122,7 +122,7 @@ so they play without the invincibility hooks.
 - A bomber that dies drops out with the lives untouched, and the HUD's half says PRESS START again; its
   START brings it back on the other bomber's cell for a life (`coop-p2-out`). Both down at once, by
   bombs or by the timer running out, costs two lives and starts the stage again (`coop-both-out`,
-  `coop-time-up`). Joining a 1 PLAYER GAME with pad 2's START costs a life too.
+  `coop-time-up`). Joining a 1 PLAYER GAME with pad 2's START cost a life too, seen on ours only.
 - Bombs hurt either bomber (`coop-friendly-fire`), and each bomber's B sets off its own remote bombs
   only (`coop-remote`).
 - Pad 2's START pauses and unpauses (`coop-pause`).
