@@ -115,14 +115,19 @@ An invincible bomber outlasts the stage's 6:00: the timer then shows minutes and
 two lives at once (KRNL:0600DACE storing `lives`) about 230 VBlanks after its timer reached 0:00,
 and a third 22000 VBlanks later. Why there and not in the other co-op runs past 6:00 is not known.
 
-## The item routes uncover a skull
+## Items
 
-`item-1` to `item-26`, `egg-burn` and `egg-second` all uncover a skull, whatever kind `hide` writes,
-on ours and on Beetle Saturn alike (`bomberman compare item-1`), so they test the skull and not
-the items they are named for. The write lands where the game looks: cell (8,17)'s word keeps slot
-60, and the reveal (f_060222D8, which takes the kind as its argument and asks for sprite 0xBF plus
-the kind) stores kind 1 at the slot's +5. Something else picks what is drawn and what it does. Until
-that is found, no item's effect is tested, the vest's included.
+`item-1` to `item-26` each uncover the kind they name, beside pad 1 at the top left, and pad 1 takes it
+by 6966. `bomberman lab items` prints what each pickup changed in pad 1's slot; `ITEM_KINDS` names
+the kinds from that and their panels, and game.toml's `objects` says what each field holds. The clock,
+the 1UP, the apple and the ice cream change nothing in the slot in a battle.
+
+The vest sets flag 0x20 and counts about 575 VBlanks down at +0x56. While it lasts pad 1 outlives its
+own bomb, and once it runs out (7529 in `vest`) the next one kills it. `use-K` sets a bomb where pad 1
+stands after taking kind K: a plain one goes off at about 7150 and kills pad 1; the remote bomb (4) waits
+for B; the spike bomb's (13) fire runs on through soft blocks; the power bomb's (20) reaches further.
+Kinds 14, 23, 24 and 25 blast there as fire up does, so what they do needs a kick, a throw or a second
+press. Item 22 turns pad 1 red and counts about 1170 VBlanks down at +0x78; what it does is not yet seen.
 
 ## Controls found
 

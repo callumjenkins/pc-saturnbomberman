@@ -507,13 +507,14 @@ def dino_hatch():
                  6935, "6840,6890,6935")
 
 
-# Item kinds, from each one given to pad 1 (item-N): what changed in the bomber, or what the icon shows
-# where nothing in it did.
-ITEM_KINDS = {1: "fire up", 2: "bomb up", 3: "skate", 4: "a bomb kind", 5: "?", 6: "?", 7: "a timed state",
-              8: "clock", 9: "1UP", 10: "speed down", 11: "kick", 12: "glove", 13: "a bomb kind",
-              14: "a bomb kind", 15: "an ability", 16: "skull", 17: "heart", 18: "apple", 19: "ice cream",
-              20: "a bomb kind", 21: "egg", 22: "a timed state", 23: "a bomb kind", 24: "a bomb kind", 25: "?",
-              26: "devil (only with the Devil rule)"}
+# Item kinds, named from each one's panel and what taking it changes in pad 1 (bomberman lab items); a
+# panel described where neither settles a name.
+ITEM_KINDS = {1: "fire up", 2: "bomb up", 3: "skate", 4: "remote bomb", 5: "bomb pass", 6: "wall pass",
+              7: "vest", 8: "clock", 9: "1UP", 10: "geta", 11: "kick", 12: "glove", 13: "spike bomb",
+              14: "a bomb kind (a grey drop)", 15: "an ability (a flame with sparkles)", 16: "skull", 17: "heart",
+              18: "apple", 19: "ice cream", 20: "power bomb", 21: "egg",
+              22: "a timed state (Bomberman beside a bomb)", 23: "a bomb kind (an arrow)",
+              24: "a bomb kind (a bomb in a ring)", 25: "line bomb", 26: "devil (only with the Devil rule)"}
 ITEM_CELL, ITEM_SLOT = (8, 17), 60             # the soft block beside pad 1's start; a slot no battle uses
 
 
@@ -530,6 +531,27 @@ def item(kind):
     item up: revealed at 6890, taken by 6966."""
     return Route(f"a single battle where pad 1 uncovers and takes item {kind} ({ITEM_KINDS[kind]})",
                  single().presses + presses_file("item-presses.txt"), 6966, "6890,6966", writes=hide(kind))
+
+
+# The kinds whose effect shows in pad 1's next bomb set where it stands. 14, 23, 24 and 25 blast as fire up
+# does there: theirs need a kick, a throw or another press.
+USED_KINDS = (1, 4, 7, 13, 20)
+
+
+def use(kind):
+    """item(kind), then pad 1 sets a bomb where it stands (6970) and presses B (7250), which sets off a
+    remote-control bomb. A plain bomb goes off at about 7150 and kills pad 1 (7160)."""
+    return Route(f"a single battle where pad 1 takes item {kind} ({ITEM_KINDS[kind]}), then bombs where it stands",
+                 item(kind).presses + tap(6970, "C", 4) + tap(7250, "B", 4), 7400, "7100,7160,7240,7300,7400",
+                 writes=hide(kind))
+
+
+def vest():
+    """The vest (item 7): pad 1 outlives its own bomb (7160). The vest runs out at 7529, about 575 VBlanks
+    after the pickup, so the bomb pad 1 sets at 7560 kills it (7800)."""
+    return Route("a single battle where pad 1's vest saves it from its own bomb, then wears off",
+                 item(7).presses + tap(6970, "C", 4) + tap(7560, "C", 4), 7800, "7160,7480,7700,7800",
+                 writes=hide(7))
 
 
 def egg_burn():
@@ -652,7 +674,8 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           "cactus": cactus, "slot": slot, "yuna": yuna,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
           "pause": paused, "battle-round": battle_round,
-          **{f"item-{k}": (lambda k=k: item(k)) for k in ITEM_KINDS}, "egg-burn": egg_burn, "egg-second": egg_second,
+          **{f"item-{k}": (lambda k=k: item(k)) for k in ITEM_KINDS},
+          **{f"use-{k}": (lambda k=k: use(k)) for k in USED_KINDS}, "vest": vest, "egg-burn": egg_burn, "egg-second": egg_second,
           "dino-evolve": dino_evolve, "open-arena": open_arena,
           **{f"com-level-{n}": (lambda n=n: com_level(n)) for n in (1, 3)},
           **{name: (lambda name=name: mechanic(name)) for name in MECHANICS},

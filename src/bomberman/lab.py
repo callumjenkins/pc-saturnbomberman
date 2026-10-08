@@ -9,6 +9,7 @@
     coverage          which recompiled code the frame tests' runs and the bot's clears have run, by module
     census ROUTE      the stage's objects by kind as the route plays: how many, the fastest each moved,
                       the update functions each ran, and the objects that appeared or went
+    items [VBLANK...] what taking each item kind (item-N) changed in pad 1's slot, at each VBlank given
 
 The helpers below are for scenario scripts played through the agent (see docs/RESEARCH.md).
 """
@@ -321,3 +322,32 @@ def census(route, start, end, every=10, name="census"):
             samples.append((r.vblank, objects(r.read)))
             run.advance(r, route, r.vblank + every)
     return tally(samples)
+
+
+# ---- items ------------------------------------------------------------------------------------------
+def changes(slots):
+    """{kind: [(offset, usual, value)]}: each slot's bytes where they differ from the value most kinds hold
+    there, so what one item changed stands out from what every pickup does. Pad 1's x and y are left out."""
+    usual = [collections.Counter(b[i] for b in slots.values()).most_common(1)[0][0] for i in range(state.SLOT)]
+    moved = range(0x48, 0x50)
+    return {k: [(i, usual[i], b[i]) for i in range(state.SLOT) if b[i] != usual[i] and i not in moved]
+            for k, b in slots.items()}
+
+
+def items(times=(6966, 7400)):
+    """Lines of each item kind's changes to pad 1's slot after item-N's pickup (6966), at each VBlank."""
+    from . import routes
+    slots = {t: {} for t in times}
+    for k in routes.ITEM_KINDS:
+        route = routes.item(k)
+        with run.play(f"{BUILD}/lab/items", route, until=6900) as r:
+            for t in sorted(times):
+                run.advance(r, route, t)
+                slots[t][k] = r.read(GAME.symbols["objects"], state.SLOT)
+    lines = []
+    for t in times:
+        lines.append(f"VBlank {t}:")
+        for k, diff in changes(slots[t]).items():
+            shown = " ".join(f"+{i:02X} {a:02X}>{b:02X}" for i, a, b in diff) or "nothing"
+            lines.append(f"  {k:2} {routes.ITEM_KINDS[k]}: {shown}")
+    return lines

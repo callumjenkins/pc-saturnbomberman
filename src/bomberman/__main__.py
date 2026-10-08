@@ -127,6 +127,8 @@ def main(argv=None):
     v.add_argument("--to", type=int, help="last VBlank (default: the route's end, or two minutes into a stage)")
     v.add_argument("--every", type=int, default=10)
     v.add_argument("--clear", action="store_true", help="a stage's saved clear instead, to its end")
+    v = labs.add_parser("items", help="what taking each item kind changed in pad 1's slot")
+    v.add_argument("vblanks", nargs="*", type=int, default=[6966, 7400])
     c = sub.add_parser("compare", help="a route on our build against Mednafen's Saturn, by the game's tick")
     c.add_argument("route", nargs="?", choices=list(routes.ROUTES))
     c.add_argument("--arenas", action="store_true", help="every arena under every sky, from the pick into play")
@@ -172,6 +174,8 @@ def main(argv=None):
             never = f"{lab.BUILD}/lab/never-ran.txt"
             os.makedirs(os.path.dirname(never), exist_ok=True)
             print("\n".join(lab.coverage(never)) + f"\nfunctions that never ran: {never}")
+        elif args.tool == "items":
+            print("\n".join(lab.items(args.vblanks)))
         elif args.tool == "census":
             if args.route in routes.ROUTES:
                 route, start = routes.ROUTES[args.route](), 0
