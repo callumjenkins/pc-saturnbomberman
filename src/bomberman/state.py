@@ -10,6 +10,7 @@ ENEMY_SLOTS = range(10, SLOTS)
 
 SOLID, SOFT, BOMB, FIRE = 0x80, 0x10, 0x20, 0x07
 CANNON = 0x0300                                   # both bits: a cannon, which keeps a bomber in it until A fires it out
+BRIDGE = 0x4000                                   # 4-4's stone bridges over the lava, 0x5300 once lowered: floor, not a cannon
 MASTER_WORLD = 8                                  # stage_2's world in Master Game, with the floor after it
 LADDER = (14, 17)                                 # where Master Game's ladder drops, once no enemy is left
 
@@ -21,6 +22,10 @@ class Thing:
     cell: tuple[int, int]
     x: float                                     # pixels
     y: float
+
+
+def cannon(v):
+    return v & CANNON == CANNON and not v & BRIDGE
 
 
 @dataclass(frozen=True)
@@ -41,7 +46,7 @@ class Stage:
 
     def passable(self, c):
         v = self.at(c)
-        return not v & (SOLID | SOFT | BOMB) and v & CANNON != CANNON
+        return not v & (SOLID | SOFT | BOMB) and not cannon(v)
 
 
 def _things(raw, slots):

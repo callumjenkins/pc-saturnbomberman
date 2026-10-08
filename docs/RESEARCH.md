@@ -102,14 +102,18 @@ With a pad in port 2, Normal Game asks for 1 PLAYER GAME or 2 PLAYER GAME (from 
 `stage`, 3950 with every item). Pad 2 also joins a 1-player game by pressing START in play, where the
 HUD's right half says PRESS START. Pad 2 is the black bomber, with its own score, and the two share
 the lives. After a boss, both board the ship together. `--coop` on `stage`, `clear`, `attempt` and
-`bot` picks 2 PLAYER GAME with pad 2 idle. Every Normal Game stage but 4-4 has a co-op clear in
+`bot` picks 2 PLAYER GAME with pad 2 idle. Every Normal Game stage has a co-op clear in
 `inputs/clears/` (2-5, 3-3, 4-9 and 5-10 with every item); the bosses' are frame tests (`coop-W-N`).
-On 4-4 the shared lives run out though both are invincible: something there kills without the
-blast or touch the hooks stop, and idle pad 2 never moves away from it. `coop-start` matches Beetle Saturn exactly until
-play begins.
+`coop-start` matches Beetle Saturn exactly until play begins. Master Game is for one player: it
+shows no 1 or 2 PLAYER GAME menu, its HUD has no PRESS START, and pad 2's START does nothing in play.
+
+4-4 lowers stone bridges over its lava (cells 0x5300, the 0x4000 bit set): the cannon bits are set
+too, but a bomber walks over them.
 
 An invincible bomber outlasts the stage's 6:00: the timer then shows minutes and seconds past it
-(21'03 and the like), on one player as on two.
+(21'03 and the like), on one player as on two. Yet a co-op 4-4 run that stalled at the lava lost
+two lives at once (KRNL:0600DACE storing `lives`) about 230 VBlanks after its timer reached 0:00,
+and a third 22000 VBlanks later. Why there and not in the other co-op runs past 6:00 is not known.
 
 ## The item routes uncover a skull
 

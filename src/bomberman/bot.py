@@ -161,7 +161,7 @@ def play(r, limit, log=print, fire=2):
             r.pad("")
             r.step(6)
             continue
-        if stage.at(stage.me.cell) & state.CANNON == state.CANNON:
+        if state.cannon(stage.at(stage.me.cell)):
             r.pad("A")                           # in a cannon: fire out of it
             r.step(10)
             r.pad("")
