@@ -136,13 +136,20 @@ so they play without the invincibility hooks.
 - Pad 2 beats every Normal Game boss alone with pad 1 standing at the start (`bomberman bot W-N --pad 2`,
   frame tests `coop-p2-W-N`); 5-9 took every item, as it did for pad 1.
 - A boss beaten while pad 2 is down takes pad 1 to the ship alone, the lives untouched, and the next
-  stage starts without pad 2 until its START (`coop-boss-p2-out`, 1-7). Pad 2's START does nothing during
-  the next stage's intro.
+  stage starts without pad 2. Once play begins, pad 2's START brings it back on pad 1's cell for a life
+  (`coop-boss-p2-out`, 1-7). The next world's intro waits for a START, and either pad's moves it on.
 - J Ninja (2-9) goes for pad 1 alone while it stands, however near pad 2 is, and for pad 2 once pad 1 is
   down (`coop-ninja`). Swapping which pad stood where, with the invincibility hooks, sent Castle Joe to
   the nearer bomber either way; Rodeon, Egg Birdon and Crator wandered alike, and the 5-9 and 5-10
   machines barely moved.
 - Castle Joe's arms pick up a bomb dropped near them, so it never goes off; one player or two.
+- Pad 2 fires 1-5's deck cannons as pad 1 does, and an octopus hit adds 100 to the score of the bomber
+  whose blast lit the fuse (`coop-deck-cannon-p2`). With pad 1 bombing at (20,9) and pad 2 at (22,13) or
+  (24,9) at the same time, only the cannon over (20,9) fired, so which cells fire the other cannons is open:
+  the 0x08 high byte that (20,8) has is on cells all over the deck.
+- Striking 1-5's enemies by writes can leave the RNG different on Beetle Saturn within 60 VBlanks, and
+  a later cannon shot then hits on one and misses on the other; 1-5 for two with no presses keeps the
+  same RNG on both through 6200. A route that depends on a hit should write the RNG once the strikes settle.
 
 `tick` had been the kernel's count of VBlanks since pad 2 last changed (06006104, one count a port from
 06006100), which went to 0 at pad 2's first press and put every later event at the reference's boot. It
@@ -214,6 +221,7 @@ the route writes the generator's state just before the pickup, as `item-skull` a
 | An egg eaten while riding | f_0601B240 |
 | An item placed when a block breaks / its kind looked up | f_06022B60 / f_06021F82 (the slot's +5) |
 | Pad 1's score, a long | 060C0690 |
+| Pad 2's score, a long; 060C0698 and 060C069C hold pad 1's and pad 2's again | 060C0694 |
 | Master Game floor | stage_2's second byte, with 08 in its first |
 | Not the item list | 060D8C0C: a pool of 2000 14-byte records from a general allocator |
 

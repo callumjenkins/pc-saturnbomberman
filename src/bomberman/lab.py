@@ -94,16 +94,18 @@ def parse_writes(writes):
 
 # Pad 1's bomber on the screen, x and y: what the camera's position shows.
 SCREEN = 0x060C38D4
+SCORES = 0x060C0690   # pad 1's score then pad 2's, a long each
 
 
 def snapshot(read, two=False):
     """What verify compares: pad 1's cell and flags (+0x34, +0x5E), and every bomb. With `two`, also
-    pad 2's cell and flags, where pad 1 is on the screen, and the lives they share."""
+    pad 2's cell and flags, where pad 1 is on the screen, the lives they share and both scores."""
     me = read(OBJECTS, SLOT)
     out = cell_of(me), me[0x34] & 0x80, me[0x5E], bombs(read)
     if two:
         p2 = read(OBJECTS + SLOT, SLOT)
-        out += (cell_of(p2), p2[0x34] & 0x80, p2[0x5E], read(SCREEN, 4).hex(), read(GAME.symbols["lives"], 1)[0])
+        out += (cell_of(p2), p2[0x34] & 0x80, p2[0x5E], read(SCREEN, 4).hex(), read(GAME.symbols["lives"], 1)[0],
+                read(SCORES, 8).hex())
     return out
 
 
