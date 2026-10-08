@@ -109,6 +109,15 @@ play begins.
 An invincible bomber outlasts the stage's 6:00: the timer then shows minutes and seconds past it
 (21'03 and the like), on one player as on two.
 
+## The item routes uncover a skull
+
+`item-1` to `item-26`, `egg-burn` and `egg-second` all uncover a skull, whatever kind `hide` writes,
+on ours and on Beetle Saturn alike (`bomberman compare item-1`), so they test the skull and not
+the items they are named for. The write lands where the game looks: cell (8,17)'s word keeps slot
+60, and the reveal (f_060222D8, which takes the kind as its argument and asks for sprite 0xBF plus
+the kind) stores kind 1 at the slot's +5. Something else picks what is drawn and what it does. Until
+that is found, no item's effect is tested, the vest's included.
+
 ## Controls found
 
 - C drops a bomb. A uses a dino's ability. Pressing a direction with A moves pad 1 as well.
