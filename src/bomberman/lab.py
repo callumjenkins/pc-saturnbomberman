@@ -98,12 +98,12 @@ SCREEN = 0x060C38D4
 
 def snapshot(read, two=False):
     """What verify compares: pad 1's cell and flags (+0x34, +0x5E), and every bomb. With `two`, also
-    pad 2's cell and flags and where pad 1 is on the screen."""
+    pad 2's cell and flags, where pad 1 is on the screen, and the lives they share."""
     me = read(OBJECTS, SLOT)
     out = cell_of(me), me[0x34] & 0x80, me[0x5E], bombs(read)
     if two:
         p2 = read(OBJECTS + SLOT, SLOT)
-        out += (cell_of(p2), p2[0x34] & 0x80, p2[0x5E], read(SCREEN, 4).hex())
+        out += (cell_of(p2), p2[0x34] & 0x80, p2[0x5E], read(SCREEN, 4).hex(), read(GAME.symbols["lives"], 1)[0])
     return out
 
 

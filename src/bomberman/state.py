@@ -9,7 +9,9 @@ SLOTS = 50
 ENEMY_SLOTS = range(10, SLOTS)
 
 SOLID, SOFT, BOMB, FIRE = 0x80, 0x10, 0x20, 0x07
-CANNON = 0x0300                                   # both bits: a cannon, which keeps a bomber in it until A fires it out
+# Both bits: a cannon (0x0B08 on 3-7), which holds a bomber until A, B or L climbs it back out, or
+# railway track (0x0F00 on 3-2 and 3-3), whose trains run a bomber down.
+CANNON = 0x0300
 BRIDGE = 0x4000                                   # 4-4's stone bridges over the lava, 0x5300 once lowered: floor, not a cannon
 MASTER_WORLD = 8                                  # stage_2's world in Master Game, with the floor after it
 LADDER = (14, 17)                                 # where Master Game's ladder drops, once no enemy is left

@@ -1,0 +1,20 @@
+{
+"about": "Normal Game for two, 1-1: the timer written down to 2 seconds runs out with both bombers playing",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+1,
+1
+],
+"from": 5800,
+"invincible": false,
+"coop": true
+},
+"presses": [],
+"writes": [
+"5800:060C1002=0078"
+],
+"end": 6200,
+"shots": "5930,6050,6200"
+}

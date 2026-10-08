@@ -557,16 +557,63 @@
   "17126": "7b8649e0fa7d38bf66fb78bbe687e34e",
   "17186": "7e71bf9cf98a14742b1955d92d65356c"
  },
+ "coop-both-out": {
+  "5968": "58f38fb18ab9d4721acec9e10185cc0d",
+  "6168": "c0b615e846211c2afbeafc99d980a1d1",
+  "6268": "95029b188a1188eb5152491787fbc7fa"
+ },
+ "coop-cannon": {
+  "5314": "1a0a20c5c8ed93fc35ead0b74594068b",
+  "5496": "033636c79cae4eea77c03a36ea0393d9",
+  "5586": "798432f145d226368b725cadba891e35",
+  "5676": "e48b8f8c0d9deb1ae32430a8333075ce"
+ },
+ "coop-friendly-fire": {
+  "5974": "eec2168f10684efd2ce5b3b1ceac9ac0",
+  "6034": "e019d023fde3b392188bb8b1a26c2b39"
+ },
+ "coop-illness-touch": {
+  "5880": "01ec425605ee15adafcdc767a06d8049",
+  "5970": "919c58b6f878c3d17209f3cb3b02fee0"
+ },
  "coop-offscreen": {
   "5960": "b86c331d0bb639ab605ba2d9ff35bde1",
   "6200": "609394c394e20f1948cc0de9306b404c",
   "6440": "fc3ccd336ce4c4802c34166d28642a16",
   "6620": "e5f3a8fffcffb5be5f6cf66c394c7b4c"
  },
+ "coop-p2-dino": {
+  "6194": "4631e7d6432736ed79ec0aec9e1befd8",
+  "6254": "11014581f2e862cf49c40a0277613d6e",
+  "6310": "7fa3bfe6e06205180692b658982d1bf1"
+ },
+ "coop-p2-exit": {
+  "6128": "1373a0e779724ab7b3edc2c1b6e06886",
+  "6278": "be74068158c541a2ff89e1375188bd2c",
+  "6758": "757036fd040e29062903706fe1837ab5"
+ },
+ "coop-p2-out": {
+  "6052": "6993955028732a1246f67d1b188f8d12",
+  "6152": "fbdbad1bdedb72e097e4ae8deed96cb9",
+  "6310": "eb2e271ca3e614b03fe6101e5e161275"
+ },
+ "coop-pause": {
+  "5898": "fd13e3b702401280a2cb3cfabd74b77b",
+  "6026": "60dd887fd14b89d2f59e85cf4ed4ca60"
+ },
+ "coop-remote": {
+  "5948": "d4513d43703930bfc31933f4506900c3",
+  "5984": "9109017177430c6ce6aa06633aba2f9b"
+ },
  "coop-start": {
   "4450": "95a9883476677186d963f42d564d0b15",
   "5600": "96f54353765d16ff5f9958ea2a82ef21",
   "5900": "861fc272ee3d7e267de7246d107d305e"
+ },
+ "coop-time-up": {
+  "5930": "aed1e5c7b04ade699f7f5fde9744f2d0",
+  "6050": "a727fa512c4072e25cdc05b7db574a79",
+  "6200": "025d8d05cc5053bd5fe9da7ceb3932e9"
  },
  "die": {
   "5860": "817d48e151845eed39c5470bc46325d3",

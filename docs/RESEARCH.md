@@ -110,6 +110,34 @@ shows no 1 or 2 PLAYER GAME menu, its HUD has no PRESS START, and pad 2's START 
 4-4 lowers stone bridges over its lava (cells 0x5300, the 0x4000 bit set): the cannon bits are set
 too, but a bomber walks over them.
 
+### What two bombers do to each other
+
+Each is a co-op mechanic matching Beetle Saturn (`lab verify` compares pad 2, pad 1's place on the screen
+and the lives in a route that plays pad 2). Most strike the enemies and give a bomber wall pass by writes,
+so they play without the invincibility hooks.
+
+- The camera follows pad 1 alone. Pad 2 walks on off the screen, and neither bomber meets an edge
+  (`coop-offscreen`: 27 cells apart on 1-5). In the bot's clears, with pad 2 idle, they were up to 30
+  columns and 20 rows apart.
+- A bomber that dies drops out with the lives untouched, and the HUD's half says PRESS START again; its
+  START brings it back on the other bomber's cell for a life (`coop-p2-out`). Both down at once, by
+  bombs or by the timer running out, costs two lives and starts the stage again (`coop-both-out`,
+  `coop-time-up`). Joining a 1 PLAYER GAME with pad 2's START costs a life too.
+- Bombs hurt either bomber (`coop-friendly-fire`), and each bomber's B sets off its own remote bombs
+  only (`coop-remote`).
+- Pad 2's START pauses and unpauses (`coop-pause`).
+- Either bomber on the open exit clears the stage for both (`coop-p2-exit`).
+- A cannon holds one bomber (+0x5E 0x0200). The other walks onto it and waits there, and is taken in as
+  the first climbs out (`coop-cannon`, 3-7's at (10,55)). A, B and L climb out, the bot's "fire" included;
+  what fires a cannon is not yet found: no button, and no blast beside it.
+- An illness passes by touch, with the time it has left, and stays with the bomber that had it
+  (`coop-illness-touch`).
+- Pad 2 hatches and rides a dino as pad 1 does (`coop-p2-dino`); a hit costs the dino, not the bomber.
+
+`tick` had been the kernel's count of VBlanks since pad 2 last changed (06006104, one count a port from
+06006100), which went to 0 at pad 2's first press and put every later event at the reference's boot. It
+is port 3's count now.
+
 An invincible bomber outlasts the stage's 6:00: the timer then shows minutes and seconds past it
 (21'03 and the like), on one player as on two. Yet a co-op 4-4 run that stalled at the lava lost
 two lives at once (KRNL:0600DACE storing `lives`) about 230 VBlanks after its timer reached 0:00,

@@ -1,0 +1,29 @@
+{
+"about": "Normal Game for two, 1-1: pad 2 dies to its own bomb and drops out with the lives untouched; its START brings it back for a life",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+1,
+1
+],
+"from": 5800,
+"invincible": false,
+"coop": true
+},
+"presses": [
+"5800:LEFT",
+"5816:",
+"5816:LEFT",
+"5832:",
+"5832:LEFT",
+"5848:",
+"5848:2.C",
+"5852:2.",
+"6152:2.START",
+"6160:2."
+],
+"writes": [],
+"end": 6310,
+"shots": "6052,6152,6310"
+}

@@ -1,0 +1,27 @@
+{
+"about": "Normal Game for two, 1-1: pad 1, with the skull's illness 0001 written in, walks onto pad 2, which catches it",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+1,
+1
+],
+"from": 5800,
+"invincible": false,
+"coop": true
+},
+"presses": [
+"5810:RIGHT",
+"5834:",
+"5834:RIGHT",
+"5860:",
+"5880:LEFT",
+"5910:"
+],
+"writes": [
+"5800:060D5F5A=00010258"
+],
+"end": 5970,
+"shots": "5880,5970"
+}

@@ -1,0 +1,23 @@
+{
+"about": "Normal Game for two, 1-1: both die at once, two lives go and the stage starts again",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+1,
+1
+],
+"from": 5800,
+"invincible": false,
+"coop": true
+},
+"presses": [
+"5800:C",
+"5804:",
+"5804:2.C",
+"5808:2."
+],
+"writes": [],
+"end": 6268,
+"shots": "5968,6168,6268"
+}

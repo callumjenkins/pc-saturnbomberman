@@ -162,7 +162,7 @@ def play(r, limit, log=print, fire=2):
             r.step(6)
             continue
         if state.cannon(stage.at(stage.me.cell)):
-            r.pad("A")                           # in a cannon: fire out of it
+            r.pad("A")                           # in a cannon: climb back out
             r.step(10)
             r.pad("")
             r.step(60)
