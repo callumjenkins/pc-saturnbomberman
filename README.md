@@ -49,13 +49,12 @@ ignore it too.
 
 ### Launcher
 
-`uv run bomberman play --launcher` opens a menu in the window before the game: the disc, the number
-of players (the multitaps), the keyboard and gamepad bindings, fullscreen, window size and volume.
+`uv run bomberman play --launcher` opens a menu in the window before the game: the number of
+players (the multitaps), the keyboard and gamepad bindings, fullscreen, window size and volume.
 A mouse, the keyboard or any gamepad works it; Start begins the game in the same window. Each change
 is saved to `settings.ini` as it is made, so the next launch opens with the same choices, and the
 session records the multitaps for `replay`. Rebinding takes one key or button per Saturn button;
-gamepads share one set. The `saturn` binary opens the same menu when it runs without `--cue`, with a
-file dialog for the disc, and checks the chosen disc is the one the build came from.
+gamepads share one set. The disc is still `prepare`'s, as for every run.
 
 The port supports one disc: Saturn Bomberman (USA), MK-81070 V1.003. `disc.json` lists every
 file on it with its size and SHA-1, and `prepare` stops before extracting anything if a file
