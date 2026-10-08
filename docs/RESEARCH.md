@@ -131,7 +131,18 @@ other bombs in a line the way it faces when C is pressed again on its own bomb; 
 kicked into a wall, bounces between the wall and the cell before it until it goes off, and thrown it had
 neither landed nor gone off 450 VBlanks later; item 23's fire turns along a wall it reaches, for the
 reach it has left. Item 24 (a bomb in a ring) blasts as a plain bomb does, 4 VBlanks later, kicked or
-thrown alike; what it is for is not yet seen. Bombs are not objects in the `objects` array. Item 22 turns pad 1 red and counts about 1170 VBlanks down at +0x78; what it does is not yet seen.
+thrown alike; what it is for is not yet seen. Bombs are not objects in the `objects` array. Item 22 counts 1200 VBlanks down at +0x78 (set by f_060217E4, the pickup's effects) and turns pad 1
+red; in a battle nothing else differs in RAM from an apple's pickup, and walking, bombs and dying are the
+same, so what it does is not yet seen.
+
+The skull draws an illness with the game's random numbers (f_0600A0EC(10), a word from the table at
+060B48E4) and gives it 600 VBlanks; the devil draws one too. The illness is a word at +0x5A, one bit
+each: 0001 slow, 0002 fast, 0004 short fuse, 0008 fuse 60 VBlanks longer, 0010 one-cell fire, 0020 no
+bombs, 0040 not yet seen (perhaps passed on by touch), 0080 reversed directions, 0100 walking on once
+let go, 0200 bombs set by themselves (`illness-*` write each). The random numbers are a 55-entry
+lagged Fibonacci generator: the index at 060BF4F4, the table after it. A walled-in CPU draws from it
+every 8 VBlanks from 7219, at its own pace on Beetle Saturn, so the two pick different illnesses unless
+the route writes the generator's state just before the pickup, as `item-skull` and `item-devil` do.
 
 ## Controls found
 
