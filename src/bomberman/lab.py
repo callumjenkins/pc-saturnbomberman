@@ -240,9 +240,9 @@ def run_clears_with_coverage(jobs=8):
     run.build.ensure(run.GAME, log=lambda s: None)
 
     def one(c):
-        world, number, items = c
-        out = run.out_dir(f"clear-{world}-{number}{routes.tag(items)}")
-        run.run(routes.clear(world, number, items), out, more=["--coverage", f"{out}/coverage.txt"], learn_seeds=False)
+        world, number, items, coop = c
+        out = run.out_dir(f"clear-{world}-{number}{routes.tag(items, coop)}")
+        run.run(routes.clear(world, number, items, coop), out, more=["--coverage", f"{out}/coverage.txt"], learn_seeds=False)
     with ThreadPoolExecutor(jobs) as pool:
         list(pool.map(one, videos.saved_clears()))
 

@@ -249,11 +249,12 @@ def stage_start(world):
     return 6600 if world == MASTER else 5700
 
 
-def stage(world, number, items=False):
+def stage(world, number, items=False, coop=False):
     """Stage WORLD-NUMBER as the game shows it (from 1), through Normal Game's start with the world and
     stage written over the ones it chose; START skips the opening movie. Play starts at about VBlank
     5620, or 5000 with every item (the title's held code), whose start comes sooner. World M is Master
-    Game's floors."""
+    Game's floors. With `coop`, pad 2 is plugged in, so Normal Game asks for 1 or 2 players, and the
+    route picks 2: pad 2 plays as the black bomber and the two share their lives."""
     from .run import GAME
     if world == MASTER and not items:
         return floor(number)
@@ -264,30 +265,34 @@ def stage(world, number, items=False):
     names = ("stage", "stage_2", "stage_3", "stage_saved")
     if items:
         presses, at = world_presses(ITEMS) + tap(4200, "START", 10), 3950
+    elif coop:
+        presses = ("1000:2.",) + TO_NORMAL + tap(4200, "START", 10) + tap(4400, "DOWN", 8) + tap(4800, "START", 10)
+        presses, at = presses + tap(5100, "START", 10), 4850
     else:
         presses, at = TO_NORMAL + tap(4200, "START", 10) + tap(4500, "START", 10), 4250
-    return Route(f"stage {world}-{number}{' with every item' if items else ''}, from Normal Game with the stage select",
+    return Route(f"stage {world}-{number}{' with every item' if items else ''}{' for two' if coop else ''}, "
+                 "from Normal Game with the stage select",
                  presses, 5700, "5700", writes=tuple(f"{at}:{GAME.symbols[n]:08X}={value}" for n in names))
 
 
-def clear(world, number, items=False):
+def clear(world, number, items=False, coop=False):
     """Stage WORLD-NUMBER cleared by the bot (bomberman bot), replayed from the presses it saved in
     inputs/clears/; the run ends a few seconds after its last press, on the next stage's start."""
-    base = stage(world, number, items)
-    saved = presses_file(f"clears/{world}-{number}{'-items' if items else ''}.txt")
+    base = stage(world, number, items, coop)
+    saved = presses_file(f"clears/{world}-{number}{tag(items, coop)}.txt")
     presses = tuple(p for p in saved if ":@" not in p)
     writes = tuple(p.replace(":@", ":") for p in saved if ":@" in p)       # the bot's strikes (bot.strike)
     end = int(saved[-1].split(":")[0]) + 300
-    return Route(f"stage {world}-{number} cleared by the bot", base.presses + presses, end, str(end),
+    return Route(f"stage {world}-{number}{' for two' if coop else ''} cleared by the bot", base.presses + presses, end, str(end),
                  invincible=True, writes=base.writes + writes)
 
 
-def attempt(world, number, items=False):
+def attempt(world, number, items=False, coop=False):
     """The bot's last run at stage WORLD-NUMBER, cleared or not, replayed from the presses it left in
     build/run/bot-WORLD-NUMBER/; the run ends a few seconds after its last press."""
     from .run import out_dir
-    base = stage(world, number, items)
-    saved = tuple(open(f"{out_dir(f'bot-{world}-{number}{tag(items)}')}/presses.txt").read().strip().split(","))
+    base = stage(world, number, items, coop)
+    saved = tuple(open(f"{out_dir(f'bot-{world}-{number}{tag(items, coop)}')}/presses.txt").read().strip().split(","))
     presses = tuple(p for p in saved if ":@" not in p)
     writes = tuple(p.replace(":@", ":") for p in saved if ":@" in p)
     end = int(saved[-1].split(":")[0]) + 300
@@ -588,6 +593,25 @@ def boss_late(world, number, cut, items=False, length=3600):
                  writes=writes)
 
 
+def coop_start():
+    """2 Player Game's stage 1-1: pad 2 plugged in, 2 PLAYER GAME picked, both bombers placed with a
+    HUD each."""
+    base = stage(1, 1, coop=True)
+    return Route("2 Player Game: both bombers at stage 1-1's start", base.presses, 5900, "4450,5600,5900",
+                 writes=base.writes)
+
+
+def coop_boss(world, number, flight):
+    """The boss stage's saved co-op clear, pictured every second from the boss's last moments through
+    the two bombers boarding the ship and flying off (`flight`, from its first frame), to the end."""
+    base = clear(world, number, coop=True)
+    shots = ",".join(str(v) for v in range(flight - 60, base.vblanks + 1, 60))
+    return dataclasses.replace(base, about=f"{BOSSES[world, number]} beaten by two: both board the ship", shots=shots)
+
+
+COOP_ROUTES = {"coop-start": coop_start, "coop-1-7": lambda: coop_boss(1, 7, 10400)}
+
+
 BOSS_ROUTES = {
     **{f"boss-{w}-{n}": (lambda w=w, n=n: boss(w, n)) for w, n in BOSSES},
     "boss-5-9-crushed": lambda: boss_late(5, 9, 6700, items=True),
@@ -611,8 +635,9 @@ def com_level(level):
                             single().presses, 8900, "7200,8000,8900"), com_level=level)
 
 
-def tag(items):
-    return "-items" if items else ""
+def tag(items, coop=False):
+    """The suffix that tells a stage's clears and runs apart: with every item, or for two players."""
+    return ("-items" if items else "") + ("-coop" if coop else "")
 
 
 ROUTES = {"normal": normal, "single": single, "battle": battle,
@@ -627,6 +652,6 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           **{name: (lambda name=name: mechanic(name)) for name in MECHANICS},
           "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
-          "master-ending": master_ending, "cannon": cannon, **BOSS_ROUTES,
+          "master-ending": master_ending, "cannon": cannon, **BOSS_ROUTES, **COOP_ROUTES,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},
           **{f"arena-{n}-{sky}": (lambda n=n, sky=sky: arena(n, sky)) for n in range(1, len(ARENAS) + 1) for sky in SKIES[1:]}}

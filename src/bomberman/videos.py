@@ -18,20 +18,22 @@ def runs_dir():
 
 
 def saved_clears():
-    """(world, number, items) for every clear in inputs/clears/, Normal Game's then Master Game's."""
+    """(world, number, items, coop) for every clear in inputs/clears/, Normal Game's then Master Game's."""
     out = []
     for path in glob.glob(f"{ROOT}/inputs/clears/*.txt"):
         name = os.path.basename(path)[:-4]
+        coop = name.endswith("-coop")
+        name = name.removesuffix("-coop")
         items = name.endswith("-items")
         world, number = name.removesuffix("-items").split("-")
-        out.append((world if world == routes.MASTER else int(world), int(number), items))
+        out.append((world if world == routes.MASTER else int(world), int(number), items, coop))
     return sorted(out, key=lambda c: (c[0] == routes.MASTER, str(c[0]), c[1]))
 
 
-def keep(video, world, number, items):
+def keep(video, world, number, items, coop=False):
     """Cuts a clear's whole-run video to start a second after the menus' last press, into the runs folder."""
-    start = max(int(p.split(":")[0]) for p in routes.stage(world, number, items).presses) + 60
-    dest = os.path.join(runs_dir(), "clears", f"{world}-{number}.mp4")
+    start = max(int(p.split(":")[0]) for p in routes.stage(world, number, items, coop).presses) + 60
+    dest = os.path.join(runs_dir(), "clears", f"{world}-{number}{'-coop' if coop else ''}.mp4")
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{start / 60:.2f}", "-i", video, "-c", "copy",
                     dest + ".new.mp4"], check=True)
@@ -39,12 +41,12 @@ def keep(video, world, number, items):
     return dest
 
 
-def record(world, number, items):
-    route = routes.clear(world, number, items)
-    out = run.out_dir(f"clear-{world}-{number}{routes.tag(items)}")
+def record(world, number, items, coop=False):
+    route = routes.clear(world, number, items, coop)
+    out = run.out_dir(f"clear-{world}-{number}{routes.tag(items, coop)}")
     video = os.path.join(os.path.abspath(out), "video.mp4")
     run.run(route, out, more=["--video", video], learn_seeds=False)
-    return keep(video, world, number, items)
+    return keep(video, world, number, items, coop)
 
 
 def record_route(name, lead=600, start=None):

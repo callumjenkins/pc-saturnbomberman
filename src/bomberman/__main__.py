@@ -34,10 +34,10 @@ def stage_arg(ap, text):
         ap.error(f"a stage is WORLD-STAGE, such as 3-2, or {routes.MASTER}-FLOOR for Master Game")
 
 
-def clear_stage(world, number, limit, window, video=False, items=False):
-    route = routes.stage(world, number, items)
+def clear_stage(world, number, limit, window, video=False, items=False, coop=False):
+    route = routes.stage(world, number, items, coop)
     start = routes.stage_start(world)
-    out = run.out_dir(f"bot-{world}-{number}{routes.tag(items)}")
+    out = run.out_dir(f"bot-{world}-{number}{routes.tag(items, coop)}")
     more = ["--video", os.path.join(out, "video.mp4")] if video else []
     with run.play(out, route, until=start, invincible=True, window=window, more=more) as r:
         cleared = bot.play(r, limit)
@@ -46,10 +46,11 @@ def clear_stage(world, number, limit, window, video=False, items=False):
         open(os.path.join(r.out, "presses.txt"), "w").write(",".join(presses) + "\n")
         print(f"{world}-{number}: {'cleared' if cleared else 'not cleared'} at VBlank {r.vblank}, {len(presses)} presses")
     if cleared:
-        path = os.path.join(ROOT, "inputs", "clears", f"{world}-{number}{routes.tag(items)}.txt")
+        path = os.path.join(ROOT, "inputs", "clears", f"{world}-{number}{routes.tag(items, coop)}.txt")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         open(path, "w").write(",".join(presses) + "\n")
-        print(f"saved {os.path.relpath(path, ROOT)}: uv run bomberman run clear {world}-{number}{' --items' if items else ''}")
+        print(f"saved {os.path.relpath(path, ROOT)}: uv run bomberman run clear {world}-{number}"
+              f"{' --items' if items else ''}{' --coop' if coop else ''}")
 
 
 def main(argv=None):
@@ -75,6 +76,7 @@ def main(argv=None):
     b.add_argument("--window", action="store_true", help="play it in a window")
     b.add_argument("--video", action="store_true", help="record it as video.mp4 beside its log")
     b.add_argument("--items", action="store_true", help="start with every item (the title's held code)")
+    b.add_argument("--coop", action="store_true", help="2 Player Game: pad 2 joins, idle, and the two share lives")
     r = sub.add_parser("run")
     r.add_argument("route", choices=[*routes.ROUTES, "code", "stage", "clear", "attempt"])
     r.add_argument("which", nargs="?", help="code: its presses in turn, such as L,R,Y,UP; stage: such as 3-2")
@@ -88,6 +90,7 @@ def main(argv=None):
     r.add_argument("--out", help="the run's directory (default build/run/ROUTE)")
     r.add_argument("--video", action="store_true", help="record it as video.mp4 beside its log")
     r.add_argument("--items", action="store_true", help="stage, clear, attempt: with every item")
+    r.add_argument("--coop", action="store_true", help="stage, clear, attempt: 2 Player Game, pad 2 idle")
     v = sub.add_parser("videos", help="videos of the saved clears, kept in $BOMBERMAN_RUNS")
     v.add_argument("stages", nargs="*", help="such as 3-2 or M-4 (default: every saved clear)")
     v.add_argument("--jobs", type=int, default=6)
@@ -197,7 +200,7 @@ def main(argv=None):
             print(line)
     elif args.command == "bot":
         world, number = stage_arg(ap, args.stage)
-        clear_stage(world, number, args.limit, args.window, args.video, args.items)
+        clear_stage(world, number, args.limit, args.window, args.video, args.items, args.coop)
     elif args.command == "routes":
         for name, make in routes.ROUTES.items():
             print(f"{name:10} {make().about}")
@@ -212,7 +215,7 @@ def main(argv=None):
             world, number = stage_arg(ap, args.which)
             make = {"stage": routes.stage, "clear": routes.clear, "attempt": routes.attempt}[args.route]
             try:
-                route = make(world, number, args.items)
+                route = make(world, number, args.items, args.coop)
             except (ValueError, FileNotFoundError) as e:
                 ap.error(str(e))
         else:
@@ -220,7 +223,7 @@ def main(argv=None):
         if args.invincible:
             route = dataclasses.replace(route, invincible=True)
         extra = args.extra.split(",") if args.extra else ()
-        name = f"{args.route}-{args.which}{routes.tag(args.items)}" if args.route in ("stage", "clear", "attempt") else args.route
+        name = f"{args.route}-{args.which}{routes.tag(args.items, args.coop)}" if args.route in ("stage", "clear", "attempt") else args.route
         out = args.out or run.out_dir(name)
         if args.video:
             more = [*more, "--video", os.path.join(os.path.abspath(out), "video.mp4")]
@@ -228,7 +231,7 @@ def main(argv=None):
                       learn_seeds=not args.once, recompile=args.recompile,
                       log=lambda s: print(s, flush=True)))
         if args.video and args.route == "clear":
-            print("kept", videos.keep(os.path.join(os.path.abspath(out), "video.mp4"), world, number, args.items))
+            print("kept", videos.keep(os.path.join(os.path.abspath(out), "video.mp4"), world, number, args.items, args.coop))
 
 
 if __name__ == "__main__":

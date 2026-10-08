@@ -16,8 +16,8 @@ from .prepare import check_prepared
 
 def compare(route, name, core_so, bios, shots=None, log=print):
     """Lines of the report, also written to build/compare/NAME/report.txt."""
-    if route.writes or route.invincible or "--multitap" in route.args:
-        raise SystemExit(f"{name}: the core can play only plain presses on one pad (no writes, hooks or multitap)")
+    if route.invincible or "--multitap" in route.args:
+        raise SystemExit(f"{name}: the core can play only presses on the two ports and writes (no hooks or multitap)")
     check_prepared()
     out = f"{BUILD}/compare/{name}"
     os.makedirs(out, exist_ok=True)
@@ -35,7 +35,8 @@ def compare(route, name, core_so, bios, shots=None, log=print):
 
     log(f"{name}: the core")
     lines = []
-    core = reference.Core(core_so, bios, cue(), save_dir=out)
+    pads = reference.presses(",".join(route.presses))
+    core = reference.Core(core_so, bios, cue(), save_dir=out, ports=1 + any(p for what in pads.values() for p, _ in what))
 
     def shot(v, n):
         dots, worst, picture = reference.difference(ours[v], core.frame)
@@ -44,8 +45,8 @@ def compare(route, name, core_so, bios, shots=None, log=print):
         lines.append(f"{v:6} {n:6} {dots:7} {worst:4}")
 
     # the core's frames run ahead of ours by the BIOS and its loads: allow it twice ours and a minute
-    end = reference.play_synced(core, tick, ticks, reference.presses(",".join(route.presses)), shots,
-                                2 * shots[-1] + 3600, shot)
+    end = reference.play_synced(core, tick, ticks, pads, shots, 2 * shots[-1] + 3600, shot,
+                                reference.writes(route.writes))
     core.close()
     report = [f"{name}: our VBlank, the core's frame, dots that differ, the largest channel error",
               *lines]
