@@ -133,6 +133,16 @@ so they play without the invincibility hooks.
 - An illness passes by touch, with the time it has left, and stays with the bomber that had it
   (`coop-illness-touch`).
 - Pad 2 hatches and rides a dino as pad 1 does (`coop-p2-dino`); a hit costs the dino, not the bomber.
+- Pad 2 beats every Normal Game boss alone with pad 1 standing at the start (`bomberman bot W-N --pad 2`,
+  frame tests `coop-p2-W-N`); 5-9 took every item, as it did for pad 1.
+- A boss beaten while pad 2 is down takes pad 1 to the ship alone, the lives untouched, and the next
+  stage starts without pad 2 until its START (`coop-boss-p2-out`, 1-7). Pad 2's START does nothing during
+  the next stage's intro.
+- J Ninja (2-9) goes for pad 1 alone while it stands, however near pad 2 is, and for pad 2 once pad 1 is
+  down (`coop-ninja`). Swapping which pad stood where, with the invincibility hooks, sent Castle Joe to
+  the nearer bomber either way; Rodeon, Egg Birdon and Crator wandered alike, and the 5-9 and 5-10
+  machines barely moved.
+- Castle Joe's arms pick up a bomb dropped near them, so it never goes off; one player or two.
 
 `tick` had been the kernel's count of VBlanks since pad 2 last changed (06006104, one count a port from
 06006100), which went to 0 at pad 2's first press and put every later event at the reference's boot. It

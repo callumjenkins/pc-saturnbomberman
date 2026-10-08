@@ -1,0 +1,32 @@
+{
+"about": "Normal Game for two, 1-7: pad 2 dies to its own bomb, the boss is struck, pad 1 boards the ship alone and the next stage starts without pad 2 until its START",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+1,
+7
+],
+"from": 7430,
+"invincible": false,
+"coop": true
+},
+"presses": [
+"7430:2.DOWN",
+"7446:2.",
+"7446:2.DOWN",
+"7466:2.",
+"7466:2.RIGHT",
+"7484:2.",
+"7484:2.C",
+"7490:2.",
+"10800:2.START",
+"10808:2."
+],
+"writes": [
+"7640:060D6580=40",
+"7670:060D640C=60"
+],
+"end": 10958,
+"shots": "7640,7700,8600,10700,10958"
+}

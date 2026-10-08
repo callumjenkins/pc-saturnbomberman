@@ -78,12 +78,13 @@ def me(r, pad=1):
     return found[0] if found else None
 
 
-def read(r):
+def read(r, pad=1):
+    """The map, the pad's bomber as `me`, the enemies and the exit."""
     sym = GAME.symbols
     raw = r.read(sym["cells"], 64 * 64 * 2)
     cells = tuple(int.from_bytes(raw[2 * i:2 * i + 2], "big") for i in range(64 * 64))
     objs = r.read(sym["objects"], SLOT * SLOTS)
-    bomber = _things(objs, [0])
+    bomber = _things(objs, [pad - 1])
     exit_cell = int.from_bytes(r.read(sym["exit_cell"], 2), "big")
     # a bomb is an object in the enemies' slots too, on a cell the map marks as holding one
     # (a slot can also hold a cell off the map, in a stage that keeps other things there)

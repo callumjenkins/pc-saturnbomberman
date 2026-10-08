@@ -278,24 +278,25 @@ def stage(world, number, items=False, coop=False):
                  presses, 5700, "5700", writes=tuple(f"{at}:{GAME.symbols[n]:08X}={value}" for n in names))
 
 
-def clear(world, number, items=False, coop=False):
+def clear(world, number, items=False, coop=False, pad=1):
     """Stage WORLD-NUMBER cleared by the bot (bomberman bot), replayed from the presses it saved in
     inputs/clears/; the run ends a few seconds after its last press, on the next stage's start."""
-    base = stage(world, number, items, coop)
-    saved = presses_file(f"clears/{world}-{number}{tag(items, coop)}.txt")
+    base = stage(world, number, items, coop or pad == 2)
+    saved = presses_file(f"clears/{world}-{number}{tag(items, coop, pad)}.txt")
     presses = tuple(p for p in saved if ":@" not in p)
     writes = tuple(p.replace(":@", ":") for p in saved if ":@" in p)       # the bot's strikes (bot.strike)
     end = int(saved[-1].split(":")[0]) + 300
-    return Route(f"stage {world}-{number}{' for two' if coop else ''} cleared by the bot", base.presses + presses, end, str(end),
+    by = " by pad 2" if pad == 2 else " for two" if coop else ""
+    return Route(f"stage {world}-{number}{by} cleared by the bot", base.presses + presses, end, str(end),
                  invincible=True, writes=base.writes + writes)
 
 
-def attempt(world, number, items=False, coop=False):
+def attempt(world, number, items=False, coop=False, pad=1):
     """The bot's last run at stage WORLD-NUMBER, cleared or not, replayed from the presses it left in
     build/run/bot-WORLD-NUMBER/; the run ends a few seconds after its last press."""
     from .run import out_dir
-    base = stage(world, number, items, coop)
-    saved = tuple(open(f"{out_dir(f'bot-{world}-{number}{tag(items, coop)}')}/presses.txt").read().strip().split(","))
+    base = stage(world, number, items, coop or pad == 2)
+    saved = tuple(open(f"{out_dir(f'bot-{world}-{number}{tag(items, coop, pad)}')}/presses.txt").read().strip().split(","))
     presses = tuple(p for p in saved if ":@" not in p)
     writes = tuple(p.replace(":@", ":") for p in saved if ":@" in p)
     end = int(saved[-1].split(":")[0]) + 300
@@ -626,18 +627,34 @@ def coop_start():
                  writes=base.writes)
 
 
-def coop_boss(world, number, items=False):
+def coop_boss(world, number, items=False, pad=1):
     """The boss stage's saved co-op clear, pictured every second over its last 25 seconds: the boss's end,
-    then the two bombers leaving together."""
-    base = clear(world, number, items, coop=True)
+    then the two bombers leaving together. With pad 2, the clear the bot played with pad 2, pad 1 still."""
+    base = clear(world, number, items, coop=True, pad=pad)
     shots = ",".join(str(v) for v in range(base.vblanks - 1500, base.vblanks + 1, 60))
-    return dataclasses.replace(base, about=f"{BOSSES[world, number]} beaten by two, and the way out", shots=shots)
+    by = "pad 2 alone, pad 1 standing by" if pad == 2 else "two"
+    return dataclasses.replace(base, about=f"{BOSSES[world, number]} beaten by {by}, and the way out", shots=shots)
 
+
+def tag(items, coop=False, pad=1):
+    """The suffix that tells a stage's clears and runs apart: with every item, for two players, and played
+    by pad 2 while pad 1 stands still."""
+    return ("-items" if items else "") + ("-coop" if coop or pad == 2 else "") + ("-p2" if pad == 2 else "")
+
+
+def saved(world, number, items, coop, pad=1):
+    """Whether the bot's clear of the stage is in inputs/clears/."""
+    return os.path.exists(os.path.join(ROOT, "inputs", "clears", f"{world}-{number}{tag(items, coop, pad)}.txt"))
+
+
+# The bosses pad 2 beat only with every item.
+P2_ITEMS = {(5, 9), (5, 10)}
 
 COOP_ROUTES = {"coop-start": coop_start,
                **{f"coop-{w}-{n}": (lambda w=w, n=n: coop_boss(w, n, items=(w, n) == (5, 10)))
-                  for w, n in BOSSES if w != MASTER and os.path.exists(os.path.join(
-                      ROOT, "inputs", "clears", f"{w}-{n}{'-items' if (w, n) == (5, 10) else ''}-coop.txt"))}}
+                  for w, n in BOSSES if w != MASTER and saved(w, n, (w, n) == (5, 10), True)},
+               **{f"coop-p2-{w}-{n}": (lambda w=w, n=n: coop_boss(w, n, items=(w, n) in P2_ITEMS, pad=2))
+                  for w, n in BOSSES if w != MASTER and saved(w, n, (w, n) in P2_ITEMS, True, 2)}}
 
 
 BOSS_ROUTES = {
@@ -661,11 +678,6 @@ def com_level(level):
     twice as often as at 1 and kill each other inside 40 seconds; 1 and 2 played the same 40 seconds."""
     return with_rules(Route(f"a single battle with the CPUs at Com Level {level}, pad 1 idle",
                             single().presses, 8900, "7200,8000,8900"), com_level=level)
-
-
-def tag(items, coop=False):
-    """The suffix that tells a stage's clears and runs apart: with every item, or for two players."""
-    return ("-items" if items else "") + ("-coop" if coop else "")
 
 
 ROUTES = {"normal": normal, "single": single, "battle": battle,

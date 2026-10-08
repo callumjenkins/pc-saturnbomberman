@@ -134,8 +134,9 @@ def strike(r, enemies):
         r.presses.append(f"{r.vblank}:@{at:08X}={flags.hex()}")
 
 
-def play(r, limit, log=print, fire=2):
-    """Play the stage the run is in until it changes or `limit` VBlanks pass; whether it was cleared."""
+def play(r, limit, log=print, fire=2, pad=1):
+    """Play the stage the run is in with the pad's bomber until it changes or `limit` VBlanks pass; whether
+    it was cleared. Pad 1 moves the cutscenes on."""
     start, end = stage_number(r), r.vblank + limit
     final = start in (bytes([len(routes.STAGES) - 1, routes.STAGES[len(routes.STAGES)] - 1]),
                       bytes([state.MASTER_WORLD, routes.FLOORS - 1]))
@@ -145,7 +146,7 @@ def play(r, limit, log=print, fire=2):
     while r.vblank < end:
         if stage_number(r) != start:
             return True
-        stage = state.read(r)
+        stage = state.read(r, pad)
         if len(stage.enemies) != count:
             count, changed = len(stage.enemies), r.vblank
         if master and stage.enemies and not stage.cores and r.vblank - changed > PATIENCE:
@@ -162,35 +163,35 @@ def play(r, limit, log=print, fire=2):
             r.step(6)
             continue
         if state.cannon(stage.at(stage.me.cell)):
-            r.pad("A")                           # in a cannon: climb back out
+            r.pad("A", pad)                      # in a cannon: climb back out
             r.step(10)
-            r.pad("")
+            r.pad("", pad)
             r.step(60)
             continue
         moves, bomb = plan(stage, fire)
         if not moves and not bomb:
-            r.pad("B")                           # sets off a remote-control bomb, which waits for it
+            r.pad("B", pad)                      # sets off a remote-control bomb, which waits for it
             r.step(4)
-            r.pad("")
+            r.pad("", pad)
             r.step(16)
             continue
         for d in moves[:8]:
-            if not walk(r, d):
+            if not walk(r, d, pad):
                 stuck += 1
                 # a bomber that cannot move is often in a scene with dialogue, which A and C move on
-                r.pad("A" if stuck % 2 else "C")
+                r.pad("A" if stuck % 2 else "C", pad)
                 r.step(4)
-                r.pad("")
+                r.pad("", pad)
                 r.step(10)
                 break
         else:
             stuck = 0
             if bomb and len(moves) <= 8:
-                r.pad("C")
+                r.pad("C", pad)
                 r.step(4)
-                r.pad("B")                       # sets off a remote-control bomb at once; nothing without one
+                r.pad("B", pad)                  # sets off a remote-control bomb at once; nothing without one
                 r.step(4)
-                r.pad("")
+                r.pad("", pad)
                 r.step(2)
         if stuck > 200:
             log(f"{r.vblank}: stuck at {stage.me.cell}")
