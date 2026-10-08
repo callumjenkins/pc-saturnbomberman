@@ -126,8 +126,12 @@ The vest sets flag 0x20 and counts about 575 VBlanks down at +0x56. While it las
 own bomb, and once it runs out (7529 in `vest`) the next one kills it. `use-K` sets a bomb where pad 1
 stands after taking kind K: a plain one goes off at about 7150 and kills pad 1; the remote bomb (4) waits
 for B; the spike bomb's (13) fire runs on through soft blocks; the power bomb's (20) reaches further.
-Kinds 14, 23, 24 and 25 blast there as fire up does, so what they do needs a kick, a throw or a second
-press. Item 22 turns pad 1 red and counts about 1170 VBlanks down at +0x78; what it does is not yet seen.
+In the open arena (the `item-*` mechanics, each matching Beetle Saturn): the line bomb (25) lays pad 1's
+other bombs in a line the way it faces when C is pressed again on its own bomb; the rubber bomb (14),
+kicked into a wall, bounces between the wall and the cell before it until it goes off, and thrown it had
+neither landed nor gone off 450 VBlanks later; item 23's fire turns along a wall it reaches, for the
+reach it has left. Item 24 (a bomb in a ring) blasts as a plain bomb does, 4 VBlanks later, kicked or
+thrown alike; what it is for is not yet seen. Bombs are not objects in the `objects` array. Item 22 turns pad 1 red and counts about 1170 VBlanks down at +0x78; what it does is not yet seen.
 
 ## Controls found
 

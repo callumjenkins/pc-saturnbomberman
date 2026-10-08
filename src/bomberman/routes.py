@@ -511,9 +511,9 @@ def dino_hatch():
 # panel described where neither settles a name.
 ITEM_KINDS = {1: "fire up", 2: "bomb up", 3: "skate", 4: "remote bomb", 5: "bomb pass", 6: "wall pass",
               7: "vest", 8: "clock", 9: "1UP", 10: "geta", 11: "kick", 12: "glove", 13: "spike bomb",
-              14: "a bomb kind (a grey drop)", 15: "an ability (a flame with sparkles)", 16: "skull", 17: "heart",
+              14: "rubber bomb", 15: "an ability (a flame with sparkles)", 16: "skull", 17: "heart",
               18: "apple", 19: "ice cream", 20: "power bomb", 21: "egg",
-              22: "a timed state (Bomberman beside a bomb)", 23: "a bomb kind (an arrow)",
+              22: "a timed state (Bomberman beside a bomb)", 23: "turning fire",
               24: "a bomb kind (a bomb in a ring)", 25: "line bomb", 26: "devil (only with the Devil rule)"}
 ITEM_CELL, ITEM_SLOT = (8, 17), 60             # the soft block beside pad 1's start; a slot no battle uses
 
@@ -533,8 +533,8 @@ def item(kind):
                  single().presses + presses_file("item-presses.txt"), 6966, "6890,6966", writes=hide(kind))
 
 
-# The kinds whose effect shows in pad 1's next bomb set where it stands. 14, 23, 24 and 25 blast as fire up
-# does there: theirs need a kick, a throw or another press.
+# The kinds whose effect shows in pad 1's next bomb set where it stands. 14, 23 and 25 show theirs in the
+# open arena's item-* mechanics; 24 blasts as fire up does, 4 VBlanks later.
 USED_KINDS = (1, 4, 7, 13, 20)
 
 
