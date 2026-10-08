@@ -2,8 +2,8 @@
 `bomberman replay` plays one again headless, the same way, with its log and optionally a video.
 
 A session keeps the pads as the game read them (input.txt), the clock it started at, the saves it
-started with, saturn's own arguments (args.txt, such as --multitap) and the log, so a crash can be
-replayed and looked into.
+started with, saturn's own arguments (args.txt, such as --multitap, and launch.txt, what the launcher
+chose) and the log, so a crash can be replayed and looked into.
 """
 import datetime
 import os
@@ -51,7 +51,7 @@ def tee(args, log_path):
     return code
 
 
-def play(more=()):
+def play(more=(), launcher=False):
     started = datetime.datetime.now().replace(microsecond=0)
     out = os.path.join(PLAYS, started.strftime("%Y%m%d-%H%M%S"))
     os.makedirs(out)
@@ -67,7 +67,7 @@ def play(more=()):
     os.symlink(os.path.basename(out), latest)
     print(f"recording to {out}")
     code = tee([run.GAME.saturn, "--cue", run.cue(), "--out", out, "--clock", clock,
-                "--record-input", f"{out}/input.txt", *more], f"{out}/log.txt")
+                "--record-input", f"{out}/input.txt", *more, *(["--launcher"] if launcher else [])], f"{out}/log.txt")
     print(f"session {os.path.basename(out)} ended with code {code}: bomberman replay {os.path.basename(out)}")
     return code
 
@@ -84,8 +84,8 @@ def replay(name="latest", video=False, window=False, more=()):
     save = "-"
     if os.path.exists(f"{session}/backup-at-start.bin"):
         save = shutil.copy(f"{session}/backup-at-start.bin", f"{out}/backup.bin")
-    played = f"{session}/args.txt"
-    played = open(played).read().split("\n")[:-1] if os.path.exists(played) else []
+    played = [line for name in ("args.txt", "launch.txt") if os.path.exists(f"{session}/{name}")
+              for line in open(f"{session}/{name}").read().split("\n")[:-1]]
     args = [run.GAME.saturn, "--cue", run.cue(), "--out", out, "--save", save, *played,
             "--clock", open(f"{session}/clock.txt").read().strip(),
             *(["--input", f"@{recorded}"] if presses else []), "--vblanks", str(last + 600),

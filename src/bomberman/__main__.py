@@ -60,7 +60,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="bomberman", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="command", required=True)
     sub.add_parser("prepare")
-    sub.add_parser("play")
+    pl = sub.add_parser("play")
+    pl.add_argument("--launcher", action="store_true", help="choose the players, controls and display in a menu first")
     rp = sub.add_parser("replay")
     rp.add_argument("session", nargs="?", default="latest")
     rp.add_argument("--video", action="store_true", help="record it as replay/video.mp4 in the session")
@@ -136,7 +137,7 @@ def main(argv=None):
     elif args.command == "play":
         prepare.check_prepared()
         run.build.ensure(run.GAME)
-        raise SystemExit(session.play(more))
+        raise SystemExit(session.play(more, launcher=args.launcher))
     elif args.command == "replay":
         prepare.check_prepared()
         run.build.ensure(run.GAME)
