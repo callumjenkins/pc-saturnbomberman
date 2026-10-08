@@ -1,4 +1,5 @@
 """Saturn Bomberman on saturn-recomp.
+    bomberman doctor                      check the tools, the disc, the preparation and the build
     bomberman prepare                     check the disc and extract it into build/
     bomberman play [-- SATURN_ARGS...]    play in a window, saves kept in the user's data directory; the
                                           session (pad, clock, log) is kept in build/play/SESSION
@@ -59,6 +60,7 @@ def main(argv=None):
         argv, more = argv[:at], argv[at + 1:]
     ap = argparse.ArgumentParser(prog="bomberman", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="command", required=True)
+    sub.add_parser("doctor")
     sub.add_parser("prepare")
     pl = sub.add_parser("play")
     pl.add_argument("--launcher", action="store_true", help="choose the players, controls and display in a menu first")
@@ -132,7 +134,9 @@ def main(argv=None):
     c.add_argument("--every", type=int, help="a shot every N VBlanks as well as the route's own")
     args = ap.parse_args(argv)
 
-    if args.command == "prepare":
+    if args.command == "doctor":
+        raise SystemExit(0 if prepare.doctor() else 1)
+    elif args.command == "prepare":
         prepare.prepare()
     elif args.command == "play":
         prepare.check_prepared()

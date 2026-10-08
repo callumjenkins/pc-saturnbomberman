@@ -41,6 +41,37 @@ def check_prepared():
         raise SystemExit(f"the disc changed since it was prepared ({cue()}): run bomberman prepare")
 
 
+def doctor():
+    """Every step a play needs, each said to be ready or what to do: the tools, the disc, the
+    preparation and the build. True when play would start."""
+    from saturnrecomp import build, prereqs
+    ready = not prereqs.check()
+    try:
+        image = cue()
+        if not os.path.exists(image):
+            raise SystemExit(f"no disc at {image}: put its .cue and .bin files in iso/ or set BOMBERMAN_CUE")
+        errors, warnings = disc.check(image, expected())
+    except SystemExit as e:
+        print(f"problem: {e}")
+        return False
+    for w in warnings:
+        print(f"note: {w}; the music may differ")
+    if errors:
+        print(f"problem: {image} is not the supported disc:\n  " + "\n  ".join(errors))
+        return False
+    print(f"ok: {image}")
+    try:
+        check_prepared()
+        print("ok: prepared")
+    except SystemExit as e:
+        print(f"to do: {e}")
+        return False
+    from .run import GAME
+    stale = build.stale(GAME)
+    print("ok: built" if not stale else f"note: the next play recompiles first ({', '.join(stale)}), several minutes")
+    return ready
+
+
 def prepare():
     if os.path.exists(PREPARED):
         os.remove(PREPARED)

@@ -18,7 +18,22 @@ uv run bomberman play         # recompiles and builds on the first run, then pla
 uv run bomberman run normal   # or a scripted run, headless
 ```
 
-The build needs uv, CMake, Ninja, clang and SDL3. A run's results go to `build/run/ROUTE/`:
+The build needs uv, CMake, Ninja, clang and SDL3; ffmpeg is optional, for `--video`. Linux is the
+supported platform for now (Windows and macOS are phase 5 of PLAN.md):
+
+| System | Install |
+| --- | --- |
+| Fedora | `sudo dnf install cmake ninja-build clang SDL3-devel` |
+| Debian 13, Ubuntu 25.04 and later | `sudo apt install cmake ninja-build clang libsdl3-dev` |
+| Arch | `sudo pacman -S cmake ninja clang sdl3` |
+
+`uv run bomberman doctor` checks each step a play needs and says what to do about the first one that
+isn't ready: a missing tool (with the install command), SDL3 not found, no disc or the wrong one, an
+unprepared disc, or a recompile still to come. A failed build stops with the end of its output and
+keeps the rest in `build/recomp-build/build-log.txt`. Once built, `play` only rebuilds what changed.
+A run that cannot open a window says so and exits with code 3; one with no sound device plays silent.
+
+A run's results go to `build/run/ROUTE/`:
 `log.txt`, the hardware log and the frames asked for as `shot-N.png`.
 
 Each `play` session is kept in `build/play/SESSION/` (`build/play/latest` is the last): the pads as
