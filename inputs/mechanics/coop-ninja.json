@@ -1,0 +1,33 @@
+{
+"about": "Normal Game for two, 2-9: J Ninja stays by pad 1 while pad 2 stands six cells off; once pad 1 dies to its own bomb he goes to pad 2",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+2,
+9
+],
+"from": 6920,
+"invincible": false,
+"coop": true
+},
+"presses": [
+"6920:2.RIGHT",
+"6938:2.",
+"6938:2.RIGHT",
+"6956:2.",
+"6956:2.RIGHT",
+"6974:2.",
+"6974:2.RIGHT",
+"6992:2.",
+"6992:2.RIGHT",
+"7052:2.",
+"7052:2.RIGHT",
+"7112:2.",
+"7112:C",
+"7116:"
+],
+"writes": [],
+"end": 7746,
+"shots": "7220,7570,7746"
+}

@@ -1,0 +1,23 @@
+{
+"about": "Normal Game for two, 1-1: pad 2's START pauses and unpauses",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+1,
+1
+],
+"from": 5800,
+"invincible": false,
+"coop": true
+},
+"presses": [
+"5830:2.START",
+"5838:2.",
+"5958:2.START",
+"5966:2."
+],
+"writes": [],
+"end": 6026,
+"shots": "5898,6026"
+}

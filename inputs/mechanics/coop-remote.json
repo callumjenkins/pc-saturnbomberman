@@ -1,0 +1,34 @@
+{
+"about": "Normal Game for two, 1-1: both bombers given the remote bomb; pad 2's B leaves pad 1's bomb, pad 1's sets it off",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+1,
+1
+],
+"from": 5800,
+"invincible": false,
+"coop": true
+},
+"presses": [
+"5800:LEFT",
+"5816:",
+"5816:C",
+"5820:",
+"5820:LEFT",
+"5836:",
+"5836:LEFT",
+"5852:",
+"5912:2.B",
+"5918:2.",
+"5948:B",
+"5954:"
+],
+"writes": [
+"5800:060D5F71=01",
+"5800:060D5FED=01"
+],
+"end": 5984,
+"shots": "5948,5984"
+}

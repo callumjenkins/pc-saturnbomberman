@@ -176,8 +176,8 @@ def mechanic(name):
     """inputs/mechanics/NAME.json played in open_arena: pad 1 on the dino of that colour (0: none), the
     presses and writes recorded when the mechanic was first checked, and its shots, by default over its
     last two seconds. Its "arena" names the players off, the rules, and whether the CPUs go free; or its
-    "normal" names a Normal Game stage to play instead, the VBlank its own presses take over from, and
-    whether pad 1 is invincible. The
+    "normal" names a Normal Game stage to play instead, the VBlank its own presses take over from,
+    whether pad 1 is invincible, and whether it is a 2 PLAYER GAME ("coop"). The
     ones without free CPUs were checked against Beetle Saturn when recorded: pad 1, its dino and the
     bombs matched."""
     import json
@@ -186,10 +186,10 @@ def mechanic(name):
     end = d["end"]
     if "normal" in d:
         n = d["normal"]
-        base = stage(*n["stage"])
+        base = stage(*n["stage"], coop=n.get("coop", False))
         early = tuple(p for p in base.presses if int(p.split(":", 1)[0]) < n["from"])
         return Route(d["about"], early + tuple(d["presses"]), end, d.get("shots", f"{end - 120},{end - 60},{end}"),
-                     invincible=n.get("invincible", False), writes=tuple(d["writes"]))
+                     invincible=n.get("invincible", False), writes=base.writes + tuple(d["writes"]))
     arena = d.get("arena", {})
     base = open_arena(off=tuple(arena.get("off", (3, 4, 5))), **arena.get("rules", {}))
     mount_at = OPEN_MOUNT + base.vblanks - open_arena().vblanks
@@ -249,11 +249,12 @@ def stage_start(world):
     return 6600 if world == MASTER else 5700
 
 
-def stage(world, number, items=False):
+def stage(world, number, items=False, coop=False):
     """Stage WORLD-NUMBER as the game shows it (from 1), through Normal Game's start with the world and
     stage written over the ones it chose; START skips the opening movie. Play starts at about VBlank
     5620, or 5000 with every item (the title's held code), whose start comes sooner. World M is Master
-    Game's floors."""
+    Game's floors. With `coop`, pad 2 is plugged in, so Normal Game asks for 1 or 2 players, and the
+    route picks 2: pad 2 plays as the black bomber and the two share their lives."""
     from .run import GAME
     if world == MASTER and not items:
         return floor(number)
@@ -262,32 +263,40 @@ def stage(world, number, items=False):
                          + f", or Master Game's {MASTER}-1 to {MASTER}-{FLOORS} without items")
     value = f"{world - 1:02X}{number - 1:02X}"
     names = ("stage", "stage_2", "stage_3", "stage_saved")
-    if items:
+    if items and coop:
+        presses = ("1000:2.",) + world_presses(ITEMS) + tap(4000, "DOWN", 8) + tap(4100, "START", 10)
+        presses, at = presses + tap(4400, "START", 10), 4150
+    elif items:
         presses, at = world_presses(ITEMS) + tap(4200, "START", 10), 3950
+    elif coop:
+        presses = ("1000:2.",) + TO_NORMAL + tap(4200, "START", 10) + tap(4400, "DOWN", 8) + tap(4800, "START", 10)
+        presses, at = presses + tap(5100, "START", 10), 4850
     else:
         presses, at = TO_NORMAL + tap(4200, "START", 10) + tap(4500, "START", 10), 4250
-    return Route(f"stage {world}-{number}{' with every item' if items else ''}, from Normal Game with the stage select",
+    return Route(f"stage {world}-{number}{' with every item' if items else ''}{' for two' if coop else ''}, "
+                 "from Normal Game with the stage select",
                  presses, 5700, "5700", writes=tuple(f"{at}:{GAME.symbols[n]:08X}={value}" for n in names))
 
 
-def clear(world, number, items=False):
+def clear(world, number, items=False, coop=False, pad=1):
     """Stage WORLD-NUMBER cleared by the bot (bomberman bot), replayed from the presses it saved in
     inputs/clears/; the run ends a few seconds after its last press, on the next stage's start."""
-    base = stage(world, number, items)
-    saved = presses_file(f"clears/{world}-{number}{'-items' if items else ''}.txt")
+    base = stage(world, number, items, coop or pad == 2)
+    saved = presses_file(f"clears/{world}-{number}{tag(items, coop, pad)}.txt")
     presses = tuple(p for p in saved if ":@" not in p)
     writes = tuple(p.replace(":@", ":") for p in saved if ":@" in p)       # the bot's strikes (bot.strike)
     end = int(saved[-1].split(":")[0]) + 300
-    return Route(f"stage {world}-{number} cleared by the bot", base.presses + presses, end, str(end),
+    by = " by pad 2" if pad == 2 else " for two" if coop else ""
+    return Route(f"stage {world}-{number}{by} cleared by the bot", base.presses + presses, end, str(end),
                  invincible=True, writes=base.writes + writes)
 
 
-def attempt(world, number, items=False):
+def attempt(world, number, items=False, coop=False, pad=1):
     """The bot's last run at stage WORLD-NUMBER, cleared or not, replayed from the presses it left in
     build/run/bot-WORLD-NUMBER/; the run ends a few seconds after its last press."""
     from .run import out_dir
-    base = stage(world, number, items)
-    saved = tuple(open(f"{out_dir(f'bot-{world}-{number}{tag(items)}')}/presses.txt").read().strip().split(","))
+    base = stage(world, number, items, coop or pad == 2)
+    saved = tuple(open(f"{out_dir(f'bot-{world}-{number}{tag(items, coop, pad)}')}/presses.txt").read().strip().split(","))
     presses = tuple(p for p in saved if ":@" not in p)
     writes = tuple(p.replace(":@", ":") for p in saved if ":@" in p)
     end = int(saved[-1].split(":")[0]) + 300
@@ -499,13 +508,14 @@ def dino_hatch():
                  6935, "6840,6890,6935")
 
 
-# Item kinds, from each one given to pad 1 (item-N): what changed in the bomber, or what the icon shows
-# where nothing in it did.
-ITEM_KINDS = {1: "fire up", 2: "bomb up", 3: "skate", 4: "a bomb kind", 5: "?", 6: "?", 7: "a timed state",
-              8: "clock", 9: "1UP", 10: "speed down", 11: "kick", 12: "glove", 13: "a bomb kind",
-              14: "a bomb kind", 15: "an ability", 16: "skull", 17: "heart", 18: "apple", 19: "ice cream",
-              20: "a bomb kind", 21: "egg", 22: "a timed state", 23: "a bomb kind", 24: "a bomb kind", 25: "?",
-              26: "devil (only with the Devil rule)"}
+# Item kinds, named from each one's panel and what taking it changes in pad 1 (bomberman lab items); a
+# panel described where neither settles a name.
+ITEM_KINDS = {1: "fire up", 2: "bomb up", 3: "skate", 4: "remote bomb", 5: "bomb pass", 6: "wall pass",
+              7: "vest", 8: "clock", 9: "1UP", 10: "geta", 11: "kick", 12: "glove", 13: "spike bomb",
+              14: "rubber bomb", 15: "an ability (a flame with sparkles)", 16: "skull", 17: "heart",
+              18: "apple", 19: "ice cream", 20: "power bomb", 21: "egg",
+              22: "a timed state (Bomberman beside a bomb)", 23: "turning fire",
+              24: "a bomb kind (a bomb in a ring)", 25: "line bomb", 26: "devil (only with the Devil rule)"}
 ITEM_CELL, ITEM_SLOT = (8, 17), 60             # the soft block beside pad 1's start; a slot no battle uses
 
 
@@ -522,6 +532,27 @@ def item(kind):
     item up: revealed at 6890, taken by 6966."""
     return Route(f"a single battle where pad 1 uncovers and takes item {kind} ({ITEM_KINDS[kind]})",
                  single().presses + presses_file("item-presses.txt"), 6966, "6890,6966", writes=hide(kind))
+
+
+# The kinds whose effect shows in pad 1's next bomb set where it stands. 14, 23 and 25 show theirs in the
+# open arena's item-* mechanics; 24 blasts as fire up does, 4 VBlanks later.
+USED_KINDS = (1, 4, 7, 13, 20)
+
+
+def use(kind):
+    """item(kind), then pad 1 sets a bomb where it stands (6970) and presses B (7250), which sets off a
+    remote-control bomb. A plain bomb goes off at about 7150 and kills pad 1 (7160)."""
+    return Route(f"a single battle where pad 1 takes item {kind} ({ITEM_KINDS[kind]}), then bombs where it stands",
+                 item(kind).presses + tap(6970, "C", 4) + tap(7250, "B", 4), 7400, "7100,7160,7240,7300,7400",
+                 writes=hide(kind))
+
+
+def vest():
+    """The vest (item 7): pad 1 outlives its own bomb (7160). The vest runs out at 7529, about 575 VBlanks
+    after the pickup, so the bomb pad 1 sets at 7560 kills it (7800)."""
+    return Route("a single battle where pad 1's vest saves it from its own bomb, then wears off",
+                 item(7).presses + tap(6970, "C", 4) + tap(7560, "C", 4), 7800, "7160,7480,7700,7800",
+                 writes=hide(7))
 
 
 def egg_burn():
@@ -588,6 +619,44 @@ def boss_late(world, number, cut, items=False, length=3600):
                  writes=writes)
 
 
+def coop_start():
+    """2 Player Game's stage 1-1: pad 2 plugged in, 2 PLAYER GAME picked, both bombers placed with a
+    HUD each."""
+    base = stage(1, 1, coop=True)
+    return Route("2 Player Game: both bombers at stage 1-1's start", base.presses, 5900, "4450,5600,5900",
+                 writes=base.writes)
+
+
+def coop_boss(world, number, items=False, pad=1):
+    """The boss stage's saved co-op clear, pictured every second over its last 25 seconds: the boss's end,
+    then the two bombers leaving together. With pad 2, the clear the bot played with pad 2, pad 1 still."""
+    base = clear(world, number, items, coop=True, pad=pad)
+    shots = ",".join(str(v) for v in range(base.vblanks - 1500, base.vblanks + 1, 60))
+    by = "pad 2 alone, pad 1 standing by" if pad == 2 else "two"
+    return dataclasses.replace(base, about=f"{BOSSES[world, number]} beaten by {by}, and the way out", shots=shots)
+
+
+def tag(items, coop=False, pad=1):
+    """The suffix that tells a stage's clears and runs apart: with every item, for two players, and played
+    by pad 2 while pad 1 stands still."""
+    return ("-items" if items else "") + ("-coop" if coop or pad == 2 else "") + ("-p2" if pad == 2 else "")
+
+
+def saved(world, number, items, coop, pad=1):
+    """Whether the bot's clear of the stage is in inputs/clears/."""
+    return os.path.exists(os.path.join(ROOT, "inputs", "clears", f"{world}-{number}{tag(items, coop, pad)}.txt"))
+
+
+# The bosses pad 2 beat only with every item.
+P2_ITEMS = {(5, 9), (5, 10)}
+
+COOP_ROUTES = {"coop-start": coop_start,
+               **{f"coop-{w}-{n}": (lambda w=w, n=n: coop_boss(w, n, items=(w, n) == (5, 10)))
+                  for w, n in BOSSES if w != MASTER and saved(w, n, (w, n) == (5, 10), True)},
+               **{f"coop-p2-{w}-{n}": (lambda w=w, n=n: coop_boss(w, n, items=(w, n) in P2_ITEMS, pad=2))
+                  for w, n in BOSSES if w != MASTER and saved(w, n, (w, n) in P2_ITEMS, True, 2)}}
+
+
 BOSS_ROUTES = {
     **{f"boss-{w}-{n}": (lambda w=w, n=n: boss(w, n)) for w, n in BOSSES},
     "boss-5-9-crushed": lambda: boss_late(5, 9, 6700, items=True),
@@ -611,22 +680,19 @@ def com_level(level):
                             single().presses, 8900, "7200,8000,8900"), com_level=level)
 
 
-def tag(items):
-    return "-items" if items else ""
-
-
 ROUTES = {"normal": normal, "single": single, "battle": battle,
           "items": lambda: world("items"),
           **{name: (lambda name=name: world(name)) for name in WORLDS},
           "cactus": cactus, "slot": slot, "yuna": yuna,
           "die": die, "game-over": game_over, "continue": continued, "save": save,
           "pause": paused, "battle-round": battle_round,
-          **{f"item-{k}": (lambda k=k: item(k)) for k in ITEM_KINDS}, "egg-burn": egg_burn, "egg-second": egg_second,
+          **{f"item-{k}": (lambda k=k: item(k)) for k in ITEM_KINDS},
+          **{f"use-{k}": (lambda k=k: use(k)) for k in USED_KINDS}, "vest": vest, "egg-burn": egg_burn, "egg-second": egg_second,
           "dino-evolve": dino_evolve, "open-arena": open_arena,
           **{f"com-level-{n}": (lambda n=n: com_level(n)) for n in (1, 3)},
           **{name: (lambda name=name: mechanic(name)) for name in MECHANICS},
           "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
-          "master-ending": master_ending, "cannon": cannon, **BOSS_ROUTES,
+          "master-ending": master_ending, "cannon": cannon, **BOSS_ROUTES, **COOP_ROUTES,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},
           **{f"arena-{n}-{sky}": (lambda n=n, sky=sky: arena(n, sky)) for n in range(1, len(ARENAS) + 1) for sky in SKIES[1:]}}

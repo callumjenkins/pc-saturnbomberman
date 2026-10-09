@@ -96,6 +96,104 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
 | Mr. Meanie's arena crushed, in the 5-9 clear with every item | about 6560 |
 | Dragon Bomber's dragon heads, in the M-20 clear | from about 9600 |
 
+## Two players in Normal Game
+
+With a pad in port 2, Normal Game asks for 1 PLAYER GAME or 2 PLAYER GAME (from about VBlank 4300 in
+`stage`, 3950 with every item). Pad 2 also joins a 1-player game by pressing START in play, where the
+HUD's right half says PRESS START. Pad 2 is the black bomber, with its own score, and the two share
+the lives. After a boss, both board the ship together. `--coop` on `stage`, `clear`, `attempt` and
+`bot` picks 2 PLAYER GAME with pad 2 idle. Every Normal Game stage has a co-op clear in
+`inputs/clears/` (2-5, 3-3, 4-9 and 5-10 with every item); the bosses' are frame tests (`coop-W-N`).
+`coop-start` matches Beetle Saturn exactly until play begins. Master Game is for one player: it
+shows no 1 or 2 PLAYER GAME menu, its HUD has no PRESS START, and pad 2's START does nothing in play.
+
+4-4 lowers stone bridges over its lava (cells 0x5300, the 0x4000 bit set): the cannon bits are set
+too, but a bomber walks over them.
+
+### What two bombers do to each other
+
+Each is a co-op mechanic matching Beetle Saturn (`lab verify` compares pad 2, pad 1's place on the screen
+and the lives in a route that plays pad 2). Most strike the enemies and give a bomber wall pass by writes,
+so they play without the invincibility hooks.
+
+- The camera follows pad 1 alone. Pad 2 walks on off the screen, and neither bomber meets an edge
+  (`coop-offscreen`: 27 cells apart on 1-5). In the bot's clears, with pad 2 idle, they were up to 30
+  columns and 20 rows apart.
+- A bomber that dies drops out with the lives untouched, and the HUD's half says PRESS START again; its
+  START brings it back on the other bomber's cell for a life (`coop-p2-out`). Both down at once, by
+  bombs or by the timer running out, costs two lives and starts the stage again (`coop-both-out`,
+  `coop-time-up`). Joining a 1 PLAYER GAME with pad 2's START cost a life too, seen on ours only.
+- Bombs hurt either bomber (`coop-friendly-fire`), and each bomber's B sets off its own remote bombs
+  only (`coop-remote`).
+- Pad 2's START pauses and unpauses (`coop-pause`).
+- Either bomber on the open exit clears the stage for both (`coop-p2-exit`).
+- A cannon holds one bomber (+0x5E 0x0200). The other walks onto it and waits there, and is taken in as
+  the first climbs out (`coop-cannon`, 3-7's at (10,55)). A, B and L climb out, the bot's "fire" included;
+  what fires a cannon is not yet found: no button, and no blast beside it.
+- An illness passes by touch, with the time it has left, and stays with the bomber that had it
+  (`coop-illness-touch`).
+- Pad 2 hatches and rides a dino as pad 1 does (`coop-p2-dino`); a hit costs the dino, not the bomber.
+- Pad 2 beats every Normal Game boss alone with pad 1 standing at the start (`bomberman bot W-N --pad 2`,
+  frame tests `coop-p2-W-N`); 5-9 took every item, as it did for pad 1.
+- A boss beaten while pad 2 is down takes pad 1 to the ship alone, the lives untouched, and the next
+  stage starts without pad 2. Once play begins, pad 2's START brings it back on pad 1's cell for a life
+  (`coop-boss-p2-out`, 1-7). The next world's intro waits for a START, and either pad's moves it on.
+- J Ninja (2-9) goes for pad 1 alone while it stands, however near pad 2 is, and for pad 2 once pad 1 is
+  down (`coop-ninja`). Swapping which pad stood where, with the invincibility hooks, sent Castle Joe to
+  the nearer bomber either way; Rodeon, Egg Birdon and Crator wandered alike, and the 5-9 and 5-10
+  machines barely moved.
+- Castle Joe's arms pick up a bomb dropped near them, so it never goes off; one player or two.
+- Pad 2 fires 1-5's deck cannons as pad 1 does, and an octopus hit adds 100 to the score of the bomber
+  whose blast lit the fuse (`coop-deck-cannon-p2`). With pad 1 bombing at (20,9) and pad 2 at (22,13) or
+  (24,9) at the same time, only the cannon over (20,9) fired: (22,13) is under no fuse, and (24,9)'s blast
+  stopped at the soft block on (24,8).
+- Two cannons fire at once: pad 1 bombing at (18,9) and pad 2 at (20,9) in the same VBlank light both
+  fuses at 6552, and both cannons fire at 6608, on Beetle Saturn too (`coop-deck-two-cannons`).
+- Striking 1-5's enemies by writes can leave the RNG different on Beetle Saturn within 60 VBlanks, and
+  a later cannon shot then hits on one and misses on the other; 1-5 for two with no presses keeps the
+  same RNG on both through 6200. A route that depends on a hit should write the RNG once the strikes settle.
+
+`tick` had been the kernel's count of VBlanks since pad 2 last changed (06006104, one count a port from
+06006100), which went to 0 at pad 2's first press and put every later event at the reference's boot. It
+is port 3's count now.
+
+An invincible bomber outlasts the stage's 6:00: the timer then shows minutes and seconds past it
+(21'03 and the like), on one player as on two. Yet a co-op 4-4 run that stalled at the lava lost
+two lives at once (KRNL:0600DACE storing `lives`) about 230 VBlanks after its timer reached 0:00,
+and a third 22000 VBlanks later. Why there and not in the other co-op runs past 6:00 is not known.
+
+## Items
+
+`item-1` to `item-26` each uncover the kind they name, beside pad 1 at the top left, and pad 1 takes it
+by 6966. `bomberman lab items` prints what each pickup changed in pad 1's slot; `ITEM_KINDS` names
+the kinds from that and their panels, and game.toml's `objects` says what each field holds. The clock,
+the 1UP, the apple and the ice cream change nothing in the slot in a battle. In Normal Game (`item-clock`,
+`item-1up`, `item-apple`, `item-ice-cream`, each matching Beetle Saturn) the clock stops the stage's
+timer and its enemies for 900 VBlanks, counted down at 060C0FFC; the 1UP adds a life; the apple scores
+1000 and the ice cream 4000.
+
+The vest sets flag 0x20 and counts about 575 VBlanks down at +0x56. While it lasts pad 1 outlives its
+own bomb, and once it runs out (7529 in `vest`) the next one kills it. `use-K` sets a bomb where pad 1
+stands after taking kind K: a plain one goes off at about 7150 and kills pad 1; the remote bomb (4) waits
+for B; the spike bomb's (13) fire runs on through soft blocks; the power bomb's (20) reaches further.
+In the open arena (the `item-*` mechanics, each matching Beetle Saturn): the line bomb (25) lays pad 1's
+other bombs in a line the way it faces when C is pressed again on its own bomb; the rubber bomb (14),
+kicked into a wall, bounces between the wall and the cell before it until it goes off, and thrown it had
+neither landed nor gone off 450 VBlanks later; item 23's fire turns along a wall it reaches, for the
+reach it has left. Item 24 (a bomb in a ring) blasts as a plain bomb does, 4 VBlanks later, kicked or
+thrown alike; what it is for is not yet seen. Bombs are not objects in the `objects` array. Item 22 counts 1200 VBlanks down at +0x78 (set by f_060217E4, the pickup's effects) and turns pad 1
+red; in a battle nothing else differs in RAM from an apple's pickup, and walking, bombs and dying are the
+same, so what it does is not yet seen.
+
+The skull draws an illness with the game's random numbers (f_0600A0EC(10), a word from the table at
+060B48E4) and gives it 600 VBlanks; the devil draws one too. The illness is a word at +0x5A, one bit
+each: 0001 slow, 0002 fast, 0004 short fuse, 0008 fuse 60 VBlanks longer, 0010 one-cell fire, 0020 no
+bombs, 0040 not yet seen (perhaps passed on by touch), 0080 reversed directions, 0100 walking on once
+let go, 0200 bombs set by themselves (`illness-*` write each). The random numbers are a 55-entry
+lagged Fibonacci generator: the index at 060BF4F4, the table after it. A walled-in CPU draws from it
+every 8 VBlanks from 7219, at its own pace on Beetle Saturn, so the two pick different illnesses unless
+the route writes the generator's state just before the pickup, as `item-skull` and `item-devil` do.
+
 ## Controls found
 
 - C drops a bomb. A uses a dino's ability. Pressing a direction with A moves pad 1 as well.
@@ -104,8 +202,18 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
 - Glove: A lifts the bomb pad 1 stands on. Wait about 60 VBlanks, then a direction with A throws it the
   way pad 1 faces. To aim, tap the direction before lifting.
 - Kick: walk into a bomb.
-- Stage 1-5's deck cannons (fuse cells (20,8), (10,6), (22,13), (36,6)): flame on a fuse fires its
-  cannon about 30 VBlanks later. In `cannon`, the first bomb at (20,9) goes off at 6384 without lighting
+- Stage 1-5's deck cannons: five on the rail at (18,6), (20,6), (22,6), (24,6) and (26,6), from a table
+  at 060B20A0 (an x word and a y word each). Each one's fuse is the cell below it, (x,7). The cannons are
+  tasks at 060D7B48, 0x30 bytes each, the cannon's cell at +0x0E and its state at +0x0A: 1 from the
+  VBlank flame touches the fuse, 2 as it fires 56 VBlanks later, and 0 again about 90 after that.
+  Each frame the update (06040AEE) fires on any of the 0x07 flame bits on the fuse (06040DEE). Setting
+  the bits by a write on (x,7) fired each of the five, and on (x,8) fired none. 1-5 starts with soft
+  blocks on (22,8), (24,8), (24,7) and (26,7). One on (x,8) stops a blast from (x,9), so the first bomb
+  there only breaks it; one on the fuse itself burns, and that fires the cannon. With (22,8) and (24,8)
+  cleared by writes, one bomb at (x,9) fired each of the five, and the shots from (22,6) and (24,6) hit
+  the octopus. Cells 0x0888 are where 1-5's pirates stand at the start: (10,5),
+  (22,12), (37,6) and (20,8). The pirate on (20,8) blocks (20,9)'s blast, and a struck pirate leaves
+  0x0800. In `cannon`, the first bomb at (20,9) goes off at 6384 without lighting
   the fuse; the second, set with C still held, lights it. A single bomb there hit the octopus (100) only
   when set 180-260 VBlanks after 6240. No bomb time tried hit the squid (500).
 - Normal Game growth: the egg beside the heart in the HUD shows the points pad 1 has scored while
@@ -135,6 +243,7 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
 | An item placed when a block breaks / its kind looked up | f_06022B60 / f_06021F82 (the slot's +5) |
 | Pad 1's score, a long | 060C0690 |
 | Points scored, added to the score and, while riding, to `growth_points` | f_06021604 |
+| Pad 2's score, a long; 060C0698 and 060C069C hold pad 1's and pad 2's again | 060C0694 |
 | Master Game floor | stage_2's second byte, with 08 in its first |
 | Not the item list | 060D8C0C: a pool of 2000 14-byte records from a general allocator |
 

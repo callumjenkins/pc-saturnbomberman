@@ -1,0 +1,38 @@
+{
+"about": "Normal Game: pad 1 uncovers and takes an item in 1-1; the apple scores 1000",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+1,
+1
+],
+"from": 5700,
+"invincible": false
+},
+"presses": [
+"5700:LEFT",
+"5720:",
+"5720:LEFT",
+"5738:",
+"5738:C",
+"5742:",
+"5742:RIGHT",
+"5760:",
+"5760:UP",
+"5778:",
+"5978:DOWN",
+"5992:",
+"5992:LEFT",
+"6012:",
+"6012:LEFT",
+"6070:"
+],
+"writes": [
+"5700:060EDEC4=0010",
+"5700:060F1EC4=003c",
+"5700:060DFD76=0000000000120000"
+],
+"end": 6300,
+"shots": "6100,6300"
+}

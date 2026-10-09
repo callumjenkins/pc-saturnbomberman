@@ -45,11 +45,15 @@ bomber_fire_under = 0x06015516      # in the bomber update, where r0 holds the f
 bomber_touched = 0x0605E512         # in the touch check, where r3 holds the object state word; any of bits 0x1228 skips the hit
 # The stage's objects, 0x7C bytes each: slots 0-9 the bombers, enemies from 10. At +0x30 the update
 # function (idle_object when the slot is free), +0x34 flags (0x80 gone, 0x40 hit), +0x44 the cell,
-# +0x48 and +0x4C x and y in 16.16 pixels. A bomber's byte at +0x37 is its hearts, the word at +0x3A its
-# speed (0xE000 at Normal Game's start, 0 in a battle; a skate adds 0x2000) and the byte at +0x3D its skates, which
-# go together: a speed without its count leaves the bomber stuck. +0x54 the slot of the dino it rides, +0x5E has 0x0800 while it rides one, +0x64 its
-# fire, +0x6E how many bombs it can have out (a bomb-up adds 1). The byte at +0x70 holds its abilities (0x01 kick, 0x02 glove, 0x08 item 15's)
-# and +0x71 its bomb kind (one bit each for items 4, 13, 14, 20, 23 and 24).
+# +0x48 and +0x4C x and y in 16.16 pixels. A bomber's flags have 0x20 while it wears the vest, and the
+# word at +0x56 counts the vest's VBlanks down. Its byte at +0x37 is its hearts, the word at +0x3A its speed
+# (0xE000 at Normal Game's start, 0 in a battle; a skate adds 0x2000, a geta takes it) and the byte at +0x3D
+# its skates, which go together: a speed without its count leaves the bomber stuck. +0x43 the map bits that
+# stop it (bomb pass clears 0x20, wall pass 0x10), +0x54 the slot of the dino it rides, +0x5A or +0x5B a
+# skull's or a devil's illness with its VBlanks in the word at +0x5C, +0x5E has 0x0800 while it rides a dino,
+# +0x64 its fire, +0x6C its bombs, the word at +0x6E how many it can have out (a bomb-up adds 1), +0x78 item
+# 22's VBlanks. The byte at +0x70 holds its abilities (0x01 kick, 0x02 glove, 0x04 line bomb, 0x08 item
+# 15's) and +0x71 its bomb kind (one bit each for items 4, 13, 14, 20, 23 and 24).
 objects = 0x060D5F00
 idle_object = 0x060143D8
 dino = 0x0601B5CC                   # a dino's update function; its object's +0x54 is its rider's slot, +0x64 the eggs it has eaten since, +0x70 its colour
@@ -79,7 +83,9 @@ stage_3 = 0x060C029E
 stage_saved = 0x060C17A0
 score = 0x060C0690                  # a long a pad: its Normal Game score
 lives = 0x060C063E                  # a byte: pad 1's lives left in Normal Game: 3 at its start, 0 while the last is played
-tick = 0x06006104                   # the kernel's count of the game's frames: it stops while the game loads
+# The kernel counts, for each pad port from 06006100, the VBlanks since that port's pad last changed, as
+# it reads the pads, so not while the game loads. With nothing in port 3, its count is the game's frames.
+tick = 0x06006108
 
 # The boot chain: the NetLink loader /0, its trampoline, the launcher, IP.BIN as the launcher
 # leaves it, the loader FLD_KNL, the XBAND library and the game's kernel. `bomberman prepare` makes

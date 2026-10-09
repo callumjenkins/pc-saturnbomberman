@@ -9,6 +9,7 @@
     coverage          which recompiled code the frame tests' runs and the bot's clears have run, by module
     census ROUTE      the stage's objects by kind as the route plays: how many, the fastest each moved,
                       the update functions each ran, and the objects that appeared or went
+    items [VBLANK...] what taking each item kind (item-N) changed in pad 1's slot, at each VBlank given
 
 The helpers below are for scenario scripts played through the agent (see docs/RESEARCH.md).
 """
@@ -91,10 +92,21 @@ def parse_writes(writes):
     return out
 
 
-def snapshot(read):
-    """What verify compares: pad 1's cell and flags (+0x34, +0x5E), and every bomb."""
+# Pad 1's bomber on the screen, x and y: what the camera's position shows.
+SCREEN = 0x060C38D4
+SCORES = 0x060C0690   # pad 1's score then pad 2's, a long each
+
+
+def snapshot(read, two=False):
+    """What verify compares: pad 1's cell and flags (+0x34, +0x5E), and every bomb. With `two`, also
+    pad 2's cell and flags, where pad 1 is on the screen, the lives they share and both scores."""
     me = read(OBJECTS, SLOT)
-    return cell_of(me), me[0x34] & 0x80, me[0x5E], bombs(read)
+    out = cell_of(me), me[0x34] & 0x80, me[0x5E], bombs(read)
+    if two:
+        p2 = read(OBJECTS + SLOT, SLOT)
+        out += (cell_of(p2), p2[0x34] & 0x80, p2[0x5E], read(SCREEN, 4).hex(), read(GAME.symbols["lives"], 1)[0],
+                read(SCORES, 8).hex())
+    return out
 
 
 def verify(route, start, every, log=print):
@@ -109,15 +121,16 @@ def verify(route, start, every, log=print):
     run.check_prepared()
     run.build.ensure(run.GAME, log=lambda s: None)
     shots = list(range(start, route.vblanks + 1, every))
+    two = any(p.split(":", 1)[1].startswith("2.") for p in route.presses)
     tick, ticks, ours = GAME.symbols["tick"], {}, {}
     with run.play(f"{BUILD}/lab/verify", route) as r:
         while r.vblank <= shots[-1]:
             ticks[r.vblank] = r.read32(tick)
             if r.vblank in shots:
-                ours[r.vblank] = snapshot(r.read)
+                ours[r.vblank] = snapshot(r.read, two)
             run.advance(r, route, r.vblank + 1)
     writes = parse_writes(route.writes)
-    core = reference.Core(core_so, bios, cue(), save_dir=f"{BUILD}/lab")
+    core = reference.Core(core_so, bios, cue(), save_dir=f"{BUILD}/lab", ports=2 if two else 1)
     memory = core.lib.retro_get_memory_data(reference.MEMORY_SYSTEM_RAM)
 
     def poke(addr, data):
@@ -131,7 +144,7 @@ def verify(route, start, every, log=print):
         for addr, data in writes.get(v, []):
             poke(addr, data)
         if v in ours:
-            theirs[v] = snapshot(core.read)
+            theirs[v] = snapshot(core.read, two)
 
     reference.play_synced(core, tick, ticks, reference.presses(",".join(route.presses)),
                           sorted(set(writes) | set(shots)), 4 * route.vblanks, on)
@@ -240,9 +253,9 @@ def run_clears_with_coverage(jobs=8):
     run.build.ensure(run.GAME, log=lambda s: None)
 
     def one(c):
-        world, number, items = c
-        out = run.out_dir(f"clear-{world}-{number}{routes.tag(items)}")
-        run.run(routes.clear(world, number, items), out, more=["--coverage", f"{out}/coverage.txt"], learn_seeds=False)
+        world, number, items, coop = c
+        out = run.out_dir(f"clear-{world}-{number}{routes.tag(items, coop)}")
+        run.run(routes.clear(world, number, items, coop), out, more=["--coverage", f"{out}/coverage.txt"], learn_seeds=False)
     with ThreadPoolExecutor(jobs) as pool:
         list(pool.map(one, videos.saved_clears()))
 
@@ -321,3 +334,32 @@ def census(route, start, end, every=10, name="census"):
             samples.append((r.vblank, objects(r.read)))
             run.advance(r, route, r.vblank + every)
     return tally(samples)
+
+
+# ---- items ------------------------------------------------------------------------------------------
+def changes(slots):
+    """{kind: [(offset, usual, value)]}: each slot's bytes where they differ from the value most kinds hold
+    there, so what one item changed stands out from what every pickup does. Pad 1's x and y are left out."""
+    usual = [collections.Counter(b[i] for b in slots.values()).most_common(1)[0][0] for i in range(state.SLOT)]
+    moved = range(0x48, 0x50)
+    return {k: [(i, usual[i], b[i]) for i in range(state.SLOT) if b[i] != usual[i] and i not in moved]
+            for k, b in slots.items()}
+
+
+def items(times=(6966, 7400)):
+    """Lines of each item kind's changes to pad 1's slot after item-N's pickup (6966), at each VBlank."""
+    from . import routes
+    slots = {t: {} for t in times}
+    for k in routes.ITEM_KINDS:
+        route = routes.item(k)
+        with run.play(f"{BUILD}/lab/items", route, until=6900) as r:
+            for t in sorted(times):
+                run.advance(r, route, t)
+                slots[t][k] = r.read(GAME.symbols["objects"], state.SLOT)
+    lines = []
+    for t in times:
+        lines.append(f"VBlank {t}:")
+        for k, diff in changes(slots[t]).items():
+            shown = " ".join(f"+{i:02X} {a:02X}>{b:02X}" for i, a, b in diff) or "nothing"
+            lines.append(f"  {k:2} {routes.ITEM_KINDS[k]}: {shown}")
+    return lines

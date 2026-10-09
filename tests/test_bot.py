@@ -3,7 +3,7 @@ from bomberman import bot, run, state
 
 
 def stage(rows, me, enemies=(), exit=(0, 0)):
-    codes = {"#": state.SOLID, "o": state.SOFT, ".": 0, "B": state.BOMB}
+    codes = {"#": state.SOLID, "o": state.SOFT, ".": 0, "B": state.BOMB, "c": 0x0F00, "=": 0x5300}
     cells = [state.SOLID] * (64 * 64)
     for y, row in enumerate(rows):
         for x, ch in enumerate(row):
@@ -66,3 +66,11 @@ def test_goes_for_the_core_mechanism_and_leaves_the_enemy():
     for d in moves:
         x, y = x + bot.DIRS[d][0], y + bot.DIRS[d][1]
     assert bomb and (5, 3) in bot.blast(s, (x, y), fire=2)[0]
+
+
+def test_walks_over_a_bridge_but_not_into_a_cannon():
+    s = stage(["#####",
+               "#.=.#",
+               "#####"], (1, 1))
+    assert s.passable((2, 1))
+    assert not stage(["#####", "#.c.#", "#####"], (1, 1)).passable((2, 1))

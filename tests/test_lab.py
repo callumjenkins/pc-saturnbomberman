@@ -23,3 +23,11 @@ def test_census_tallies_kinds_speeds_and_comings_and_goings():
     assert lines[0].startswith("kind 01: 1 at 0, 1-1 after, fastest 60 px/s; 0606E770 from 0 50%, 0606DDDE from 10 50%")
     assert "10: slot 12 kind 03 appears at (9, 9), 0607466C" in lines
     assert "10: slot 11 kind 02 gone from (6, 5)" in lines
+
+
+def test_item_changes_are_the_bytes_most_kinds_do_not_hold():
+    plain = bytes(lab.state.SLOT)
+    vest = bytearray(plain)
+    vest[0x34], vest[0x48] = 0x21, 9
+    found = lab.changes({1: plain, 2: plain, 7: bytes(vest)})
+    assert found == {1: [], 2: [], 7: [(0x34, 0, 0x21)]}

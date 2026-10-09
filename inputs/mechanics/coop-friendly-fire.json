@@ -1,0 +1,31 @@
+{
+"about": "Normal Game for two, 1-1: pad 1's bomb goes off beside pad 2",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+1,
+1
+],
+"from": 5800,
+"invincible": false,
+"coop": true
+},
+"presses": [
+"5800:2.RIGHT",
+"5816:2.",
+"5816:RIGHT",
+"5832:",
+"5832:C",
+"5836:",
+"5836:LEFT",
+"5852:",
+"5852:LEFT",
+"5868:",
+"5868:LEFT",
+"5884:"
+],
+"writes": [],
+"end": 6034,
+"shots": "5974,6034"
+}
