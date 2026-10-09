@@ -19,7 +19,7 @@ boxart = "https://cdn.thegamesdb.net/images/original/boxart/front/11326-1.jpg"  
 # (08xx) and the battles (09xx) are left to the dump or the replay.
 [checkpoint]
 keep = [["stage_2", 2], ["score", 8], ["lives", 1], ["dino_colours", 1], ["growth_points", 20],
-        ["objects+0x37", 1], ["objects+0x3A", 1], ["objects+0x5E", 1], ["objects+0x64", 2], ["objects+0x6E", 2],
+        ["objects+0x37", 1], ["objects+0x3A", 4], ["objects+0x5E", 1], ["objects+0x64", 2], ["objects+0x6E", 2],
         ["objects+0x70", 2]]
 accept = [[0x0001, 0x0006], [0x0100, 0x0108], [0x0200, 0x0208], [0x0300, 0x0309], [0x0400, 0x0409]]
 presses = ["1900:START", "1910:", "2500:START", "2510:", "3000:START", "3010:", "3400:START", "3410:",
@@ -32,7 +32,7 @@ resume = 4610
 # starts one where the session does, since stage_2 is 1-1 already).
 fresh = [0x0000]
 show = [["Stage {}", "stage_2", "world-stage"], ["{} pts", "score", "u32"], ["Lives {}", "lives", "u8"],
-        ["Fire {}", "objects+0x64", "u16"], ["Bombs {}", "objects+0x6E", "u16"], ["Speed +{}", "objects+0x3A", "steps:E0:20?"],
+        ["Fire {}", "objects+0x64", "u16"], ["Bombs {}", "objects+0x6E", "u16"], ["Speed +{}", "objects+0x3A", "u8@3?"],
         ["Hearts +{}", "objects+0x37", "u8?"], ["{}", "objects+0x70", "bits:01=Kick,02=Glove?"],
         ["{} dino", "dino_colours", "names:,Pink,Blue,Green,Yellow,Purple?", "objects+0x5E&08"]]
 
@@ -45,8 +45,9 @@ bomber_fire_under = 0x06015516      # in the bomber update, where r0 holds the f
 bomber_touched = 0x0605E512         # in the touch check, where r3 holds the object state word; any of bits 0x1228 skips the hit
 # The stage's objects, 0x7C bytes each: slots 0-9 the bombers, enemies from 10. At +0x30 the update
 # function (idle_object when the slot is free), +0x34 flags (0x80 gone, 0x40 hit), +0x44 the cell,
-# +0x48 and +0x4C x and y in 16.16 pixels. A bomber's byte at +0x37 is its hearts, +0x3A its speed
-# (a skate adds 0x20), +0x54 the slot of the dino it rides, +0x5E has 0x0800 while it rides one, +0x64 its
+# +0x48 and +0x4C x and y in 16.16 pixels. A bomber's byte at +0x37 is its hearts, the word at +0x3A its
+# speed (0xE000 at Normal Game's start, 0 in a battle; a skate adds 0x2000) and the byte at +0x3D its skates, which
+# go together: a speed without its count leaves the bomber stuck. +0x54 the slot of the dino it rides, +0x5E has 0x0800 while it rides one, +0x64 its
 # fire, +0x6E how many bombs it can have out (a bomb-up adds 1). The byte at +0x70 holds its abilities (0x01 kick, 0x02 glove, 0x08 item 15's)
 # and +0x71 its bomb kind (one bit each for items 4, 13, 14, 20, 23 and 24).
 objects = 0x060D5F00

@@ -116,6 +116,11 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
   (`mechanic("dino-grow-normal")`, grown at 10422). The total carries on, so the egg after a growth
   starts part full with what was scored past the threshold. The check is f_0601B068, and the
   thresholds are a table at 060B46B8 that has the same 5000 and 15000 for every colour.
+- A bomber's speed is the word at +0x3A, with its skates counted in the byte at +0x3D. Normal Game starts
+  at 0xE000 and a battle at 0; a skate adds 0x2000 to the word without a carry (0xE000 becomes 0) and 1
+  to the count (`clear-1-1` with skates hidden in its blocks, picked up at 6030), and in a battle a
+  speed-down takes the word to 0xE000. A bomber given the skated word without its count barely moves
+  (0x80 in 90 VBlanks), which is how the first stage-start rebuilds left a skated bomber stuck.
 - Mad Bomber: C throws, further the longer it is held (3, 5, then at most 7 cells at 40 VBlanks). B
   doubles the hovercraft's speed.
 

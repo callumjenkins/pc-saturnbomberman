@@ -159,10 +159,36 @@ def checkpoint_matches(name):
         theirs = state(r, route, int(lines[-1].split()[0]))
     with run.play(f"{out}/rebuilt", rebuilt) as r:
         ours = state(r, rebuilt, cp.resume)
+        made = r.vblank - 700
     if theirs is None or ours is None:
         return [f"no bomber made after the {'run' if theirs is None else 'rebuild'}'s stage start"]
     names = [f"{a:08X}" for a, _ in cp.keep] + ["the dino's eggs", "the dino's colour"]
-    return [f"{n}: {o} where the run has {t}" for n, t, o in zip(names, theirs, ours) if t != o]
+    problems = [f"{n}: {o} where the run has {t}" for n, t, o in zip(names, theirs, ours) if t != o]
+
+    # The bomber has to be the player's too: held RIGHT moves it, and further with one more skate (a skate
+    # adds 0x20 to the speed's first byte and 1 to its count, the range's fourth).
+    def moved(r_route, tag):
+        press = made + 1500
+        held = dataclasses.replace(r_route, presses=r_route.presses + (f"{press}:RIGHT", f"{press + 90}:"), vblanks=press + 100)
+        with run.play(f"{out}/{tag}", held) as r:
+            run.advance(r, held, press)
+            x = r.read32(objects + 0x48)
+            run.advance(r, held, press + 90)
+            return r.read32(objects + 0x48) - x
+    walked = moved(rebuilt, "rebuilt-moves")
+    if walked < 0x100000:
+        problems.append(f"the rebuilt bomber moved {walked / 0x10000:.2f} pixels in 90 VBlanks of RIGHT")
+    fields = lines[-1].split()
+    speed = next(i for i, (a, n) in enumerate(cp.keep) if a == objects + 0x3A)
+    riding = next(i for i, (a, n) in enumerate(cp.keep) if a == objects + 0x5E)
+    if not int(fields[1 + riding], 16) & 0x08:
+        b = bytearray.fromhex(fields[1 + speed])
+        b[0], b[3] = (b[0] + 0x20) & 0xFF, b[3] + 1
+        fields[1 + speed] = b.hex().upper()
+        skated = moved(dataclasses.replace(rebuilt, writes=tuple(cp.rebuild(" ".join(fields)))), "skated-moves")
+        if skated <= walked:
+            problems.append(f"the rebuilt bomber with a skate moved {skated / 0x10000:.2f} pixels, no further than without ({walked / 0x10000:.2f})")
+    return problems
 
 
 def main():
