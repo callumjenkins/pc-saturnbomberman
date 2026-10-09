@@ -145,8 +145,10 @@ so they play without the invincibility hooks.
 - Castle Joe's arms pick up a bomb dropped near them, so it never goes off; one player or two.
 - Pad 2 fires 1-5's deck cannons as pad 1 does, and an octopus hit adds 100 to the score of the bomber
   whose blast lit the fuse (`coop-deck-cannon-p2`). With pad 1 bombing at (20,9) and pad 2 at (22,13) or
-  (24,9) at the same time, only the cannon over (20,9) fired: (22,13) is under no fuse, and (24,9)'s bomb
-  only broke the soft block on the fuse (24,8).
+  (24,9) at the same time, only the cannon over (20,9) fired: (22,13) is under no fuse, and (24,9)'s blast
+  stopped at the soft block on (24,8).
+- Two cannons fire at once: pad 1 bombing at (18,9) and pad 2 at (20,9) in the same VBlank light both
+  fuses at 6552, and both cannons fire at 6608, on Beetle Saturn too (`coop-deck-two-cannons`).
 - Striking 1-5's enemies by writes can leave the RNG different on Beetle Saturn within 60 VBlanks, and
   a later cannon shot then hits on one and misses on the other; 1-5 for two with no presses keeps the
   same RNG on both through 6200. A route that depends on a hit should write the RNG once the strikes settle.
@@ -201,13 +203,17 @@ the route writes the generator's state just before the pickup, as `item-skull` a
   way pad 1 faces. To aim, tap the direction before lifting.
 - Kick: walk into a bomb.
 - Stage 1-5's deck cannons: five on the rail at (18,6), (20,6), (22,6), (24,6) and (26,6), from a table
-  at 060B20A0 (an x word and a y word each). Each one's fuse is the cell two rows below it, (x,8), and
-  the cannon fires 44 VBlanks after flame touches its fuse. Each frame the cannon's update (06040AEE)
-  reads that cell and fires on any of the 0x07 flame bits (06040DEE). (22,8) and (24,8) start as soft
-  blocks, so the first bomb below them breaks the block and a second lights the fuse. With the enemies
-  struck and the blocks cleared by writes, one bomb at (x,9) fired each of the five in turn, and the
-  shots from (22,6) and (24,6) hit the octopus. The other 0x0888 cells, (10,5), (37,6) and (22,12),
-  take flame and fire nothing. In `cannon`, the first bomb at (20,9) goes off at 6384 without lighting
+  at 060B20A0 (an x word and a y word each). Each one's fuse is the cell below it, (x,7). The cannons are
+  tasks at 060D7B48, 0x30 bytes each, the cannon's cell at +0x0E and its state at +0x0A: 1 from the
+  VBlank flame touches the fuse, 2 as it fires 56 VBlanks later, and 0 again about 90 after that.
+  Each frame the update (06040AEE) fires on any of the 0x07 flame bits on the fuse (06040DEE). Setting
+  the bits by a write on (x,7) fired each of the five, and on (x,8) fired none. 1-5 starts with soft
+  blocks on (22,8), (24,8), (24,7) and (26,7). One on (x,8) stops a blast from (x,9), so the first bomb
+  there only breaks it; one on the fuse itself burns, and that fires the cannon. With (22,8) and (24,8)
+  cleared by writes, one bomb at (x,9) fired each of the five, and the shots from (22,6) and (24,6) hit
+  the octopus. Cells 0x0888 are where 1-5's pirates stand at the start: (10,5),
+  (22,12), (37,6) and (20,8). The pirate on (20,8) blocks (20,9)'s blast, and a struck pirate leaves
+  0x0800. In `cannon`, the first bomb at (20,9) goes off at 6384 without lighting
   the fuse; the second, set with C still held, lights it. A single bomb there hit the octopus (100) only
   when set 180-260 VBlanks after 6240. No bomb time tried hit the squid (500).
 - Normal Game growth: power-ups fill the dino's growth meter, the egg beside the heart in the HUD, and
