@@ -22,7 +22,7 @@ videos of clears and mechanics in `$BOMBERMAN_RUNS`.
 | 0 | Steps 2 and 3 done: `disc.json` lists the supported disc's files and `prepare` checks the disc against it first. A run stops if the disc changed since `prepare`, and saturn-recomp recompiles when its inputs change (part of step 4). Step 1, the recorded baseline, is open. |
 | 1 | Pictures: `bomberman compare` plays a route on ours and on Beetle Saturn, lined up by the game's tick, and `compare --arenas` checks every arena under every sky. Menus, arenas and pad 1's own play match exactly; what differs is load timing and CPU drift, documented in RESEARCH.md. Sound is not compared yet. |
 | 2 | Every Normal Game stage (45 of 45) and every Master Game floor cleared by the bot, with routes for deaths, continues, saves, pause, bosses, battle options and each dino's ability. `bomberman lab coverage` counts the code that has run: 82% of the kernel's code bytes after the tests, clears and two play sessions. Discovery predicts every entry the game used to stop at, so a build needs no learned seeds. The original-to-recomp map (2a) is open. |
-| 3 | Done but for real controllers: gamepads a player each, hotplug without moving other players, per-player recording, port 2's own pad. The frame test plays the 10-player battle on ten SDL virtual gamepads and gets the scripted run's frames. Tried with real pads: none yet. |
+| 3 | Done but for real controllers: gamepads a player each, hotplug without moving other players, per-player recording, port 2's own pad. The frame test plays the 10-player battle on ten SDL virtual gamepads and gets the scripted run's frames. Tried with real pads: none yet, and that trial waits until players can be gathered or online play exists, since nobody can be planned in for a co-op session. |
 | 4 | `bomberman play` plays in a window with saves in the user's data directory, apart from `build/`; each session is kept for `bomberman replay`. `settings.ini` beside the saves holds the window, volume and bindings, per gamepad model if wanted. A Dear ImGui options menu in the game's window (`play --launcher`) sets the multitaps, bindings, display and volume; the disc stays with `prepare` and the playtest launchers; the dependency choice awaits a real-pad trial. `bomberman doctor` checks tools, SDL3, disc, preparation and build, with install commands for Fedora, Debian/Ubuntu and Arch. |
 | 5 | Begun alongside the playtest builds: the window on OpenGL 3.2, the game's tasks on Windows fibers and macOS ucontext. |
 | 6 | Not started. |
@@ -304,8 +304,9 @@ Keep Musashi and the existing SCSP implementation during these phases. Recompili
 need instruction coverage, memory/device integration and independent sound checks before adoption.
 Daytona's sound hardware and supported instruction set do not establish compatibility.
 
-Online multiplayer, widescreen, higher simulation rates and support for additional disc revisions
-are outside the initial release milestone. Each can use the validation and player setup work here.
+Widescreen, higher simulation rates and support for additional disc revisions are outside the
+initial release milestone. So is online multiplayer, but it gets a plan of its own later: it is the
+way co-op and battle can be played and tested with real players. Each can use the validation and player setup work here.
 See [IDEATION.md](IDEATION.md) for enhancement ideas, feasibility estimates and possible later work.
 
 An unconditional proof of identical behaviour in every circumstance is outside these phases.

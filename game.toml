@@ -28,9 +28,6 @@ writes = ["4250:stage=stage_2", "4250:stage_2", "4250:stage_3=stage_2", "4250:st
           "4600:score", "4600:lives", "4600:dino_colours", "4600:growth_points", "4600:objects+0x37",
           "4600:objects+0x3A", "4600:objects+0x5E&08", "4600:objects+0x64", "4600:objects+0x6E", "4600:objects+0x70"]
 resume = 4610
-# Starting Normal Game puts stage_2 back to 1-1, which starts a save file (a first game after power-on
-# starts one where the session does, since stage_2 is 1-1 already).
-fresh = [0x0000]
 show = [["Stage {}", "stage_2", "world-stage"], ["{} pts", "score", "u32"], ["Lives {}", "lives", "u8"],
         ["Fire {}", "objects+0x64", "u16"], ["Bombs {}", "objects+0x6E", "u16"], ["Speed +{}", "objects+0x3A", "u8@3?"],
         ["Hearts +{}", "objects+0x37", "u8?"], ["{}", "objects+0x70", "bits:01=Kick,02=Glove?"],
