@@ -142,8 +142,8 @@ def checkpoint_matches(name):
     masks = {k: mask for _, _, k, mask in cp.writes if mask}      # the bits a rebuild carries, of a range it masks
 
     def state(r, route, since):
-        """The kept ranges and pad 1's dino (its eggs eaten and colour) once the bomber made after
-        VBlank `since` has played 700 VBlanks; None if no bomber is made."""
+        """The kept ranges, dino growth and colour, and collected bomb/fire counts 700 VBlanks after the next bomber is made.
+        None if no bomber is made within 3000 VBlanks of `since`."""
         run.advance(r, route, since)
         for made in (False, True):
             while (r.read32(objects + 0x30) == idle) != made and r.vblank < since + 3000:
@@ -155,7 +155,8 @@ def checkpoint_matches(name):
         dino = r.read(objects + me[0x55] * 0x7C, 0x7C) if me[0x5E] & 0x08 else bytes(0x7C)
         kept = [r.read(a, n) for a, n in cp.keep]
         kept = [bytes(b & m for b, m in zip(k, masks[i])) if i in masks else k for i, k in enumerate(kept)]
-        return [k.hex() for k in kept] + [dino[0x64:0x66].hex(), dino[0x70:0x72].hex()]
+        counts = r.read(objects + 0x7C, 4)
+        return [k.hex() for k in kept] + [dino[0x64:0x66].hex(), dino[0x70:0x72].hex(), counts.hex()]
     with run.play(f"{out}/run", route) as r:
         theirs = state(r, route, int(lines[-1].split()[0]))
     with run.play(f"{out}/rebuilt", rebuilt) as r:
@@ -163,8 +164,22 @@ def checkpoint_matches(name):
         made = r.vblank - 700
     if theirs is None or ours is None:
         return [f"no bomber made after the {'run' if theirs is None else 'rebuild'}'s stage start"]
-    names = [f"{a:08X}" for a, _ in cp.keep] + ["the dino's eggs", "the dino's colour"]
+    names = [f"{a:08X}" for a, _ in cp.keep] + ["the dino's eggs", "the dino's colour", "the bombs and fire collected"]
     problems = [f"{n}: {o} where the run has {t}" for n, t, o in zip(names, theirs, ours) if t != o]
+
+    powered_line = lines[-1].split()
+    for offset, value in ((0x64, 16), (0x6E, 10)):
+        index = cp.keep.index((objects + offset, 2))
+        powered_line[index + 1] = f"{value:04X}"
+    powered = dataclasses.replace(rebuilt, writes=tuple(cp.rebuild(" ".join(powered_line))))
+    with run.play(f"{out}/powered", powered) as r:
+        if state(r, powered, cp.resume) is None:
+            problems.append("no bomber made for the rebuild with collected power-ups")
+        else:
+            run.advance(r, powered, r.vblank + 1000)
+            counts = [int.from_bytes(r.read(objects + offset, 2), "big") for offset in (0x6E, 0x64, 0x7C, 0x7E)]
+            if counts != [10, 16, 10, 16]:
+                problems.append(f"rebuilt bomb/fire values and collected counts: {counts} where [10, 16, 10, 16] was expected")
 
     # The bomber has to be the player's too: held RIGHT moves it, and further with one more skate (a skate
     # adds 0x20 to the speed's first byte and 1 to its count, the range's fourth).

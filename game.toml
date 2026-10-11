@@ -20,13 +20,15 @@ boxart = "https://cdn.thegamesdb.net/images/original/boxart/front/11326-1.jpg"  
 [checkpoint]
 keep = [["stage_2", 2], ["score", 8], ["lives", 1], ["dino_colours", 1], ["growth_points", 20],
         ["objects+0x37", 1], ["objects+0x3A", 4], ["objects+0x5E", 1], ["objects+0x64", 2], ["objects+0x6E", 2],
-        ["objects+0x70", 2]]
+        ["objects+0x70", 2], ["objects+0x43", 1], ["objects+0x80", 2], ["awarded_score", 8], ["dino_sizes", 5]]
 accept = [[0x0001, 0x0006], [0x0100, 0x0108], [0x0200, 0x0208], [0x0300, 0x0309], [0x0400, 0x0409]]
 presses = ["1900:START", "1910:", "2500:START", "2510:", "3000:START", "3010:", "3400:START", "3410:",
            "4200:START", "4210:", "4500:START", "4510:"]
 writes = ["4250:stage=stage_2", "4250:stage_2", "4250:stage_3=stage_2", "4250:stage_saved=stage_2",
           "4600:score", "4600:lives", "4600:dino_colours", "4600:growth_points", "4600:objects+0x37",
-          "4600:objects+0x3A", "4600:objects+0x5E&08", "4600:objects+0x64", "4600:objects+0x6E", "4600:objects+0x70"]
+          "4600:objects+0x3A", "4600:objects+0x5E&08", "4600:objects+0x64", "4600:objects+0x6E", "4600:objects+0x70",
+          "4600:objects+0x7E=objects+0x64", "4600:objects+0x7C=objects+0x6E",
+          "4600:objects+0x43", "4600:objects+0x80", "4600:awarded_score", "4600:dino_sizes"]
 resume = 4610
 show = [["Stage {}", "stage_2", "world-stage"], ["{} pts", "score", "u32"], ["Lives {}", "lives", "u8"],
         ["Fire {}", "objects+0x64", "u16"], ["Bombs {}", "objects+0x6E", "u16"], ["Speed +{}", "objects+0x3A", "u8@3?"],
@@ -49,8 +51,9 @@ bomber_touched = 0x0605E512         # in the touch check, where r3 holds the obj
 # stop it (bomb pass clears 0x20, wall pass 0x10), +0x54 the slot of the dino it rides, +0x5A or +0x5B a
 # skull's or a devil's illness with its VBlanks in the word at +0x5C, +0x5E has 0x0800 while it rides a dino,
 # +0x64 its fire, +0x6C its bombs, the word at +0x6E how many it can have out (a bomb-up adds 1), +0x78 item
-# 22's VBlanks. The byte at +0x70 holds its abilities (0x01 kick, 0x02 glove, 0x04 line bomb, 0x08 item
-# 15's) and +0x71 its bomb kind (one bit each for items 4, 13, 14, 20, 23 and 24).
+# 22's VBlanks, and the words at +0x7C and +0x7E the bombs and fire it has collected, which the game copies
+# back into +0x6E and +0x64 (capped at 10 and 16) now and then. The byte at +0x70 holds its abilities (0x01
+# kick, 0x02 glove, 0x04 line bomb, 0x08 item 15's) and +0x71 its bomb kind (one bit each for items 4, 13, 14, 20, 23 and 24).
 objects = 0x060D5F00
 idle_object = 0x060143D8
 dino = 0x0601B5CC                   # a dino's update function; its object's +0x54 is its rider's slot, +0x64 the eggs it has eaten since, +0x70 its colour
@@ -63,6 +66,8 @@ dino_colours = 0x060D82D4
 # Every point a bomber scores while riding goes into its dino's colour, and the total is never reset during a game.
 # A dino starts a stage at its first size under 5000, its second under 15000, and its last from there.
 growth_points = 0x060D82DC
+# The size each colour's next egg hatches at, one byte per colour for pad 1.
+dino_sizes = 0x060D8304
 core_mechanism = 0x0607466C         # the update function of a Core Mechanism: the exit opens once none is left
 # The stage map: 64x64 cells, a word each, the cell (x, y) at y*64+x. 0x80 solid (walls, hard blocks,
 # a standing enemy), 0x40 an item, 0x10 soft block, 0x20 bomb, the low 3 bits fire.
@@ -79,6 +84,8 @@ stage_2 = 0x060C029C
 stage_3 = 0x060C029E
 stage_saved = 0x060C17A0
 score = 0x060C0690                  # a long a pad: its Normal Game score
+# The score already checked for extra-life thresholds, a long per pad.
+awarded_score = 0x060C0FDC
 lives = 0x060C063E                  # a byte: pad 1's lives left in Normal Game: 3 at its start, 0 while the last is played
 # The kernel counts, for each pad port from 06006100, the VBlanks since that port's pad last changed, as
 # it reads the pads, so not while the game loads. With nothing in port 3, its count is the game's frames.
