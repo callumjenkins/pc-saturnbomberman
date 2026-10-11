@@ -1,0 +1,359 @@
+# Code the coverage report sets aside: MODULE ADDRESS CLASS, then a note.
+# Written by src/bomberman/research/coverage_classes.py; its docstring says how.
+KRNL 06094DE4 dead  under 0609B336
+KRNL 06094E6C dead  under 0609B336
+KRNL 06094F64 dead  under 0609B336
+KRNL 0609B336 dead  no caller or pointer in the JP release either
+KRNL 060A8FCC dead  under 0609B336
+KRNL 060A9068 dead  under 0609B336
+KRNL 060A93DC dead  under 0609B336
+KRNL 060AA0A4 dead  under 0609B336
+KRNL 060AA218 dead  under 0609B336
+KRNL 060074D4 online  under 06059648
+KRNL 0602905C online  under 06059648
+KRNL 06029166 online  under 06059648
+KRNL 060291A8 online  under 06059648
+KRNL 060292AE online  under 06059648
+KRNL 060292E8 online  under 06059648
+KRNL 06029582 online  under 06059648
+KRNL 0602E1DA online  under 06059648
+KRNL 0602E26E online  under 06059648
+KRNL 0602E2B0 online  under 06059648
+KRNL 0602E2C6 online  under 06059648
+KRNL 0602E2EA online  under 06059648
+KRNL 0602E346 online  under 06059648
+KRNL 060550D8 online  under 06059648
+KRNL 06058B14 online  under 06059648
+KRNL 06058D96 online  under 06059648
+KRNL 06058DBE online  under 06059648
+KRNL 060595A0 online  under 06059648
+KRNL 06059648 online  link_mode != 0 at 0603313E
+KRNL 06059750 online  under 06059648
+KRNL 06059776 online  under 06059648
+KRNL 060597D2 online  under 06059648
+KRNL 06059850 online  under 06059648
+KRNL 06059F0E online  under 06059648
+KRNL 060A4CBE online  under 06059648
+KRNL 060A4CE4 online  under 06059648
+KRNL 060A4CEC online  under 06059648
+KRNL 060A4D20 online  under 06059648
+KRNL 060A4D60 online  under 06059648
+KRNL 060A4D8E online  under 06059648
+KRNL 060A4DD6 online  under 06059648
+KRNL 060AE3CC online  under 06059648
+KRNL 06013C24 online  under 06051B0C
+KRNL 06051B0C online  link_mode != 0 at 0602E5B4
+KRNL 06051CB8 online  under 06051B0C
+KRNL 06051D88 online  under 06051B0C
+KRNL 06051E1C online  under 06051B0C
+KRNL 06051E4C online  under 06051B0C
+KRNL 06051EBE online  under 06051B0C
+KRNL 060599EE online  under 06059A72
+KRNL 06059A0C online  under 06059A72
+KRNL 06059A72 online  link_mode == 2 at 06059A44
+KRNL 06059CC8 online  under 06059A72
+KRNL 06059D9C online  under 06059A72
+KRNL 06059E62 online  under 06059A72
+KRNL 06059EAC online  under 06059A72
+KRNL 06059EDE online  under 06059A72
+KRNL 06059F32 online  under 06059A72
+KRNL 06039724 dead  under 06039BAC
+KRNL 0603983A dead  under 06039BAC
+KRNL 06039A20 dead  under 06039BAC
+KRNL 06039BAC dead  no caller or pointer in the JP release either
+KRNL 060976D8 dead  under 06097D04
+KRNL 060979DC dead  under 06097D04
+KRNL 06097D04 dead  no caller or pointer in the JP release either
+KRNL 060A9108 dead  no caller or pointer in the JP release either
+KRNL 060978BC dead  under 06097E20
+KRNL 06097A4C dead  under 06097E20
+KRNL 06097E20 dead  no caller or pointer in the JP release either
+KRNL 060518D0 online  link_mode != 0 at 0602E416
+KRNL 06051998 online  under 060518D0
+KRNL 06051A00 online  under 060518D0
+KRNL 06051B3C online  under 060518D0
+KRNL 06097AB0 dead  under 06097F5C
+KRNL 06097F5C dead  no caller or pointer in the JP release either
+KRNL 06058DA6 online  under 0605A124
+KRNL 06059F98 online  under 0605A124
+KRNL 0605A024 online  under 0605A124
+KRNL 0605A09E online  under 0605A124
+KRNL 0605A124 online  link_mode == 1 at 06059A40
+KRNL 060A26B0 dead  no caller or pointer in the JP release either
+KRNL 060A79CC dead  under 060A26B0
+KRNL 060AE530 dead  under 060A26B0
+KRNL 060A2D4C dead  no caller or pointer in the JP release either
+KRNL 060A7DA6 dead  under 060A2D4C
+KRNL 060AAC56 dead  under 060A2D4C
+KRNL 060AE7D0 dead  under 060A2D4C
+KRNL 060ABF1C dead  no caller or pointer in the JP release either
+KRNL 0604D1CE dead  no caller or pointer in the JP release either
+KRNL 060A404C dead  no caller or pointer in the JP release either
+KRNL 060ABDBA dead  under 060A404C
+KRNL 0605FD0C dead  no caller or pointer in the JP release either
+KRNL 06043030 dead  no caller or pointer in the JP release either
+KRNL 0609EAF8 dead  no caller or pointer in the JP release either
+KRNL 06042E80 dead  no caller or pointer in the JP release either
+KRNL 060A3AF4 dead  no caller or pointer in the JP release either
+KRNL 060AB6BE dead  under 060A3AF4
+KRNL 0604D0AE dead  no caller or pointer in the JP release either
+KRNL 06031C3C dead  no caller or pointer in the JP release either
+KRNL 060A1644 dead  under 060A22EC
+KRNL 060A22EC dead  no caller or pointer in the JP release either
+KRNL 0609B488 dead  no caller or pointer in the JP release either
+KRNL 060A3C58 dead  no caller or pointer in the JP release either
+KRNL 060ABCB0 dead  under 060A3C58
+KRNL 060ABCCC dead  under 060A3C58
+KRNL 060ABD34 dead  under 060A3C58
+KRNL 060A2A4C dead  no caller or pointer in the JP release either
+KRNL 060A5E44 dead  under 060A2A4C
+KRNL 060AACD4 dead  under 060A2A4C
+KRNL 060A2850 dead  no caller or pointer in the JP release either
+KRNL 060A7D2E dead  under 060A2850
+KRNL 060A86F8 dead  under 060A2850
+KRNL 06035840 dead  no caller or pointer in the JP release either
+KRNL 06032B6C dead  no caller or pointer in the JP release either
+KRNL 060A2902 dead  no caller or pointer in the JP release either
+KRNL 060AAD08 dead  under 060A2902
+KRNL 060A4A02 dead  no caller or pointer in the JP release either
+KRNL 060AE200 dead  under 060A4A02
+KRNL 060AE206 dead  under 060A4A02
+KRNL 060AE234 dead  under 060A4A02
+KRNL 06030E82 dead  under 06039320
+KRNL 06038FCC dead  under 06039320
+KRNL 06038FF6 dead  under 06039320
+KRNL 06039320 dead  no caller or pointer in the JP release either
+KRNL 06039374 dead  under 06039320
+KRNL 06039462 dead  under 06039320
+KRNL 060A0F1C dead  no caller or pointer in the JP release either
+KRNL 0602D36E dead  no caller or pointer in the JP release either
+KRNL 0609EC5E dead  no caller or pointer in the JP release either
+KRNL 0602ECF6 dead  no caller or pointer in the JP release either
+KRNL 0602EE3A dead  under 0602ECF6
+KRNL 0603840E online  under 060599C8
+KRNL 0605986A online  under 060599C8
+KRNL 060599C8 online  link_mode == 2 at 06059B22
+KRNL 06032296 dead  no caller or pointer in the JP release either
+KRNL 060A391C dead  no caller or pointer in the JP release either
+KRNL 060AA7B4 dead  under 060AA802
+KRNL 060AA802 dead  no caller or pointer in the JP release either
+KRNL 06096922 dead  no caller or pointer in the JP release either
+KRNL 060A6C04 dead  under 06096922
+KRNL 06018542 dead  no caller or pointer in the JP release either
+KRNL 06018EBC dead  under 06018542
+KRNL 0603F788 dead  no caller or pointer in the JP release either
+KRNL 060A45FE dead  no caller or pointer in the JP release either
+KRNL 06029AF2 dead  no caller or pointer in the JP release either
+KRNL 06083DC2 dead  no caller or pointer in the JP release either
+KRNL 06051A78 online  link_mode != 0 at 0602E416
+KRNL 06037E38 dead  no caller or pointer in the JP release either
+KRNL 0609E9E4 dead  no caller or pointer in the JP release either
+KRNL 060A1140 dead  no caller or pointer in the JP release either
+KRNL 060A2484 dead  no caller or pointer in the JP release either
+KRNL 060A2E2A dead  no caller or pointer in the JP release either
+KRNL 06011D86 dead  under 06011E2C
+KRNL 06011E2C dead  no caller or pointer in the JP release either
+KRNL 06052024 dead  no caller or pointer in the JP release either
+KRNL 06095868 dead  under 06052024
+KRNL 0609587E dead  under 06052024
+KRNL 060A29D4 dead  no caller or pointer in the JP release either
+KRNL 0609618A dead  no caller or pointer in the JP release either
+KRNL 060A50A0 dead  no caller or pointer in the JP release either
+KRNL 06020E40 dead  no caller or pointer in the JP release either
+KRNL 060A4838 dead  no caller or pointer in the JP release either
+KRNL 060AD564 dead  under 060A4838
+KRNL 06008814 cut  called in the JP release
+KRNL 0609E5EC dead  no caller or pointer in the JP release either
+KRNL 0609E674 dead  no caller or pointer in the JP release either
+KRNL 060A2B4E dead  no caller or pointer in the JP release either
+KRNL 06029EB8 dead  no caller or pointer in the JP release either
+KRNL 06050AAC cut  called in the JP release
+KRNL 06059B70 online  link_mode == 2 at 06059B22
+KRNL 0602B2BC dead  no caller or pointer in the JP release either
+KRNL 060A0FFE dead  under 060A1070
+KRNL 060A1070 dead  no caller or pointer in the JP release either
+KRNL 060A27D4 dead  no caller or pointer in the JP release either
+KRNL 06027AF4 dead  no caller or pointer in the JP release either
+KRNL 06027B38 dead  under 06027AF4
+KRNL 06027B58 dead  under 06027AF4
+KRNL 06036DB2 dead  no caller or pointer in the JP release either
+KRNL 060A240A dead  no caller or pointer in the JP release either
+KRNL 060A4C0C dead  no caller or pointer in the JP release either
+KRNL 060ADA80 dead  under 060A4C0C
+KRNL 06029F2E dead  no caller or pointer in the JP release either
+KRNL 06059C0A online  link_mode == 2 at 06059B22
+KRNL 0609668C dead  no caller or pointer in the JP release either
+KRNL 06063916 dead  no caller or pointer in the JP release either
+KRNL 0609EA86 dead  no caller or pointer in the JP release either
+KRNL 0609E972 dead  no caller or pointer in the JP release either
+KRNL 0609F0F4 dead  no caller or pointer in the JP release either
+KRNL 0602E932 dead  no caller or pointer in the JP release either
+KRNL 0602E9AE dead  under 0602E932
+KRNL 0603F714 dead  no caller or pointer in the JP release either
+KRNL 06044A18 dead  no caller or pointer in the JP release either
+KRNL 060A23E6 dead  no caller or pointer in the JP release either
+KRNL 060AAB50 dead  under 060A23E6
+KRNL 060A2CBC dead  no caller or pointer in the JP release either
+KRNL 06095D34 dead  no caller or pointer in the JP release either
+KRNL 060970DA dead  no caller or pointer in the JP release either
+KRNL 060A5124 dead  no caller or pointer in the JP release either
+KRNL 06037DD6 dead  no caller or pointer in the JP release either
+KRNL 06043F48 dead  no caller or pointer in the JP release either
+KRNL 0604F624 dead  no caller or pointer in the JP release either
+KRNL 060A25CA dead  no caller or pointer in the JP release either
+KRNL 06006F60 dead  no caller or pointer in the JP release either
+KRNL 0600AAE4 dead  no caller or pointer in the JP release either
+KRNL 060114D8 dead  no caller or pointer in the JP release either
+KRNL 0602E836 dead  no caller or pointer in the JP release either
+KRNL 0600AA2A dead  no caller or pointer in the JP release either
+KRNL 060A3B08 dead  no caller or pointer in the JP release either
+KRNL 0609F090 dead  no caller or pointer in the JP release either
+KRNL 060A0CB6 dead  no caller or pointer in the JP release either
+KRNL 060A17A4 dead  no caller or pointer in the JP release either
+KRNL 060A2636 dead  no caller or pointer in the JP release either
+KRNL 0600AB46 dead  no caller or pointer in the JP release either
+KRNL 06090C14 dead  no caller or pointer in the JP release either
+KRNL 060A66EE dead  under 060AA91C
+KRNL 060AA91C dead  no caller or pointer in the JP release either
+KRNL 060AE4A2 dead  no caller or pointer in the JP release either
+KRNL 060A2570 dead  no caller or pointer in the JP release either
+KRNL 060AE628 dead  no caller or pointer in the JP release either
+KRNL 060A1030 dead  no caller or pointer in the JP release either
+KRNL 0601510C dead  no caller or pointer in the JP release either
+KRNL 06095E0C dead  no caller or pointer in the JP release either
+KRNL 060A2C18 dead  no caller or pointer in the JP release either
+KRNL 060A5F88 dead  under 060A2C18
+KRNL 06033A60 dead  no caller or pointer in the JP release either
+KRNL 0609553A dead  no caller or pointer in the JP release either
+KRNL 06096052 dead  no caller or pointer in the JP release either
+KRNL 060964DC dead  no caller or pointer in the JP release either
+KRNL 060A3914 dead  no caller or pointer in the JP release either
+KRNL 060AAEC2 dead  under 060A3914
+KRNL 060AB12E dead  under 060A3914
+KRNL 060AE856 dead  no caller or pointer in the JP release either
+KRNL 06043B78 dead  no caller or pointer in the JP release either
+KRNL 0604B53A dead  no caller or pointer in the JP release either
+KRNL 06058916 dead  no caller or pointer in the JP release either
+KRNL 0609EC08 dead  no caller or pointer in the JP release either
+KRNL 0603EAAC dead  no caller or pointer in the JP release either
+KRNL 060436E8 dead  no caller or pointer in the JP release either
+KRNL 06036850 dead  no caller or pointer in the JP release either
+KRNL 06062D3C dead  no caller or pointer in the JP release either
+KRNL 0606A9A2 dead  no caller or pointer in the JP release either
+KRNL 0603593C dead  no caller or pointer in the JP release either
+KRNL 0609600A dead  no caller or pointer in the JP release either
+KRNL 060A2DE2 dead  no caller or pointer in the JP release either
+KRNL 06006700 cut  called in the JP release
+KRNL 0602E970 dead  no caller or pointer in the JP release either
+KRNL 06096498 dead  no caller or pointer in the JP release either
+KRNL 06096892 dead  no caller or pointer in the JP release either
+KRNL 060968E0 dead  no caller or pointer in the JP release either
+KRNL 060A3D7C dead  no caller or pointer in the JP release either
+KRNL 060AE3FA dead  no caller or pointer in the JP release either
+KRNL 060AE434 dead  no caller or pointer in the JP release either
+KRNL 060AE9F6 dead  no caller or pointer in the JP release either
+KRNL 06008B94 dead  no caller or pointer in the JP release either
+KRNL 0604D526 dead  no caller or pointer in the JP release either
+KRNL 060A3BFC dead  no caller or pointer in the JP release either
+KRNL 060ABB28 dead  under 060A3BFC
+KRNL 06034C02 dead  no caller or pointer in the JP release either
+KRNL 06039EEE dead  no caller or pointer in the JP release either
+KRNL 0603E11C dead  no caller or pointer in the JP release either
+KRNL 06042F96 dead  no caller or pointer in the JP release either
+KRNL 06043194 dead  no caller or pointer in the JP release either
+KRNL 06044A7E dead  no caller or pointer in the JP release either
+KRNL 060638E0 dead  no caller or pointer in the JP release either
+KRNL 0606DAB2 dead  no caller or pointer in the JP release either
+KRNL 0609ED2C dead  no caller or pointer in the JP release either
+KRNL 0609ED78 dead  no caller or pointer in the JP release either
+KRNL 0609F15A dead  no caller or pointer in the JP release either
+KRNL 060A15D0 dead  no caller or pointer in the JP release either
+KRNL 060A3F32 dead  no caller or pointer in the JP release either
+KRNL 060A4940 dead  no caller or pointer in the JP release either
+KRNL 060ADC76 dead  under 060A4940
+KRNL 060A4B86 dead  no caller or pointer in the JP release either
+KRNL 060AA99C dead  no caller or pointer in the JP release either
+KRNL 06009D06 dead  no caller or pointer in the JP release either
+KRNL 060A0266 dead  no caller or pointer in the JP release either
+KRNL 060A4074 dead  no caller or pointer in the JP release either
+KRNL 060AAE52 dead  under 060A4074
+KRNL 060AE98E dead  no caller or pointer in the JP release either
+KRNL 06008EE8 dead  no caller or pointer in the JP release either
+KRNL 06058D5C online  under 06059798
+KRNL 06059798 online  link_mode == 2 at 06032C98
+KRNL 06064AAC dead  no caller or pointer in the JP release either
+KRNL 06068A28 dead  no caller or pointer in the JP release either
+KRNL 060A3B7E dead  no caller or pointer in the JP release either
+KRNL 060A3BB6 dead  no caller or pointer in the JP release either
+KRNL 060A4860 dead  no caller or pointer in the JP release either
+KRNL 060A7196 dead  no caller or pointer in the JP release either
+KRNL 06090894 dead  no caller or pointer in the JP release either
+KRNL 060908C2 dead  no caller or pointer in the JP release either
+KRNL 060A39F2 dead  no caller or pointer in the JP release either
+KRNL 060A3D3E dead  no caller or pointer in the JP release either
+KRNL 060A46C0 dead  no caller or pointer in the JP release either
+KRNL 060AE936 dead  no caller or pointer in the JP release either
+KRNL 06035726 dead  no caller or pointer in the JP release either
+KRNL 060A3ED4 dead  no caller or pointer in the JP release either
+KRNL 060A4B24 dead  no caller or pointer in the JP release either
+KRNL 060AE82A dead  no caller or pointer in the JP release either
+KRNL 06031C12 dead  no caller or pointer in the JP release either
+KRNL 06095836 dead  no caller or pointer in the JP release either
+KRNL 060A4F40 dead  no caller or pointer in the JP release either
+KRNL 060AA8EC dead  no caller or pointer in the JP release either
+KRNL 060AE964 dead  no caller or pointer in the JP release either
+KRNL 06031BEA dead  no caller or pointer in the JP release either
+KRNL 0603F47A dead  no caller or pointer in the JP release either
+KRNL 060A3F06 dead  no caller or pointer in the JP release either
+KRNL 0603E436 dead  no caller or pointer in the JP release either
+KRNL 0604327A dead  no caller or pointer in the JP release either
+KRNL 060A2BD0 dead  no caller or pointer in the JP release either
+KRNL 060A4ABA dead  no caller or pointer in the JP release either
+KRNL 06009DB4 dead  no caller or pointer in the JP release either
+KRNL 06014FC4 dead  no caller or pointer in the JP release either
+KRNL 060394C8 dead  no caller or pointer in the JP release either
+KRNL 0603DE58 dead  no caller or pointer in the JP release either
+KRNL 0603E366 dead  no caller or pointer in the JP release either
+KRNL 06006EFC dead  no caller or pointer in the JP release either
+KRNL 0600798A dead  under 060079A4
+KRNL 060079A4 dead  no caller or pointer in the JP release either
+KRNL 06008BD2 dead  under 06008C5C
+KRNL 06008C5C dead  no caller or pointer in the JP release either
+KRNL 06008C6A dead  under 06008C5C
+KRNL 06008F08 dead  no caller or pointer in the JP release either
+KRNL 0602AD1A dead  no caller or pointer in the JP release either
+KRNL 0603E1CE dead  no caller or pointer in the JP release either
+KRNL 060622D0 dead  no caller or pointer in the JP release either
+KRNL 060A4088 dead  no caller or pointer in the JP release either
+KRNL 06029A78 dead  no caller or pointer in the JP release either
+KRNL 06029A9A dead  no caller or pointer in the JP release either
+KRNL 0603C178 dead  no caller or pointer in the JP release either
+KRNL 0609568C dead  no caller or pointer in the JP release either
+KRNL 06008DE8 dead  no caller or pointer in the JP release either
+KRNL 0601C182 dead  under 0601C1C6
+KRNL 0601C1C6 dead  no caller or pointer in the JP release either
+KRNL 0609F6CC dead  no caller or pointer in the JP release either
+KRNL 060A4060 dead  no caller or pointer in the JP release either
+KRNL 060ABB6C dead  under 060A4060
+KRNL 06059BF2 online  link_mode == 2 at 06059B22
+KRNL 06007326 online  link_mode == 2 at 0602F82E
+KRNL 06031BD2 dead  no caller or pointer in the JP release either
+KRNL 060A4984 dead  no caller or pointer in the JP release either
+KRNL 06009092 dead  no caller or pointer in the JP release either
+KRNL 06031978 dead  no caller or pointer in the JP release either
+KRNL 0603E5A8 dead  no caller or pointer in the JP release either
+KRNL 0600FE74 dead  no caller or pointer in the JP release either
+KRNL 0602EDC8 dead  no caller or pointer in the JP release either
+KRNL 060A3AE0 dead  no caller or pointer in the JP release either
+KRNL 06009E38 dead  no caller or pointer in the JP release either
+KRNL 06009ECE dead  no caller or pointer in the JP release either
+KRNL 060A3C38 dead  no caller or pointer in the JP release either
+KRNL 060ABCAA dead  under 060A3C38
+KRNL 060A3EB4 dead  no caller or pointer in the JP release either
+KRNL 060AAE30 dead  under 060A3EB4
+KRNL 060393F2 dead  no caller or pointer in the JP release either
+KRNL 0609D2AE dead  under 0609E16E
+KRNL 0609D332 dead  under 0609E16E
+KRNL 0609E16E dead  no caller or pointer in the JP release either
+KRNL 060A3CDE dead  no caller or pointer in the JP release either
+KRNL 060393EE dead  no caller or pointer in the JP release either

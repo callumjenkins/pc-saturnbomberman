@@ -12,6 +12,7 @@ repo = "callumjenkins/pc-saturnbomberman"
 disc = "disc.json"
 coverage = ["build/test/*/coverage.txt", "build/run/*/coverage.txt", "build/play/*/replay/coverage.txt"]
 boxart = "https://cdn.thegamesdb.net/images/original/boxart/front/11326-1.jpg"   # TheGamesDB's, the US box
+classes = "coverage-classes.tsv"   # code the coverage report sets aside: online, dead in every release, cut
 
 # A stage start in Normal Game, which a session's Continue rebuilds through the stage select when the
 # session's dump won't load (saturn-recomp's playtest/README.md). stage_2 changes as each stage loads,
@@ -86,6 +87,10 @@ stage_saved = 0x060C17A0
 score = 0x060C0690                  # a long a pad: its Normal Game score
 # The score already checked for extra-life thresholds, a long per pad.
 awarded_score = 0x060C0FDC
+# H2H's connection state (06002FB8), as its entry at 06002F24 returned it at boot: 0 unless the NetLink's UART
+# passed the scratch-register test, then 1 for the answering side and 2 for the side that dialled.
+# Battles, the bonus game and the results take their online paths when it is not 0.
+link_mode = 0x060C0AA8
 lives = 0x060C063E                  # a byte: pad 1's lives left in Normal Game: 3 at its start, 0 while the last is played
 # The kernel counts, for each pad port from 06006100, the VBlanks since that port's pad last changed, as
 # it reads the pads, so not while the game loads. With nothing in port 3, its count is the game's frames.
