@@ -1,0 +1,47 @@
+{
+"about": "Normal Game for two, 3-9: pad 1 bombs below Rodeon's left cannon at (7,9) and pad 2 below the right one at (15,9) in the same VBlank; both cannons light (6512) and fire together (6562)",
+"colour": 0,
+"stage": 1,
+"normal": {
+"stage": [
+3,
+9
+],
+"from": 6300,
+"invincible": false,
+"coop": true
+},
+"presses": [
+"6300:LEFT",
+"6300:2.RIGHT",
+"6318:",
+"6318:2.",
+"6318:LEFT",
+"6318:2.RIGHT",
+"6336:",
+"6336:2.",
+"6336:LEFT",
+"6336:2.RIGHT",
+"6354:",
+"6354:2.",
+"6354:C",
+"6354:2.C",
+"6358:",
+"6358:2.",
+"6362:RIGHT",
+"6362:2.LEFT",
+"6380:",
+"6380:2.",
+"6380:RIGHT",
+"6380:2.LEFT",
+"6398:",
+"6398:2.",
+"6398:RIGHT",
+"6398:2.LEFT",
+"6416:",
+"6416:2."
+],
+"writes": [],
+"end": 6700,
+"shots": "6512,6562,6637,6700"
+}
