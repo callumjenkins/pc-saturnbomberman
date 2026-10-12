@@ -142,6 +142,14 @@ file = "build/extract/XBAND/H2HLIBUS.BIN"
 base = 0x06002F00
 seeds = [0x06003320]
 
+# The XBAND client, which XS loads over the kernel's space for QuickLink (mode 6): direct dial,
+# the lobby's match-ups and mail. XS enters it at 06006002.
+[[module]]
+name = "XBAND"
+file = "build/extract/XBAND/XBAND.BIN"
+base = 0x06006000
+seeds = [0x06006002]
+
 [[module]]
 name = "KRNL"
 file = "build/extract/BOMSS/0KRNL.BIN"
@@ -153,6 +161,26 @@ setjmp = "krnl_setjmp"
 longjmp = "krnl_longjmp"
 yields = ["krnl_setjmp", "krnl_yield"]
 unknown_yields = true
+
+# The XBAND client's kernel switches tasks through 06006062: it saves every register on the running
+# task's stack, stores that stack pointer in the task's block, asks its scheduler for the next and loads
+# that one's, then pops into it with rte. The saved task resumes 84 bytes up its stack, at its caller's PR.
+[[task_switch]]
+module = "XBAND"
+save = 0x06006098
+save_key = "r1"
+resume_sp = 84
+switch = 0x060060C4
+switch_key = "r0"
+
+# A second way in, at 0600CA58 (its scheduler is 0600C9E0), with the same 84-byte frame.
+[[task_switch]]
+module = "XBAND"
+save = 0x0600CA88
+save_key = "r0"
+resume_sp = 84
+switch = 0x0600CA94
+switch_key = "r0"
 
 [[hook]]
 module = "KRNL"
