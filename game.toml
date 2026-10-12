@@ -14,6 +14,16 @@ coverage = ["build/test/*/coverage.txt", "build/run/*/coverage.txt", "build/play
 boxart = "https://cdn.thegamesdb.net/images/original/boxart/front/11326-1.jpg"   # TheGamesDB's, the US box
 classes = "coverage-classes.tsv"   # code the coverage report sets aside: online, dead in every release, cut
 
+# The Japanese release's voices, from the player's own Japanese disc (T-14302G): Dr. I's radio calls
+# (M_058-M_067, byte for byte the Japanese files), the opening movie in Japanese, and the title's voice
+# (audio track 2).
+[playtest.other_disc]
+label = "Japanese voices"
+disc = "disc-jp.json"
+files = "/BOMSS/M_058.AIF=/M_058.AIF,/BOMSS/M_059.AIF=/M_059.AIF,/BOMSS/M_060.AIF=/M_060.AIF,/BOMSS/M_061.AIF=/M_061.AIF,/BOMSS/M_062.AIF=/M_062.AIF,/BOMSS/M_063.AIF=/M_063.AIF,/BOMSS/M_064.AIF=/M_064.AIF,/BOMSS/M_065.AIF=/M_065.AIF,/BOMSS/M_066.AIF=/M_066.AIF,/BOMSS/M_067.AIF=/M_067.AIF,/BOMSS/BOMSS2.CPK=/BOMSS2.CPK"
+tracks = "2"
+cue = "iso-jp/Saturn Bomberman (JP).cue"
+
 # A stage start in Normal Game, which a session's Continue rebuilds through the stage select when the
 # session's dump won't load (saturn-recomp's playtest/README.md). stage_2 changes as each stage loads,
 # while the bomber still has what it carries over. Stage 1-1, a world's intro (stage FF), Master Game

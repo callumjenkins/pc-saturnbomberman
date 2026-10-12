@@ -1,6 +1,7 @@
 # BYOA: nothing from the disc goes in the repo.
 build/
 iso/
+iso-jp/
 *.cue
 *.bin
 *.BIN
