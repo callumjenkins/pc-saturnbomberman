@@ -274,6 +274,10 @@ found code (77%), in 4,602 of its 11,806 functions. H2H, which holds 6 KB of cod
 sessions the same day ran 364 functions nothing else had, taking KRNL to 496 KB (82%): the series
 setup, team battles, the standings, records, Killed By, the awards and the save screens.
 
+`tests/netlink.py` writes coverage too. On 2026-10-13, with the frame tests and one NetLink check, KRNL
+stood at 507 KB of 610 KB (83%), H2H at 85% of its 6 KB, and the XBAND client at 230 KB of 480 KB
+(48%). The QuickLink check never opens the client's lobby, mail or setup.
+
 ## Learned seeds
 
 `seeds.json` holds the 199 KRNL addresses the game stopped at in earlier runs ("no function at"). None
