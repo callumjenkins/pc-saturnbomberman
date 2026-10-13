@@ -5,9 +5,26 @@
 # agent-home projects/pc-saturnbomberman/context/inventory.md): boot, the normal route and the battle route.
 IP.BIN	replaced	saturn-recomp's boot (runtime bios.cpp) reads its header and loads the first-read file; its security and area code are not run. It differs from SAMPLEIP.BIN, the IP module's source, in 123 bytes from 0xE2 to 0xEAA.
 track *	data	CD-DA: the runtime's CD block plays a track when the game asks (runs log "CD-DA: play track N").
-/BOMSS/PROGRAM.BIN@0-8000	interpreted	SEGA's 68000 sound driver (Ver2.04 96/01/25, Sound Division): 180 68000 rts, no SH-2 return. Read on Beetle to 0x00254000 at boot. In our run its bytes from 0x44 are sound RAM from 0 at VBlank 2500 (30,416 of 32,768 equal; the rest is its work area), and the 68000 runs it on Musashi.
+/BOMSS/PROGRAM.BIN@44-6418	interpreted	SEGA's 68000 sound driver (Ver2.04 96/01/25, Sound Division), its code: all 180 of the file's 68000 rts, no SH-2 return. Read on Beetle to 0x00254000 at boot. In our run these bytes are sound RAM from 0 at VBlank 2500, and the 68000 runs them on Musashi. XBAND.DAT holds the same bytes.
 /BOMSS/PROGRAM.BIN	data	Images the CPU reads into 0x00200000-0x002F0000 on Beetle (0x8000-0x1C8000, 0x438000-0x4D4000, 0x66C000-0x6D4000, 0x900000-0x968000 in the routes recorded). No SH-2 prologue or return in any part read, and KRNL names 0x00254000 only from a table.
 /BOMSS/BOMSS[12].CPK	data	Sega FILM with Cinepak video (cvid); on Beetle the master's DMA streams it into a ring buffer at 0x060C341C for KRNL to decode (BOMSS1 the attract intro, BOMSS2 the Normal Game story).
 /BOMSS/M_*.AIF	data	AIFF (FORM...AIFF), all 19. On Beetle, SCU DMA streams M_007 (normal) and M_021, M_025 (battle) whole into a 0x5000-byte ring buffer at 0x060CE730; the other 16 were not read in the routes recorded.
 /XBMAP.BIN	data	A 68-byte table of directory names (BOMSS, XBAND); read on Beetle to 0x00278120 at boot.
 /XBAND/GAMEINFO.BIN	data	A 288-byte record naming SATURN BOMBERMAN; read on Beetle to 0x00278000 at boot.
+/BOMSS/BOMSS3.CPK	data	Sega FILM with Cinepak video, the Normal Game ending: KRNL 0606488E opens it and hands it to the movie player (0600AD62), and that function ran in the frame tests coop-5-10 and coop-p2-5-10 and the clear-5-10-items replay.
+/BOMSS_*.TXT	data	The volume descriptor's copyright, abstract and bibliography files (BOMSS_CP, _AB and _BI at PVD bytes 702-812); no program names them.
+/NETLINK/SNDDRV.BIN	interpreted	The NetLink browser's 68000 sound driver: 146 68000 rts and the header layout of the game's driver in PROGRAM.BIN; BOOT names it. The 68000 would run it on Musashi; no run has shown it running.
+/NETLINK/DATASECT.BIN	data	The NetLink browser's tables (keyboard layouts, HTML tag names): BOOT names it, and it holds no SH-2 prologue.
+/XBAND/DRAMDB.BIN	data	The XBAND client names it; no SH-2 prologue.
+/XBAND/BGLIST00.TXT	data	The XBAND client's list of theme screens (THEME00/*.BMP); the client names it.
+/XBAND/THEME00/*.BMP?named	data	Theme screens the XBAND client names (files.tsv's last column).
+/LOADING.BMP	data	A loading picture XS names in full.
+/NETLINK/*.BMP?named	data	The NetLink browser's (/0, PlanetWeb) BMP files that it, or a page it names, names (files.tsv's last column).
+/NETLINK/*.GIF?named	data	The NetLink browser's (/0, PlanetWeb) GIF files that it, or a page it names, names (files.tsv's last column).
+/NETLINK/*.HTM?named	data	The NetLink browser's (/0, PlanetWeb) HTM files that it, or a page it names, names (files.tsv's last column).
+/NETLINK/*.JPE?named	data	The NetLink browser's (/0, PlanetWeb) JPE files that it, or a page it names, names (files.tsv's last column).
+/NETLINK/*.TXT?named	data	The NetLink browser's (/0, PlanetWeb) TXT files that it, or a page it names, names (files.tsv's last column).
+/NETLINK/*.WAV?named	data	The NetLink browser's (/0, PlanetWeb) WAV files that it, or a page it names, names (files.tsv's last column).
+/NETLINK/*.WDT?named	data	The NetLink browser's (/0, PlanetWeb) WDT files that it, or a page it names, names (files.tsv's last column).
+/XBAND/XBAND.DAT@11868-17c3c	interpreted	The same 68000 sound driver as PROGRAM.BIN 0x44-0x6418, byte for byte (25,556 bytes, its 180 rts).
+/XBAND/XBAND.DAT	data	The XBAND client names it; outside the driver it has 2 68000 rts (chance gives about 4) and no SH-2 prologue.
