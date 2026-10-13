@@ -105,6 +105,9 @@ built without it, so they are MIT. The repository itself is MIT-licensed (`LICEN
 
 ## Layout
 
+Claude and Codex use the [agent workflow](docs/AGENT-WORKFLOW.md) for bounded function validation,
+reference comparisons, and automation runs. `AGENTS.md` is the shared project entrypoint.
+
     game.toml              the programs saturn-recomp recompiles, names for addresses, the task switch and hooks
     seeds.json             the function seeds runs have learned
     disc.json              the supported disc's files and audio tracks, by size and SHA-1
