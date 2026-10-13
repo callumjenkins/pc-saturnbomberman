@@ -4,6 +4,12 @@ seeds = "seeds.json"
 build = "build"
 cmake = ["SATURN_VDP1_GPL=ON"]     # VDP1 by Mednafen's rules: builds are GPL (saturn-recomp THIRD_PARTY.md)
 
+# What the disc holds and what became of each part: python -m saturnrecomp.inventory game.toml.
+[inventory]
+manifest = "disc.json"
+files = "build/extract"
+treatments = "inventory.tsv"
+
 # Builds for playtesters: saturn-recomp's playtest/README.md. Their sessions are measured against the
 # routes' and the clears' coverage.
 [playtest]
@@ -118,6 +124,8 @@ base = 0x06010000
 name = "TRAMP"
 file = "build/tramp.bin"
 base = 0x00200000
+source = "/0"
+source_offset = 0x3B4B0
 
 [[module]]
 name = "XS"
@@ -128,6 +136,7 @@ base = 0x00280000
 name = "IP"
 file = "build/ip-patched.bin"
 base = 0x06002000
+source = "/SAMPLEIP.BIN"
 seeds = [0x06002100, 0x06002E20]
 
 [[module]]

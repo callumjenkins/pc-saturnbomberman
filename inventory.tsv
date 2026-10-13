@@ -1,0 +1,5 @@
+# What became of each disc file no module is made from: PATTERN, TREATMENT, then the evidence, TAB-separated.
+# saturn-recomp/src/saturnrecomp/inventory.py reads it; the first row that matches wins. Files no row
+# matches are reported as unknown: give one a row only with evidence for it.
+IP.BIN	replaced	saturn-recomp's boot (runtime bios.cpp) reads its header and loads the first-read file; its security and area code are not run. It differs from SAMPLEIP.BIN, the IP module's source, in 123 bytes from 0xE2 to 0xEAA.
+track *	data	CD-DA: the runtime's CD block plays a track when the game asks (runs log "CD-DA: play track N").
