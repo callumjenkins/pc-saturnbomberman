@@ -284,6 +284,11 @@ A build with no learned KRNL seeds passed the 141 frame tests, ran every saved c
 replayed both of Callum's 2026-10-07 sessions to the same saves. The file stays as the learning loop's
 record, and a new entry in it means discovery missed something worth a look.
 
+The XBAND client's 152 learned seeds are the same kind: 151 are return addresses after a call, where a
+task resumed on a fresh fiber, and one enters the C library's copy table. Its task switch names the
+system-call dispatcher (06006110) as a yield in game.toml, and with calls to unknown targets counted as
+yielding too, discovery predicts all 151 (13 262 resume points in all).
+
 ## Adding a mechanic route
 
 1. Script it through the agent with the lab helpers, in `open_arena` where it can be.

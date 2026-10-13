@@ -1,5 +1,7 @@
 """Two copies of the game play each other over a NetLink line on this machine: a call, a match, the
-reboot back to the XBAND client, then a rematch and its reboot. Nine minutes: it runs in real time.
+reboot back to the XBAND client, then a rematch and its reboot. Beside them, a second pair whose dialler
+stops mid-match: the waiter holds the match while it waits for a call back, then returns to the XBAND
+client. Nine minutes: it runs in real time.
     uv run tests/netlink.py
 
 Both copies run at real-time pace, as two consoles do. Unpaced, one can get far enough ahead to hang up
@@ -28,30 +30,35 @@ DIAL = ["2500:A", "2506:", *(p for k in range(12) for p in (f"{2700 + 14 * k}:LE
 AGAIN = 14200
 END = 31000
 BACK = [16400, 30900]
+# The dropped call: the dialler stops in the match, and the waiter's H2H waits 4500 ticks for it to call back.
+DROP = 9000
+DROP_END = 16000
 
 
 def later(presses, by):
     return [f"{int(v) + by}:{b}" for v, b in (p.split(":") for p in presses)]
 
 
-def side(name, modem, presses):
+def side(name, modem, presses, end=END, shots=BACK):
     out = f"{BUILD}/test/netlink-{name}"
     # In a window, offscreen, as frames.py's controllers check runs: only a window is paced.
-    args = ["--cue", cue(), "--settings", "-", "--save", "-", "--vblanks", str(END), "--modem", modem,
-            "--shot", ",".join(map(str, BACK)), "--input", ",".join(presses)]
+    args = ["--cue", cue(), "--settings", "-", "--save", "-", "--vblanks", str(end), "--modem", modem,
+            "--input", ",".join(presses), "--coverage", f"{out}/coverage.txt"]
+    if shots:
+        args += ["--shot", ",".join(map(str, shots))]
     return out, learn.run(run.GAME, args, out, timeout=3000)
 
 
-def problems(name, out, log):
+def problems(name, out, log, calls=2, back=BACK):
     found = [line for line in log.splitlines() if "FATAL" in line]
-    if len(re.findall(r"CONNECT 28800", log)) < 2:
-        found.append("fewer than two calls connected")
+    if len(re.findall(r"CONNECT 28800", log)) < calls:
+        found.append(f"fewer than {calls} calls connected")
     starts = re.findall(r"program start \d+: (\w+)", log)
-    if starts.count("KRNL") < 2:
-        found.append(f"KRNL started {starts.count('KRNL')} times, not twice")
-    if starts[-4:] != ["KRNL", "BOOT", "TRAMP", "XS"]:
+    if starts.count("KRNL") < calls:
+        found.append(f"KRNL started {starts.count('KRNL')} times, not {calls}")
+    if back and starts[-4:] != ["KRNL", "BOOT", "TRAMP", "XS"]:
         found.append(f"the last program starts are {starts[-4:]}, not KRNL's reboot to XS")
-    for v in BACK:
+    for v in back:
         shot = f"{out}/shot-{v}.png"
         # The XBAND title is dark grey marble; VDP2 left as a match had it shows it pink and yellow.
         if not os.path.exists(shot) or sum(ImageStat.Stat(Image.open(shot).convert("L")).mean) > 90:
@@ -62,20 +69,28 @@ def problems(name, out, log):
 def main():
     build.ensure(run.GAME, False, log=lambda s: None)
     os.environ.update(SDL_VIDEO_DRIVER="offscreen", SDL_AUDIO_DRIVER="dummy")
-    with socket.socket() as probe:
-        probe.bind(("127.0.0.1", 0))
-        port = probe.getsockname()[1]
+    ports = []
+    for _ in range(2):
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            ports.append(probe.getsockname()[1])
     waiter = TO_MENU + WAIT + ["16500:A", "16506:"] + later(WAIT, AGAIN)
     dialer = TO_MENU + DIAL + ["16500:A", "16506:"] + later(DIAL, AGAIN)
-    with concurrent.futures.ThreadPoolExecutor(2) as ex:
-        w = ex.submit(side, "waiter", f"listen={port}", waiter)
-        d = ex.submit(side, "dialer", f"dial=127.0.0.1:{port}", dialer)
-        found = problems("waiter", *w.result()) + problems("dialer", *d.result())
-    for p in found:
+    with concurrent.futures.ThreadPoolExecutor(4) as ex:
+        w = ex.submit(side, "waiter", f"listen={ports[0]}", waiter)
+        d = ex.submit(side, "dialer", f"dial=127.0.0.1:{ports[0]}", dialer)
+        dw = ex.submit(side, "drop-waiter", f"listen={ports[1]}", TO_MENU + WAIT, DROP_END, [DROP_END - 100])
+        dd = ex.submit(side, "drop-dialer", f"dial=127.0.0.1:{ports[1]}", TO_MENU + DIAL, DROP, [])
+        rematch = problems("waiter", *w.result()) + problems("dialer", *d.result())
+        drop = problems("drop-waiter", *dw.result(), calls=1, back=[DROP_END - 100])
+        drop += problems("drop-dialer", *dd.result(), calls=1, back=[])
+    for p in rematch + drop:
         print("FAIL    ", p)
-    if not found:
+    if not rematch:
         print("ok       two matches over a NetLink line, each back to the XBAND title")
-    sys.exit(1 if found else 0)
+    if not drop:
+        print("ok       a call dropped mid-match: the other side waits for it, then goes back to the XBAND title")
+    sys.exit(1 if rematch or drop else 0)
 
 
 if __name__ == "__main__":

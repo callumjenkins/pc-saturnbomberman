@@ -165,6 +165,7 @@ unknown_yields = true
 # The XBAND client's kernel switches tasks through 06006062: it saves every register on the running
 # task's stack, stores that stack pointer in the task's block, asks its scheduler for the next and loads
 # that one's, then pops into it with rte. The saved task resumes 84 bytes up its stack, at its caller's PR.
+# System calls go through 06006110's jump table, and some of them wait in the switch.
 [[task_switch]]
 module = "XBAND"
 save = 0x06006098
@@ -172,6 +173,8 @@ save_key = "r1"
 resume_sp = 84
 switch = 0x060060C4
 switch_key = "r0"
+yields = [0x06006110]
+unknown_yields = true
 
 # A second way in, at 0600CA58 (its scheduler is 0600C9E0), with the same 84-byte frame.
 [[task_switch]]
