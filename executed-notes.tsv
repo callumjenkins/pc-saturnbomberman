@@ -1,0 +1,7 @@
+# Code a reference run executed that no module holds, and why: FIRST, LAST (folded addresses, inclusive), the
+# evidence. Read by python -m saturnrecomp.executed game.toml RUN.tsv ... --notes executed-notes.tsv.
+060EC8B0	060F08AF	BIOS backup library (replaced by the runtime's BUP): KRNL 06039026 calls BUP_Init with the library at 060EC8B0 and work at 060F08B0 when link_mode is 0.
+002F0000	002F3FFF	BIOS backup library (replaced by the runtime's BUP), unpacked here during the NetLink browser's start: every opcode Beetle ran here is the one it ran at the same offset from 060EC8B0.
+06000000	06001FFF	BIOS routines in its work area (replaced by the runtime's BIOS services): most first ran before frame 430, when Beetle read the first disc sector, so they came from the BIOS ROM.
+06010000	0603FFFF	BIOS boot code (replaced by the runtime's boot): none of these bytes is in a module, and the range first ran before frame 430 (the first disc sector) and was done before /0 loaded at frame 570.
+06002E20	06002E25	The disc IP.BIN's own code, where it differs from SAMPLEIP.BIN (replaced: the runtime's boot does not run IP.BIN's code).
