@@ -74,3 +74,12 @@ def test_walks_over_a_bridge_but_not_into_a_cannon():
                "#####"], (1, 1))
     assert s.passable((2, 1))
     assert not stage(["#####", "#.c.#", "#####"], (1, 1)).passable((2, 1))
+
+
+def test_soft_blocks_given_up_on_leave_it_to_break_another():
+    two = ["#########",
+           "#o.....o#",
+           "#########"]
+    s = stage(two, (4, 1), enemies=[(1, 0)])
+    assert bot.plan(s, fire=1) == (["LEFT", "LEFT"], True)
+    assert bot.plan(s, fire=1, ignore=frozenset({(1, 1)})) == (["RIGHT", "RIGHT"], True)

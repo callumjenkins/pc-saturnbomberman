@@ -250,5 +250,9 @@ uv run bomberman trace cactus clear-1-1 battle --jobs 4
 uv run python -m saturnrecomp.executed game.toml build/trace/*/exec.tsv --notes executed-notes.tsv
 ```
 
+`bot-W-N` (with a clear's tags) has the bot play the stage on the core itself, so its moves follow the
+core's enemies. A stage it does not clear with walking flame is played again without it. `--video` keeps
+the stage's play as `core/NAME.mp4` in `$BOMBERMAN_RUNS`.
+
 The title and menus match exactly. In play the enemies drift a few dots apart, because the game
 runs some tasks on every VBlank while it loads, and the core's loads are longer than ours.

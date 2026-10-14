@@ -141,13 +141,16 @@ def main(argv=None):
                    help="the folder holding mpr-17933.bin (default $SATURN_BIOS)")
     c.add_argument("--every", type=int, help="a shot every N VBlanks as well as the route's own")
     t = sub.add_parser("trace", help="routes on Beetle Saturn built with exec-trace.patch, logging what it executes")
-    t.add_argument("routes", nargs="+", help="names from bomberman routes, or clear-W-N with its tags, such as clear-5-10-items")
+    t.add_argument("routes", nargs="+", help="names from bomberman routes, clear-W-N with its tags, such as "
+                   "clear-5-10-items, or bot-W-N for the bot playing the stage on the core")
     t.add_argument("--core", default=os.environ.get("SATURN_EXEC_CORE"),
                    help="the core built with exec-trace.patch (default $SATURN_EXEC_CORE)")
     t.add_argument("--bios", default=os.environ.get("SATURN_BIOS"),
                    help="the folder holding mpr-17933.bin (default $SATURN_BIOS)")
     t.add_argument("--every", type=int, default=500, help="a shot every N VBlanks (default 500)")
     t.add_argument("--jobs", type=int, default=4)
+    t.add_argument("--no-flame", action="store_true", help="bot-W-N: the bot without walking flame (bot.walk)")
+    t.add_argument("--video", action="store_true", help="bot-W-N: the stage's play as core/NAME.mp4 in $BOMBERMAN_RUNS")
     args = ap.parse_args(argv)
 
     if args.command == "doctor":
@@ -217,7 +220,7 @@ def main(argv=None):
         if not args.core or not args.bios:
             ap.error("trace needs --core and --bios, or SATURN_EXEC_CORE and SATURN_BIOS")
         trace.traces(args.routes, os.path.expanduser(args.core), os.path.expanduser(args.bios), args.every, args.jobs,
-                     log=lambda s: print(s, flush=True))
+                     log=lambda s: print(s, flush=True), flame=not args.no_flame, video=args.video)
     elif args.command == "bot":
         world, number = stage_arg(ap, args.stage)
         clear_stage(world, number, args.limit, args.window, args.video, args.items, args.coop, args.pad)
