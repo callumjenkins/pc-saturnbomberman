@@ -12,6 +12,7 @@
     bomberman run attempt WORLD-STAGE [options]  the bot's last run at a stage, cleared or not
     bomberman bot WORLD-STAGE [--limit N]        clear a stage, invincible, and save its presses
     bomberman compare ROUTE | --arenas    against Mednafen's Saturn: a route, or every arena under every sky
+    bomberman trace ROUTE...              on Beetle Saturn built with exec-trace.patch: what it executed (bomberman.trace)
 --video on run or bot also records the run as video.mp4 in its directory; a clear's is also kept
 in $BOMBERMAN_RUNS (bomberman videos).
 A run builds the game first if it has to, plays the route headless into build/run/ROUTE (log.txt and
@@ -22,7 +23,7 @@ import sys
 
 import os
 
-from . import bot, compare, lab, prepare, routes, run, session, videos
+from . import bot, compare, lab, prepare, routes, run, session, trace, videos
 from .paths import ROOT
 
 
@@ -139,6 +140,14 @@ def main(argv=None):
     c.add_argument("--bios", default=os.environ.get("SATURN_BIOS"),
                    help="the folder holding mpr-17933.bin (default $SATURN_BIOS)")
     c.add_argument("--every", type=int, help="a shot every N VBlanks as well as the route's own")
+    t = sub.add_parser("trace", help="routes on Beetle Saturn built with exec-trace.patch, logging what it executes")
+    t.add_argument("routes", nargs="+", help="names from bomberman routes, or clear-W-N with its tags, such as clear-5-10-items")
+    t.add_argument("--core", default=os.environ.get("SATURN_EXEC_CORE"),
+                   help="the core built with exec-trace.patch (default $SATURN_EXEC_CORE)")
+    t.add_argument("--bios", default=os.environ.get("SATURN_BIOS"),
+                   help="the folder holding mpr-17933.bin (default $SATURN_BIOS)")
+    t.add_argument("--every", type=int, default=500, help="a shot every N VBlanks (default 500)")
+    t.add_argument("--jobs", type=int, default=4)
     args = ap.parse_args(argv)
 
     if args.command == "doctor":
@@ -204,6 +213,11 @@ def main(argv=None):
             shots |= set(range(args.every, max(shots) + 1, args.every))
         for line in compare.compare(route, args.route, args.core, args.bios, shots):
             print(line)
+    elif args.command == "trace":
+        if not args.core or not args.bios:
+            ap.error("trace needs --core and --bios, or SATURN_EXEC_CORE and SATURN_BIOS")
+        trace.traces(args.routes, os.path.expanduser(args.core), os.path.expanduser(args.bios), args.every, args.jobs,
+                     log=lambda s: print(s, flush=True))
     elif args.command == "bot":
         world, number = stage_arg(ap, args.stage)
         clear_stage(world, number, args.limit, args.window, args.video, args.items, args.coop, args.pad)

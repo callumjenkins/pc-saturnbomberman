@@ -238,5 +238,17 @@ up by the game's own frame count (`tick` in `game.toml`), which stops while the 
 saturn-recomp's README says how to build the core. Only routes made of presses on one pad can be
 compared: the core has no hooks, writes or multitap here.
 
+`bomberman trace ROUTE...` plays routes the same way on a copy of the core built with
+`exec-trace.patch`, which logs every instruction it executes and takes the invincibility hooks, so
+bot clears (`clear-W-N` with the saved file's tags, such as `clear-5-10-items`) and multitap routes
+play too. Each route's log goes to `build/trace/ROUTE/exec.tsv`, which
+`python -m saturnrecomp.executed` checks against the translation.
+
+```sh
+export SATURN_EXEC_CORE=path/to/the/patched/mednafen_saturn_libretro.so
+uv run bomberman trace cactus clear-1-1 battle --jobs 4
+uv run python -m saturnrecomp.executed game.toml build/trace/*/exec.tsv --notes executed-notes.tsv
+```
+
 The title and menus match exactly. In play the enemies drift a few dots apart, because the game
 runs some tasks on every VBlank while it loads, and the core's loads are longer than ours.
