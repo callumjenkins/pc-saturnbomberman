@@ -136,27 +136,72 @@ UNBROKEN = 900
 PATIENCE = 1800
 
 
+def poke(r, addr, data):
+    """A write, recorded in the run's presses as VBLANK:@ADDR=HEX, which routes.clear replays as a write."""
+    r.write(addr, data)
+    r.presses.append(f"{r.vblank}:@{addr:08X}={bytes(data).hex()}")
+
+
+CLOCK = next(k for k, name in routes.ITEM_KINDS.items() if name == "clock")
+
+
+def take_clock(r, stage, pad=1):
+    """Hides a clock in a soft block written onto a free cell beside the bomber, bombs it and walks onto
+    the clock. The game's pickup then stops the stage's timer and every enemy, bosses too, for about 950
+    VBlanks. Whether it took one."""
+    from .run import GAME
+    sym = GAME.symbols
+    me = stage.me.cell
+    side = next(((d, (me[0] + dx, me[1] + dy)) for d, (dx, dy) in DIRS.items()
+                 if stage.passable((me[0] + dx, me[1] + dy)) and not stage.at((me[0] + dx, me[1] + dy)) & state.FIRE), None)
+    free = next((k for k in range(75, 0, -1) if not any(r.read(sym["item_slots"] + k * 8, 8))), None)
+    if side is None or free is None:
+        return False
+    d, (x, y) = side
+    r.pad("C", pad)
+    r.step(4)
+    r.pad("", pad)
+    if not state.cell(r, me) & state.BOMB:      # no bomb yet, as while a stage's opening plays
+        return False
+    poke(r, sym["item_slots"] + free * 8, bytes([0, 0, 0, 0, 0, CLOCK, 0, 0]))
+    poke(r, sym["hidden_items"] + (y * 64 + x) * 2, free.to_bytes(2, "big"))
+    poke(r, sym["cells"] + (y * 64 + x) * 2, (stage.at((x, y)) | state.SOFT).to_bytes(2, "big"))
+    r.pad("B", pad)                              # sets off a remote-control bomb at once; nothing without one
+    r.step(4)
+    r.pad("", pad)
+    for _ in range(80):                          # a plain bomb's fuse is about 140 VBlanks; a remote one goes at once
+        r.step(4)
+        v = state.cell(r, (x, y))
+        if v & state.ITEM and not v & (state.FIRE | state.SOFT):
+            break
+    walk(r, d, pad, flame=False)
+    return int.from_bytes(r.read(sym["clock_freeze"], 2), "big") > 0
+
+
 def strike(r, enemies):
     """Sets the hit flag on each enemy, the way a blast does, and records each write in the run's presses as
     VBLANK:@ADDR=HEX, which routes.clear replays as a write."""
     from .run import GAME
     for e in enemies:
         at = GAME.symbols["objects"] + e.slot * state.SLOT + 0x34
-        flags = bytes([r.read(at, 1)[0] | 0x40])
-        r.write(at, flags)
-        r.presses.append(f"{r.vblank}:@{at:08X}={flags.hex()}")
+        poke(r, at, bytes([r.read(at, 1)[0] | 0x40]))
 
 
-def play(r, limit, log=print, pad=1, flame=True):
+def play(r, limit, log=print, pad=1, flame=True, clock=False):
     """Play the stage the run is in with the pad's bomber until it changes or `limit` VBlanks pass; whether
-    it was cleared. Pad 1 moves the cutscenes on."""
+    it was cleared. Pad 1 moves the cutscenes on. With `clock`, it keeps every enemy frozen with a clock
+    it hides beside itself (take_clock)."""
+    from .run import GAME
     start, end = stage_number(r), r.vblank + limit
     final = start in (bytes([len(routes.STAGES) - 1, routes.STAGES[len(routes.STAGES)] - 1]),
                       bytes([state.MASTER_WORLD, routes.FLOORS - 1]))
     master = start[0] == state.MASTER_WORLD
+    # bosses come out slower frozen, and a freeze can keep one from changing form (5-10)
+    clock = clock and ((routes.MASTER if master else start[0] + 1), start[1] + 1) not in routes.BOSSES
     stuck, gone_since = 0, None
     count, changed = None, r.vblank
     ignore, aiming = set(), {}                   # soft blocks given up on; when each set was first aimed at
+    held = (0, r.vblank)                         # the clock's VBlanks left, and since when
     while r.vblank < end:
         if stage_number(r) != start:
             return True
@@ -176,6 +221,20 @@ def play(r, limit, log=print, pad=1, flame=True):
             r.pad("")
             r.step(6)
             continue
+        left = int.from_bytes(r.read(GAME.symbols["clock_freeze"], 2), "big") if clock else 0
+        if left and left == held[0] and r.vblank - held[1] > 120:
+            # the game counts the freeze down only in some phases, and freezing those again keeps them from
+            # ending: 5-10's boss never took his final form
+            log(f"{r.vblank}: the clock has stopped at {left}; ending it, and no more clocks here")
+            poke(r, GAME.symbols["clock_freeze"], bytes(2))
+            left, clock = 0, False
+        if left != held[0]:
+            held = (left, r.vblank)
+        # not while Core Mechanisms stand: 1-1 never cleared with clocks taken then
+        if clock and not stage.cores and stage.enemies and not left:
+            if take_clock(r, stage, pad):
+                log(f"{r.vblank}: took a clock")
+                continue
         if state.cannon(stage.at(stage.me.cell)):
             r.pad("A", pad)                      # in a cannon: climb back out
             r.step(10)

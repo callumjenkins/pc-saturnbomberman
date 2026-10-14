@@ -85,6 +85,7 @@ dino_colours = 0x060D82D4
 growth_points = 0x060D82DC
 # The size each colour's next egg hatches at, one byte per colour for pad 1.
 dino_sizes = 0x060D8304
+clock_freeze = 0x060C0FFC           # a word: the clock item's VBlanks left, while the stage's timer stands still
 core_mechanism = 0x0607466C         # the update function of a Core Mechanism: the exit opens once none is left
 # The stage map: 64x64 cells, a word each, the cell (x, y) at y*64+x. 0x80 solid (walls, hard blocks,
 # a standing enemy), 0x40 an item, 0x10 soft block, 0x20 bomb, the low 3 bits fire.

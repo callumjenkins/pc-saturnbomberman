@@ -148,7 +148,7 @@ class CoreRun:
         return self.core.frame
 
 
-def bot(name, core_so, bios, limit=22000, log=print, flame=True, video=False):
+def bot(name, core_so, bios, limit=22000, log=print, flame=True, video=False, clock=False):
     """The bot's run at the stage on the core, with or without walking flame (bot.walk); the report's
     lines. With `video`, the stage's play goes to core/NAME.mp4 in the runs folder (bomberman videos)."""
     from . import bot as player
@@ -157,7 +157,7 @@ def bot(name, core_so, bios, limit=22000, log=print, flame=True, video=False):
     world = world if world == routes.MASTER else int(world)
     pad = 2 if p2 else 1
     route = dataclasses.replace(routes.stage(world, int(number), bool(items), bool(coop) or pad == 2), invincible=True)
-    out = f"{BUILD}/trace/{name}{'' if flame else '-no-flame'}"
+    out = f"{BUILD}/trace/{name}{'' if flame else '-no-flame'}{'-clock' if clock else ''}"
     os.makedirs(out, exist_ok=True)
     start = routes.stage_start(world)
     tick = run.GAME.symbols["tick"]
@@ -190,12 +190,12 @@ def bot(name, core_so, bios, limit=22000, log=print, flame=True, video=False):
             notes.append(f"  {(frame - at) / core.av.timing.fps:6.1f} s  {line}")
             log(line)
 
-        cleared = player.play(r, limit, log=note, pad=pad, flame=flame)
+        cleared = player.play(r, limit, log=note, pad=pad, flame=flame, clock=clock)
         if keep:
             keep.close()
         r.frame().save_png(f"{out}/end-{r.vblank}.png")
         open(f"{out}/presses.txt", "w").write(",".join(r.presses) + "\n")
-        report = [f"{name}{'' if flame else ' without walking flame'}: {'cleared' if cleared else 'not cleared'} on the core: the stage from frame {at}, "
+        report = [f"{name}{'' if flame else ' without walking flame'}{' with clocks' if clock else ''}: {'cleared' if cleared else 'not cleared'} on the core: the stage from frame {at}, "
                   f"the bot to frame {r.vblank}", *notes]
         core.close()
     open(f"{out}/report.txt", "w").write("\n".join(report) + "\n")
@@ -249,14 +249,14 @@ def trace(name, core_so, bios, every=500, log=print):
 
 
 def _one(job):
-    name, core_so, bios, every, flame, video = job
+    name, core_so, bios, every, flame, video, clock = job
     try:
         if name.startswith("bot-"):
-            first = "\n".join(bot(name, core_so, bios, log=lambda s: None, flame=flame, video=video))
+            first = "\n".join(bot(name, core_so, bios, log=lambda s: None, flame=flame, video=video, clock=clock))
             if not flame or ": cleared" in first.split("\n")[0]:
                 return first
             # walking flame and plain bombing each clear stages the other does not
-            return first + "\n" + "\n".join(bot(name, core_so, bios, log=lambda s: None, flame=False, video=video))
+            return first + "\n" + "\n".join(bot(name, core_so, bios, log=lambda s: None, flame=False, video=video, clock=clock))
         report = trace(name, core_so, bios, every, log=lambda s: None)
     except Exception as e:                                 # one route's failure leaves the others running
         return f"{name}: failed: {e!r}"
@@ -266,9 +266,9 @@ def _one(job):
     return f"{name}: {len(report) - 2} shots, {reached}"
 
 
-def traces(names, core_so, bios, every=500, jobs=4, log=print, flame=True, video=False):
+def traces(names, core_so, bios, every=500, jobs=4, log=print, flame=True, video=False, clock=False):
     """Each route traced in its own process, a line each as it finishes."""
     from concurrent.futures import ProcessPoolExecutor, as_completed
     with ProcessPoolExecutor(jobs) as pool:
-        for f in as_completed([pool.submit(_one, (n, core_so, bios, every, flame, video)) for n in names]):
+        for f in as_completed([pool.submit(_one, (n, core_so, bios, every, flame, video, clock)) for n in names]):
             log(f.result())

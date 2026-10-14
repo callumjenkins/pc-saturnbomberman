@@ -8,7 +8,7 @@ SLOT = 0x7C
 SLOTS = 50
 ENEMY_SLOTS = range(10, SLOTS)
 
-SOLID, SOFT, BOMB, FIRE = 0x80, 0x10, 0x20, 0x07
+SOLID, ITEM, SOFT, BOMB, FIRE = 0x80, 0x40, 0x10, 0x20, 0x07
 # Both bits: a cannon (0x0B08 on 3-7), which holds a bomber until A, B or L climbs it back out, or
 # railway track (0x0F00 on 3-2 and 3-3), whose trains run a bomber down.
 CANNON = 0x0300
