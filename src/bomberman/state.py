@@ -12,7 +12,12 @@ SOLID, SOFT, BOMB, FIRE = 0x80, 0x10, 0x20, 0x07
 # Both bits: a cannon (0x0B08 on 3-7), which holds a bomber until A, B or L climbs it back out, or
 # railway track (0x0F00 on 3-2 and 3-3), whose trains run a bomber down.
 CANNON = 0x0300
+CART = 0x5B00                                     # 3-6's mine cart where it waits; 4-2's floor 0x4A00 shares bits with it
 BRIDGE = 0x4000                                   # 4-4's stone bridges over the lava, 0x5300 once lowered: floor, not a cannon
+WEAK_FIRE = 0x0010                                # the skull's illness (+0x5A) that leaves a bomber one cell of fire
+# The sleeping cactus, a slot machine mini-game once bombed on all four sides (routes.cactus): an object that
+# never dies, at a fixed cell of two Gunman stages, by (world, stage) as the game shows them.
+CACTI = {(3, 1): (11, 25), (3, 3): (35, 40)}
 MASTER_WORLD = 8                                  # stage_2's world in Master Game, with the floor after it
 LADDER = (14, 17)                                 # where Master Game's ladder drops, once no enemy is left
 
@@ -26,6 +31,11 @@ class Thing:
     y: float
 
 
+def cart(v):
+    """3-6's mine cart, waiting at one end of its track: a bomber who steps on rides it to the other."""
+    return v & 0xFF80 == CART
+
+
 def cannon(v):
     return v & CANNON == CANNON and not v & BRIDGE
 
@@ -36,6 +46,7 @@ class Stage:
     me: Thing | None                             # pad 1's bomber, None when it is gone (as on the exit)
     enemies: tuple[Thing, ...]
     exit: tuple[int, int]
+    fire: int = 2                                # how far the bomber's blasts reach, in cells
 
     @property
     def cores(self):
@@ -92,4 +103,10 @@ def read(r, pad=1):
     exit = (exit_cell % 64, exit_cell // 64)
     if r.read(sym["stage_2"], 1)[0] == MASTER_WORLD:
         exit = LADDER if not enemies else (-1, -1)
-    return Stage(cells, bomber[0] if bomber else None, enemies, exit)
+    else:
+        world, number = r.read(sym["stage"], 2)
+        cactus = CACTI.get((world + 1, number + 1))
+        enemies = tuple(e for e in enemies if e.cell != cactus)
+    me_slot = objs[(pad - 1) * SLOT:pad * SLOT]
+    fire = 1 if int.from_bytes(me_slot[0x5A:0x5C], "big") & WEAK_FIRE else int.from_bytes(me_slot[0x64:0x66], "big")
+    return Stage(cells, bomber[0] if bomber else None, enemies, exit, max(fire, 1))

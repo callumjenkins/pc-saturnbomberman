@@ -182,13 +182,21 @@ def bot(name, core_so, bios, limit=22000, log=print, flame=True, video=False):
             os.makedirs(f"{runs_dir()}/core", exist_ok=True)
             keep = Video(core, f"{runs_dir()}/core/{os.path.basename(out)}.mp4")
         r = CoreRun(core, out, keep)
-        cleared = player.play(r, limit, log=log, pad=pad, flame=flame)
+        notes = []
+
+        def note(line):
+            """The bot's log line, with its time from the stage's start: the time into the video."""
+            frame = int(line.split(":")[0])
+            notes.append(f"  {(frame - at) / core.av.timing.fps:6.1f} s  {line}")
+            log(line)
+
+        cleared = player.play(r, limit, log=note, pad=pad, flame=flame)
         if keep:
             keep.close()
         r.frame().save_png(f"{out}/end-{r.vblank}.png")
         open(f"{out}/presses.txt", "w").write(",".join(r.presses) + "\n")
         report = [f"{name}{'' if flame else ' without walking flame'}: {'cleared' if cleared else 'not cleared'} on the core: the stage from frame {at}, "
-                  f"the bot to frame {r.vblank}"]
+                  f"the bot to frame {r.vblank}", *notes]
         core.close()
     open(f"{out}/report.txt", "w").write("\n".join(report) + "\n")
     return report
@@ -244,11 +252,11 @@ def _one(job):
     name, core_so, bios, every, flame, video = job
     try:
         if name.startswith("bot-"):
-            first = bot(name, core_so, bios, log=lambda s: None, flame=flame, video=video)[0]
-            if not flame or ": cleared" in first:
+            first = "\n".join(bot(name, core_so, bios, log=lambda s: None, flame=flame, video=video))
+            if not flame or ": cleared" in first.split("\n")[0]:
                 return first
             # walking flame and plain bombing each clear stages the other does not
-            return first + "\n" + bot(name, core_so, bios, log=lambda s: None, flame=False, video=video)[0]
+            return first + "\n" + "\n".join(bot(name, core_so, bios, log=lambda s: None, flame=False, video=video))
         report = trace(name, core_so, bios, every, log=lambda s: None)
     except Exception as e:                                 # one route's failure leaves the others running
         return f"{name}: failed: {e!r}"

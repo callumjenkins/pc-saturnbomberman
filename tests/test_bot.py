@@ -83,3 +83,56 @@ def test_soft_blocks_given_up_on_leave_it_to_break_another():
     s = stage(two, (4, 1), enemies=[(1, 0)])
     assert bot.plan(s, fire=1) == (["LEFT", "LEFT"], True)
     assert bot.plan(s, fire=1, ignore=frozenset({(1, 1)})) == (["RIGHT", "RIGHT"], True)
+
+
+def test_waits_rather_than_bombs_when_no_core_mechanism_is_in_reach():
+    apart = ["#######",
+             "#..#..#",
+             "#######"]
+    s = stage(apart, (1, 1), enemies=[(5, 1)])
+    core = state.Thing(10, run.GAME.symbols["core_mechanism"], (5, 1), 80, 16)
+    assert bot.plan(s, fire=1) == (["RIGHT"], True)                  # a boss: blast from the nearest cell
+    assert bot.plan(state.Stage(s.cells, s.me, (core,), s.exit), fire=1) == (["RIGHT"], False)
+
+
+def test_rides_a_mine_cart_only_when_nothing_is_in_reach_without_it():
+    track = ["######",
+             "#..o.#",
+             "#.####",
+             "######"]
+    s = stage(track, (1, 1), enemies=[(4, 1)])
+    cells = list(s.cells)
+    cells[2 * 64 + 1] = state.CART                                # the cart at (1,2)
+    with_cart = state.Stage(tuple(cells), s.me, s.enemies, s.exit)
+    assert bot.plan(with_cart, fire=1) == (["RIGHT"], True)        # the soft block first
+    cells[1 * 64 + 3] = state.SOLID
+    assert bot.plan(state.Stage(tuple(cells), s.me, s.enemies, s.exit), fire=1) == (["DOWN"], False)
+
+
+class Memory:
+    """Work RAM for state.read: zeros, but for the bytes written."""
+
+    def __init__(self):
+        self.bytes = {}
+
+    def write(self, addr, data):
+        for i, b in enumerate(data):
+            self.bytes[addr + i] = b
+
+    def read(self, addr, n):
+        return bytes(self.bytes.get(addr + i, 0) for i in range(n))
+
+
+def test_the_sleeping_cactus_is_no_enemy_on_its_stages():
+    sym = run.GAME.symbols
+    for stage_number, kept in (((2, 0), 0), ((2, 1), 1)):     # 3-1, then 3-2
+        r = Memory()
+        r.write(sym["stage"], bytes(stage_number))
+        slot = sym["objects"] + 10 * state.SLOT
+        r.write(slot + 0x30, (0x06076070).to_bytes(4, "big"))
+        r.write(slot + 0x44, (25 * 64 + 11).to_bytes(2, "big"))
+        assert len(state.read(r).enemies) == kept
+
+
+def test_4_2s_floor_is_no_mine_cart():
+    assert state.cart(0x5B00) and not state.cart(0x4A00) and not state.cart(0x5300)

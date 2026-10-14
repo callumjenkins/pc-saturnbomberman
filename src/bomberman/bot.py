@@ -8,15 +8,15 @@ from . import routes, state
 DIRS = {"UP": (0, -1), "DOWN": (0, 1), "LEFT": (-1, 0), "RIGHT": (1, 0)}
 
 
-def paths(stage, start):
-    """For each cell the bomber can walk to, the presses that get there."""
+def paths(stage, start, carts=False):
+    """For each cell the bomber can walk to, the presses that get there; with `carts`, onto a mine cart too."""
     prev = {start: None}
     q = collections.deque([start])
     while q:
         c = q.popleft()
         for d, (dx, dy) in DIRS.items():
             n = (c[0] + dx, c[1] + dy)
-            if n not in prev and stage.passable(n):
+            if n not in prev and stage.passable(n) and (carts or not state.cart(stage.at(n))):
                 prev[n] = (c, d)
                 q.append(n)
 
@@ -51,7 +51,8 @@ def plan(stage, fire, ignore=frozenset()):
     """Where to go next and whether to bomb there: a cell whose blast reaches a target, else one that
     breaks the soft block nearest a target, else the exit once none is left. The targets are the Core
     Mechanisms, which alone keep the exit shut, or every enemy in a stage without them, such as a
-    boss's. Soft blocks in `ignore` are left alone."""
+    boss's. Soft blocks in `ignore` are left alone. A mine cart is ridden only when nothing is in reach
+    without it."""
     reachable, path = paths(stage, stage.me.cell)
     foes = stage.cores or stage.enemies
     if not stage.cores and stage.exit in reachable and stage.exit != stage.me.cell:
@@ -76,17 +77,23 @@ def plan(stage, fire, ignore=frozenset()):
             continue
         if best is None or score < best[0]:
             best = (score, c)
+    if best is None:
+        # nothing in reach on foot: ride a mine cart if there is one, which takes the bomber elsewhere
+        by_cart, cart_path = paths(stage, stage.me.cell, carts=True)
+        carts = [c for c in by_cart if state.cart(stage.at(c))]
+        if carts:
+            return cart_path(min(carts, key=lambda c: len(cart_path(c)))), False
     if best is None and foes:
-        # nothing in reach, as against a boss: blast from the nearest cell, where each new bomb lands in
-        # the last one's fire and goes off at once
+        # nothing in reach. Against a boss: blast from the nearest cell, where each new bomb lands in the
+        # last one's fire and goes off at once. Else wait there: fire keeps 4-4's bridges raised.
         near = min(reachable, key=lambda c: (min(abs(c[0] - t[0]) + abs(c[1] - t[1]) for t in targets), len(path(c))))
-        return path(near), True
+        return path(near), not stage.cores
     return (path(best[1]), True) if best else ([], False)
 
 
 def walk(r, d, pad=1, flame=True):
-    """Hold d until the bomber stands on the next cell in that direction, aligned to it. False if it
-    did not get there. A bomb dropped on fire goes off at once, so with `flame` it drops one on every
+    """Hold d until the bomber stands on the next cell in that direction, at or just past its centre. False
+    if it did not get there. A bomb dropped on fire goes off at once, so with `flame` it drops one on every
     burning cell it crosses: with invincibility that keeps a blast going wherever it walks."""
     me = state.me(r, pad)
     if me is None:
@@ -95,8 +102,8 @@ def walk(r, d, pad=1, flame=True):
     goal = (me.cell[0] + dx, me.cell[1] + dy)
     r.pad(d, pad)
     arrived = False
-    for _ in range(30):
-        r.step(2)
+    for _ in range(60):
+        r.step(1)
         me = state.me(r, pad)
         if me is None:                            # gone: the exit took it
             arrived = True
@@ -106,7 +113,9 @@ def walk(r, d, pad=1, flame=True):
             r.pad(d + "+C", pad)
             r.step(2)
             r.pad(d, pad)
-        if me.cell == goal and abs(me.x - goal[0] * 16) < 2 and abs(me.y - goal[1] * 16) < 3:
+        # checked every VBlank: with every speed-up a bomber moves more than a pixel a VBlank
+        off_x, off_y = me.x - goal[0] * 16, me.y - goal[1] * 16
+        if me.cell == goal and (dx * off_x >= -1 if dx else abs(off_x) < 2) and (dy * off_y >= -2 if dy else abs(off_y) < 3):
             arrived = True
             break
     r.pad("", pad)
@@ -120,7 +129,7 @@ def stage_number(r):
     return master if master[0] == state.MASTER_WORLD else r.read(GAME.symbols["stage"], 2)
 
 
-# How long the bot bombs the same soft blocks before it takes them for ones a blast does not break.
+# How long the bot bombs the same soft blocks, from its first bomb at them, before it leaves them.
 UNBROKEN = 900
 
 # Master Game enemies that dodge every blast: once none has died for this long, the bot hits them by hand.
@@ -138,7 +147,7 @@ def strike(r, enemies):
         r.presses.append(f"{r.vblank}:@{at:08X}={flags.hex()}")
 
 
-def play(r, limit, log=print, fire=2, pad=1, flame=True):
+def play(r, limit, log=print, pad=1, flame=True):
     """Play the stage the run is in with the pad's bomber until it changes or `limit` VBlanks pass; whether
     it was cleared. Pad 1 moves the cutscenes on."""
     start, end = stage_number(r), r.vblank + limit
@@ -173,16 +182,8 @@ def play(r, limit, log=print, fire=2, pad=1, flame=True):
             r.pad("", pad)
             r.step(60)
             continue
+        fire = stage.fire
         moves, bomb = plan(stage, fire, frozenset(ignore))
-        if bomb:
-            at = stage.me.cell
-            for d in moves:
-                at = (at[0] + DIRS[d][0], at[1] + DIRS[d][1])
-            aimed = frozenset(blast(stage, at, fire)[1] - ignore)
-            # some soft blocks stay however often the bot bombs them, as on 3-6 past a bridge
-            if aimed and r.vblank - aiming.setdefault(aimed, r.vblank) > UNBROKEN:
-                log(f"{r.vblank}: the soft blocks at {sorted(aimed)} have not broken; leaving them")
-                ignore |= aimed
         if not moves and not bomb:
             r.pad("B", pad)                      # sets off a remote-control bomb, which waits for it
             r.step(4)
@@ -190,7 +191,7 @@ def play(r, limit, log=print, fire=2, pad=1, flame=True):
             r.step(16)
             continue
         for d in moves[:8]:
-            if not walk(r, d, pad, flame):
+            if not walk(r, d, pad, flame and bomb):
                 stuck += 1
                 # a bomber that cannot move is often in a scene with dialogue, which A and C move on
                 r.pad("A" if stuck % 2 else "C", pad)
@@ -201,6 +202,13 @@ def play(r, limit, log=print, fire=2, pad=1, flame=True):
         else:
             stuck = 0
             if bomb and len(moves) <= 8:
+                at = stage.me.cell
+                for d in moves:
+                    at = (at[0] + DIRS[d][0], at[1] + DIRS[d][1])
+                aimed = frozenset(blast(stage, at, fire)[1] - ignore)
+                if aimed and r.vblank - aiming.setdefault(aimed, r.vblank) > UNBROKEN:
+                    log(f"{r.vblank}: the soft blocks at {sorted(aimed)} have not broken; leaving them")
+                    ignore |= aimed
                 r.pad("C", pad)
                 r.step(4)
                 r.pad("B", pad)                  # sets off a remote-control bomb at once; nothing without one
