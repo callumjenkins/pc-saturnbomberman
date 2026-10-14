@@ -187,17 +187,17 @@ def strike(r, enemies):
         poke(r, at, bytes([r.read(at, 1)[0] | 0x40]))
 
 
-def play(r, limit, log=print, pad=1, flame=True, clock=False):
+def play(r, limit, log=print, pad=1, flame=True, clock=None):
     """Play the stage the run is in with the pad's bomber until it changes or `limit` VBlanks pass; whether
-    it was cleared. Pad 1 moves the cutscenes on. With `clock`, it keeps every enemy frozen with a clock
-    it hides beside itself (take_clock)."""
+    it was cleared. Pad 1 moves the cutscenes on. With `clock`, by default in Master Game, it keeps every
+    enemy frozen with a clock it hides beside itself (take_clock)."""
     from .run import GAME
     start, end = stage_number(r), r.vblank + limit
     final = start in (bytes([len(routes.STAGES) - 1, routes.STAGES[len(routes.STAGES)] - 1]),
                       bytes([state.MASTER_WORLD, routes.FLOORS - 1]))
     master = start[0] == state.MASTER_WORLD
     # bosses come out slower frozen, and a freeze can keep one from changing form (5-10)
-    clock = clock and ((routes.MASTER if master else start[0] + 1), start[1] + 1) not in routes.BOSSES
+    clock = (master if clock is None else clock) and ((routes.MASTER if master else start[0] + 1), start[1] + 1) not in routes.BOSSES
     stuck, gone_since = 0, None
     count, changed = None, r.vblank
     ignore, aiming = set(), {}                   # soft blocks given up on; when each set was first aimed at

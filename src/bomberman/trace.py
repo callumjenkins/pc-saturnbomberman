@@ -148,7 +148,7 @@ class CoreRun:
         return self.core.frame
 
 
-def bot(name, core_so, bios, limit=22000, log=print, flame=True, video=False, clock=False):
+def bot(name, core_so, bios, limit=22000, log=print, flame=True, video=False, clock=None):
     """The bot's run at the stage on the core, with or without walking flame (bot.walk); the report's
     lines. With `video`, the stage's play goes to core/NAME.mp4 in the runs folder (bomberman videos)."""
     from . import bot as player
@@ -266,7 +266,7 @@ def _one(job):
     return f"{name}: {len(report) - 2} shots, {reached}"
 
 
-def traces(names, core_so, bios, every=500, jobs=4, log=print, flame=True, video=False, clock=False):
+def traces(names, core_so, bios, every=500, jobs=4, log=print, flame=True, video=False, clock=None):
     """Each route traced in its own process, a line each as it finishes."""
     from concurrent.futures import ProcessPoolExecutor, as_completed
     with ProcessPoolExecutor(jobs) as pool:

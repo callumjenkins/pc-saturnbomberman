@@ -150,7 +150,8 @@ def main(argv=None):
     t.add_argument("--every", type=int, default=500, help="a shot every N VBlanks (default 500)")
     t.add_argument("--jobs", type=int, default=4)
     t.add_argument("--no-flame", action="store_true", help="bot-W-N: the bot without walking flame (bot.walk)")
-    t.add_argument("--clock", action="store_true", help="bot-W-N: keep every enemy frozen with clocks the bot hides beside itself")
+    t.add_argument("--clock", action="store_true", help="bot-W-N: keep every enemy frozen with clocks the bot hides beside itself, in every stage "
+                   "rather than only in Master Game")
     t.add_argument("--video", action="store_true", help="bot-W-N: the stage's play as core/NAME.mp4 in $BOMBERMAN_RUNS")
     args = ap.parse_args(argv)
 
@@ -221,7 +222,7 @@ def main(argv=None):
         if not args.core or not args.bios:
             ap.error("trace needs --core and --bios, or SATURN_EXEC_CORE and SATURN_BIOS")
         trace.traces(args.routes, os.path.expanduser(args.core), os.path.expanduser(args.bios), args.every, args.jobs,
-                     log=lambda s: print(s, flush=True), flame=not args.no_flame, video=args.video, clock=args.clock)
+                     log=lambda s: print(s, flush=True), flame=not args.no_flame, video=args.video, clock=args.clock or None)
     elif args.command == "bot":
         world, number = stage_arg(ap, args.stage)
         clear_stage(world, number, args.limit, args.window, args.video, args.items, args.coop, args.pad)
