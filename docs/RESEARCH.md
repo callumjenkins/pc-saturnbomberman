@@ -40,7 +40,14 @@ What it cannot follow:
   reads 150 sectors a second; ours by default starts at once and reads 300, so on 1-1 the enemies set
   off 7 ticks sooner than on the core and every enemy after is 7 ticks ahead. `compare`, `lab verify`
   and `trace` therefore run ours with `--accurate-drive`, Mednafen's seek model and rate: the stream
-  then ends within a tick of the core's. The earlier loads still differ, by what the CPUs cost.
+  then ends within a tick of the core's.
+- **The boot's loads.** Before the title, the opening logos change directory and read files through
+  the CD block's own file commands (0x70-0x74). On the core each change or read of a directory waits
+  7 to 14 frames for the drive; `--accurate-drive` does the same, which took 42 frames out of the
+  boot's lead over the core. What remains, about 50 frames by the title, is mostly the game's work on
+  what it loaded: after the 24 sectors at FAD 0F14 arrive, the core spends 49 frames before the next
+  load and ours 29. Charging time per instruction didn't fix it. Costs high enough to slow those loads
+  to the core's pace made the intro drop frames that the core doesn't.
 - **Screens that run on VBlanks while the tick stands still**, such as the results between battle
   rounds. The two runs leave them at different times.
 - **Wandering CPUs.** They move differently in each, and win their bombs back on reaching pad 1.
