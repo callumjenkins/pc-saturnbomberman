@@ -233,6 +233,16 @@ MASTER = "M"
 FLOORS = 20
 
 
+# The random generator's index as every stage route reached its stage write when the bot saved its clears.
+# Each stage route writes it there, so the clears replay whatever the boot before them drew.
+CLEARS_RANDOM_INDEX = 0x32
+
+
+def random_write(at):
+    from .run import GAME
+    return f"{at}:{GAME.symbols['random_index']:08X}={CLEARS_RANDOM_INDEX:08X}"
+
+
 def floor(number):
     """Master Game's floor NUMBER, from 1. The game sets stage_2 to world 8 and floor 0 at about
     VBlank 6536, then loads the floor, so the floor written just after is the one that loads. Play
@@ -241,7 +251,7 @@ def floor(number):
     if not 1 <= number <= FLOORS:
         raise ValueError(f"no floor {number}: Master Game has M-1 to M-{FLOORS}")
     writes = (f"6537:{GAME.symbols['stage_2']:08X}=08{number - 1:02X}",) if number > 1 else ()
-    return Route(f"Master Game's floor {number}", TO_MASTER, 6700, "6700", writes=writes)
+    return Route(f"Master Game's floor {number}", TO_MASTER, 6700, "6700", writes=(*writes, random_write(6537)))
 
 
 def stage_start(world):
@@ -275,7 +285,7 @@ def stage(world, number, items=False, coop=False):
         presses, at = TO_NORMAL + tap(4200, "START", 10) + tap(4500, "START", 10), 4250
     return Route(f"stage {world}-{number}{' with every item' if items else ''}{' for two' if coop else ''}, "
                  "from Normal Game with the stage select",
-                 presses, 5700, "5700", writes=tuple(f"{at}:{GAME.symbols[n]:08X}={value}" for n in names))
+                 presses, 5700, "5700", writes=(*(f"{at}:{GAME.symbols[n]:08X}={value}" for n in names), random_write(at)))
 
 
 def clear(world, number, items=False, coop=False, pad=1):

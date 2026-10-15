@@ -54,7 +54,11 @@ What it cannot follow:
   is mostly the game's work on what it loaded: after a one-sector load the core runs about 213 000
   instructions (0.84 frames) before its next CD command, which take almost no time on ours, and
   after the 24 sectors at FAD 0F14 arrive, the core spends 49 frames before the next load and ours
-  29. Charging time per instruction didn't fix it. Costs high enough to slow those loads to the
+  29. The opening logos' animation advances on the SH-2's FRT interrupt (KRNL:0602F9F8, OCRA 0x5203 at
+  φ/8), and Bomberman never leaves the 320-dot clock, so φ is 26.87 MHz: on the core the logo holds
+  6 frames a step. Ours counted the FRT at 28.6 MHz, 5.6 frames a step, and left the logos 10 frames
+  early; with φ right the wait after FAD 00AC ends within half a frame of the core's, and battle-round
+  matches the core on every shot from VBlank 2000 to 16400. Charging time per instruction didn't fix it. Costs high enough to slow those loads to the
   core's pace made the intro drop frames that the core doesn't.
 - **Screens that run on VBlanks while the tick stands still**, such as the results between battle
   rounds. The two runs leave them at different times.

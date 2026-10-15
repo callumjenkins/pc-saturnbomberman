@@ -137,7 +137,10 @@ def checkpoint_matches(name):
     lines = [line for line in open(progress).read().splitlines() if cp.rebuild(line)] if os.path.exists(progress) else []
     if not lines:
         return ["no stage start to rebuild"]
-    rebuilt = routes.Route("rebuilt", tuple(cp.presses), cp.resume, "", writes=tuple(cp.rebuild(lines[-1])))
+    def writes(line):
+        """The rebuild's writes, with the random generator's index the run's stage route writes."""
+        return (*cp.rebuild(line), routes.random_write(cp.writes[0][0]))
+    rebuilt = routes.Route("rebuilt", tuple(cp.presses), cp.resume, "", writes=writes(lines[-1]))
     idle, objects = run.GAME.symbols["idle_object"], run.GAME.symbols["objects"]
     masks = {k: mask for _, _, k, mask in cp.writes if mask}      # the bits a rebuild carries, of a range it masks
 
@@ -171,7 +174,7 @@ def checkpoint_matches(name):
     for offset, value in ((0x64, 16), (0x6E, 10)):
         index = cp.keep.index((objects + offset, 2))
         powered_line[index + 1] = f"{value:04X}"
-    powered = dataclasses.replace(rebuilt, writes=tuple(cp.rebuild(" ".join(powered_line))))
+    powered = dataclasses.replace(rebuilt, writes=writes(" ".join(powered_line)))
     with run.play(f"{out}/powered", powered) as r:
         if state(r, powered, cp.resume) is None:
             problems.append("no bomber made for the rebuild with collected power-ups")
@@ -201,7 +204,7 @@ def checkpoint_matches(name):
         b = bytearray.fromhex(fields[1 + speed])
         b[0], b[3] = (b[0] + 0x20) & 0xFF, b[3] + 1
         fields[1 + speed] = b.hex().upper()
-        skated = moved(dataclasses.replace(rebuilt, writes=tuple(cp.rebuild(" ".join(fields)))), "skated-moves")
+        skated = moved(dataclasses.replace(rebuilt, writes=writes(" ".join(fields))), "skated-moves")
         if skated <= walked:
             problems.append(f"the rebuilt bomber with a skate moved {skated / 0x10000:.2f} pixels, no further than without ({walked / 0x10000:.2f})")
     return problems

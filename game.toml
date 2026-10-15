@@ -102,6 +102,7 @@ stage_2 = 0x060C029C
 stage_3 = 0x060C029E
 stage_saved = 0x060C17A0
 score = 0x060C0690                  # a long a pad: its Normal Game score
+random_index = 0x060BF4F4           # the 55-entry random generator's index; its table follows
 # The score already checked for extra-life thresholds, a long per pad.
 awarded_score = 0x060C0FDC
 # H2H's connection state (06002FB8), as its entry at 06002F24 returned it at boot: 0 unless the NetLink's UART
