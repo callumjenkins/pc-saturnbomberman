@@ -34,11 +34,13 @@ def run(route, out, vblanks=None, shots=None, extra=(), more=(), learn_seeds=Tru
     return learn.learn(GAME, args, out, log=log)
 
 
-def play(out, route=None, until=0, invincible=False, window=False, more=()):
+def play(out, route=None, until=0, invincible=False, window=False, more=(), accurate_drive=False):
     """A run for a program to play (saturnrecomp.agent), on the current build. With a route, its
-    presses before VBlank `until` are played first, and its saturn arguments apply."""
+    presses before VBlank `until` are played first, and its saturn arguments apply. `accurate_drive`
+    gives the CD drive the hardware's seeks and rate, as a run compared with Beetle Saturn needs."""
     check_prepared()
     args = ["--cue", cue(), "--save", "-", *([] if window else ["--headless"]), *(route.args if route else ()),
+            *(["--accurate-drive"] if accurate_drive else []),
             *(invincible_hooks() if invincible or (route and route.invincible) else []), *more]
     r = agent.start(GAME.saturn, args, out)
     if route and until:

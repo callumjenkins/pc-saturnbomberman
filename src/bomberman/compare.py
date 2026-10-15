@@ -26,7 +26,7 @@ def compare(route, name, core_so, bios, shots=None, log=print):
 
     log(f"{name}: our run, to VBlank {shots[-1]}")
     ticks, ours = {}, {}
-    with run.play(f"{out}/ours", route) as r:
+    with run.play(f"{out}/ours", route, accurate_drive=True) as r:
         while r.vblank <= shots[-1]:
             ticks[r.vblank] = r.read32(tick)
             if r.vblank in shots:

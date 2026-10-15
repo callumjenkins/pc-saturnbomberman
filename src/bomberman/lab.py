@@ -123,7 +123,7 @@ def verify(route, start, every, log=print):
     shots = list(range(start, route.vblanks + 1, every))
     two = any(p.split(":", 1)[1].startswith("2.") for p in route.presses)
     tick, ticks, ours = GAME.symbols["tick"], {}, {}
-    with run.play(f"{BUILD}/lab/verify", route) as r:
+    with run.play(f"{BUILD}/lab/verify", route, accurate_drive=True) as r:
         while r.vblank <= shots[-1]:
             ticks[r.vblank] = r.read32(tick)
             if r.vblank in shots:

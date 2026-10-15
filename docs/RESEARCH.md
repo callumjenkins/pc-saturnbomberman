@@ -34,6 +34,13 @@ What it cannot follow:
   our 171), and the game runs some tasks on every VBlank while it loads. Enemies and CPUs therefore
   drift a few frames apart after a load. Neither drive timing, nor holding our drive, nor copying the
   core's RAM in after the load closed the gap (agent-home `projects/pc-saturnbomberman/context/mednafen-comparison.md`).
+- **The stage's opening sound stream.** A stage's enemies start when the sound stream its start plays
+  ends (the callback at 06006164, cleared at 06009F4C once the stream's state byte at 060B2E84 is 2).
+  The stream reads 85 sectors and plays them. The real drive seeks first, about 9 frames on 1-1, and
+  reads 150 sectors a second; ours by default starts at once and reads 300, so on 1-1 the enemies set
+  off 7 ticks sooner than on the core and every enemy after is 7 ticks ahead. `compare`, `lab verify`
+  and `trace` therefore run ours with `--accurate-drive`, Mednafen's seek model and rate: the stream
+  then ends within a tick of the core's. The earlier loads still differ, by what the CPUs cost.
 - **Screens that run on VBlanks while the tick stands still**, such as the results between battle
   rounds. The two runs leave them at different times.
 - **Wandering CPUs.** They move differently in each, and win their bombs back on reaching pad 1.
