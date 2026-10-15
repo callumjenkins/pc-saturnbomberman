@@ -40,7 +40,11 @@ What it cannot follow:
   reads 150 sectors a second; ours by default starts at once and reads 300, so on 1-1 the enemies set
   off 7 ticks sooner than on the core and every enemy after is 7 ticks ahead. `compare`, `lab verify`
   and `trace` therefore run ours with `--accurate-drive`, Mednafen's seek model and rate: the stream
-  then ends within a tick of the core's.
+  then ends within a tick of the core's. On `clear-1-1` it ends a tick later on ours, and with the core
+  shifted by that tick every live enemy and the random generator (060BF4F4) match from the enemies'
+  creation at tick 2925 to 4264. There pad 1's bomb kills slot 16 at the same tick on both, but the
+  core's enemy has walked one step further. The enemy's wait (KRNL:0606E494) picks its direction from
+  the generator, so a different draw count before the stage would also separate them.
 - **The boot's loads.** Before the title, the opening logos change directory and read files through
   the CD block's own file commands (0x70-0x74). On the core each change or read of a directory waits
   7 to 14 frames for the drive; `--accurate-drive` does the same, which took 42 frames out of the
