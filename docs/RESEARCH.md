@@ -40,18 +40,22 @@ What it cannot follow:
   reads 150 sectors a second; ours by default starts at once and reads 300, so on 1-1 the enemies set
   off 7 ticks sooner than on the core and every enemy after is 7 ticks ahead. `compare`, `lab verify`
   and `trace` therefore run ours with `--accurate-drive`, Mednafen's seek model and rate: the stream
-  then ends within a tick of the core's. On `clear-1-1` it ends a tick later on ours, and with the core
-  shifted by that tick every live enemy and the random generator (060BF4F4) match from the enemies'
-  creation at tick 2925 to 4264. There pad 1's bomb kills slot 16 at the same tick on both, but the
-  core's enemy has walked one step further. The enemy's wait (KRNL:0606E494) picks its direction from
+  then ends within two ticks of the core's. On `clear-1-1` it ends two ticks later on ours, and with
+  the core shifted by those ticks every live enemy's update function, flags, cell and position, and
+  the random generator (060BF4F4), match from the enemies' creation at tick 2923 to 4261. There pad 1's
+  bomb kills slot 16 at the same tick on both, but the core's enemy has walked one step further. The enemy's wait (KRNL:0606E494) picks its direction from
   the generator, so a different draw count before the stage would also separate them.
 - **The boot's loads.** Before the title, the opening logos change directory and read files through
   the CD block's own file commands (0x70-0x74). On the core each change or read of a directory waits
   7 to 14 frames for the drive; `--accurate-drive` does the same, which took 42 frames out of the
-  boot's lead over the core. What remains, about 50 frames by the title, is mostly the game's work on
-  what it loaded: after the 24 sectors at FAD 0F14 arrive, the core spends 49 frames before the next
-  load and ours 29. Charging time per instruction didn't fix it. Costs high enough to slow those loads
-  to the core's pace made the intro drop frames that the core doesn't.
+  boot's lead over the core. The first sector after a seek also reaches the buffer two sectors' time
+  after the seek, as in Mednafen (one reading its subcode, one into the pre-buffer), so a one-sector
+  read takes the core's 7 to 8 frames to within a tenth. What remains, about 48 frames by the title,
+  is mostly the game's work on what it loaded: after a one-sector load the core runs about 213 000
+  instructions (0.84 frames) before its next CD command, which take almost no time on ours, and
+  after the 24 sectors at FAD 0F14 arrive, the core spends 49 frames before the next load and ours
+  29. Charging time per instruction didn't fix it. Costs high enough to slow those loads to the
+  core's pace made the intro drop frames that the core doesn't.
 - **Screens that run on VBlanks while the tick stands still**, such as the results between battle
   rounds. The two runs leave them at different times.
 - **Wandering CPUs.** They move differently in each, and win their bombs back on reaching pad 1.
