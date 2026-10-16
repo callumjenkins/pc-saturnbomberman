@@ -50,8 +50,8 @@ def blast(stage, c, fire):
 def plan(stage, fire, ignore=frozenset()):
     """Where to go next and whether to bomb there: a cell whose blast reaches a target, else one that
     breaks the soft block nearest a target, else the exit once none is left. The targets are the Core
-    Mechanisms, which alone keep the exit shut, or every enemy in a stage without them, such as a
-    boss's. Soft blocks in `ignore` are left alone. A mine cart is ridden only when nothing is in reach
+    Mechanisms, which alone keep the exit shut, or a boss's weak cell where it has one, or every enemy.
+    Soft blocks in `ignore` are left alone. A mine cart is ridden only when nothing is in reach
     without it."""
     reachable, path = paths(stage, stage.me.cell)
     foes = stage.cores or stage.enemies
@@ -62,7 +62,7 @@ def plan(stage, fire, ignore=frozenset()):
             return path(stage.exit), False
         targets = {stage.exit}
     else:
-        targets = {e.cell for e in foes}
+        targets = {stage.weak} if stage.weak else {e.cell for e in foes}
     best = None
     for c in reachable:
         hit, soft = blast(stage, c, fire)

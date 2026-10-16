@@ -136,3 +136,38 @@ def test_the_sleeping_cactus_is_no_enemy_on_its_stages():
 
 def test_4_2s_floor_is_no_mine_cart():
     assert state.cart(0x5B00) and not state.cart(0x4A00) and not state.cart(0x5300)
+
+
+def test_aims_at_a_boss_s_weak_cell_and_not_at_its_body():
+    s = stage(ROOM, (1, 1), enemies=[(1, 3)])
+    s = state.Stage(s.cells, s.me, s.enemies, s.exit, weak=(5, 3))
+    moves, bomb = bot.plan(s, fire=2)
+    x, y = 1, 1
+    for d in moves:
+        x, y = x + bot.DIRS[d][0], y + bot.DIRS[d][1]
+    assert bomb and (5, 3) in bot.blast(s, (x, y), fire=2)[0]
+
+
+def test_mr_meanie_s_weak_cell_follows_the_part_out():
+    sym = run.GAME.symbols
+    word = lambda v: (v & 0xFFFF).to_bytes(2, "big")
+
+    def weak(y, out, lost, phase=0):
+        r = Memory()
+        r.write(sym["stage"], bytes((4, 8)))                    # 5-9
+        body = sym["objects"] + 10 * state.SLOT
+        r.write(body + 0x30, (0x0608B490).to_bytes(4, "big"))
+        r.write(body + 0x44, (11 * 64 + 11).to_bytes(2, "big"))
+        r.write(body + 0x48, word(0xB0))
+        r.write(body + 0x4C, word(y))
+        r.write(sym["meanie_parts_out"], word(out))
+        r.write(sym["meanie_parts_lost"], word(lost))
+        r.write(sym["meanie_phase"], word(phase))
+        r.write(sym["meanie_offsets"], word(2 - 64) + word(0) + word(-2 - 64))
+        return state.read(r).weak
+
+    assert weak(0xB0, 0, 0) == (11, 9)                           # two rows above the body
+    assert weak(0xA0, 1, 1) == (11, 9)                           # a row lower once a part is lost
+    assert weak(0xA0, 1, 0, phase=0) == (13, 8)                  # the part out, by the phase's offset
+    assert weak(0xA0, 1, 0, phase=2) == (9, 8)
+    assert weak(0xA0, 1, 0, phase=3) is None

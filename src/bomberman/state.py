@@ -47,6 +47,7 @@ class Stage:
     enemies: tuple[Thing, ...]
     exit: tuple[int, int]
     fire: int = 2                                # how far the bomber's blasts reach, in cells
+    weak: tuple[int, int] | None = None          # the one cell a boss takes hits on, for the bosses that have one
 
     @property
     def cores(self):
@@ -77,6 +78,27 @@ def _things(raw, slots):
     return out
 
 
+MEANIE = (5, 9)                                   # the stage of Mr. Meanie's mech, whose body is slot 10
+
+
+def meanie_weak(objs, r):
+    """The cell Mr. Meanie's mech takes hits on, worked out as the game does; None when no fire can hurt it."""
+    sym = GAME.symbols
+    body = objs[10 * SLOT:11 * SLOT]
+    word = lambda a: int.from_bytes(r.read(a, 2), "big")
+    lost = word(sym["meanie_parts_lost"])
+    out = (word(sym["meanie_parts_out"]) - lost) & 0xFFFF
+    x = int.from_bytes(body[0x48:0x4A], "big")
+    y = (int.from_bytes(body[0x4C:0x4E], "big") - 32 + 16 * lost + 16 * out) & 0xFFFF
+    at = ((y >> 4) + (y >> 3 & 1)) * 64 + (x >> 4) + (x >> 3 & 1)   # each to the nearest cell
+    if out:
+        phase = word(sym["meanie_phase"])
+        if phase >= 3:
+            return None
+        at += int.from_bytes(r.read(sym["meanie_offsets"] + 2 * phase, 2), "big", signed=True)
+    return at % 64, at // 64
+
+
 def cell(r, c):
     """One cell of the map: a 2-byte read, for checking under the bomber as it walks."""
     x, y = c
@@ -101,12 +123,14 @@ def read(r, pad=1):
     # (a slot can also hold a cell off the map, in a stage that keeps other things there)
     enemies = tuple(t for t in _things(objs, ENEMY_SLOTS) if t.cell[1] < 64 and not cells[t.cell[1] * 64 + t.cell[0]] & BOMB)
     exit = (exit_cell % 64, exit_cell // 64)
+    weak = None
     if r.read(sym["stage_2"], 1)[0] == MASTER_WORLD:
         exit = LADDER if not enemies else (-1, -1)
     else:
         world, number = r.read(sym["stage"], 2)
         cactus = CACTI.get((world + 1, number + 1))
         enemies = tuple(e for e in enemies if e.cell != cactus)
+        weak = meanie_weak(objs, r) if (world + 1, number + 1) == MEANIE and enemies else None
     me_slot = objs[(pad - 1) * SLOT:pad * SLOT]
     fire = 1 if int.from_bytes(me_slot[0x5A:0x5C], "big") & WEAK_FIRE else int.from_bytes(me_slot[0x64:0x66], "big")
-    return Stage(cells, bomber[0] if bomber else None, enemies, exit, max(fire, 1))
+    return Stage(cells, bomber[0] if bomber else None, enemies, exit, max(fire, 1), weak)
