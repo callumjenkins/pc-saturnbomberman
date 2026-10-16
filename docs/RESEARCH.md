@@ -77,6 +77,27 @@ Bomber Stadium's save prompts differ, and once a match ends at a different time 
 other screens. Callum's 05:01 session matched for the 20 s compared in its first battle and parted
 after that.
 
+### Sound
+
+`bomberman compare ROUTE --sound` records both runs' sound and compares them a second (60 of our
+VBlanks) at a time. Each window of ours is placed at the same point of the game in the core's
+recording and searched 250 ms either way. Both recordings go to `build/compare/ROUTE/`, as
+`ours.wav` and `core.wav`, for listening. On 2026-10-16, for `normal` and `battle-round`:
+
+- **The sound is the same sound.** When nothing else is playing, a window correlates at 0.99 to
+  1.000, as in the title and story intro. The channels are the right way round in every window.
+  Neither recording clips.
+- **Ours is 1.5 dB louder.** That's the median gap over the windows that correlate, on both routes.
+- **Our frame is too short.** The runtime's VBlank comes at 59.94 Hz (`kFrameNs`, 16.683 ms). The
+  core's comes at 59.826 Hz, which is 449,204 cycles of φ (the master clock over 65), 16.715 ms. A
+  sound plays on the sound chip's own 44.1 kHz clock, so while it plays it falls behind our picture
+  by 0.19%. Within each of `normal`'s intro sounds that's 1.9 ms a second, 115 ms a minute.
+- **The core plays the BIOS's start-up sound.** Ours replaces the BIOS, so ours is silent for those
+  first seconds.
+- **In battle, most windows don't match** (44 of 255 correlate at 0.9). The music lines up, but the
+  CPUs drift apart on the core as they do in the pictures, so the sound effects in the mix differ.
+  Some music windows are also out of line by more than the 250 ms searched.
+
 ## The open arena
 
 `routes.open_arena(off=..., **rules)` is where mechanics are tested. It is Path to Glory under the white

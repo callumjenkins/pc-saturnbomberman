@@ -11,7 +11,8 @@
     bomberman run clear WORLD-STAGE [options]    a stage the bot cleared, replayed
     bomberman run attempt WORLD-STAGE [options]  the bot's last run at a stage, cleared or not
     bomberman bot WORLD-STAGE [--limit N]        clear a stage, invincible, and save its presses
-    bomberman compare ROUTE | --arenas    against Mednafen's Saturn: a route, or every arena under every sky
+    bomberman compare ROUTE | --arenas    against Mednafen's Saturn: a route, or every arena under every sky;
+                                          --sound compares the route's sound
     bomberman trace ROUTE...              on Beetle Saturn built with exec-trace.patch: what it executed (bomberman.trace)
 --video on run or bot also records the run as video.mp4 in its directory, the bot's from the stage start; a clear's is also kept
 in $BOMBERMAN_RUNS (bomberman videos).
@@ -143,7 +144,8 @@ def main(argv=None):
                    help="Beetle Saturn's libretro core (default $SATURN_REFERENCE_CORE)")
     c.add_argument("--bios", default=os.environ.get("SATURN_BIOS"),
                    help="the folder holding mpr-17933.bin (default $SATURN_BIOS)")
-    c.add_argument("--every", type=int, help="a shot every N VBlanks as well as the route's own")
+    c.add_argument("--every", type=int, help="a shot every N VBlanks as well as the route's own; with --sound, the window")
+    c.add_argument("--sound", action="store_true", help="the sound instead, window by window, with both recordings saved")
     t = sub.add_parser("trace", help="routes on Beetle Saturn built with exec-trace.patch, logging what it executes")
     t.add_argument("routes", nargs="+", help="names from bomberman routes, clear-W-N with its tags, such as "
                    "clear-5-10-items, or bot-W-N for the bot playing the stage on the core")
@@ -217,6 +219,10 @@ def main(argv=None):
         if not args.route:
             ap.error("compare needs a route, or --arenas")
         route = routes.ROUTES[args.route]()
+        if args.sound:
+            for line in compare.sound(route, args.route, args.core, args.bios, args.every or 60):
+                print(line)
+            return
         shots = {int(s) for s in route.shots.split(",") if s}
         if args.every:
             shots |= set(range(args.every, max(shots) + 1, args.every))
