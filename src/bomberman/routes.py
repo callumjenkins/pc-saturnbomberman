@@ -657,14 +657,14 @@ def saved(world, number, items, coop, pad=1):
     return os.path.exists(os.path.join(ROOT, "inputs", "clears", f"{world}-{number}{tag(items, coop, pad)}.txt"))
 
 
-# The bosses pad 2 beat only with every item.
-P2_ITEMS = {(5, 9), (5, 10)}
+# The bosses the bot beats for two only with every item.
+COOP_ITEMS = {(5, 9), (5, 10)}
 
 COOP_ROUTES = {"coop-start": coop_start,
-               **{f"coop-{w}-{n}": (lambda w=w, n=n: coop_boss(w, n, items=(w, n) == (5, 10)))
-                  for w, n in BOSSES if w != MASTER and saved(w, n, (w, n) == (5, 10), True)},
-               **{f"coop-p2-{w}-{n}": (lambda w=w, n=n: coop_boss(w, n, items=(w, n) in P2_ITEMS, pad=2))
-                  for w, n in BOSSES if w != MASTER and saved(w, n, (w, n) in P2_ITEMS, True, 2)}}
+               **{f"coop-{w}-{n}": (lambda w=w, n=n: coop_boss(w, n, items=(w, n) in COOP_ITEMS))
+                  for w, n in BOSSES if w != MASTER and saved(w, n, (w, n) in COOP_ITEMS, True)},
+               **{f"coop-p2-{w}-{n}": (lambda w=w, n=n: coop_boss(w, n, items=(w, n) in COOP_ITEMS, pad=2))
+                  for w, n in BOSSES if w != MASTER and saved(w, n, (w, n) in COOP_ITEMS, True, 2)}}
 
 
 BOSS_ROUTES = {

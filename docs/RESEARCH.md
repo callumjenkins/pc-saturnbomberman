@@ -160,7 +160,7 @@ so they play without the invincibility hooks.
   (`coop-illness-touch`).
 - Pad 2 hatches and rides a dino as pad 1 does (`coop-p2-dino`); a hit costs the dino, not the bomber.
 - Pad 2 beats every Normal Game boss alone with pad 1 standing at the start (`bomberman bot W-N --pad 2`,
-  frame tests `coop-p2-W-N`); 5-9 took every item, as it did for pad 1.
+  frame tests `coop-p2-W-N`); 5-9 took every item, as it does for pad 1 alone and for two.
 - A boss beaten while pad 2 is down takes pad 1 to the ship alone, the lives untouched, and the next
   stage starts without pad 2. Once play begins, pad 2's START brings it back on pad 1's cell for a life
   (`coop-boss-p2-out`, 1-7). The next world's intro waits for a START, and either pad's moves it on.
