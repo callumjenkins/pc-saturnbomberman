@@ -13,7 +13,7 @@
     bomberman bot WORLD-STAGE [--limit N]        clear a stage, invincible, and save its presses
     bomberman compare ROUTE | --arenas    against Mednafen's Saturn: a route, or every arena under every sky
     bomberman trace ROUTE...              on Beetle Saturn built with exec-trace.patch: what it executed (bomberman.trace)
---video on run or bot also records the run as video.mp4 in its directory; a clear's is also kept
+--video on run or bot also records the run as video.mp4 in its directory, the bot's from the stage start; a clear's is also kept
 in $BOMBERMAN_RUNS (bomberman videos).
 A run builds the game first if it has to, plays the route headless into build/run/ROUTE (log.txt and
 shot-N.png) and learns seeds while the game stops at code discovery missed."""
@@ -39,13 +39,17 @@ def clear_stage(world, number, limit, window, video=False, items=False, coop=Fal
     route = routes.stage(world, number, items, coop or pad == 2)
     start = routes.stage_start(world)
     out = run.out_dir(f"bot-{world}-{number}{routes.tag(items, coop, pad)}")
-    more = ["--video", os.path.join(out, "video.mp4")] if video else []
+    video = video and os.path.join(os.path.abspath(out), "video.mp4")
+    more = ["--video", video] if video else []
     with run.play(out, route, until=start, invincible=True, window=window, more=more) as r:
         cleared = bot.play(r, limit, pad=pad)
         presses = [p for p in r.presses if int(p.split(":")[0]) >= start]
         r.frame().save_png(os.path.join(r.out, f"end-{r.vblank}.png"))
         open(os.path.join(r.out, "presses.txt"), "w").write(",".join(presses) + "\n")
-        print(f"{world}-{number}: {'cleared' if cleared else 'not cleared'} at VBlank {r.vblank}, {len(presses)} presses")
+        print(f"{world}-{number}: {'cleared' if cleared else 'not cleared'} {r.vblank - start} VBlanks into the stage "
+              f"(VBlank {r.vblank}), {len(presses)} presses")
+    if video:
+        videos.cut(video, start, video)
     if cleared:
         path = os.path.join(ROOT, "inputs", "clears", f"{world}-{number}{routes.tag(items, coop, pad)}.txt")
         os.makedirs(os.path.dirname(path), exist_ok=True)

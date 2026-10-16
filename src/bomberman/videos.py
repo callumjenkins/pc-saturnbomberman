@@ -30,15 +30,19 @@ def saved_clears():
     return sorted(out, key=lambda c: (c[0] == routes.MASTER, str(c[0]), c[1]))
 
 
-def keep(video, world, number, items, coop=False):
-    """Cuts a clear's whole-run video to start a second after the menus' last press, into the runs folder."""
-    start = max(int(p.split(":")[0]) for p in routes.stage(world, number, items, coop).presses) + 60
-    dest = os.path.join(runs_dir(), "clears", f"{world}-{number}{'-coop' if coop else ''}.mp4")
+def cut(video, start, dest):
+    """`video` from VBlank `start` on, into `dest`, which may be `video` itself."""
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{start / 60:.2f}", "-i", video, "-c", "copy",
                     dest + ".new.mp4"], check=True)
     os.replace(dest + ".new.mp4", dest)
     return dest
+
+
+def keep(video, world, number, items, coop=False):
+    """Cuts a clear's whole-run video to start a second after the menus' last press, into the runs folder."""
+    start = max(int(p.split(":")[0]) for p in routes.stage(world, number, items, coop).presses) + 60
+    return cut(video, start, os.path.join(runs_dir(), "clears", f"{world}-{number}{'-coop' if coop else ''}.mp4"))
 
 
 def record(world, number, items, coop=False):
@@ -57,12 +61,7 @@ def record_route(name, lead=600, start=None):
     run.run(route, out, more=["--video", video], learn_seeds=False)
     if start is None:
         start = max(0, min(int(s) for s in route.shots.split(",")) - lead)
-    dest = os.path.join(runs_dir(), "mechanics", f"{name}.mp4")
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{start / 60:.2f}", "-i", video, "-c", "copy",
-                    dest + ".new.mp4"], check=True)
-    os.replace(dest + ".new.mp4", dest)
-    return dest
+    return cut(video, start, os.path.join(runs_dir(), "mechanics", f"{name}.mp4"))
 
 
 def record_all(which=None, jobs=6, log=print):

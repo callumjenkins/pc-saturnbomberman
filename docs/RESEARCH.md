@@ -122,6 +122,14 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
 | Mr. Meanie's arena crushed, in the 5-9 clear with every item | about 6560 |
 | Dragon Bomber's dragon heads, in the M-20 clear | from about 9600 |
 
+A boss stage's entrance holds pad 1 until its banner ends. With nothing written, the bomber first answers
+the pad at 6724 on 1-7, 6256 on 2-9, 6768 on 4-10, 6716 on 5-9 and 6428 on 5-10. On 1-1, 3-9 and 4-5 it
+answers within 40 VBlanks of 5700. No button shortens an entrance: START, A, B and C tapped every 20
+VBlanks leave it as it is. Bit 0 of 060D7E68 is set through the entrance and cleared at its end, and
+clearing it early frees the bomber (at 6004 on 5-9) without skipping anything: the banner and the boss
+keep their own times, and on 4-10 the stage clock ran on from 38:58 and the bot never cleared the
+stage. The routes leave it alone.
+
 ## Two players in Normal Game
 
 With a pad in port 2, Normal Game asks for 1 PLAYER GAME or 2 PLAYER GAME (from about VBlank 4300 in
