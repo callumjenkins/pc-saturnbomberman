@@ -113,10 +113,13 @@ def sound(route, name, core_so, bios, every=60, max_lag=0.25, log=print):
               f"{matched} of {sounding} sounding windows correlate at 0.9 or more; "
               f"lag from {min(lags, default=0) * 1000 / audio.RATE:+.1f} to {max(lags, default=0) * 1000 / audio.RATE:+.1f} ms; "
               f"{len(left) / audio.RATE:.1f} s of ours, {len(ref_left) / audio.RATE:.1f} s of the core's"]
-    drift = audio.slope(steady)
-    if drift is not None:
-        report.append(f"over the windows that correlate, the core's sound moves {drift * 3600 * 1000 / audio.RATE:+.1f} ms "
-                      f"a minute (3600 of our VBlanks) against ours")
+    # neighbouring windows of one sound: a jump of more than 5 ms is another sound started
+    pairs = [(v1 - v0, l1 - l0) for (v0, l0), (v1, l1) in zip(steady, steady[1:])
+             if v1 - v0 == every and abs(l1 - l0) * 1000 < 5 * audio.RATE]
+    if pairs:
+        drift = sum(d for _, d in pairs) / sum(v for v, _ in pairs)
+        report.append(f"within a sound, the core's moves {drift * 3600 * 1000 / audio.RATE:+.1f} ms a minute "
+                      f"(3600 of our VBlanks) against ours, over {len(pairs)} pairs of windows")
     open(f"{out}/sound.txt", "w").write("\n".join(report) + "\n")
     return report
 

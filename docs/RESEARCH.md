@@ -88,15 +88,17 @@ recording and searched 250 ms either way. Both recordings go to `build/compare/R
   1.000, as in the title and story intro. The channels are the right way round in every window.
   Neither recording clips.
 - **Ours is 1.5 dB louder.** That's the median gap over the windows that correlate, on both routes.
-- **Our frame is too short.** The runtime's VBlank comes at 59.94 Hz (`kFrameNs`, 16.683 ms). The
+- **The frame now matches the core's.** The runtime's VBlank came at 59.94 Hz (16.683 ms). The
   core's comes at 59.826 Hz, which is 449,204 cycles of φ (the master clock over 65), 16.715 ms. A
-  sound plays on the sound chip's own 44.1 kHz clock, so while it plays it falls behind our picture
-  by 0.19%. Within each of `normal`'s intro sounds that's 1.9 ms a second, 115 ms a minute.
+  sound plays on the sound chip's own 44.1 kHz clock, so it fell behind our picture by 0.19%, 115 ms
+  a minute. The runtime's line is now 63,556 ns, the core's 1708 cycles of φ. Within a sound, the
+  core's now moves 0.7 ms a minute against ours on `normal` and 0.2 on `battle-round`.
+- **The core's sound comes 63 ms after ours** through `normal`'s story intro, and that gap holds.
 - **The core plays the BIOS's start-up sound.** Ours replaces the BIOS, so ours is silent for those
   first seconds.
-- **In battle, most windows don't match** (44 of 255 correlate at 0.9). The music lines up, but the
-  CPUs drift apart on the core as they do in the pictures, so the sound effects in the mix differ.
-  Some music windows are also out of line by more than the 250 ms searched.
+- **In battle, 105 of 254 windows correlate at 0.9**, up from 44 before the frame matched. The
+  rest are mixes in which the sound effects differ, because the CPUs drift apart on the core as they
+  do in the pictures. A few music windows are also out of line by more than the 250 ms searched.
 
 ## The open arena
 
@@ -137,9 +139,9 @@ the rules screen cycles through its seven rows. Time runs 1:00 to 9:00 and wraps
 | --- | --- |
 | Normal Game stage route: play starts | about 5620 (5000 with every item) |
 | Master Game: stage_2 set to 08 00 / floor 1 play starts | 6536 / about 6600 (`stage M-N` writes 08 NN-1 at 6537) |
-| Master floor 20 cleared by the saved clear: the temple door / final RESULT | 15400-16200 / 17000 |
+| Master floor 20 cleared by the saved clear: the temple door / final RESULT | 11175-11975 / 12775 (434-1234 / 2034 after its last press) |
 | Stage 1-5 cannon: bomb at (20,9) with C held from 6232 / second bomb / fuse lit / fired / octopus hit | 6234 / 6412 / 6578 / 6608 / 6644 |
-| Dr. Mechado's unicycle mecha, in the 5-10 clear with every item | about 8000 |
+| Dr. Mechado's unicycle mecha, in the 5-10 clear with every item | about 10500 |
 | Mr. Meanie's arena crushed, in the 5-9 clear with every item | about 6560 |
 | Dragon Bomber's dragon heads, in the M-20 clear | from about 9600 |
 

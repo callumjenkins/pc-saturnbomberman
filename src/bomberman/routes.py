@@ -670,17 +670,19 @@ COOP_ROUTES = {"coop-start": coop_start,
 BOSS_ROUTES = {
     **{f"boss-{w}-{n}": (lambda w=w, n=n: boss(w, n)) for w, n in BOSSES},
     "boss-5-9-crushed": lambda: boss_late(5, 9, 6700, items=True),
-    "boss-5-10-mecha": lambda: boss_late(5, 10, 8100, items=True),
+    "boss-5-10-mecha": lambda: boss_late(5, 10, 10500, items=True),
     "boss-M-20-late": lambda: boss_late("M", 20, 9000),
 }
 
 
 def master_ending():
-    """Floor 20's clear replayed (Dragon Bomber beaten), then the ending: the temple door opens (15400 to
-    16200) and RESULT ranks the run (17000)."""
+    """Floor 20's clear replayed (Dragon Bomber beaten), then the ending: the temple door opens (from 434
+    to 1234 VBlanks after the clear's last press) and RESULT ranks the run (2034 after)."""
     base = clear(MASTER, 20)
-    return Route("Master Game finished: floor 20 cleared, the temple door and the final RESULT", base.presses, 17000,
-                 "15400,15800,16200,17000", invincible=True, writes=base.writes)
+    end = max(int(p.split(":")[0]) for p in base.presses)
+    shots = [end + d for d in (434, 834, 1234, 2034)]
+    return Route("Master Game finished: floor 20 cleared, the temple door and the final RESULT", base.presses, shots[-1],
+                 ",".join(map(str, shots)), invincible=True, writes=base.writes)
 
 
 def com_level(level):

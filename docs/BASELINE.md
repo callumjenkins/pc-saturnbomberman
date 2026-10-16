@@ -23,4 +23,19 @@ run again after saturn-recomp d98f59b, which adds only `saturnrecomp.audio`: che
 | `uv run tests/frames.py` | 204 of 204 ok |
 | Every saved clear replayed (`inputs/clears/`, 120) | every one reaches the next stage, except the three 5-10 clears, which end on 5-10 as the game's last stage does |
 
-Nothing failed, so nothing in the baseline needs explaining before later work.
+Nothing failed. The replay check had a gap, though: it compares only the stage number, and 5-10 is
+the last stage, so it can't tell whether a 5-10 clear beat Dr. Mechado. Its last frame does tell.
+
+## 2026-10-16, after the frame fix
+
+saturn-recomp's line went from 63,435 ns (a 59.94 Hz frame) to the core's 63,556 ns (59.826 Hz).
+Every check above passes again, with these changes:
+
+- 27 clears stopped short and the bot played them again. 4-8 for two and 4-9 cleared only with
+  `--limit 40000`, after the stage clock ran out once.
+- The three 5-10 clears, checked by their last frames, stopped mid-fight, paused. The bot played
+  them again, and each now reaches the ending movie. They had not been checked this way before the
+  change.
+- 183 of the 204 frame tests differed and were re-recorded, after a look at every route's pictures.
+  `master-ending` now places its shots from the end of floor 20's clear, and `boss-5-10-mecha` cuts
+  in at 10500, where the new clear's mecha first shows.

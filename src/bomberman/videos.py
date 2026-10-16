@@ -13,6 +13,9 @@ from .paths import ROOT
 
 
 
+FIELD = 263 * 63556e-9      # seconds from one VBlank to the next: the runtime's 263 lines
+
+
 def runs_dir():
     return os.environ.get("BOMBERMAN_RUNS", os.path.expanduser("~/saturn-recomp/pc-saturnbomberman-runs"))
 
@@ -33,7 +36,7 @@ def saved_clears():
 def cut(video, start, dest):
     """`video` from VBlank `start` on, into `dest`, which may be `video` itself."""
     os.makedirs(os.path.dirname(dest), exist_ok=True)
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{start / 60:.2f}", "-i", video, "-c", "copy",
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{start * FIELD:.2f}", "-i", video, "-c", "copy",
                     dest + ".new.mp4"], check=True)
     os.replace(dest + ".new.mp4", dest)
     return dest
