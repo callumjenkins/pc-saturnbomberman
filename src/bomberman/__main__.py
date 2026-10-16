@@ -267,7 +267,7 @@ def main(argv=None):
                       learn_seeds=not args.once, recompile=args.recompile,
                       log=lambda s: print(s, flush=True)))
         if args.video and args.route == "clear":
-            print("kept", videos.keep(os.path.join(os.path.abspath(out), "video.mp4"), world, number, args.items, args.coop))
+            print("kept", videos.keep(os.path.join(os.path.abspath(out), "video.mp4"), world, number, args.items, args.coop, args.pad))
 
 
 if __name__ == "__main__":

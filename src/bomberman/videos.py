@@ -21,15 +21,17 @@ def runs_dir():
 
 
 def saved_clears():
-    """(world, number, items, coop) for every clear in inputs/clears/, Normal Game's then Master Game's."""
+    """(world, number, items, coop, pad) for every clear in inputs/clears/, Normal Game's then Master Game's."""
     out = []
     for path in glob.glob(f"{ROOT}/inputs/clears/*.txt"):
         name = os.path.basename(path)[:-4]
+        pad = 2 if name.endswith("-p2") else 1
+        name = name.removesuffix("-p2")
         coop = name.endswith("-coop")
         name = name.removesuffix("-coop")
         items = name.endswith("-items")
         world, number = name.removesuffix("-items").split("-")
-        out.append((world if world == routes.MASTER else int(world), int(number), items, coop))
+        out.append((world if world == routes.MASTER else int(world), int(number), items, coop, pad))
     return sorted(out, key=lambda c: (c[0] == routes.MASTER, str(c[0]), c[1]))
 
 
@@ -42,18 +44,18 @@ def cut(video, start, dest):
     return dest
 
 
-def keep(video, world, number, items, coop=False):
+def keep(video, world, number, items, coop=False, pad=1):
     """Cuts a clear's whole-run video to start a second after the menus' last press, into the runs folder."""
-    start = max(int(p.split(":")[0]) for p in routes.stage(world, number, items, coop).presses) + 60
-    return cut(video, start, os.path.join(runs_dir(), "clears", f"{world}-{number}{'-coop' if coop else ''}.mp4"))
+    start = max(int(p.split(":")[0]) for p in routes.stage(world, number, items, coop or pad == 2).presses) + 60
+    return cut(video, start, os.path.join(runs_dir(), "clears", f"{world}-{number}{routes.tag(items, coop, pad)}.mp4"))
 
 
-def record(world, number, items, coop=False):
-    route = routes.clear(world, number, items, coop)
-    out = run.out_dir(f"clear-{world}-{number}{routes.tag(items, coop)}")
+def record(world, number, items, coop=False, pad=1):
+    route = routes.clear(world, number, items, coop, pad)
+    out = run.out_dir(f"clear-{world}-{number}{routes.tag(items, coop, pad)}")
     video = os.path.join(os.path.abspath(out), "video.mp4")
     run.run(route, out, more=["--video", video], learn_seeds=False)
-    return keep(video, world, number, items, coop)
+    return keep(video, world, number, items, coop, pad)
 
 
 def record_route(name, lead=600, start=None):
