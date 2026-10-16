@@ -4,8 +4,8 @@ Phase 0's recorded baseline. Each later change can be checked against these resu
 
 ## 2026-10-16
 
-Recorded at pc-saturnbomberman 5312942, with saturn-recomp pinned at 9aa23e4. The checks were then
-run again after saturn-recomp d98f59b, which adds only `saturnrecomp.audio`.
+Recorded at pc-saturnbomberman 5312942, with saturn-recomp pinned at 9aa23e4. Two checks were
+run again after saturn-recomp d98f59b, which adds only `saturnrecomp.audio`: check.sh and the frame tests passed there too.
 
 | Tool | Version |
 | --- | --- |
