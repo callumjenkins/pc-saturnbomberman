@@ -18,6 +18,7 @@ track *	data	CD-DA: the runtime's CD block plays a track when the game asks (run
 /XBAND/DRAMDB.BIN	data	The XBAND client names it; no SH-2 prologue.
 /XBAND/BGLIST00.TXT	data	The XBAND client's list of theme screens (THEME00/*.BMP); the client names it.
 /XBAND/THEME00/*.BMP?named	data	Theme screens the XBAND client names (files.tsv's last column).
+/XBAND/THEME00/*.BMP	data	The four theme screens nothing on the disc names (MAILLIST, MAKEMAIL, READMAIL, STATS): each decodes whole as a 320x224 BMP, the size of the named ones. BGLIST00.TXT, the client's list of theme screens, leaves them out.
 /LOADING.BMP	data	A loading picture XS names in full.
 /NETLINK/*.BMP?named	data	The NetLink browser's (/0, PlanetWeb) BMP files that it, or a page it names, names (files.tsv's last column).
 /NETLINK/*.GIF?named	data	The NetLink browser's (/0, PlanetWeb) GIF files that it, or a page it names, names (files.tsv's last column).
@@ -26,5 +27,7 @@ track *	data	CD-DA: the runtime's CD block plays a track when the game asks (run
 /NETLINK/*.TXT?named	data	The NetLink browser's (/0, PlanetWeb) TXT files that it, or a page it names, names (files.tsv's last column).
 /NETLINK/*.WAV?named	data	The NetLink browser's (/0, PlanetWeb) WAV files that it, or a page it names, names (files.tsv's last column).
 /NETLINK/*.WDT?named	data	The NetLink browser's (/0, PlanetWeb) WDT files that it, or a page it names, names (files.tsv's last column).
+/NETLINK/[AL][RU][IC][AI]*.WDT	data	The browser's bold and italic fonts: BOOT 06020EE0-06020F3E takes "LUCI" or "ARIA" and adds "B" for bold, "I" for italic and ".WDT" with strcat (06075408), which names all eight.
+/NETLINK/*.GIF	data	Pictures nothing on the disc names, in any case, in full or by stem: each decodes whole as a GIF.
 /XBAND/XBAND.DAT@11868-17c3c	interpreted	The same 68000 sound driver as PROGRAM.BIN 0x44-0x6418, byte for byte (25,556 bytes, its 180 rts).
 /XBAND/XBAND.DAT	data	The XBAND client names it; outside the driver it has 2 68000 rts (chance gives about 4) and no SH-2 prologue.
