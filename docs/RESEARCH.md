@@ -424,6 +424,33 @@ into work RAM (`clock_copy`), and a scripted run had started from the host's tim
 scripted run on 2000-01-01, as sessions already start on the clock they recorded. No frame or sound
 changed.
 
+## The 68000 sound drivers
+
+`python -m saturnrecomp.inventory` splits each of the three drivers into code, data and unclassified
+bytes (`build/inventory/sound.tsv`), from a descent that starts at the vectors and reads jump tables.
+The game's driver is PROGRAM.BIN 0x44-0x6418, and XBAND.DAT holds the same bytes. It has 4,051
+instructions in 13,428 bytes, 12 jump tables, and 10,496 unclassified bytes. 3,072 of those lie between
+the vectors and the code at 0x1000, nearly all zeros, which the gap report calls text. The NetLink
+browser's SNDDRV.BIN has 3,747 instructions, 22 tables, and one `jmp (A2)` at 04122 whose A2 a `lea`
+sets before a `bra` to 04104.
+
+On 2026-10-17 the 648 Beetle traces ran 2,530 of the game driver's instructions, and the descent had
+found every one. They ran 639 other 68000 addresses. One, 0277A, has the NetLink driver's bytes by
+chance, so the check counts it as that driver's. The other 638 are in `executed-notes.tsv`:
+
+- **The BIOS's own sound program.** It runs from 0x1000 at frame 53, before the first disc sector at
+  frame 430, and everything it ran had started by frame 554. The game's driver loads over it, and
+  the driver's code past its range first ran at frame 1286.
+- **The driver writes over itself.** At 01768 it puts four `nop`s over a test and branch at 010E4
+  and two over each `bsr` at 01168, 0116C, 01170, 01AAE and 02BE6, each under a bit of the flags
+  byte at 004E1 being clear. The core ran those `nop`s in every route.
+
+The game's driver has a command table of 16 4-byte entries (`jsr (6,PC,D7.w)` at 01AD2, `andi #$f`
+before it) in which entries 11 and 14 begin a 6-byte `jmp $1b6a.l`. Entries 12, 13 and 15 start inside
+one, so the descent's paths clash and the inventory lists 01B0A and 01B12 as bad. No trace ran any of
+entries 11 to 15. The NetLink driver's table at 01808 has the same shape, and its entries inside a
+`jmp $186e.l` at 0183E and 0184A come out as words that do not decode.
+
 ## Learned seeds
 
 `seeds.json` holds the 199 KRNL addresses the game stopped at in earlier runs ("no function at"). None

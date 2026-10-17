@@ -10,6 +10,24 @@ manifest = "disc.json"
 files = "build/extract"
 treatments = "inventory.tsv"
 
+# The 68000 sound drivers, which the runtime interprets on Musashi. Each starts with its vector table and
+# loads at sound RAM's start.
+[[inventory.sound]]
+name = "SND"
+source = "/BOMSS/PROGRAM.BIN"
+offset = 0x44
+bytes = 0x63D4
+
+[[inventory.sound]]
+name = "XBSND"
+source = "/XBAND/XBAND.DAT"
+offset = 0x11868
+bytes = 0x63D4
+
+[[inventory.sound]]
+name = "NLSND"
+source = "/NETLINK/SNDDRV.BIN"
+
 # Builds for playtesters: saturn-recomp's playtest/README.md. Their sessions are measured against the
 # routes' and the clears' coverage.
 [playtest]

@@ -1,7 +1,12 @@
-# Code a reference run executed that no module holds, and why: FIRST, LAST (folded addresses, inclusive), the
+# Code a reference run executed that no module or 68000 program holds, and why: FIRST, LAST (folded addresses, inclusive), the
 # evidence. Read by python -m saturnrecomp.executed game.toml RUN.tsv ... --notes executed-notes.tsv.
 060EC8B0	060F08AF	BIOS backup library (replaced by the runtime's BUP): KRNL 06039026 calls BUP_Init with the library at 060EC8B0 and work at 060F08B0 when link_mode is 0.
 002F0000	002F3FFF	BIOS backup library (replaced by the runtime's BUP), unpacked here during the NetLink browser's start: every opcode Beetle ran here is the one it ran at the same offset from 060EC8B0.
 06000000	06001FFF	BIOS routines in its work area (replaced by the runtime's BIOS services): most first ran before frame 430, when Beetle read the first disc sector, so they came from the BIOS ROM.
 06010000	0603FFFF	BIOS boot code (replaced by the runtime's boot): none of these bytes is in a module, and the range first ran before frame 430 (the first disc sector) and was done before /0 loaded at frame 570.
 06002E20	06002E25	The disc IP.BIN's own code, where it differs from SAMPLEIP.BIN (replaced: the runtime's boot does not run IP.BIN's code).
+000010E4	000010EB	The game's sound driver writing nop over its own code: at 01768 it puts 4E71 nops over its code here when bits of the flags at 004E1 are clear. Any other opcode run here ran before frame 554, from the BIOS's sound program.
+00001168	00001173	The game's sound driver writing nop over its own code: at 01768 it puts 4E71 nops over its code here when bits of the flags at 004E1 are clear. Any other opcode run here ran before frame 554, from the BIOS's sound program.
+00001AAE	00001AB1	The game's sound driver writing nop over its own code: at 01768 it puts 4E71 nops over its code here when bits of the flags at 004E1 are clear. Any other opcode run here ran before frame 554, from the BIOS's sound program.
+00002BE6	00002BE9	The game's sound driver writing nop over its own code: at 01768 it puts 4E71 nops over its code here when bits of the flags at 004E1 are clear. Any other opcode run here ran before frame 554, from the BIOS's sound program.
+00001000	00004A2D	The BIOS's own 68000 sound program: every opcode no driver holds here first ran by frame 554, and the game's driver, loaded over it, first ran past this range at frame 1286.
