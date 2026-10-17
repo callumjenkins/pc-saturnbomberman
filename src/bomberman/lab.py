@@ -12,6 +12,9 @@
     items [VBLANK...] what taking each item kind (item-N) changed in pad 1's slot, at each VBlank given
     events ROUTE      when the stage, pad 1's lives, score and bomber, and the objects in slots from 10 change,
                       on ours and on Beetle Saturn: each change paired with the core's, and how many frames apart
+    memory ROUTE      work RAM on ours and on Beetle Saturn at the same tick every N VBlanks: how many bytes differ,
+                      how many have a reason (memory-notes.tsv, unchanged since the last checkpoint, a stack, a
+                      VBlank count, a VBlank's lag), and the rest
 
 The helpers below are for scenario scripts played through the agent (see docs/RESEARCH.md).
 """
@@ -275,6 +278,194 @@ def events(route, name, start=None, log=print):
             lines.append(summary(k, rows, note))
     if ran is None:
         lines.append(f"the core ran out of frames at {4 * route.vblanks}, before our VBlank {route.vblanks}")
+    for line in lines:
+        log(line)
+    return lines
+
+
+# ---- memory ---------------------------------------------------------------------------------------
+BANKS = ((0x06000000, 0x100000), (0x00200000, 0x100000))   # high then low work RAM: address, size
+NEAR = (-1, 1, -2, 2)
+NOTES = "memory-notes.tsv"
+KINDS = ("noted", "as at the last checkpoint", "below a task's stack pointer", "counts VBlanks",
+         "held by ours a VBlank or two away", "unexplained")
+STACK_DEPTH = 0x200                 # the deepest difference seen below a waiting task's stack pointer was 0x1E0
+TASKS, TASK_BLOCK = 18, 0x58
+
+
+def stack_pointers(read):
+    """The stack pointer each of the kernel's task blocks saved: r15 in its setjmp buffer."""
+    base = GAME.symbols["task_blocks"]
+    return [int.from_bytes(read(base + k * TASK_BLOCK + 32 + 32, 4), "big") for k in range(TASKS)]
+
+
+NEARBY = re.compile(r"ours \d VBlanks? (earlier|later)$")
+
+
+def kind(why):
+    """Which of KINDS a reason `sort_out` gave is."""
+    if why is None:
+        return "unexplained"
+    if NEARBY.match(why):
+        return "held by ours a VBlank or two away"
+    return why if why in KINDS else "noted"
+
+
+def carried(ours, theirs, before, skip=()):
+    """Whether each byte differs and neither side has changed it since `before`, ours and the core then,
+    outside the offsets `skip` ([(first, last)], inclusive)."""
+    if before is None:
+        return [False] * len(ours)
+    out = [x != y and x == a and y == b for x, y, a, b in zip(ours, theirs, *before)]
+    for lo, hi in skip:
+        out[lo:hi + 1] = [False] * (hi + 1 - lo)
+    return out
+
+
+def spans(ours, theirs, base, gap=16, before=None, skip=()):
+    """[(first, last)]: the Saturn addresses, inclusive, of runs of bytes that differ, joined where fewer
+    than `gap` bytes apart, leaving out the bytes `carried` from `before`."""
+    out, old = [], carried(ours, theirs, before, skip)
+    for i in (i for i, (x, y) in enumerate(zip(ours, theirs)) if x != y and not old[i]):
+        if out and base + i - out[-1][1] <= gap:
+            out[-1][1] = base + i
+        else:
+            out.append([base + i, base + i])
+    return [tuple(s) for s in out]
+
+
+def read_notes(path):
+    """[(first, last, why)] from a notes file's tab-separated lines: FIRST and LAST inclusive, in hex."""
+    out = []
+    for line in open(path):
+        if line.strip() and not line.startswith("#"):
+            first, last, why = line.rstrip("\n").split("\t", 2)
+            out.append((int(first, 16), int(last, 16), why))
+    return out
+
+
+def counts_vblanks(lo, end, near, ours, core):
+    """Whether every long, or every word, over lo..end that differs from the core's goes up by one from ours
+    a VBlank earlier to ours now and a VBlank later."""
+    if -1 not in near or 1 not in near:
+        return False
+    for size in (4, 2):
+        value = lambda read, a: int.from_bytes(read(a, size), "big")
+        at = [a for a in range(lo - lo % size, end, size) if ours(a, size) != core(a, size)]
+        if all(value(near[1], a) - value(ours, a) == value(ours, a) - value(near[-1], a) == 1 for a in at):
+            return True
+    return False
+
+
+def sort_out(span, notes, ours, core, near, stacks=()):
+    """[(first, last, bytes that differ, why)]: the span cut where notes and stacks begin and end, without
+    pieces where no byte differs, each with its note, "below a task's stack pointer" (within STACK_DEPTH
+    of one of `stacks`), "counts VBlanks", "ours K VBlanks later" or "earlier" (`near`, {K: read}) or None.
+    Each read takes (addr, n)."""
+    first, last = span
+    bounds = [a for lo, hi, _ in notes for a in (lo, hi + 1)] + [a for sp in stacks for a in (sp - STACK_DEPTH, sp)]
+    cuts = sorted({first, last + 1} | {a for a in bounds if first < a <= last})
+    out = []
+    for lo, end in zip(cuts, cuts[1:]):
+        mine, theirs = ours(lo, end - lo), core(lo, end - lo)
+        count = sum(x != y for x, y in zip(mine, theirs))
+        if not count:
+            continue
+        why = next((w for a, b, w in notes if a <= lo and end - 1 <= b), None)
+        if why is None and any(sp - STACK_DEPTH <= lo and end <= sp for sp in stacks):
+            why = "below a task's stack pointer"
+        if why is None and counts_vblanks(lo, end, near, ours, core):
+            why = "counts VBlanks"
+        if why is None:
+            k = next((k for k in near if near[k](lo, end - lo) == theirs), None)
+            if k is not None:
+                why = f"ours {abs(k)} VBlank{'s' if abs(k) > 1 else ''} {'later' if k > 0 else 'earlier'}"
+        out.append((lo, end - 1, count, why))
+    return out
+
+
+def reader(banks):
+    """read(addr, n) over a snapshot of BANKS."""
+    def read(addr, n):
+        i, (base, _) = next((i, b) for i, b in enumerate(BANKS) if b[0] <= addr < b[0] + b[1])
+        return banks[i][addr - base:addr - base + n]
+    return read
+
+
+def checkpoint(ours, core, near, before, notes):
+    """(Counter of bytes by kind, [(first, last, bytes, why)]) for one checkpoint's snapshots of BANKS: ours,
+    the core's, ours at other VBlanks ({K: snapshot}) and both at the last checkpoint (or None)."""
+    read_ours, read_core = reader(ours), reader(core)
+    stacks = [a for a, b in zip(stack_pointers(read_ours), stack_pointers(read_core)) if a == b and a]
+    near = {k: reader(snap) for k, snap in near.items()}
+    counts, pieces = collections.Counter(), []
+    for i, ((base, size), a, b) in enumerate(zip(BANKS, ours, core)):
+        then = before and (before[0][i], before[1][i])
+        noted = [(lo - base, hi - base) for lo, hi, _ in notes if base <= lo < base + size]
+        counts["as at the last checkpoint"] += sum(carried(a, b, then, noted))
+        for s in spans(a, b, base, before=then, skip=noted):
+            pieces += sort_out(s, notes, read_ours, read_core, near, stacks)
+    for p in pieces:
+        counts[kind(p[3])] += p[2]
+    return +counts, pieces
+
+
+def memory_line(v, n, counts, rest):
+    """`memory`'s line for our VBlank v and the core's frame n: the bytes of each of KINDS in `counts`, then
+    the largest of the unexplained runs, `rest`, which come largest first."""
+    line = f"{v} (core frame {n}): {sum(counts.values())} bytes differ"
+    line += "".join(f", {counts[k]} {k}" for k in KINDS if counts[k])
+    if rest:
+        line += f" in {len(rest)} runs, the largest " + ", ".join(f"{lo:08X}-{hi:08X} ({c})" for lo, hi, c, _ in rest[:3])
+    return line
+
+
+def memory(route, name, every=1000, start=None, log=print):
+    """Lines: at every `every` VBlanks from `start` (by default the route's first press), how many bytes
+    of work RAM differ on ours and on Beetle Saturn at the same tick, how many of them `sort_out` finds a
+    reason for, of each kind, and the largest runs of the rest. Every piece goes to build/lab/memory-ROUTE.txt."""
+    core_so, bios = reference_core()
+    if route.invincible or "--multitap" in route.args:
+        raise SystemExit("memory plays presses and writes only: no hooks or multitap")
+    run.check_prepared()
+    run.build.ensure(run.GAME, log=lambda s: None)
+    if start is None:
+        start = min(int(p.split(":", 1)[0]) for p in route.presses)
+    if not 0 <= start <= route.vblanks:
+        raise SystemExit(f"--from {start} is outside the route's {route.vblanks} VBlanks")
+    shots = list(range(start, route.vblanks + 1, every))
+    wanted = {v + k for v in shots for k in (0, *NEAR)}
+    tick, ticks, ours = GAME.symbols["tick"], {}, {}
+    with run.play(f"{BUILD}/lab/memory", route, accurate_drive=True) as r:
+        while r.vblank <= shots[-1] + max(NEAR):
+            ticks[r.vblank] = r.read32(tick)
+            if r.vblank in wanted:
+                ours[r.vblank] = [r.read(b, n) for b, n in BANKS]
+            run.advance(r, route, r.vblank + 1)
+    two = any(p.split(":", 1)[1].startswith("2.") for p in route.presses)
+    core = reference.Core(core_so, bios, cue(), save_dir=f"{BUILD}/lab", ports=2 if two else 1)
+    theirs = {}
+
+    def on(v, n):
+        theirs[v] = n, [core.read(b, size) for b, size in BANKS]
+
+    reference.play_synced(core, tick, ticks, reference.presses(",".join(route.presses)), shots, 4 * route.vblanks,
+                          on, parse_writes(route.writes))
+    core.close()
+    notes = read_notes(NOTES)
+
+    lines, before = [], None
+    with open(f"{BUILD}/lab/memory-{name}.txt", "w") as f:
+        f.write("our VBlank, the core's frame, first, last, bytes that differ, why\n")
+        for v in shots:
+            if v not in theirs:
+                lines.append(f"{v}: the core never reached it")
+                continue
+            n, banks = theirs[v]
+            counts, pieces = checkpoint(ours[v], banks, {k: ours[v + k] for k in NEAR if v + k in ours}, before, notes)
+            before = ours[v], banks
+            f.writelines(f"{v} {n} {lo:08X} {hi:08X} {count} {why or '?'}\n" for lo, hi, count, why in pieces)
+            lines.append(memory_line(v, n, counts, sorted((p for p in pieces if p[3] is None), key=lambda p: -p[2])))
     for line in lines:
         log(line)
     return lines

@@ -102,6 +102,47 @@ On 2026-10-17, over `normal`, `die`, `continue`, `save`, `master` and `item-ice-
 - **None of the six changes the stage outside Master Game.** They all play 1-1, and the bot's clears
   that would move on need the hooks.
 
+### Memory
+
+`bomberman lab memory ROUTE` reads both work RAM banks on both every 1000 VBlanks (`--every`) from the
+route's first press, at the same tick, and splits the bytes that differ into runs. Each run gets a
+reason where one fits, and the rest are reported as unexplained:
+
+- **noted:** a range in `memory-notes.tsv`, each with its evidence. The notes keep to memory with one
+  use: the BIOS's vectors, dispatcher and boot code, the stack the scheduler switches tasks on, the clock
+  copies, the interrupt handlers the game asks the BIOS for, and the scheduler's own state.
+- **as at the last checkpoint:** neither side has changed the byte since. A load's leftovers are
+  reported once, at the first checkpoint after the load, and land here after that.
+- **below a task's stack pointer:** within 0x200 bytes below the stack pointer a waiting task saved in
+  its block (`task_blocks`), where both saved the same one. On the core the BIOS's interrupt dispatcher
+  saves registers and its return address, 06000928, on the running task's stack; ours dispatches
+  interrupts itself. The deepest such difference seen was 0x1E0 below.
+- **counts VBlanks:** every long or word that differs goes up by one each VBlank on ours. The core
+  spends more VBlanks loading, so its counts are ahead.
+- **held by ours a VBlank or two away.**
+
+Every run, with its reason, goes to `build/lab/memory-ROUTE.txt`. On 2026-10-17, over `normal`,
+`battle-round`, `die`, `save`, `master` and `pause`:
+
+- **It found one fault, in our CD block.** The CD block's report has a CD-ROM bit (0x80 in its first
+  word) that Mednafen sets while the drive reads data sectors. Ours never set it, and the game keeps
+  copies of the report (060BDA3C, 060BF4EC, 060FC048). saturn-recomp's `cdblock.cpp` now sets it on a
+  data sector and on Stop, and clears it 500 drive clocks after a play or a directory read starts its
+  seek, as Mednafen does. Mednafen also clears it on a seek to a position, which ours leaves alone. No frame or sound check changed.
+- **Between loads, little is left unexplained.** `battle-round` leaves at most 12 bytes at 11 of its 12
+  checkpoints from VBlank 4900, and 96 at 14900. Normal Game leaves 54 to 189 on `normal` from 5900. The largest
+  run, 111 bytes at 6900, is the random generator (060BF4F4 and its table): from VBlank 5400 the core's
+  holds what ours holds a few hundred VBlanks later, four or five draws ahead, which fits the stage's
+  opening stream ending a tick or two apart (above). The rest are enemy fields in the object slots,
+  the drive's position in the copies of the CD report, and runs in 060EBB80-060EBCFF that nothing here
+  explains yet.
+- **The large runs come at the first checkpoint after a load.** On ours the last stores to 060E8C1C on
+  are the opening movie's sectors (BOMSS2.CPK), and to 002F1190 on KRNL 060AEE04's, during VBlanks 4257
+  to 4500, up to the route's START at 4500; what they hold depends on how far each drive had read. On
+  `save`, 13 KB at 060EC8B0 differ after the save, where the core runs the BIOS's backup library
+  (executed-notes.tsv) and ours keeps its own. A checkpoint inside the core's longer load finds what
+  ours wrote earlier, as `master`'s 12 KB at 00271000 at VBlank 3900, which match by 4900.
+
 ### Sound
 
 `bomberman compare ROUTE --sound` records both runs' sound and compares them a second (60 of our

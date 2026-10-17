@@ -1,0 +1,9 @@
+# Work RAM that differs on ours and on Beetle Saturn at the same tick, and why: FIRST, LAST (inclusive), the
+# evidence. Read by bomberman lab memory.
+06000000	06000AFF	The BIOS's vectors, interrupt dispatcher and work area. The core's vectors point at the BIOS's dispatcher (060008xx), which saves registers and calls the game's handler; ours fills the table with the runtime's own entries at VBlank 0 and dispatches interrupts itself.
+06000D00	06000D57	BIOS code its boot leaves (it sets the cache and calls the BIOS ROM at 00002650). Ours boots without the BIOS and leaves zeros.
+060BCB94	060BCBBF	Frames above the stack pointer every idle task block saved (060BCB94), where the core's frames hold PCs inside krnl_longjmp (060061E6 to 060061F4), as an interrupt that arrives there pushes them. Ours switches tasks on host fibers (saturn-recomp's tasks.cpp).
+060FA939	060FA947	clock_copy and the copy after it. The core's clock is the host's (the copy holds the day the run was made); ours starts at run.CLOCK.
+060FC050	060FC067	Handlers the game keeps to put back later: SYS_GETUINT's answers at 060FC050 and SYS_GETSINT's at 060FC05C, three each (KRNL 060A5408 and the call after it). The BIOS answers with addresses in its own area (0600083C, 0600087C); the runtime answers with its own (0x2000 and 0x1000 plus the vector times 4), which it takes back when the game calls or restores them.
+0600603C	06006047	The scheduler's state: 0600603C, a flag KRNL 060074E8 sets and KRNL 06069646 clears every VBlank, and 06006040 and 06006044, which KRNL 06006C00 fills from the chosen task's block (+20 and +28) at every switch. A snapshot finds them at another point of the VBlank on each.
+06006170	06006173	The idle task's count of its rounds (KRNL 060062A0: yield, add one, test a flag, go round), which goes up as often as the CPU has time to spare.
