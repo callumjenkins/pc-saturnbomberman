@@ -174,14 +174,27 @@ def labels(read):
 
 
 def timeline(samples):
-    """{source: [(frame, tick, value)]} for each change in [(frame, tick, labels)] after the first."""
+    """{source: [(frame, tick, value)]} for each change in [(frame, tick, labels)] after the first.
+    Changes at one tick on back-to-back samples are one, at the first's frame with the last's value, or
+    none if the value comes back: how much of a tick's work a sample sees depends on each side's speed."""
     out, last = collections.defaultdict(list), samples[0][2] if samples else {}
+    before, latest, previous = {}, {}, None
     for frame, tick, now in samples[1:]:
         for k, v in now.items():
-            if v != last.get(k):
-                out[k].append((frame, tick, v))
-        last = now
-    return dict(out)
+            if v == last.get(k):
+                continue
+            changes = out[k]
+            if changes and changes[-1][1] == tick and latest.get(k) == previous:
+                first = changes.pop()[0]
+                if v == before[k]:
+                    continue
+                changes.append((first, tick, v))
+            else:
+                before[k] = last.get(k)
+                changes.append((frame, tick, v))
+            latest[k] = frame
+        last, previous = now, frame
+    return {k: changes for k, changes in out.items() if changes}
 
 
 def pair(ours, theirs):

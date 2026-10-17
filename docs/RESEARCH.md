@@ -83,18 +83,21 @@ after that.
 (`--from` moves it): the stage (Master Game's floor), pad 1's lives and score, whether pad 1's bomber
 exists, and how many objects the slots from 10 hold, counted as `state` counts them. It pairs the nth
 change of each with the core's nth, and reports how many frames later the core makes it and whether it
-comes at the same tick. Every pair goes to `build/lab/events-ROUTE.txt`. Like `verify`, it takes no
-route with invincibility hooks or a multitap, so the bot's clears can't be timed.
+comes at the same tick. Changes at one tick on back-to-back samples count as one, at the first one's
+frame with the last one's value, or as none if the value comes back, because how much of a tick's work
+a VBlank sees depends on how fast each side runs the game's code. Every pair goes to
+`build/lab/events-ROUTE.txt`. Like `verify`, it takes no route with invincibility hooks or a multitap,
+so the bot's clears can't be timed.
 
 On 2026-10-17, over `normal`, `die`, `continue`, `save`, `master` and `item-ice-cream`:
 
-- **Every change paired with the core's but one, at the same tick or one tick apart.** That covers the
+- **Every change paired with the core's, at the same tick or one tick apart.** That covers the
   lives, the score (the ice cream's 4000), Master Game's floor, pad 1's bomber made and gone, and the
   objects made at a stage's start. The one-tick differences come as Normal Game sets the lives, as
   stage 1-1 starts after its load, and at VBlank 8745 in `continue` and `save`, where pad 1's bomber slot
   fills again before GAME OVER. `master` has none.
-- **The one that didn't pair is in `master`, at VBlank 6682:** ours then has 1 object in the slots
-  from 10 where the core has 4. Nothing here says why.
+- **Master Game makes its first floor's objects over two VBlanks at one tick.** At tick 4930 ours has 1 object
+  in the slots from 10 at VBlank 6682 and 5 at 6683, and the core 4 at frame 7601 and 5 at 7602.
 - **The core falls further behind and never catches up.** It is 788 frames behind when Normal Game
   sets the lives, and on `save` 1130 at the last change, after a game over, a save, the title and a
   load. The offset never shrinks on any of the six while the tick stays put, which is the load timing

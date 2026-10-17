@@ -89,10 +89,47 @@ def test_labels_read_master_game_s_floor():
     assert lab.labels(r.read)["stage"] == f"{state.MASTER_WORLD:02x}07"
 
 
-def test_a_value_that_goes_back_is_two_events_and_one_sample_none():
+def test_a_value_that_goes_back_at_another_tick_is_two_events_and_one_sample_none():
     samples = [(1, 0, {"lives": 1}), (2, 1, {"lives": 2}), (3, 2, {"lives": 1})]
     assert lab.timeline(samples) == {"lives": [(2, 1, 2), (3, 2, 1)]}
     assert lab.timeline(samples[:1]) == {} and lab.timeline([]) == {}
+
+
+def test_changes_on_back_to_back_samples_at_one_tick_are_one_event_with_the_last_value():
+    samples = [(1, 5, {"enemies": 0}), (2, 5, {"enemies": 1}), (3, 5, {"enemies": 5}), (4, 6, {"enemies": 5})]
+    assert lab.timeline(samples) == {"enemies": [(2, 5, 5)]}
+
+
+def test_a_value_that_goes_back_on_back_to_back_samples_at_one_tick_is_no_event():
+    samples = [(1, 5, {"lives": 1}), (2, 5, {"lives": 2}), (3, 5, {"lives": 1}), (4, 6, {"lives": 1})]
+    assert lab.timeline(samples) == {}
+
+
+def test_three_back_to_back_changes_at_one_tick_are_one_event():
+    samples = [(frame, 5, {"enemies": v}) for frame, v in enumerate([0, 1, 5, 7], 1)]
+    assert lab.timeline(samples) == {"enemies": [(2, 5, 7)]}
+
+
+def test_back_to_back_is_per_source():
+    samples = [(1, 5, {"a": 0, "b": 0}), (2, 5, {"a": 1, "b": 0}), (3, 5, {"a": 1, "b": 1}), (4, 5, {"a": 2, "b": 1})]
+    assert lab.timeline(samples) == {"a": [(2, 5, 1), (4, 5, 2)], "b": [(3, 5, 1)]}
+
+
+def test_a_tick_s_work_seen_at_different_points_pairs_on_where_it_settles():
+    ours = lab.timeline([(1, 5, {"enemies": 0}), (2, 5, {"enemies": 1}), (3, 5, {"enemies": 5})])
+    theirs = lab.timeline([(10, 5, {"enemies": 0}), (11, 5, {"enemies": 4}), (12, 5, {"enemies": 5})])
+    assert lab.pair(ours, theirs) == {"enemies": ([(5, 2, 11, 9, 0)], None)}
+
+
+def test_changes_at_one_tick_with_a_sample_between_stay_two_events():
+    samples = [(1, 5, {"stage": 0}), (2, 5, {"stage": 1}), (3, 5, {"stage": 1}), (4, 5, {"stage": 2})]
+    assert lab.timeline(samples) == {"stage": [(2, 5, 1), (4, 5, 2)]}
+
+
+def test_a_change_after_one_that_went_back_starts_its_own_event():
+    values = [0, 1, 1, 2, 1, 3]
+    samples = [(frame, 5, {"stage": v}) for frame, v in enumerate(values, 1)]
+    assert lab.timeline(samples) == {"stage": [(2, 5, 1), (6, 5, 3)]}
 
 
 def test_a_core_that_is_earlier_has_a_negative_offset():
