@@ -130,12 +130,16 @@ Every run, with its reason, goes to `build/lab/memory-ROUTE.txt`. On 2026-10-17,
   data sector and on Stop, and clears it 500 drive clocks after a play or a directory read starts its
   seek, as Mednafen does. Mednafen also clears it on a seek to a position, which ours leaves alone. No frame or sound check changed.
 - **Between loads, little is left unexplained.** `battle-round` leaves at most 12 bytes at 11 of its 12
-  checkpoints from VBlank 4900, and 96 at 14900. Normal Game leaves 54 to 189 on `normal` from 5900. The largest
+  checkpoints from VBlank 4900, and 96 at 14900. Normal Game leaves 33 to 169 on `normal` from 5900. The largest
   run, 111 bytes at 6900, is the random generator (060BF4F4 and its table): from VBlank 5400 the core's
   holds what ours holds a few hundred VBlanks later, four or five draws ahead, which fits the stage's
-  opening stream ending a tick or two apart (above). The rest are enemy fields in the object slots,
-  the drive's position in the copies of the CD report, and runs in 060EBB80-060EBCFF that nothing here
-  explains yet.
+  opening stream ending a tick or two apart (above). The rest are enemy fields in the object slots
+  and the drive's position in the copies of the CD report.
+- **The sprite sort's buckets differ only in dead words.** 060EBA80 holds 500 buckets, each a head and
+  a tail node index. KRNL 060AA57C sets every head back to FFFF as it walks them, and KRNL 060AA50C
+  reads a tail only when the bucket's head is set, so between sorts only the unread tails differ. At
+  121 ticks of `normal` and 11 of `battle-round`, every head was FFFF on both. memory-notes.tsv now
+  covers the table.
 - **The large runs come at the first checkpoint after a load.** On ours the last stores to 060E8C1C on
   are the opening movie's sectors (BOMSS2.CPK), and to 002F1190 on KRNL 060AEE04's, during VBlanks 4257
   to 4500, up to the route's START at 4500; what they hold depends on how far each drive had read. On
