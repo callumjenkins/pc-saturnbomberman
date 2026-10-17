@@ -131,7 +131,9 @@ Every run, with its reason, goes to `build/lab/memory-ROUTE.txt`. On 2026-10-17,
   word) that Mednafen sets while the drive reads data sectors. Ours never set it, and the game keeps
   copies of the report (060BDA3C, 060BF4EC, 060FC048). saturn-recomp's `cdblock.cpp` now sets it on a
   data sector and on Stop, and clears it 500 drive clocks after a play or a directory read starts its
-  seek, as Mednafen does. Mednafen also clears it on a seek to a position, which ours leaves alone. No frame or sound check changed.
+  seek, as Mednafen does. No frame or sound check changed. Mednafen also clears it when a Seek goes to
+  a position, or a Pause comes while the drive is stopped, and ours does neither. On `save`,
+  `battle-round` and `continue` the game sent only Stop and a Pause where the drive is, from Pause or Play.
 - **Between loads, little is left unexplained.** `battle-round` leaves at most 12 bytes at 11 of its 12
   checkpoints from VBlank 4900, and 96 at 14900. Normal Game leaves 33 to 169 on `normal` from 5900. The largest
   run, 111 bytes at 6900, is the random generator (060BF4F4 and its table): from VBlank 5400 the core's
