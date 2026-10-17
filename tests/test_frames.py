@@ -1,0 +1,147 @@
+"""tests/frames.py's hashing, recording rule and diffs, on made-up pictures and sound."""
+import frames
+from PIL import Image
+from saturnrecomp import audio
+
+
+def picture(path, size=(4, 3), dots=()):
+    im = Image.new("RGB", size, (10, 20, 30))
+    for xy, rgb in dots:
+        im.putpixel(xy, rgb)
+    im.save(path, compress_level=9)
+    return str(path)
+
+
+def test_a_frame_is_its_dots_whatever_the_png_encoding(tmp_path):
+    a = picture(tmp_path / "a.png")
+    Image.open(a).save(tmp_path / "b.png", compress_level=0)
+    assert open(a, "rb").read() != open(tmp_path / "b.png", "rb").read()
+    assert frames.pixels(a) == frames.pixels(tmp_path / "b.png")
+    assert frames.pixels(a) != frames.pixels(picture(tmp_path / "c.png", dots=[((1, 1), (10, 20, 31))]))
+    assert frames.pixels(picture(tmp_path / "d.png", size=(2, 6))) != frames.pixels(picture(tmp_path / "e.png", size=(6, 2)))
+
+
+def test_a_run_with_a_problem_or_a_missing_frame_is_never_recorded():
+    assert frames.outcome({"100": "x"}, [], {}, update=True)[3]
+    assert not frames.outcome({"100": "x"}, ["saturn-recomp: the run exited with status 1"], {}, update=True)[3]
+    status, _, problems, record = frames.outcome({"100": "x", "200": None}, [], {}, update=True)
+    assert (status, problems, record) == ("FAIL", ["no frame 200"], False)
+    assert frames.outcome({"sound": None}, [], {}, update=True)[2] == ["no sound"]
+
+
+def test_a_frame_that_differs_fails_and_says_which():
+    status, diffs, _, record = frames.outcome({"100": "x", "200": "y"}, [], {"100": "x", "200": "z"}, update=False)
+    assert (status, diffs, record) == ("FAIL", ["200"], False)
+    assert frames.outcome({"100": "x"}, [], {"100": "x"}, update=False)[0] == "ok"
+
+
+def kept_and_now(tmp_path, monkeypatch, name, files):
+    monkeypatch.setattr(frames, "BUILD", str(tmp_path))
+    monkeypatch.setattr(frames, "KEPT", str(tmp_path / "test-expected"))
+    monkeypatch.setattr(frames, "files", lambda n: files)
+    for d in ("test", "test-expected"):
+        (tmp_path / d / name).mkdir(parents=True)
+    return tmp_path / "test-expected" / name, tmp_path / "test" / name
+
+
+def test_a_differing_frame_is_counted_and_drawn_against_the_kept_picture(tmp_path, monkeypatch):
+    kept, now = kept_and_now(tmp_path, monkeypatch, "r", {"100": "shot-100.png"})
+    picture(kept / "shot-100.png")
+    picture(now / "shot-100.png", dots=[((0, 0), (10, 20, 90)), ((3, 2), (0, 20, 30))])
+    said = frames.difference("r", "100", frames.pixels(kept / "shot-100.png"))
+    assert said.startswith("frame 100 differs in 2 dots, by up to 60 in a channel")
+    assert Image.open(now / "diff-100.png").size == (12, 3)
+
+
+def test_a_kept_picture_from_another_recording_is_not_compared(tmp_path, monkeypatch):
+    kept, now = kept_and_now(tmp_path, monkeypatch, "r", {"100": "shot-100.png"})
+    picture(kept / "shot-100.png")
+    picture(now / "shot-100.png", dots=[((0, 0), (0, 0, 0))])
+    assert "no picture kept" in frames.difference("r", "100", "another hash")
+    assert not (now / "diff-100.png").exists()
+
+
+def test_differing_sound_says_from_when(tmp_path, monkeypatch):
+    kept, now = kept_and_now(tmp_path, monkeypatch, "r", {"sound": "sound.wav"})
+    left = [0] * 50000
+    audio.write_wav(str(kept / "sound.wav"), left, left)
+    later = left[:]
+    later[44100 + 7] = 5
+    audio.write_wav(str(now / "sound.wav"), left[:49000], later[:49000])
+    said = frames.difference("r", "sound", frames.samples(str(kept / "sound.wav")))
+    assert said == "the sound differs from 1.00 s, 49000 samples where 50000 were recorded"
+
+
+def test_a_missing_frame_is_reported_not_diffed():
+    assert frames.outcome({"100": None}, [], {"100": "h"}, update=False) == ("FAIL", [], ["no frame 100"], False)
+
+
+def test_recording_reports_no_differences():
+    assert frames.outcome({"100": "x"}, [], {"100": "y"}, update=True) == ("recorded", [], [], True)
+
+
+def test_a_failed_exit_a_fatal_error_and_a_missing_log_line_are_problems(monkeypatch):
+    monkeypatch.setitem(frames.LOG_LINES, "r", ["BUP: wrote X"])
+    log = "fine\nFATAL] no function at 06001000\nsaturn-recomp: the run exited with status 3\n"
+    assert frames.log_problems("r", log) == ["FATAL] no function at 06001000",
+                                             "saturn-recomp: the run exited with status 3", "no log line 'BUP: wrote X'"]
+    assert frames.log_problems("r", "BUP: wrote X\n") == []
+
+
+def test_a_run_in_sounds_records_its_sound(monkeypatch):
+    route = type("R", (), {"shots": "100,200"})
+    monkeypatch.setitem(frames.RUNS, "r", lambda: route)
+    assert frames.files("r") == {"100": "shot-100.png", "200": "shot-200.png"}
+    monkeypatch.setattr(frames, "SOUNDS", {"r"})
+    assert frames.files("r")["sound"] == "sound.wav"
+
+
+def test_the_sound_hash_covers_both_channels(tmp_path):
+    quiet = [0] * 100
+    louder = quiet[:]
+    louder[50] = 1
+    audio.write_wav(str(tmp_path / "a.wav"), quiet, quiet)
+    audio.write_wav(str(tmp_path / "b.wav"), quiet, louder)
+    audio.write_wav(str(tmp_path / "c.wav"), louder, quiet)
+    hashes = {frames.samples(str(tmp_path / f"{n}.wav")) for n in "abc"}
+    assert len(hashes) == 3
+
+
+def test_differing_sound_in_the_left_channel_says_from_when(tmp_path, monkeypatch):
+    kept, now = kept_and_now(tmp_path, monkeypatch, "r", {"sound": "sound.wav"})
+    quiet = [0] * 10000
+    audio.write_wav(str(kept / "sound.wav"), quiet, quiet)
+    changed = quiet[:]
+    changed[4410] = -1
+    audio.write_wav(str(now / "sound.wav"), changed, quiet)
+    assert frames.difference("r", "sound", frames.samples(str(kept / "sound.wav"))) == "the sound differs from 0.10 s"
+
+
+def test_sound_that_only_ends_sooner_says_where_it_ends(tmp_path, monkeypatch):
+    kept, now = kept_and_now(tmp_path, monkeypatch, "r", {"sound": "sound.wav"})
+    tone = [i % 7 for i in range(50000)]
+    audio.write_wav(str(kept / "sound.wav"), tone, tone)
+    audio.write_wav(str(now / "sound.wav"), tone[:49000], tone[:49000])
+    said = frames.difference("r", "sound", frames.samples(str(kept / "sound.wav")))
+    assert said == "the sound differs from 1.11 s, 49000 samples where 50000 were recorded"
+
+
+def test_a_frame_of_another_size_says_both_sizes(tmp_path, monkeypatch):
+    kept, now = kept_and_now(tmp_path, monkeypatch, "r", {"100": "shot-100.png"})
+    picture(kept / "shot-100.png")
+    picture(now / "shot-100.png", size=(5, 3))
+    assert frames.difference("r", "100", frames.pixels(kept / "shot-100.png")) == "frame 100 is 5x3, 4x3 when recorded"
+
+
+def test_a_frame_with_no_recording_says_so(tmp_path, monkeypatch):
+    kept, now = kept_and_now(tmp_path, monkeypatch, "r", {"100": "shot-100.png"})
+    picture(now / "shot-100.png")
+    assert frames.difference("r", "100", None) == "frame 100 has no recording"
+
+
+def test_keep_replaces_the_kept_folder(tmp_path, monkeypatch):
+    kept, now = kept_and_now(tmp_path, monkeypatch, "r", {"100": "shot-100.png"})
+    picture(kept / "shot-50.png")
+    picture(now / "shot-100.png")
+    frames.keep("r")
+    assert sorted(p.name for p in kept.iterdir()) == ["shot-100.png"]

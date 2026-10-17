@@ -4,23 +4,25 @@
 
 Runs are deterministic, so a frame that changes means the game ran differently. A change can be
 right, such as a VDP2 feature that now draws, so look at the frames in build/test/NAME before
-recording them with --update."""
+recording them with --update. README.md's Testing section says what is checked and how a difference is reported."""
 import argparse
 import concurrent.futures
 import dataclasses
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 
 from PIL import Image
-from saturnrecomp import build
+from saturnrecomp import agent, audio, build, learn, reference
 
 from bomberman import routes, run
 from bomberman.paths import BUILD, ROOT
 
 EXPECTED = f"{ROOT}/tests/frames.json"
+KEPT = f"{BUILD}/test-expected"
 RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", "items", *routes.WORLDS, "slot", "yuna"]},
         "stage-5-3": lambda: routes.stage(5, 3), "clear-1-1": lambda: routes.clear(1, 1),
         "clear-1-7": lambda: routes.clear(1, 7),
@@ -35,20 +37,90 @@ RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", 
                                                      "open-arena", *routes.MECHANICS, "com-level-1", "com-level-3"]}}
 # Lines a run's log must hold, for what a frame does not show.
 LOG_LINES = {"save": ["BUP: wrote BOMBERSS_01 (12 bytes)"], "master-result": ["BUP: wrote BOMBERSS_02 (240 bytes)"]}
+# Runs whose sound is checked too: music, effects, the death and the pause, which silences the sound.
+SOUNDS = {"normal", "battle-round", "die", "pause"}
+
+
+def pixels(path):
+    im = Image.open(path).convert("RGB")
+    return hashlib.md5(b"%dx%d " % im.size + im.tobytes()).hexdigest()
+
+
+def samples(path):
+    _, left, right = audio.read_wav(path)
+    return hashlib.md5(left.tobytes() + right.tobytes()).hexdigest()
+
+
+def files(name):
+    """{frame VBlank or "sound": file name} for the run's output files in its folder."""
+    names = {v: f"shot-{v}.png" for v in RUNS[name]().shots.split(",")}
+    return {**names, "sound": "sound.wav"} if name in SOUNDS else names
 
 
 def replay(name):
-    """The run's frames as {VBlank: md5}, and its problems: fatal errors and missing log lines."""
+    """The run's frames as {VBlank: hash}, with "sound" for a run in SOUNDS, and its log_problems."""
     route = RUNS[name]()
     out = f"{BUILD}/test/{name}"
-    log = run.run(route, out, more=["--coverage", f"{out}/coverage.txt"], learn_seeds=False)
+    wav = ["--wav", f"{out}/sound.wav"] if name in SOUNDS else []
+    log = run.run(route, out, more=["--coverage", f"{out}/coverage.txt", *wav], learn_seeds=False)
     frames = {}
-    for v in route.shots.split(","):
-        path = f"{out}/shot-{v}.png"
-        frames[v] = hashlib.md5(open(path, "rb").read()).hexdigest() if os.path.exists(path) else None
-    problems = [line for line in log.splitlines() if "FATAL" in line]
-    problems += [f"no log line {want!r}" for want in LOG_LINES.get(name, []) if want not in log]
-    return frames, problems
+    for key, file in files(name).items():
+        path = f"{out}/{file}"
+        frames[key] = (samples if key == "sound" else pixels)(path) if os.path.exists(path) else None
+    return frames, log_problems(name, log)
+
+
+def log_problems(name, log):
+    """The log's fatal errors and failed exit, and the LOG_LINES it lacks."""
+    problems = [line for line in log.splitlines() if "FATAL" in line or line.startswith(learn.EXITED)]
+    return problems + [f"no log line {want!r}" for want in LOG_LINES.get(name, []) if want not in log]
+
+
+def keep(name):
+    """Copies the run's outputs to KEPT, for later failures to be diffed against."""
+    kept = f"{KEPT}/{name}"
+    shutil.rmtree(kept, ignore_errors=True)
+    os.makedirs(kept)
+    for file in files(name).values():
+        shutil.copy(f"{BUILD}/test/{name}/{file}", kept)
+
+
+def difference(name, key, expected):
+    """What changed in the run's frame or sound, against the copy kept when `expected`, its hash, was recorded."""
+    file = files(name)[key]
+    now, kept = f"{BUILD}/test/{name}/{file}", f"{KEPT}/{name}/{file}"
+    what = "the sound" if key == "sound" else f"frame {key}"
+    if expected is None:
+        return f"{what} has no recording"
+    if not os.path.exists(kept) or (samples if key == "sound" else pixels)(kept) != expected:
+        return f"{what} differs (no {'sound' if key == 'sound' else 'picture'} kept from its recording to compare)"
+    if key == "sound":
+        _, *ours = audio.read_wav(now)
+        _, *theirs = audio.read_wav(kept)
+        n = min(len(ours[0]), len(theirs[0]))
+        step = 4096
+        first = next((i for i in range(0, n, step) if any(ch[i:min(i + step, n)] != th[i:min(i + step, n)]
+                                                          for ch, th in zip(ours, theirs))), n)
+        if first < n:
+            first = next(i for i in range(first, n) if ours[0][i] != theirs[0][i] or ours[1][i] != theirs[1][i])
+        lengths = f", {len(ours[0])} samples where {len(theirs[0])} were recorded" if len(ours[0]) != len(theirs[0]) else ""
+        return f"the sound differs from {first / audio.RATE:.2f} s{lengths}"
+    a, b = Image.open(now).convert("RGB"), Image.open(kept).convert("RGB")
+    if a.size != b.size:
+        return f"frame {key} is {a.width}x{a.height}, {b.width}x{b.height} when recorded"
+    n, worst, picture = reference.difference(agent.Frame(*a.size, a.tobytes()), agent.Frame(*b.size, b.tobytes()))
+    Image.frombytes("RGB", (picture.width, picture.height), picture.rgb).save(f"{BUILD}/test/{name}/diff-{key}.png")
+    return f"frame {key} differs in {n} dots, by up to {worst} in a channel (diff-{key}.png: this run, the recording, the dots)"
+
+
+def outcome(frames, problems, expected, update):
+    """(status, the keys that differ, problems, whether to record the frames) for a run.
+    A run with a problem is never recorded, and a missing frame or sound is a problem."""
+    problems = problems + [f"no {'sound' if k == 'sound' else f'frame {k}'}" for k in frames if frames[k] is None]
+    record = update and not problems
+    diffs = [] if update else [k for k in frames if frames[k] is not None and frames[k] != expected.get(k)]
+    status = "FAIL" if problems or diffs else "recorded" if record else "ok"
+    return status, diffs, problems, record
 
 
 def agent_matches():
@@ -234,16 +306,14 @@ def main():
     failed = 0
     for name in names:
         frames, problems = results[name]
-        problems = problems + [f"no frame {v}" for v in frames if frames[v] is None]
-        # a run with a problem is never recorded as the expected one
-        if args.update and not problems:
+        status, diffs, problems, record = outcome(frames, problems, expected.get(name, {}), args.update)
+        if record:
             expected[name] = frames
-        diffs = [v for v in frames if frames[v] != expected.get(name, {}).get(v)]
-        bad = problems or (diffs and not args.update)
-        failed += bool(bad)
-        status = "FAIL" if bad else "recorded" if args.update else "ok"
-        detail = "; ".join([*(f"frame {v} differs" for v in diffs if not args.update), *(p.strip() for p in problems)])
-        print(f"{status:8} {name}" + (f": {detail}" if detail and bad else ""))
+            keep(name)
+        failed += status == "FAIL"
+        detail = "; ".join([*(difference(name, k, expected.get(name, {}).get(k)) for k in diffs),
+                            *(p.strip() for p in problems)])
+        print(f"{status:8} {name}" + (f": {detail}" if detail else ""))
     if "stage-5-3" in names and not args.update:
         ok = agent_matches()
         failed += not ok

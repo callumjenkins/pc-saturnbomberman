@@ -212,9 +212,16 @@ Anything after `--` goes to the saturn executable, such as `-- --dump 6000` for 
 ## Testing
 
 `uv run tests/frames.py` rebuilds, replays every route in parallel (about five minutes) and fails if a
-frame differs from `tests/frames.json` or a run hits a fatal error. It also plays stage 5-3
-through saturn-recomp's agent and checks that it ends on the same frame as the scripted run. When a change to the frames is
-meant, check them in `build/test/NAME/` and record them with `--update`.
+frame differs from `tests/frames.json`, or a run hits a fatal error or exits with an error status.
+A frame is the hash of its decoded dots. The sound of `normal`, `battle-round`, `die` and `pause` is
+checked the same way. It also plays stage 5-3 through saturn-recomp's agent and checks that it ends on the same frame
+as the scripted run. When a change to the frames is meant, check them in `build/test/NAME/` and
+record them with `--update`. A run with a problem or a missing frame is never recorded.
+
+`--update` also keeps what it recorded in `build/test-expected/`. When a frame later differs, the
+report counts the dots that changed and the largest channel error, and `build/test/NAME/diff-V.png`
+shows this run, the recording and the changed dots side by side. For sound, it gives the time of the
+first sample that differs.
 
 ## Researching the game
 
