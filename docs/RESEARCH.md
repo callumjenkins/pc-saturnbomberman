@@ -27,7 +27,7 @@ the next one. `game.toml` names the addresses; this file holds the method, the t
 
 Runs are lined up by the game's own frame count, `tick` (0x06006104), which stops while the game loads.
 Each press or write of ours is placed at the same tick in the core, and as many VBlanks into it
-(`saturnrecomp.reference.play_synced`). `verify` needs `SATURN_REFERENCE_CORE` and `SATURN_BIOS`.
+(`saturnrecomp.reference.play_synced`). `verify` and `events` need `SATURN_REFERENCE_CORE` and `SATURN_BIOS`.
 
 What it cannot follow:
 - **Load timing.** The core's loads take about twice as many VBlanks (a stage load: 364 against
@@ -76,6 +76,31 @@ A play session doesn't replay on the core for long. The core starts with a blank
 Bomber Stadium's save prompts differ, and once a match ends at a different time the presses land on
 other screens. Callum's 05:01 session matched for the 20 s compared in its first battle and parted
 after that.
+
+### Events
+
+`bomberman lab events ROUTE` times the game's own state changes on both, from the route's first press
+(`--from` moves it): the stage (Master Game's floor), pad 1's lives and score, whether pad 1's bomber
+exists, and how many objects the slots from 10 hold, counted as `state` counts them. It pairs the nth
+change of each with the core's nth, and reports how many frames later the core makes it and whether it
+comes at the same tick. Every pair goes to `build/lab/events-ROUTE.txt`. Like `verify`, it takes no
+route with invincibility hooks or a multitap, so the bot's clears can't be timed.
+
+On 2026-10-17, over `normal`, `die`, `continue`, `save`, `master` and `item-ice-cream`:
+
+- **Every change paired with the core's but one, at the same tick or one tick apart.** That covers the
+  lives, the score (the ice cream's 4000), Master Game's floor, pad 1's bomber made and gone, and the
+  objects made at a stage's start. The one-tick differences come as Normal Game sets the lives, as
+  stage 1-1 starts after its load, and at VBlank 8745 in `continue` and `save`, where pad 1's bomber slot
+  fills again before GAME OVER. `master` has none.
+- **The one that didn't pair is in `master`, at VBlank 6682:** ours then has 1 object in the slots
+  from 10 where the core has 4. Nothing here says why.
+- **The core falls further behind and never catches up.** It is 788 frames behind when Normal Game
+  sets the lives, and on `save` 1130 at the last change, after a game over, a save, the title and a
+  load. The offset never shrinks on any of the six while the tick stays put, which is the load timing
+  above, measured.
+- **None of the six changes the stage outside Master Game.** They all play 1-1, and the bot's clears
+  that would move on need the hooks.
 
 ### Sound
 
@@ -340,12 +365,12 @@ stood at 507 KB of 610 KB (83%), H2H at 85% of its 6 KB, and the XBAND client at
 
 Every recompiled function marks that it ran in a host-side table, built in whether or not `--coverage`
 asks for the file. On 2026-10-17 a build with those stores taken out of the generator played the same
-frames and sound in all 204 frame checks, and six routes' machine state dumps at their end were the
+frames and sound in all 204 frame checks, and six routes' machine state dumps 120 VBlanks before their end were the
 same to the byte (`normal`, `battle-round`, `die`, `clear-1-7`, `master-boss`, `save`). The marking
 changes nothing the game sees.
 
 Those dumps first differed between two runs of the same build. The game copies the console's clock
-into work RAM, and a scripted run had started from the host's time. `run.CLOCK` now starts every
+into work RAM (`clock_copy`), and a scripted run had started from the host's time. `run.CLOCK` now starts every
 scripted run on 2000-01-01, as sessions already start on the clock they recorded. No frame or sound
 changed.
 

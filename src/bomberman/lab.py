@@ -10,6 +10,8 @@
     census ROUTE      the stage's objects by kind as the route plays: how many, the fastest each moved,
                       the update functions each ran, and the objects that appeared or went
     items [VBLANK...] what taking each item kind (item-N) changed in pad 1's slot, at each VBlank given
+    events ROUTE      when the stage, pad 1's lives, score and bomber, and the objects in slots from 10 change,
+                      on ours and on Beetle Saturn: each change paired with the core's, and how many frames apart
 
 The helpers below are for scenario scripts played through the agent (see docs/RESEARCH.md).
 """
@@ -18,11 +20,12 @@ import ctypes as C
 import glob
 import os
 import re
+import types
 
 from saturnrecomp import reference
 from saturnrecomp.sh2 import Image as SH2Image
 
-from . import run, state
+from . import bot, run, state
 from .paths import BUILD, cue
 from .run import GAME
 
@@ -113,9 +116,7 @@ def verify(route, start, every, log=print):
     """Matching frames and the first difference, as a line; the core comes from $SATURN_REFERENCE_CORE
     and $SATURN_BIOS. Lined up by tick, so it can't follow screens that run on VBlanks while the tick
     stands still, such as the results between rounds."""
-    core_so, bios = os.environ.get("SATURN_REFERENCE_CORE"), os.environ.get("SATURN_BIOS")
-    if not core_so or not bios:
-        raise SystemExit("verify needs SATURN_REFERENCE_CORE and SATURN_BIOS")
+    core_so, bios = reference_core()
     if route.invincible or "--multitap" in route.args:
         raise SystemExit("verify plays presses and writes only: no hooks or multitap")
     run.check_prepared()
@@ -156,6 +157,127 @@ def verify(route, start, every, log=print):
         line += f"; first difference at {first}: ours {ours[first]}, core {theirs.get(first, 'not reached')}"
     log(line)
     return line
+
+
+# ---- events ---------------------------------------------------------------------------------------
+def labels(read):
+    """The game state `events` times: the stage (Master Game's floor), pad 1's lives and score, whether
+    pad 1's bomber is out, and how many objects the slots from 10 hold, counted as `state` counts them."""
+    s = GAME.symbols
+    used = {t.slot for t in state._things(read(OBJECTS, SLOT * state.SLOTS), range(state.SLOTS))}
+    return {"stage": bot.stage_number(types.SimpleNamespace(read=read)).hex(), "lives": read(s["lives"], 1)[0],
+            "score": int.from_bytes(read(s["score"], 4), "big"), "bomber": 0 in used,
+            "enemies": sum(k in used for k in state.ENEMY_SLOTS)}
+
+
+def timeline(samples):
+    """{source: [(frame, tick, value)]} for each change in [(frame, tick, labels)] after the first."""
+    out, last = collections.defaultdict(list), samples[0][2] if samples else {}
+    for frame, tick, now in samples[1:]:
+        for k, v in now.items():
+            if v != last.get(k):
+                out[k].append((frame, tick, v))
+        last = now
+    return dict(out)
+
+
+def pair(ours, theirs):
+    """{source: (rows, note)}: each of our changes beside the core's of the same order, as (value, our
+    VBlank, the core's frame, frames the core is later, ticks the core is later), up to the first the
+    core does differently, which the note describes (None if none)."""
+    out = {}
+    for k in sorted(set(ours) | set(theirs)):
+        a, b, rows, note = ours.get(k, []), theirs.get(k, []), [], None
+        for i in range(max(len(a), len(b))):
+            if i >= len(b):
+                note = f"ours {a[i][2]} at VBlank {a[i][0]}, not on the core"
+            elif i >= len(a):
+                note = f"the core's {b[i][2]} at frame {b[i][0]}, not on ours"
+            elif a[i][2] != b[i][2]:
+                note = f"ours {a[i][2]} at VBlank {a[i][0]}, the core's {b[i][2]} at frame {b[i][0]}"
+            if note:
+                break
+            rows.append((a[i][2], a[i][0], b[i][0], b[i][0] - a[i][0], b[i][1] - a[i][1]))
+        out[k] = rows, note
+    return out
+
+
+def summary(source, rows, note):
+    """`events`' line for a source's pairs and the note `pair` gave it."""
+    if not rows and not note:
+        return f"{source}: no change on either"
+    line = f"{source}: {len(rows)} paired"
+    if rows:
+        line += f", the core {rows[0][3]} frames later at the first and {rows[-1][3]} at the last"
+        apart = [row[4] for row in rows if row[4]]
+        line += f", {len(apart)} at another tick, by up to {max(map(abs, apart))}" if apart else ", all at the same tick"
+    return line + (f"; then {note}" if note else "")
+
+
+def reference_core():
+    """$SATURN_REFERENCE_CORE and $SATURN_BIOS."""
+    core_so, bios = os.environ.get("SATURN_REFERENCE_CORE"), os.environ.get("SATURN_BIOS")
+    if not core_so or not bios:
+        raise SystemExit("this needs SATURN_REFERENCE_CORE and SATURN_BIOS")
+    return core_so, bios
+
+
+def events(route, name, start=None, log=print):
+    """Lines: per source, how many changes from our VBlank `start` pair with the core's, how many frames
+    later the core's first and last are, and the first it does differently. Every pair goes to
+    build/lab/events-ROUTE.txt. `start` is by default the route's first press, since before the game
+    starts the core's RAM holds what its BIOS left there and ours doesn't."""
+    core_so, bios = reference_core()
+    if route.invincible or "--multitap" in route.args:
+        raise SystemExit("events plays presses and writes only: no hooks or multitap")
+    run.check_prepared()
+    run.build.ensure(run.GAME, log=lambda s: None)
+    if start is None:
+        start = min(int(p.split(":", 1)[0]) for p in route.presses)
+    if not 0 <= start < route.vblanks:
+        raise SystemExit(f"--from {start} is outside the route's {route.vblanks} VBlanks")
+    tick, ticks, ours = GAME.symbols["tick"], {}, []
+    with run.play(f"{BUILD}/lab/events", route, accurate_drive=True) as r:
+        while r.vblank <= route.vblanks:
+            ticks[r.vblank] = r.read32(tick)
+            if r.vblank >= start:
+                ours.append((r.vblank, ticks[r.vblank], labels(r.read)))
+            run.advance(r, route, r.vblank + 1)
+    two = any(p.split(":", 1)[1].startswith("2.") for p in route.presses)
+    core = reference.Core(core_so, bios, cue(), save_dir=f"{BUILD}/lab", ports=2 if two else 1)
+    theirs, started = [], []
+
+    class Sampled:
+        """The core, sampled after every frame it runs once it reaches our `start`."""
+        def __getattr__(self, attr):
+            return getattr(core, attr)
+
+        def run(self):
+            core.run()
+            if started:
+                theirs.append((core.frames, core.read32(tick), labels(core.read)))
+
+    def on(v, n):
+        if v == start:
+            started.append(n)
+            theirs.append((n, core.read32(tick), labels(core.read)))
+
+    ran = reference.play_synced(Sampled(), tick, ticks, reference.presses(",".join(route.presses)),
+                                [start, route.vblanks], 4 * route.vblanks, on, parse_writes(route.writes))
+    core.close()
+    paired = pair(timeline(ours), timeline(theirs))
+    lines = []
+    with open(f"{BUILD}/lab/events-{name}.txt", "w") as f:
+        f.write("source value, our VBlank, the core's frame, frames the core is later, ticks the core is later\n")
+        for k in ours[0][2]:
+            rows, note = paired.get(k, ([], None))
+            f.writelines(f"{k} {' '.join(map(str, row))}\n" for row in rows)
+            lines.append(summary(k, rows, note))
+    if ran is None:
+        lines.append(f"the core ran out of frames at {4 * route.vblanks}, before our VBlank {route.vblanks}")
+    for line in lines:
+        log(line)
+    return lines
 
 
 # ---- sheet, watch, disasm, ramdiff ----------------------------------------------------------------

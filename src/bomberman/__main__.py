@@ -109,6 +109,9 @@ def main(argv=None):
     v.add_argument("route", choices=list(routes.ROUTES))
     v.add_argument("--from", dest="start", type=int, help="first VBlank compared (default: 400 before the end)")
     v.add_argument("--every", type=int, default=4)
+    v = labs.add_parser("events", help="when the game's state changes, on ours and on Beetle Saturn")
+    v.add_argument("route", choices=list(routes.ROUTES))
+    v.add_argument("--from", dest="start", type=int, help="first VBlank sampled (default: the route's first press)")
     v = labs.add_parser("sheet", help="a route's frame-test shots on one image")
     v.add_argument("route")
     v.add_argument("--crop", help="X0,Y0,X1,Y1")
@@ -184,6 +187,8 @@ def main(argv=None):
         if args.tool == "verify":
             route = routes.ROUTES[args.route]()
             lab.verify(route, args.start or max(0, route.vblanks - 400), args.every)
+        elif args.tool == "events":
+            lab.events(routes.ROUTES[args.route](), args.route, args.start)
         elif args.tool == "sheet":
             print(lab.sheet(args.route, tuple(map(int, args.crop.split(","))) if args.crop else None, args.columns))
         elif args.tool == "watch":

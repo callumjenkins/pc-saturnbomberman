@@ -227,7 +227,7 @@ first sample that differs.
 
 `docs/RESEARCH.md` holds the method behind the routes: lining runs up with Beetle Saturn, the open arena
 where mechanics are tested, the menu timings, the controls and the traps. `bomberman lab` has the tools
-it uses: `verify`, `sheet`, `watch`, `disasm` and `ramdiff`.
+it uses: `verify`, `events`, `sheet`, `watch`, `disasm` and `ramdiff`.
 
 ## Comparing with Mednafen
 

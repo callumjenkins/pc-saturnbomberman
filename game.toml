@@ -121,6 +121,9 @@ lives = 0x060C063E                  # a byte: pad 1's lives left in Normal Game:
 # The kernel counts, for each pad port from 06006100, the VBlanks since that port's pad last changed, as
 # it reads the pads, so not while the game loads. With nothing in port 3, its count is the game's frames.
 tick = 0x06006108
+# The SMPC's clock as the game last read it, in BCD: seconds, minutes, hours, the day, the weekday then the
+# month in one byte, and the year's last two digits then its first two. Another copy follows at 060FA940.
+clock_copy = 0x060FA939
 
 # The boot chain: the NetLink loader /0, its trampoline, the launcher, IP.BIN as the launcher
 # leaves it, the loader FLD_KNL, the XBAND library and the game's kernel. `bomberman prepare` makes
