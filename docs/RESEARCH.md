@@ -87,7 +87,9 @@ recording and searched 250 ms either way. Both recordings go to `build/compare/R
 - **The sound is the same sound.** When nothing else is playing, a window correlates at 0.99 to
   1.000, as in the title and story intro. The channels are the right way round in every window.
   Neither recording clips.
-- **Ours is 1.5 dB louder.** That's the median gap over the windows that correlate, on both routes.
+- **The levels match.** Ours was 1.5 dB louder, because the core scales the sound chip's output by
+  27/32 (`mednafen/ss/sound.c`), and the runtime now does the same. Over the windows that correlate,
+  the median gap is now 0.05 dB on `normal` and 0.00 on `battle-round`.
 - **The frame now matches the core's.** The runtime's VBlank came at 59.94 Hz (16.683 ms). The
   core's comes at 59.826 Hz, which is 449,204 cycles of φ (the master clock over 65), 16.715 ms. A
   sound plays on the sound chip's own 44.1 kHz clock, so it fell behind our picture by 0.19%, 115 ms
