@@ -338,6 +338,17 @@ setup, team battles, the standings, records, Killed By, the awards and the save 
 stood at 507 KB of 610 KB (83%), H2H at 85% of its 6 KB, and the XBAND client at 230 KB of 480 KB
 (48%). The QuickLink check never opens the client's lobby, mail or setup.
 
+Every recompiled function marks that it ran in a host-side table, built in whether or not `--coverage`
+asks for the file. On 2026-10-17 a build with those stores taken out of the generator played the same
+frames and sound in all 204 frame checks, and six routes' machine state dumps at their end were the
+same to the byte (`normal`, `battle-round`, `die`, `clear-1-7`, `master-boss`, `save`). The marking
+changes nothing the game sees.
+
+Those dumps first differed between two runs of the same build. The game copies the console's clock
+into work RAM, and a scripted run had started from the host's time. `run.CLOCK` now starts every
+scripted run on 2000-01-01, as sessions already start on the clock they recorded. No frame or sound
+changed.
+
 ## Learned seeds
 
 `seeds.json` holds the 199 KRNL addresses the game stopped at in earlier runs ("no function at"). None

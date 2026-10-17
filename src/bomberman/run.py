@@ -1,4 +1,5 @@
-"""One run of a route on the recompiled game, headless. A run starts with no saves and keeps none."""
+"""One run of a route on the recompiled game, headless. A run starts with no saves and keeps none, and
+with the console's clock at CLOCK."""
 import os
 
 from saturnrecomp import agent, build, config, learn
@@ -7,6 +8,8 @@ from .paths import BUILD, ROOT, cue
 from .prepare import check_prepared
 
 GAME = config.load(f"{ROOT}/game.toml")
+# The game copies the clock into work RAM, so a run left on the host's clock differs by when it started.
+CLOCK = "2000-01-01T00:00:00"
 
 
 def invincible_hooks():
@@ -18,7 +21,7 @@ def invincible_hooks():
 
 def saturn_args(route, vblanks=None, shots=None, extra=(), more=()):
     presses = ",".join((*route.presses, *extra))
-    return ["--cue", cue(), "--headless", "--save", "-", "--vblanks", str(vblanks or route.vblanks), "--shot", shots or route.shots,
+    return ["--cue", cue(), "--headless", "--save", "-", "--clock", CLOCK, "--vblanks", str(vblanks or route.vblanks), "--shot", shots or route.shots,
             "--input", presses, *route.args, *(invincible_hooks() if route.invincible else []),
             *(["--write", ",".join(route.writes)] if route.writes else []), *more]
 
@@ -39,7 +42,7 @@ def play(out, route=None, until=0, invincible=False, window=False, more=(), accu
     presses before VBlank `until` are played first, and its saturn arguments apply. `accurate_drive`
     gives the CD drive the hardware's seeks and rate, as a run compared with Beetle Saturn needs."""
     check_prepared()
-    args = ["--cue", cue(), "--save", "-", *([] if window else ["--headless"]), *(route.args if route else ()),
+    args = ["--cue", cue(), "--save", "-", "--clock", CLOCK, *([] if window else ["--headless"]), *(route.args if route else ()),
             *(["--accurate-drive"] if accurate_drive else []),
             *(invincible_hooks() if invincible or (route and route.invincible) else []), *more]
     r = agent.start(GAME.saturn, args, out)
