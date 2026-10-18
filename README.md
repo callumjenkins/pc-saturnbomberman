@@ -215,7 +215,12 @@ Anything after `--` goes to the saturn executable, such as `-- --dump 6000` for 
 frame differs from `tests/frames.json`, or a run hits a fatal error or exits with an error status.
 A frame is the hash of its decoded dots. The sound of `normal`, `battle-round`, `die` and `pause` is
 checked the same way. It also plays stage 5-3 through saturn-recomp's agent and checks that it ends on the same frame
-as the scripted run. When a change to the frames is meant, check them in `build/test/NAME/` and
+as the scripted run. With `battle` it plays the 10-player battle twice more, in an offscreen window
+in real time: on ten of SDL's virtual gamepads, and on ten gamepads made by the kernel's uinput, which
+SDL finds and reads as it does a USB pad. Half of those have an Xbox 360 pad's IDs, and half IDs SDL
+does not know. Each pad's buttons are read back one by one as it plugs in, and pads are unplugged and
+plugged back in partway through. Each run must give the scripted run's frames and record the script's
+presses. The kernel's pads need write access to `/dev/uinput`, and without it that run is skipped. When a change to the frames is meant, check them in `build/test/NAME/` and
 record them with `--update`. A run with a problem or a missing frame is never recorded.
 
 `--update` also keeps what it recorded in `build/test-expected/`. When a frame later differs, the

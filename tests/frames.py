@@ -138,24 +138,33 @@ def agent_matches():
     return shot.size == (frame.width, frame.height) and shot.tobytes() == frame.rgb
 
 
-def controllers_match():
-    """Problems with the 10-player battle played on ten SDL virtual gamepads instead of a script: its
-    frames must be the scripted run's, and its recording the script. It runs in a window, offscreen,
-    paced to real time."""
+# Pad 1 unplugged as the script lets go of A, and back before it next presses it. The kernel's pad 2,
+# a model SDL does not know, goes while pad 1 is out and comes back first, to its own player: SDL's virtual pads
+# all have one GUID, so theirs would take the lower player.
+UNPLUG = {"sdl": "1:8078-8150", "uinput": "1:8078-8150,2:8079-8140"}
+
+
+def controllers_match(pads):
+    """Problems with the 10-player battle played on ten virtual gamepads instead of a script, SDL's
+    for "sdl" or the kernel's for "uinput", with UNPLUG's pads unplugged for a while: its frames must
+    be the scripted run's, and its recording the script. It runs in a window, offscreen, paced to real
+    time."""
     route = RUNS["battle"]()
-    out = f"{BUILD}/test/controllers"
+    out = f"{BUILD}/test/controllers-{pads}"
     os.makedirs(out, exist_ok=True)
     args = run.saturn_args(route)
     args.remove("--headless")
     args[args.index("--input")] = "--virtual-input"
-    args += ["--settings", "-"]                 # the default bindings, whatever the player's file says
+    args += ["--settings", "-",                 # the default bindings, whatever the player's file says
+             "--virtual-pads", pads, "--virtual-unplug", UNPLUG[pads]]
     env = {**os.environ, "SDL_VIDEO_DRIVER": "offscreen", "SDL_AUDIO_DRIVER": "dummy"}
     with open(f"{out}/log.txt", "w") as log:
         subprocess.run([run.GAME.saturn, "--out", out, "--record-input", f"{out}/input.txt", *args],
                        stdout=log, stderr=subprocess.STDOUT, env=env, timeout=600)
-    problems = [f"frame {v} differs" for v in route.shots.split(",")
-                if not os.path.exists(f"{out}/shot-{v}.png") or
-                Image.open(f"{out}/shot-{v}.png").tobytes() != Image.open(f"{BUILD}/test/battle/shot-{v}.png").tobytes()]
+    problems = [line.strip() for line in open(f"{out}/log.txt") if "FATAL" in line]
+    problems += [f"frame {v} differs" for v in route.shots.split(",")
+                 if not os.path.exists(f"{out}/shot-{v}.png") or
+                 Image.open(f"{out}/shot-{v}.png").tobytes() != Image.open(f"{BUILD}/test/battle/shot-{v}.png").tobytes()]
 
     def steps(presses):
         return sorted((int(at), held if "." in held else "1." + held)
@@ -310,10 +319,14 @@ def main():
     expected = json.load(open(EXPECTED)) if os.path.exists(EXPECTED) else {}
     with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as ex:
         results = dict(zip(names, ex.map(replay, names)))
-    controllers = "battle" in names and not args.update and not results["battle"][1]
+    controllers = ["sdl", "uinput"] if "battle" in names and not args.update and not results["battle"][1] else []
+    if controllers and not os.access("/dev/uinput", os.W_OK):
+        controllers.remove("uinput")
+        print(f"{'skip':8} controllers: the battle on ten kernel gamepads needs /dev/uinput, which this user cannot write")
     dumped = [n for n in DUMPS if n in names and not args.update and not results[n][1]]
     checked = [n for n in CHECKPOINTS if n in names and not args.update and not results[n][1]]
     with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as ex:
+        pads = dict(zip(controllers, ex.map(controllers_match, controllers)))
         dumps = dict(zip(dumped, ex.map(dump_matches, dumped)))
         rebuilt = dict(zip(checked, ex.map(checkpoint_matches, checked)))
 
@@ -333,10 +346,9 @@ def main():
         failed += not ok
         print(f"{'ok' if ok else 'FAIL':8} agent: stage 5-3 played through the agent"
               + ("" if ok else " gives a different frame"))
-    if controllers:
-        problems = controllers_match()
+    for kind, problems in pads.items():
         failed += bool(problems)
-        print(f"{'FAIL' if problems else 'ok':8} controllers: the battle on ten virtual gamepads"
+        print(f"{'FAIL' if problems else 'ok':8} controllers: the battle on ten {'SDL virtual' if kind == 'sdl' else 'kernel'} gamepads"
               + (f": {'; '.join(problems)}" if problems else ""))
     for name, problems in dumps.items():
         failed += bool(problems)

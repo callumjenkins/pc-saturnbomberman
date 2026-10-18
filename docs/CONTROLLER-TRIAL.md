@@ -1,9 +1,15 @@
 # Trying real controllers
 
-The pad tests in saturn-recomp and the frame test's battle on ten SDL virtual gamepads check the
-joining, leaving, and multitap logic. This checklist covers what only physical pads show: drivers,
-Bluetooth sleep and wake, identical models with no serial number, and several people pressing at
-once. Record each trial in the table at the end, including how many pads took part.
+The pad tests in saturn-recomp and the frame test's battle check the joining, leaving, and multitap
+logic. The battle runs on ten SDL virtual gamepads and on ten kernel gamepads made through uinput,
+which SDL finds through udev and maps as it does a real Xbox 360 pad or an unknown one. Between them
+they do checks 1, 2, and 5 for wired pads, and check 4 with a button held rather than a direction.
+Each pad also presses every button the bindings read as it plugs in, and a kernel pad presses the
+directions on both the d-pad and the left stick.
+
+This checklist covers what only physical pads show: drivers, Bluetooth sleep and wake, identical
+models with no serial number, and several people pressing at once. Record each trial in the table at
+the end, including how many pads took part.
 
 ## Setup
 
