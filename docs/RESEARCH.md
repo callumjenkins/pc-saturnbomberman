@@ -58,8 +58,26 @@ What it cannot follow:
   φ/8), and Bomberman never leaves the 320-dot clock, so φ is 26.87 MHz: on the core the logo holds
   6 frames a step. Ours counted the FRT at 28.6 MHz, 5.6 frames a step, and left the logos 10 frames
   early; with φ right the wait after FAD 00AC ends within half a frame of the core's, and battle-round
-  matches the core on every shot from VBlank 2000 to 16400. Charging time per instruction didn't fix it. Costs high enough to slow those loads to the
-  core's pace made the intro drop frames that the core doesn't.
+  matches the core on every shot from VBlank 2000 to 16400. A flat cost per instruction did not close
+  the rest: costs high enough to slow those loads to the core's pace made the intro drop frames that
+  the core doesn't.
+- **The game's work, in CPU time.** By default ours gives the master SH-2 400 ns a safe point (a loop's
+  back-edge, a call, an `ldc ...,sr` or a register access), however much code runs between them, so
+  heavy work takes no longer than light. `compare`, `lab` and `trace` therefore also run ours with
+  `--accurate-cpu`: the recompiled code counts each straight run of instructions' issue cycles (the
+  SH7604's tables), plus a cycle for each write and 8 for each register access, and the master's time
+  is those cycles at φ. The three weights were fitted on `normal` and `battle-round` against the core;
+  a read costs nothing extra. Counting the frames the tick stands still, matched in order, the title's
+  start-up holds 70 frames against the core's 83 (39 by default), the loads before the story intro 10,
+  17 and 19 against 11, 17 and 19, and the story intro's stream 328 against 350 (285 by default). One
+  hold before the title stays at 9 against 19. From the end of the load before the story intro to its
+  music's Play, ours and the core take the same 197 ticks. The fit is touchy, because a route presses
+  at fixed VBlanks and a different pace moves where its presses land: with a register access at 2
+  cycles `normal` takes another path through the menus, and at 4 or 11 `battle-round`'s pictures part
+  from the core's at VBlank 7000; at 8 they match from 2000 to 16400 as they do without the flag.
+  Without the flag nothing changes: the frame tests and routes run at the default pace. With the
+  counting compiled in, a headless `normal` to VBlank 8800 took 7.55 s, against 7.34 and 7.46 s
+  without.
 - **Screens that run on VBlanks while the tick stands still**, such as the results between battle
   rounds. The two runs leave them at different times.
 - **Wandering CPUs.** They move differently in each, and win their bombs back on reaching pad 1.
@@ -186,33 +204,34 @@ other above scores 0:
   ours starts 10 ms sooner), and for 20 ms at `battle-round`'s 14100 + 320 ms. At `battle-round`'s
   16140 + 180 ms ours is silent for 10 ms where the core is at -34 dBFS: a sound ending 10 ms sooner on
   ours, since both are silent after it.
-- **Ours plays 50 ms that the core leaves silent**, 160 ms into the windows at 5700, 6300, 6900, 7500,
-  8100 and 8700 of `normal`, every other page of the story intro, where the core is at -90 dBFS. After
-  those 50 ms the two play the same sound in step (0.97 over the next 100 ms). The sound is CD audio,
-  and the cause is when the game starts it, not the CD block. The intro plays track 3 from FAD 63110,
-  then Pauses it (Seek FFFFFF) every 300 ticks and resumes it (Play FFFFFF) 300 ticks later. Both send
-  each Pause and resume at the same tick (3530 or 3531, 3830 or 3831, and so on), and each page plays
-  367 sectors on both. But the core sends the first Play at tick 3415 and ours at 3418, so the core has
-  played 4 more sectors at the first Pause (to 63237, against our 63233), and every later page starts
-  and ends 4 sectors (53 ms) further on. Our 50 ms is what the core played before the pause, 5 s
-  earlier, and at each Pause the core plays 50 ms that ours doesn't. The Play waits on the game's work
-  after its last load: the sector fetches before it line up within a tick (the last at 3383 on ours,
-  3382 on the core), and the game takes 35 ticks after it on ours and 33 on the core. That is the
-  load-to-work difference above, under "The boot's loads". It was timed with a copy of the core
-  printing each CD command and the first and last CD audio sample, by the core's sample count.
-- **The title's first sound starts louder on ours.** From 10 ms into the window at 3120, in both
-  routes, ours is at about -46 dBFS for 220 ms where the core's is at -59, and then they match. It is
-  the end of the title music, CD audio track 2 (FAD 61269-63110, played once), which fades out on the
-  disc, under the chime keyed on at tick 1570. Both send its Play at tick 527, inside a stretch where
-  the tick stands still while the title starts up: 39 VBlanks on ours and 83 frames on the core. The
-  Play comes 3 VBlanks into it on ours and 13 frames into it on the core, so after the Play the tick
-  stays still for 36 VBlanks on ours and 70 frames on the core, while the track plays. Ticks and frames
-  agree outside that stretch, so at the chime the core's track has played 34 frames, 0.57 s, further
-  into its fade-out, and the CD audio the core hands its sound chip is 2 to 12 dB below ours through the
-  chime. Before the Play, the BIOS's backup library, which the core runs and ours replaces, takes 2 of
-  the core's frames (BUP_Init fills 060EC8B0 in frames 2676 and 2677, and no other BUP call comes). The
-  68000's key-ons and levels for the chime, and the CD audio's send levels (slots 16 and 17), are the
-  same on both to within 10 samples.
+- **Ours played 50 ms that the core left silent** before `--accurate-cpu`. 160 ms into the windows at
+  5700, 6300, 6900, 7500, 8100 and 8700 of `normal`, every other page of the story intro, where the
+  core is at -90 dBFS. After those 50 ms the two play the same sound in step (0.97 over the next 100
+  ms). The sound is CD audio, and the cause is when the game starts it, not the CD block. The intro
+  plays track 3 from FAD 63110, then Pauses it (Seek FFFFFF) and resumes it (Play FFFFFF) on alternate
+  page turns, which the route's START presses make every 300 VBlanks. Both send each Pause and resume
+  at the same tick (3530 or 3531, 3830 or 3831, and so on), and each page plays 367 sectors on both.
+  But the core sends the first Play at tick 3415 and ours at 3418, so the core has played 4 more
+  sectors at the first Pause (to 63237, against our 63233), and every later page starts and ends 4
+  sectors (53 ms) further on. Our 50 ms is what the core played before the pause, 5 s earlier, and at
+  each Pause the core plays 50 ms that ours doesn't. The Play waits on the game's work after its last
+  load: the sector fetches before it line up within a tick (the last at 3383 on ours, 3382 on the
+  core), and the game takes 35 ticks after it on ours and 33 on the core. That is the load-to-work
+  difference above, under "The boot's loads". It was timed with a copy of the core printing each CD
+  command and the first and last CD audio sample, by the core's sample count.
+- **The title's first sound started louder on ours** before `--accurate-cpu`. From 10 ms into the
+  window at 3120, in both routes, ours is at about -46 dBFS for 220 ms where the core's is at -59, and
+  then they match. It is the end of the title music, CD audio track 2 (FAD 61269-63110, played once),
+  which fades out on the disc, under the chime keyed on at tick 1570. Both send its Play at tick 527,
+  inside a stretch where the tick stands still while the title starts up: 39 VBlanks on ours and 83
+  frames on the core. The Play comes 3 VBlanks into it on ours and 13 frames into it on the core, so
+  after the Play the tick stays still for 36 VBlanks on ours and 70 frames on the core, while the
+  track plays. Ticks and frames agree outside that stretch, so at the chime the core's track has
+  played 34 frames, 0.57 s, further into its fade-out, and the CD audio the core hands its sound chip
+  is 2 to 12 dB below ours through the chime. Before the Play, the BIOS's backup library, which the
+  core runs and ours replaces, takes 2 of the core's frames (BUP_Init fills 060EC8B0 in frames 2676
+  and 2677, and no other BUP call comes). The 68000's key-ons and levels for the chime, and the CD
+  audio's send levels (slots 16 and 17), are the same on both to within 10 samples.
 - **The sound chip's DSP gave no reverb on ours** before 2026-10-18. It showed under the title's
   chime, whose slots send to the DSP (IMXL 3). Two things kept the game's reverb program silent, each
   checked against Mednafen's `ss/scsp.inc`. The game writes 64 words from 0x780, and ours took
@@ -231,6 +250,19 @@ other above scores 0:
 - **The rest are mixes**, at levels within 5 dB of each other, where an effect starts at a slightly
   different point in the music: the rest of `normal`'s 5040 window, and most of `battle-round`'s 58
   of 10,038 parts.
+
+The 50 ms onsets and the title's louder tail were both the game's work taking a different time on
+ours. `--accurate-cpu` (under "Comparing with Beetle Saturn") gives it the core's, and the two bullets
+above describe the runs without it. On 2026-10-18, with it:
+
+- **`normal`**: 52 of 107 windows correlate at 0.9 or more (38 of 103 without it), and 37 of 4822
+  parts below 0.5. The title's tail is gone. The story intro's onsets are not: ours still plays 50 to
+  70 ms at each resume that the core leaves silent. The work after the load now takes the same 197
+  ticks on both, but the first Pause comes 70 ticks after the Play on ours and 73 on the core, from
+  where the load ends against the route's START press. 5 of the 18 shots every 500 VBlanks match the
+  core exactly, as without it.
+- **`battle-round`**: 115 of 252 windows (105 of 254 without it), and 59 of 10,973 parts below 0.5.
+  Every shot from VBlank 2000 matches the core, as without it.
 
 The sound a run makes also reaches the device unchanged. `tests/frames.py normal` plays the first
 minute to SDL's disk driver. From the first sound on, the device's samples equal the run's: 2.29

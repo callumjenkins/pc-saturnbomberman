@@ -26,7 +26,7 @@ def compare(route, name, core_so, bios, shots=None, log=print):
 
     log(f"{name}: our run, to VBlank {shots[-1]}")
     ticks, ours = {}, {}
-    with run.play(f"{out}/ours", route, accurate_drive=True) as r:
+    with run.play(f"{out}/ours", route, accurate_drive=True, accurate_cpu=True) as r:
         while r.vblank <= shots[-1]:
             ticks[r.vblank] = r.read32(tick)
             if r.vblank in shots:
@@ -72,7 +72,7 @@ def sound(route, name, core_so, bios, every=60, max_lag=0.25, log=print):
 
     log(f"{name}: our run, to VBlank {end}")
     ticks = {}
-    with run.play(f"{out}/ours", route, accurate_drive=True, more=["--wav", f"{out}/ours.wav"]) as r:
+    with run.play(f"{out}/ours", route, accurate_drive=True, accurate_cpu=True, more=["--wav", f"{out}/ours.wav"]) as r:
         while r.vblank <= end:
             ticks[r.vblank] = r.read32(tick)
             run.advance(r, route, r.vblank + 1)
