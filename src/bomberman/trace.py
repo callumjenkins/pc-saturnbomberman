@@ -163,7 +163,7 @@ def bot(name, core_so, bios, limit=22000, log=print, flame=True, video=False, cl
     tick = run.GAME.symbols["tick"]
     log(f"{name}: our run, to VBlank {start}")
     ticks = {}
-    with run.play(f"{out}/ours", route, accurate_drive=True, accurate_cpu=True) as r:
+    with run.play(f"{out}/ours", route, accurate_drive=True) as r:
         while r.vblank <= start:
             ticks[r.vblank] = r.read32(tick)
             run.advance(r, route, r.vblank + 1)
@@ -214,7 +214,7 @@ def trace(name, core_so, bios, every=500, log=print):
 
     log(f"{name}: our run, to VBlank {end}")
     ticks, ours = {}, {}
-    with run.play(f"{out}/ours", route, accurate_drive=True, accurate_cpu=True) as r:
+    with run.play(f"{out}/ours", route, accurate_drive=True) as r:
         while r.vblank <= end:
             ticks[r.vblank] = r.read32(tick)
             if r.vblank in shots:

@@ -127,7 +127,7 @@ def verify(route, start, every, log=print):
     shots = list(range(start, route.vblanks + 1, every))
     two = any(p.split(":", 1)[1].startswith("2.") for p in route.presses)
     tick, ticks, ours = GAME.symbols["tick"], {}, {}
-    with run.play(f"{BUILD}/lab/verify", route, accurate_drive=True, accurate_cpu=True) as r:
+    with run.play(f"{BUILD}/lab/verify", route, accurate_drive=True) as r:
         while r.vblank <= shots[-1]:
             ticks[r.vblank] = r.read32(tick)
             if r.vblank in shots:
@@ -253,7 +253,7 @@ def events(route, name, start=None, log=print):
     if not 0 <= start < route.vblanks:
         raise SystemExit(f"--from {start} is outside the route's {route.vblanks} VBlanks")
     tick, ticks, ours = GAME.symbols["tick"], {}, []
-    with run.play(f"{BUILD}/lab/events", route, accurate_drive=True, accurate_cpu=True) as r:
+    with run.play(f"{BUILD}/lab/events", route, accurate_drive=True) as r:
         while r.vblank <= route.vblanks:
             ticks[r.vblank] = r.read32(tick)
             if r.vblank >= start:
@@ -449,7 +449,7 @@ def memory(route, name, every=1000, start=None, log=print):
     shots = list(range(start, route.vblanks + 1, every))
     wanted = {v + k for v in shots for k in (0, *NEAR)}
     tick, ticks, ours = GAME.symbols["tick"], {}, {}
-    with run.play(f"{BUILD}/lab/memory", route, accurate_drive=True, accurate_cpu=True) as r:
+    with run.play(f"{BUILD}/lab/memory", route, accurate_drive=True) as r:
         while r.vblank <= shots[-1] + max(NEAR):
             ticks[r.vblank] = r.read32(tick)
             if r.vblank in wanted:
