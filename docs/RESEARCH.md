@@ -187,12 +187,23 @@ other above scores 0:
   16140 + 180 ms ours is silent for 10 ms where the core is at -34 dBFS: a sound ending 10 ms sooner on
   ours, since both are silent after it.
 - **Ours plays 50 ms that the core leaves silent**, 160 ms into the windows at 5700, 6300, 6900, 7500,
-  8100 and 8700 of `normal`, every other page of the story intro, where the core is at -90 dBFS. After those 50 ms the two play the
-  same sound in step (0.97 over the next 100 ms), and the core plays nothing like our 50 ms within
-  1.5 s either way. So the start of that sound is silent on the core, not late. Why is open.
+  8100 and 8700 of `normal`, every other page of the story intro, where the core is at -90 dBFS. After
+  those 50 ms the two play the same sound in step (0.97 over the next 100 ms). The sound is CD audio,
+  and the cause is when the game starts it, not the CD block. The intro plays track 3 from FAD 63110,
+  then Pauses it (Seek FFFFFF) every 300 ticks and resumes it (Play FFFFFF) 300 ticks later. Both send
+  each Pause and resume at the same tick (3530 or 3531, 3830 or 3831, and so on), and each page plays
+  367 sectors on both. But the core sends the first Play at tick 3415 and ours at 3418, so the core has
+  played 4 more sectors at the first Pause (to 63237, against our 63233), and every later page starts
+  and ends 4 sectors (53 ms) further on. Our 50 ms is what the core played before the pause, 5 s
+  earlier, and at each Pause the core plays 50 ms that ours doesn't. The Play waits on the game's work
+  after its last load: the sector fetches before it line up within a tick (the last at 3383 on ours,
+  3382 on the core), and the game takes 35 ticks after it on ours and 33 on the core. That is the
+  load-to-work difference above, under "The boot's loads". It was timed with a copy of the core
+  printing each CD command and the first and last CD audio sample, by the core's sample count.
 - **The title's first sound starts louder on ours.** From 10 ms into the window at 3120, in both
-  routes, ours is at about -46 dBFS for 220 ms where the core's is at -59, and then they match. It
-  may be the same difference as the story intro's.
+  routes, ours is at about -46 dBFS for 220 ms where the core's is at -59, and then they match. It is
+  the tail of the chime keyed on 1.7 to 2 s earlier (eight slots from SA 0C4D6, looping, with D2R 4),
+  and no CD audio plays there, so it is a different difference. Why is open.
 - **The rest are mixes**, at levels within 5 dB of each other, where an effect starts at a slightly
   different point in the music: the rest of `normal`'s 5040 window, and most of `battle-round`'s 58
   of 10,038 parts.
