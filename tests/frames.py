@@ -8,11 +8,13 @@ Runs are deterministic, so a frame that changes means the game ran differently. 
 right, such as a VDP2 feature that now draws, so look at the frames in build/test/NAME before
 recording them with --update. README.md's Testing section says what is checked and how a difference is reported."""
 import argparse
+import array
 import concurrent.futures
 import dataclasses
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -175,6 +177,61 @@ def controllers_match(pads):
     return problems
 
 
+# The part of `normal` played to a sound device: the opening, the title and the mode select.
+DEVICE_VBLANKS = 3600
+LEAD = 2205                 # frames of silence the runtime puts before a chunk that finds the stream empty
+LAST_QUEUED = 11025         # frames the stream can hold, which the device has not played when the run ends
+
+
+def device_sound_matches():
+    """Problems with the sound SDL's audio stream gives a device in a window, offscreen. SDL's disk
+    driver writes what a device would play to a file, and it must hold the frame test's sound of
+    `normal`, in order and unchanged."""
+    route = RUNS["normal"]()
+    out = f"{BUILD}/test/device-sound"
+    os.makedirs(out, exist_ok=True)
+    args = run.saturn_args(route, vblanks=DEVICE_VBLANKS)
+    args.remove("--headless")
+    args += ["--settings", "-", "--wav", f"{out}/sound.wav"]       # at the default volume, the stream's gain is 1
+    env = {**os.environ, "SDL_VIDEO_DRIVER": "offscreen", "SDL_AUDIO_DRIVER": "disk",
+           "SDL_AUDIO_DISK_OUTPUT_FILE": f"{out}/device.raw"}
+    with open(f"{out}/log.txt", "w") as log:
+        subprocess.run([run.GAME.saturn, "--out", out, *args], stdout=log, stderr=subprocess.STDOUT, env=env, timeout=600)
+    log = open(f"{out}/log.txt").read()
+    if not os.path.exists(f"{out}/sound.wav") or not os.path.exists(f"{out}/device.raw"):
+        return [line.strip() for line in log.splitlines() if "FATAL" in line] + ["no sound from the run or the device"]
+    _, *made = audio.read_wav(f"{out}/sound.wav")
+    _, *tested = audio.read_wav(f"{BUILD}/test/normal/sound.wav")
+    return device_problems(made, tested, array.array("h", open(f"{out}/device.raw", "rb").read()), log)
+
+
+def device_problems(made, tested, device, log):
+    """What is wrong with the device's recording, interleaved stereo, against `made`, the windowed run's
+    (left, right), given `tested`, the frame test's, and the run's log."""
+    problems = [line.strip() for line in log.splitlines() if "FATAL" in line]
+    if any(ch != th[:len(ch)] for ch, th in zip(made, tested)):
+        problems.append("the windowed run's sound is not the frame test's")
+    both = array.array("h", bytes(4 * len(made[0])))
+    both[0::2], both[1::2] = made
+    played = audio.live(both, device)
+    counts = re.search(r"audio stream: (\d+) times empty, (\d+) chunks dropped", log)
+    if not counts:
+        return problems + ["no audio stream line in the log"]
+    empty, dropped = map(int, counts.groups())
+    gaps = [shift for _, shift in played.shifts if shift > 0]
+    skips = [shift for _, shift in played.shifts if shift < 0]
+    if played.offset is None:
+        problems.append("the device played no sound")
+    problems += [f"the device played something else at {at / audio.RATE:.2f} s" for at in played.unmatched[:3]]
+    if any(gap < LEAD for gap in gaps) or len(gaps) > empty:
+        problems.append(f"the device went silent {len(gaps)} times, by {gaps} frames, and the stream ran empty {empty} times")
+    if len(skips) > dropped:
+        problems.append(f"the device skipped samples {len(skips)} times, and the stream dropped {dropped} chunks")
+    if played.ended is not None and len(made[0]) - played.ended > LAST_QUEUED:
+        problems.append(f"the device stopped {(len(made[0]) - played.ended) / audio.RATE:.2f} s before the run's sound ended")
+    return problems
+
+
 # Runs started again from a dump of the machine taken at this VBlank (saturn-recomp's state.cpp).
 DUMPS = {"battle": 7000, "clear-1-7": 8000, "master-boss": 13000, "save": 9000}
 
@@ -323,9 +380,11 @@ def main():
     if controllers and not os.access("/dev/uinput", os.W_OK):
         controllers.remove("uinput")
         print(f"{'skip':8} controllers: the battle on ten kernel gamepads needs /dev/uinput, which this user cannot write")
+    device = ["normal"] if "normal" in names and not args.update and not results["normal"][1] else []
     dumped = [n for n in DUMPS if n in names and not args.update and not results[n][1]]
     checked = [n for n in CHECKPOINTS if n in names and not args.update and not results[n][1]]
     with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as ex:
+        sound = [ex.submit(device_sound_matches) for _ in device]
         pads = dict(zip(controllers, ex.map(controllers_match, controllers)))
         dumps = dict(zip(dumped, ex.map(dump_matches, dumped)))
         rebuilt = dict(zip(checked, ex.map(checkpoint_matches, checked)))
@@ -349,6 +408,10 @@ def main():
     for kind, problems in pads.items():
         failed += bool(problems)
         print(f"{'FAIL' if problems else 'ok':8} controllers: the battle on ten {'SDL virtual' if kind == 'sdl' else 'kernel'} gamepads"
+              + (f": {'; '.join(problems)}" if problems else ""))
+    for problems in (f.result() for f in sound):
+        failed += bool(problems)
+        print(f"{'FAIL' if problems else 'ok':8} device sound: normal's first {DEVICE_VBLANKS} VBlanks through SDL's audio stream"
               + (f": {'; '.join(problems)}" if problems else ""))
     for name, problems in dumps.items():
         failed += bool(problems)

@@ -9,7 +9,7 @@ check and the smoke checklist below. Until then it's a playtest build.
 | Platform | Status | Game-free CI | Parity | Smoke checklist |
 |---|---|---|---|---|
 | Linux x64 | Supported | Clang and GCC, every push | It's the reference | Played throughout development |
-| Windows x64 | Parity passed. Pad, save, and launcher still to try | Clang with MSVC's libraries, every push | Passed 2026-10-18 at saturn-recomp `7aa53b8`, in a Windows 11 VM | Partly: window, picture, pace, and sound stream (below) |
+| Windows x64 | Parity passed. The pad, and sound on a PC with a GPU, still to try | Clang with MSVC's libraries, every push | Passed 2026-10-18 at saturn-recomp `7aa53b8`, in a Windows 11 VM | All but the pad and the sound stream (below) |
 | Android arm64 | Playtest | none | Not run | Not run. 31 sessions played on a Galaxy Z Fold 7, on builds from 2026-10-07 to 2026-10-11 |
 | macOS arm64 | Playtest. Waits for someone with a Mac | Clang, every push | Not run | Not run |
 
@@ -40,11 +40,11 @@ path and modification time.
 
 | # | Check | Windows, 2026-10-18 |
 |---|---|---|
-| 1 | A windowed run opens a window, and the picture fills a 4:3 rectangle in it | Window passed: SDL drew with direct3d11. The 4:3 shape is unchecked, since the intro has bars of its own |
+| 1 | A windowed run opens a window, and the picture fills a 4:3 rectangle in it | Passed: SDL drew with direct3d11. Fullscreen on the VM's 1280×800 screen, the picture is 1066×800 |
 | 2 | The picture is right: the intro and the title look as they do on Linux | Passed: the intro looked right in a screenshot. Parity shows the headless frames are equal |
 | 3 | A run keeps the Saturn's pace: 3000 VBlanks take about 50 s | Passed: 50.1 s |
-| 4 | Sound plays with no gaps: the log's audio stream line drops no chunks | Passed: 0 dropped. Nobody listened to it |
+| 4 | Sound plays with no gaps: the log's audio stream line has the stream empty once, at the start, and no chunks dropped | Failed in the VM: 32 times empty in 50 s, so 50 ms gaps, from presents that take 14 ms on average and up to 33 ms. The VM has no GPU, so Direct3D 11 draws in software. With `SDL_RENDER_DRIVER=software` a present takes 0.9 ms and the stream runs empty only at the start. To try on a Windows PC with a GPU |
 | 5 | A pad joins and plays: `CONTROLLER-TRIAL.md` checks 1, 4, and 5 | Not tried: the VM has no pad |
-| 6 | A save made in one session is there in the next | Not tried. The runtime's save tests pass on Windows in CI |
-| 7 | The release's launcher checks the disc and starts the game | Not tried |
-| 8 | Fullscreen, and back | Not tried |
+| 6 | A save made in one session is there in the next | Passed: the `save` route's save, in `%APPDATA%\saturn-recomp\MK-81070_V1.003\backup.bin`, matched Linux's byte for byte, and a second session's LOAD GAME list showed slot 1 as STAGE 1-1, the same frame as Linux's |
+| 7 | The release's launcher checks the disc and starts the game | Passed, with a release folder built in the VM as the workflow builds it: a text file was refused, the disc was checked, Play started the game, and quitting kept the session. It also opened a console window behind the game, which the launcher now stops |
+| 8 | Fullscreen, and back | Passed: F11 both ways |

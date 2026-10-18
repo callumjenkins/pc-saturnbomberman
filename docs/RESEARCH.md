@@ -177,6 +177,36 @@ recording and searched 250 ms either way. Both recordings go to `build/compare/R
   rest are mixes in which the sound effects differ, because the CPUs drift apart on the core as they
   do in the pictures. A few music windows are also out of line by more than the 250 ms searched.
 
+On 2026-10-18 the report gained each matching window's 10 ms parts, compared at the window's offset,
+and lists the stretches whose parts correlate below 0.5. A part where one side is below -50 dBFS and the
+other above scores 0:
+
+- **Neither route has a click or a dropout in the middle of a sound.** Where the parts differ, ours
+  is more than 6 dB louder only where a sound starts (below, and `normal`'s 5040 + 100 ms, where
+  ours starts 10 ms sooner), and for 20 ms at `battle-round`'s 14100 + 320 ms. At `battle-round`'s
+  16140 + 180 ms ours is silent for 10 ms where the core is at -34 dBFS: a sound ending 10 ms sooner on
+  ours, since both are silent after it.
+- **Ours plays 50 ms that the core leaves silent**, 160 ms into the windows at 5700, 6300, 6900, 7500,
+  8100 and 8700 of `normal`, every other page of the story intro, where the core is at -90 dBFS. After those 50 ms the two play the
+  same sound in step (0.97 over the next 100 ms), and the core plays nothing like our 50 ms within
+  1.5 s either way. So the start of that sound is silent on the core, not late. Why is open.
+- **The title's first sound starts louder on ours.** From 10 ms into the window at 3120, in both
+  routes, ours is at about -46 dBFS for 220 ms where the core's is at -59, and then they match. It
+  may be the same difference as the story intro's.
+- **The rest are mixes**, at levels within 5 dB of each other, where an effect starts at a slightly
+  different point in the music: the rest of `normal`'s 5040 window, and most of `battle-round`'s 58
+  of 10,038 parts.
+
+The sound a run makes also reaches the device unchanged. `tests/frames.py normal` plays the first
+minute to SDL's disk driver. From the first sound on, the device's samples equal the run's: 2.29
+million frames compared equal (`audio.live`'s `compared`, which counts silence after the first sound
+too). The only differences are 50 ms silences where the stream ran empty. With its default buffer
+the disk driver plays about 0.7% fast: the stream lost about 315 frames a second, measured with a
+probe of the stream's queue. With `SDL_AUDIO_DEVICE_SAMPLE_FRAMES=441` it played about 0.6% slow and
+the stream filled towards dropping chunks. So a run on that driver says nothing about the host's
+timing. A real device's empty and dropped counts are on the log's `audio stream:` line: on Linux's
+PipeWire, none in a minute.
+
 ## The open arena
 
 `routes.open_arena(off=..., **rules)` is where mechanics are tested. It is Path to Glory under the white

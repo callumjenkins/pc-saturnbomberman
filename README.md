@@ -18,14 +18,15 @@ uv run bomberman play         # recompiles and builds on the first run, then pla
 uv run bomberman run normal   # or a scripted run, headless
 ```
 
-The build needs uv, CMake, Ninja, clang and SDL3; ffmpeg is optional, for `--video`. Linux is the
-supported platform for now (Windows and macOS are phase 5 of PLAN.md):
+The build needs uv, CMake, Ninja, clang and SDL3; ffmpeg is optional, for `--video`. Building from a
+disc needs Linux. Windows and Android get release builds and macOS a playtest build, and
+`docs/PLATFORMS.md` says what each has passed:
 
 | System | Install |
 | --- | --- |
-| Fedora | `sudo dnf install cmake ninja-build clang SDL3-devel` |
-| Debian 13, Ubuntu 25.04 and later | `sudo apt install cmake ninja-build clang libsdl3-dev` |
-| Arch | `sudo pacman -S cmake ninja clang sdl3` |
+| Fedora | `sudo dnf install uv cmake ninja-build clang SDL3-devel` |
+| Debian 13, Ubuntu 25.04 and later | `sudo apt install cmake ninja-build clang libsdl3-dev`, and uv from [its installer](https://docs.astral.sh/uv/getting-started/installation/) |
+| Arch | `sudo pacman -S uv cmake ninja clang sdl3` |
 
 `uv run bomberman doctor` checks each step a play needs and says what to do about the first one that
 isn't ready: a missing tool (with the install command), SDL3 not found, no disc or the wrong one, an
@@ -214,7 +215,12 @@ Anything after `--` goes to the saturn executable, such as `-- --dump 6000` for 
 `uv run tests/frames.py` rebuilds, replays every route in parallel (about five minutes) and fails if a
 frame differs from `tests/frames.json`, or a run hits a fatal error or exits with an error status.
 A frame is the hash of its decoded dots. The sound of `normal`, `battle-round`, `die` and `pause` is
-checked the same way. It also plays stage 5-3 through saturn-recomp's agent and checks that it ends on the same frame
+checked the same way. With `normal`, its first minute is played again in an offscreen window through
+SDL's audio stream to SDL's disk driver, and what that device was given must be the frame test's sound,
+in order and unchanged. Silence where the stream ran empty, or samples where it dropped a chunk, are
+allowed when the log counts them, since the disk driver's clock runs a little fast or slow and the
+stream runs empty every few seconds.
+It also plays stage 5-3 through saturn-recomp's agent and checks that it ends on the same frame
 as the scripted run. With `battle` it plays the 10-player battle twice more, in an offscreen window
 in real time: on ten of SDL's virtual gamepads, and on ten gamepads made by the kernel's uinput, which
 SDL finds and reads as it does a USB pad. Half of those have an Xbox 360 pad's IDs, and half IDs SDL

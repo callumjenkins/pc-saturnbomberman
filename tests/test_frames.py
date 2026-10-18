@@ -160,6 +160,7 @@ def main(monkeypatch, *argv):
     monkeypatch.setattr(frames.build, "ensure", lambda game: used.append("built"))
     monkeypatch.setattr(frames, "replay", lambda name: (used.append(frames.run.GAME.saturn), ({"100": "x"}, []))[1])
     monkeypatch.setattr(frames, "files", lambda name: {"100": "shot-100.png"})
+    monkeypatch.setattr(frames, "device_sound_matches", lambda: [])
     monkeypatch.setattr(frames.sys, "argv", ["frames.py", *argv])
     try:
         frames.main()
@@ -208,3 +209,67 @@ def test_frames_update_with_another_saturn_needs_an_expected_file(monkeypatch):
 def test_frames_with_a_saturn_that_does_not_exist_stop_before_running(monkeypatch):
     status, used = main(monkeypatch, "--saturn", "no/such/saturn.exe", "--expected", "x.json", "normal")
     assert "no/such/saturn.exe" in str(status) and used == []
+
+
+def sound(frames_, seed=1):
+    import array, random
+    rng = random.Random(seed)
+    return tuple(array.array("h", (int(rng.gauss(0, 3000)) for _ in range(frames_))) for _ in range(2))
+
+
+def played(made, at=None, put_in=0, left_out=0):
+    """The device's recording of `made`: a lead of silence, then the samples, with silence put in or
+    samples left out at frame `at`."""
+    import array
+    both = array.array("h", bytes(4 * len(made[0])))
+    both[0::2], both[1::2] = made
+    if at is not None:
+        both = both[:2 * at] + array.array("h", bytes(4 * put_in)) + both[2 * (at + left_out):]
+    return array.array("h", bytes(4 * frames.LEAD)) + both
+
+
+def log(empty=1, dropped=0, more=""):
+    return f"{more}  audio stream: {empty} times empty, {dropped} chunks dropped\n"
+
+
+MADE = sound(20000)
+
+
+def test_a_device_that_played_the_frame_tests_sound_has_no_problem():
+    tested = tuple(ch + ch[:100] for ch in MADE)                               # the frame test's run is longer
+    assert frames.device_problems(MADE, tested, played(MADE), log()) == []
+
+
+def test_a_windowed_run_with_other_sound_than_the_frame_tests_is_a_problem():
+    assert frames.device_problems(MADE, sound(20000, 2), played(MADE), log()) == [
+        "the windowed run's sound is not the frame test's"]
+
+
+def test_silence_the_stream_counted_is_allowed_and_uncounted_or_short_silence_is_not():
+    device = played(MADE, 5000, put_in=2300)
+    assert frames.device_problems(MADE, MADE, device, log(empty=1)) == []
+    assert frames.device_problems(MADE, MADE, device, log(empty=0))[0].startswith("the device went silent 1 times")
+    short = played(MADE, 5000, put_in=1000)
+    assert frames.device_problems(MADE, MADE, short, log(empty=5))[0].startswith("the device went silent 1 times, by [1000]")
+
+
+def test_samples_skipped_without_a_dropped_chunk_are_a_problem():
+    device = played(MADE, 5000, left_out=700)
+    assert frames.device_problems(MADE, MADE, device, log(dropped=1)) == []
+    assert frames.device_problems(MADE, MADE, device, log(dropped=0)) == [
+        "the device skipped samples 1 times, and the stream dropped 0 chunks"]
+
+
+def test_a_device_that_stopped_well_before_the_runs_sound_ended_is_a_problem():
+    device = played(MADE)
+    assert frames.device_problems(MADE, MADE, device[:-2 * (frames.LAST_QUEUED - audio.PART)], log()) == []
+    assert frames.device_problems(MADE, MADE, device[:-2 * (frames.LAST_QUEUED + 1000)], log()) == [
+        "the device stopped 0.27 s before the run's sound ended"]
+
+
+def test_a_silent_device_a_fatal_error_and_a_log_with_no_stream_line_are_problems():
+    import array
+    assert frames.device_problems(MADE, MADE, array.array("h", bytes(4000)), log()) == ["the device played no sound"]
+    assert frames.device_problems(MADE, MADE, played(MADE), log(more="[FATAL] call to 06012345\n")) == [
+        "[FATAL] call to 06012345"]
+    assert frames.device_problems(MADE, MADE, played(MADE), "") == ["no audio stream line in the log"]
