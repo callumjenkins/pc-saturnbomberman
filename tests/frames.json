@@ -132,7 +132,7 @@
   "14410": "49ed5dbb0f5d95b5d0af16d79ed98f7f",
   "16090": "5dfdec933b658aa7fb01deb49dd3a3d4",
   "16400": "6b81d67c2799a5dc7f8b9480e3044f22",
-  "sound": "f6812d556356776e11a120392c2f8fa5"
+  "sound": "aae34faa47aeb6655bca10d34175da1a"
  },
  "bonus-game": {
   "16450": "c1bd5ddfbfb23e837a12968a58f9f02c",
@@ -845,7 +845,7 @@
  "die": {
   "5860": "0dca6ae728399d3bb212a86ae619c063",
   "6500": "d36fa6abc54ec257525198cc87bd66dd",
-  "sound": "c0b221adf9a0641dbaec8165e0a45c57"
+  "sound": "817b3bf713be9f3d3a74f3558188c501"
  },
  "dino-blue": {
   "6760": "b582cbdb94abf80175d7ad9ee6f9eef6",
@@ -1280,7 +1280,7 @@
   "6300": "3fc71d4ef35f7868779e00a335100a06",
   "8100": "0a6c83ca09096a9dd9ea4c1735cad057",
   "9000": "339d0f919e23f31282d58dc5674a80e2",
-  "sound": "16485546f509ab909941949f83d46e2d"
+  "sound": "a71b3305f0ef58edba0bae6ec8de7345"
  },
  "open-arena": {
   "7400": "eafb809c0540f3c2c966eaf9833166b1",
@@ -1290,7 +1290,7 @@
   "6028": "de2d53d240c97bf14693dca34ec7c24c",
   "6140": "de2d53d240c97bf14693dca34ec7c24c",
   "6400": "508741cb30d5a22bb74964d15c4c4299",
-  "sound": "4d8695b6e2b9363b61c4537d640299c0"
+  "sound": "e7ed88fd3dd101b683f7ed2f4a51c3cf"
  },
  "save": {
   "12010": "9c285326f933cec8bcfcf8798940d00a",
