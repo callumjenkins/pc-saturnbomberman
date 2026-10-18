@@ -202,8 +202,32 @@ other above scores 0:
   printing each CD command and the first and last CD audio sample, by the core's sample count.
 - **The title's first sound starts louder on ours.** From 10 ms into the window at 3120, in both
   routes, ours is at about -46 dBFS for 220 ms where the core's is at -59, and then they match. It is
-  the tail of the chime keyed on 1.7 to 2 s earlier (eight slots from SA 0C4D6, looping, with D2R 4),
-  and no CD audio plays there, so it is a different difference. Why is open.
+  the end of the title music, CD audio track 2 (FAD 61269-63110, played once), which fades out on the
+  disc, under the chime keyed on at tick 1570. Both send its Play at tick 527, inside a stretch where
+  the tick stands still while the title starts up: 39 VBlanks on ours and 83 frames on the core. The
+  Play comes 3 VBlanks into it on ours and 13 frames into it on the core, so after the Play the tick
+  stays still for 36 VBlanks on ours and 70 frames on the core, while the track plays. Ticks and frames
+  agree outside that stretch, so at the chime the core's track has played 34 frames, 0.57 s, further
+  into its fade-out, and the CD audio the core hands its sound chip is 2 to 12 dB below ours through the
+  chime. Before the Play, the BIOS's backup library, which the core runs and ours replaces, takes 2 of
+  the core's frames (BUP_Init fills 060EC8B0 in frames 2676 and 2677, and no other BUP call comes). The
+  68000's key-ons and levels for the chime, and the CD audio's send levels (slots 16 and 17), are the
+  same on both to within 10 samples.
+- **The sound chip's DSP gave no reverb on ours** before 2026-10-18. It showed under the title's
+  chime, whose slots send to the DSP (IMXL 3). Two things kept the game's reverb program silent, each
+  checked against Mednafen's `ss/scsp.inc`. The game writes 64 words from 0x780, and ours took
+  0x7C0-0x7FF for MADRS too, so the second 32, all 0, wiped the delay line's addresses. Ours also read
+  and wrote sound RAM only on odd steps, as MAME does; on Mednafen any step can, a step later. The DSP
+  step now follows Mednafen in its other differences from MAME too: its registers last from one sample
+  to the next, the accumulator has 26 bits, EFREG keeps what was last written, ADRS is signed, an IRA
+  past the CD inputs keeps the last input (ours stopped the program there), NOFL is bit 8, and RBP has
+  7 bits. Separately, ours scaled envelope rates by key as MAME does, OCT + 2 KRS + FNS bit 9 on a
+  64-step scale, where Mednafen adds KRS + OCT, from 0 to 15, to the 32-step rate: at OCT -3 the
+  chime's notes released at 62 dB a second, against the core's 82. With these fixed, the DSP's input
+  and its outputs (EFREG 0 and 1) are within about 1 dB of the core's through the chime. The sound
+  compares hardly moved, since the reverb is quiet under the dry sound: `normal` keeps 38 of 103
+  windows at 0.9 and `battle-round` 105 of 254, and the parts below 0.5 go from 58 to 59 and from 58
+  to 50.
 - **The rest are mixes**, at levels within 5 dB of each other, where an effect starts at a slightly
   different point in the music: the rest of `normal`'s 5040 window, and most of `battle-round`'s 58
   of 10,038 parts.
