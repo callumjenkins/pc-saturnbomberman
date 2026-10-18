@@ -223,6 +223,12 @@ report counts the dots that changed and the largest channel error, and `build/te
 shows this run, the recording and the changed dots side by side. For sound, it gives the time of the
 first sample that differs.
 
+`--saturn EXE` runs another executable as it is, without building, and `--expected FILE` compares with
+or records into that file, keeping its pictures beside it in `NAME.kept/`. Together they check a build for
+another platform against Linux's: record a Linux build of the same sources and options with
+`--update`, then run the other build against that file. `docs/PLATFORMS.md` says what each platform
+has passed.
+
 ## Researching the game
 
 `docs/RESEARCH.md` holds the method behind the routes: lining runs up with Beetle Saturn, the open arena

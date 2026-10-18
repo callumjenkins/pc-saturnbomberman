@@ -1,4 +1,7 @@
 """tests/frames.py's hashing, recording rule and diffs, on made-up pictures and sound."""
+import json
+import os
+
 import frames
 from PIL import Image
 from saturnrecomp import audio
@@ -145,3 +148,63 @@ def test_keep_replaces_the_kept_folder(tmp_path, monkeypatch):
     picture(now / "shot-100.png")
     frames.keep("r")
     assert sorted(p.name for p in kept.iterdir()) == ["shot-100.png"]
+
+
+def main(monkeypatch, *argv):
+    """frames.main with `argv`, every run giving frame 100 the hash "x"; its exit status, and the executables
+    the runs used."""
+    used = []
+    monkeypatch.setattr(frames, "EXPECTED", frames.EXPECTED)
+    monkeypatch.setattr(frames, "KEPT", frames.KEPT)
+    monkeypatch.setattr(frames.run.GAME, "executable", "")
+    monkeypatch.setattr(frames.build, "ensure", lambda game: used.append("built"))
+    monkeypatch.setattr(frames, "replay", lambda name: (used.append(frames.run.GAME.saturn), ({"100": "x"}, []))[1])
+    monkeypatch.setattr(frames, "files", lambda name: {"100": "shot-100.png"})
+    monkeypatch.setattr(frames.sys, "argv", ["frames.py", *argv])
+    try:
+        frames.main()
+    except SystemExit as e:
+        return e.code, used
+
+
+def test_frames_with_another_saturn_skip_the_build_and_run_that_executable(tmp_path, monkeypatch):
+    expected = tmp_path / "other.json"
+    expected.write_text('{"normal": {"100": "x"}}')
+    saturn = tmp_path / "saturn.exe"
+    saturn.write_text("")
+    status, used = main(monkeypatch, "--saturn", str(saturn), "--expected", str(expected), "normal")
+    assert (status, used) == (0, [str(saturn)])
+
+
+def test_frames_compare_with_the_expected_file_given(tmp_path, monkeypatch, capsys):
+    expected = tmp_path / "other.json"
+    expected.write_text('{"normal": {"100": "y"}}')
+    status, used = main(monkeypatch, "--expected", str(expected), "normal")
+    assert (status, used[0]) == (1, "built")
+    assert capsys.readouterr().out.startswith("FAIL     normal")
+
+
+def test_frames_update_writes_the_expected_file_given_and_keeps_beside_it(tmp_path, monkeypatch):
+    expected = tmp_path / "other.json"
+    monkeypatch.setattr(frames, "keep", lambda name: kept.append((name, frames.KEPT)))
+    kept = []
+    assert main(monkeypatch, "--update", "--expected", str(expected), "normal")[0] == 0
+    assert json.loads(expected.read_text()) == {"normal": {"100": "x"}}
+    assert kept == [("normal", str(tmp_path / "other.kept"))]
+
+
+def test_frames_update_to_an_expected_file_with_no_extension_records_it(tmp_path, monkeypatch):
+    expected = tmp_path / "other"
+    monkeypatch.setattr(frames, "keep", lambda name: os.makedirs(frames.KEPT, exist_ok=True))
+    assert main(monkeypatch, "--update", "--expected", str(expected), "normal")[0] == 0
+    assert json.loads(expected.read_text()) == {"normal": {"100": "x"}}
+
+
+def test_frames_update_with_another_saturn_needs_an_expected_file(monkeypatch):
+    status, used = main(monkeypatch, "--saturn", "elsewhere/saturn.exe", "--update", "normal")
+    assert "--expected" in str(status) and used == []
+
+
+def test_frames_with_a_saturn_that_does_not_exist_stop_before_running(monkeypatch):
+    status, used = main(monkeypatch, "--saturn", "no/such/saturn.exe", "--expected", "x.json", "normal")
+    assert "no/such/saturn.exe" in str(status) and used == []

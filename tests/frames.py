@@ -1,6 +1,8 @@
 """Replay the routes on the current build and compare their frames with the recorded ones.
     uv run tests/frames.py [NAME ...]             # all runs, or the ones named
     uv run tests/frames.py --update [NAME ...]    # record the frames as they are now
+    uv run tests/frames.py --saturn EXE --expected FILE [--update] [NAME ...]
+                                                  # another executable, such as a release's, against a recording of the same sources
 
 Runs are deterministic, so a frame that changes means the game ran differently. A change can be
 right, such as a VDP2 feature that now draws, so look at the frames in build/test/NAME before
@@ -285,13 +287,25 @@ def checkpoint_matches(name):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--update", action="store_true")
+    ap.add_argument("--saturn", help="run this executable, as it is, in place of the build's own")
+    ap.add_argument("--expected", help="the recording to compare with or --update, in place of tests/frames.json")
     ap.add_argument("names", nargs="*")
     args = ap.parse_args()
+    if args.saturn and args.update and not args.expected:
+        raise SystemExit("--saturn with --update needs --expected: another build's frames are not tests/frames.json's")
+    if args.saturn and not os.path.isfile(args.saturn):
+        raise SystemExit(f"--saturn {args.saturn}: no such executable")
+    global EXPECTED, KEPT
+    if args.expected:
+        EXPECTED, KEPT = args.expected, os.path.splitext(args.expected)[0] + ".kept"
     names = args.names or list(RUNS)
     unknown = [n for n in names if n not in RUNS]
     if unknown:
         raise SystemExit(f"no run named {', '.join(unknown)}; the runs are {', '.join(RUNS)}")
-    build.ensure(run.GAME)
+    if args.saturn:
+        run.GAME.executable = os.path.abspath(args.saturn)
+    else:
+        build.ensure(run.GAME)
 
     expected = json.load(open(EXPECTED)) if os.path.exists(EXPECTED) else {}
     with concurrent.futures.ThreadPoolExecutor(os.cpu_count()) as ex:
