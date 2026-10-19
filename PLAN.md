@@ -201,6 +201,18 @@ An intentionally omitted translation is detected by the reference-trace comparis
 absent from the discovered entry set. Every observed original instruction is mapped or reported
 as an explicit gap; lack of reference trace support is reported as an uncompleted check.
 
+The write comparison in step 7 found two gaps in the runtime's hardware, both traced on `die` in
+RESEARCH.md ("The extra poll before `die`'s stage load is VDP1's draw time"):
+
+- **VDP1 draw time.** Our draws end 1 ms after they start, so the draw-end interrupt (vector 0x4D)
+  comes straight after VBlank-OUT. On the core it comes later in the field. A task that waits on it
+  can start a field later on ours, which gave `die` one extra pad poll before its stage load.
+  Closing it needs a model of how long VDP1 takes to draw a list, then re-recorded frame tests.
+- **The drive's pause.** Ours answers Seek Disc 0xFFFFFF with PAUSE at once. Beetle answers BUSY
+  for one more sector and a periodic check, about 8 to 15 ms. A probe holding ours BUSY for 11.6 ms
+  left `die`'s extra poll in place, so this gap is not that one's cause. A fix belongs behind
+  `--accurate-drive`.
+
 ## Deferred work
 
 Widescreen, higher simulation rates and support for additional disc revisions are outside the
