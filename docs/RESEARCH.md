@@ -189,8 +189,12 @@ it. On 2026-10-19:
   addresses in 060E0000 to 060FFFFF took the same values in the same order. The 64 that did not are the
   game's data at 060FA8B8 to 060FA940, whose first values at the start of the window differ by a few
   bytes, and the buffer at 060EC41C, which the game fills by copying. On `battle-round`, 64,344 of 65,623 matched.
-  Most of the 1,254 that did not are in the game's task stacks, such as 060C3778, where the same code
-  stores at an offset 0x30 lower on ours. Neither is traced to a cause yet.
+  Most of the 1,254 that did not are in the game's task stacks, such as 060C3778, where the function at
+  060990AA, which reads the SMPC status register, pushes its registers at a different depth. On VBlank 1961
+  its first push is at 060C3784 on ours, and at 060C37B4 on the core at the matching frame. The core
+  reaches it through BIOS code (06000864 to 06000926) that pushes 12 words first, and the stack under that
+  differs as well. Stack contents are left over from wherever each side was when the interrupt came, so
+  their addresses are not a fault. The data at 060FA8B8 to 060FA940 is untraced.
 
 ### Sound
 

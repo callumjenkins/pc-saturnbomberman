@@ -2,7 +2,7 @@
 
 This repository owns game configuration, routes, inputs, and research. Generic recompiler and
 runtime changes belong in the `saturn-recomp` submodule. Read `README.md` for commands,
-`docs/RESEARCH.md` for game timings and reference limitations, and the relevant part of `PLAN.md`.
+`docs/RESEARCH.md` for game timings and reference limitations, and the relevant part of `PLAN.md` (the translation) or `PLAN-RELEASE.md` (builds and playtesters).
 Disc data and generated code stay under ignored `build/` directories.
 
 Use the delegation workflow in [docs/AGENT-WORKFLOW.md](docs/AGENT-WORKFLOW.md). Delegate bounded

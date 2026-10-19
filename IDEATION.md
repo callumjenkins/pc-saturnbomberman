@@ -2,7 +2,7 @@
 
 Written 2026-10-06. Ideas for extending the game once the faithful port is complete. Feasibility
 estimates describe the work we expect from the current architecture; they are not commitments or
-delivery estimates. [PLAN.md](PLAN.md) defines the initial release work.
+delivery estimates. [PLAN.md](PLAN.md) defines the translation work and [PLAN-RELEASE.md](PLAN-RELEASE.md) the release work.
 
 A finished recomp could support new levels, characters, rules and online play. The main limit is
 how much of the original game we understand and are willing to replace. Native execution removes
