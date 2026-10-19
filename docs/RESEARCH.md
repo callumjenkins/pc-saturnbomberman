@@ -200,6 +200,16 @@ it. On 2026-10-19:
   bytes apart. The other 14 are the run's last frame cut at different points. Both follow from the two
   drives' load timing, already accepted above. 
 
+- **`die` and `master`, 060C0000 to 060FFFFF.** On `die`, 25,846 of 26,035 addresses took the same values
+  in the same order, 5 more up to the end, and 184 did not. Most of those part at tick 4180 (the
+  death, 105 addresses, the core 2 ticks sooner), at 522 where the window opens in a load, and at
+  3416, the story intro's first Play, as on `normal`. On `master`, 63,128 of 65,348 matched, 109 more up
+  to the end, and 2,111 did not: 1,440 at tick 522, where the core is still filling buffers that ours
+  filled before the window, and 522 at tick 4861 in the 8-bit buffer at 060C1260. There both write a
+  byte a frame while a load goes on, and ours stops after 71 frames to stream data while the core keeps
+  going, so the same values come at different counts. These are the drive's load timing again. The
+  deaths' differences at tick 4180 are not traced further.
+
 ### Sound
 
 `bomberman compare ROUTE --sound` records both runs' sound and compares them a second (60 of our
