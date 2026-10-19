@@ -202,13 +202,26 @@ it. On 2026-10-19:
 
 - **`die` and `master`, 060C0000 to 060FFFFF.** On `die`, 25,846 of 26,035 addresses took the same values
   in the same order, 5 more up to the end, and 184 did not. Most of those part at tick 4180 (the
-  death, 105 addresses, the core 2 ticks sooner), at 522 where the window opens in a load, and at
+  stage's restart after the death, 105 addresses), at 522 where the window opens in a load, and at
   3416, the story intro's first Play, as on `normal`. On `master`, 63,128 of 65,348 matched, 109 more up
   to the end, and 2,111 did not: 1,440 at tick 522, where the core is still filling buffers that ours
   filled before the window, and 522 at tick 4861 in the 8-bit buffer at 060C1260. There both write a
   byte a frame while a load goes on, and ours stops after 71 frames to stream data while the core keeps
-  going, so the same values come at different counts. These are the drive's load timing again. The
-  deaths' differences at tick 4180 are not traced further.
+  going, so the same values come at different counts. These are the drive's load timing again.
+- **`die`'s death, traced.** Everything in the death comes at the same tick on both: the bomber's death
+  at tick 3981, the stage's end flag (060D7E68) at 3982, the fade 180 ticks later, and the restart at 4180.
+  The stage task's call count at 060C0630 is one higher on the core at each of them (0x429 against 0x428 at
+  the death, 0x4EE against 0x4ED at the last call). The count starts at the stage. The core's first two calls
+  come at ticks 2917 and 2918, in frames 5642 and 5643. Ours makes both at tick 2919, in VBlank 4789, after a
+  load in which the tick stands still, and is a call behind from then on. The 105 addresses are that count
+  and the stores that follow it, such as the loop over 060C062C. I checked the count, the loop and the
+  events above, not each address. Why ours starts the stage task two ticks later is not traced. It comes as
+  the load's copy loop (KRNL:06033E0C) ends, which fits the load timing.
+- **`lab writes` took ours a tick sooner than the core's.** It read our tick as a VBlank began, before the
+  VBlank's handler had run, and the core's after each frame, so the ticks it printed for the same moment
+  were one apart. `ticks_after` now reads ours from the next VBlank. Which store pairs with which, and where
+  the core's window opens, did not depend on it. The "core 2 ticks sooner" at the death was not that: it
+  compares two different stores, ours of the restart (tick 4180) and the core's of its extra call (4178).
 
 ### Sound
 

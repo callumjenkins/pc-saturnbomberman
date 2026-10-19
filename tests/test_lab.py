@@ -411,6 +411,10 @@ def test_a_stream_holds_each_address_and_size_s_values_with_repeats_left_out():
         (0x100, 4): [(10, 5, 1, "f"), (12, 6, 2, "g"), (13, None, 1, "f")], (0x100, 2): [(12, 6, 2, "h")]}
 
 
+def test_our_tick_is_read_from_the_next_vblank_to_match_the_core_s_after_each_frame():
+    assert lab.ticks_after({10: 5, 11: 6, 12: 6}) == {9: 5, 10: 6, 11: 6}
+
+
 def test_streams_pair_in_order_up_to_the_first_value_taken_differently():
     ours = {(0x100, 4): [(10, 5, 1, "f"), (12, 6, 2, "g")], (0x104, 1): [(10, 5, 7, "f")],
             (0x108, 1): [(10, 5, 7, "f")]}

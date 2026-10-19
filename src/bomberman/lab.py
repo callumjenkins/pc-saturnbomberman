@@ -580,6 +580,12 @@ def window(stores, first, last):
     return [s for s in stores if first <= s[0] < last]
 
 
+def ticks_after(ticks):
+    """{VBlank: the game's tick once that VBlank's handler has run}, as the core's tick is read after each
+    frame. Ours is read as a VBlank starts, before its handler, so each VBlank takes the next one's."""
+    return {v - 1: t for v, t in ticks.items()}
+
+
 def streams(stores, ticks):
     """{(address, size): [(time, tick, value, writer)]}: the values stored at each address in order, a
     store of the value already there left out, since how often a waiting loop rewrites one depends on
@@ -662,7 +668,7 @@ def writes(route, name, lo, hi, start=None, shown=20, log=print):
     if len(started) < 2:
         raise SystemExit(f"the core never reached our VBlank {route.vblanks}")
     ours, theirs, dma = without_dma(ours, window(core_stores(open(f"{out}/core.txt")), *started))
-    ours, theirs = streams(ours, ticks), streams(theirs, core_ticks)
+    ours, theirs = streams(ours, ticks_after(ticks)), streams(theirs, core_ticks)
     paired = pair_streams(ours, theirs, (route.vblanks, started[1]))
     differ = [(key, n, note) for key, (n, note) in paired.items() if note and note != "the end"]
     ended = sum(note == "the end" for _, note in paired.values())
