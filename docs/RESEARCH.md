@@ -222,7 +222,22 @@ it. On 2026-10-19:
   the core, with the stage task's first call in that frame and the first poll after the load (0xB66) in the
   next. On ours it ends in VBlank 4789, and the stage task's first two calls and the first poll (0xB67)
   come in that same VBlank. Both sides reach 0xB67 at the same moment, the core with one more stage call.
-  Why ours polls once more before the load, and why its two stage calls come in one VBlank, is not traced.
+  The task makes one call as the load ends and one after each poll, so the call that is one short is the poll
+  that ours spent before the load.
+- **The extra poll before `die`'s stage load is VDP1's draw time.** Both sides see START at the poll that
+  stores 0xB64. The CD task that ends the menu's data stream waits for VDP1's draw-end interrupt (vector 0x4D,
+  KRNL:060074E8, which sets 0600603C) and then pauses the drive. In this 30 fps menu the core's draw ends in
+  the same field as the poll, after it: VBlank-OUT, the poll, draw-end. Ours ends its draws 1 ms after they
+  start, so draw-end follows VBlank-OUT at once and the poll comes in the next field. The CD task therefore
+  starts a field later on ours, and from START to the load takes 3 VBlanks on ours and 2 frames on the core.
+  This is the draw-time model `projects/saturn-recomp/context/vdp1-frame-change-timing.md` in agent-home
+  says is missing.
+- **The drive's pause answers BUSY first on the core.** That CD task sends End Data Transfer, Set CD Device
+  Connection, Reset Selector, and Seek Disc to 0xFFFFFF. Ours answers PAUSE (0x01) at once. Mednafen answers
+  BUSY until the drive has read one more sector and seen the end, then PAUSE a sector later, about 8 to 15 ms
+  in all, and the core's wait at 060A8CA6 reads the status 196 times. A probe that kept ours BUSY for 11.6 ms moved
+  the poll after the pause into the next field but left the extra poll, so this is a second gap and not the
+  cause.
 - **`lab writes` took ours a tick sooner than the core's.** It read our tick as a VBlank began, before the
   VBlank's handler had run, and the core's after each frame, so the ticks it printed for the same moment
   were one apart. `ticks_after` now reads ours from the next VBlank. Which store pairs with which, and where
