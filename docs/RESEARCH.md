@@ -215,8 +215,14 @@ it. On 2026-10-19:
   come at ticks 2917 and 2918, in frames 5642 and 5643. Ours makes both at tick 2919, in VBlank 4789, after a
   load in which the tick stands still, and is a call behind from then on. The 105 addresses are that count
   and the stores that follow it, such as the loop over 060C062C. I checked the count, the loop and the
-  events above, not each address. Why ours starts the stage task two ticks later is not traced. It comes as
-  the load's copy loop (KRNL:06033E0C) ends, which fits the load timing.
+  events above, not each address. The "tick" at 06006108 is one of eight per-poll counters from 06006100, and
+  it stands still while a load runs. Before this stage's load, ours polls once more than the core: its last
+  poll stores 0xB66 in VBlank 4503 and the load starts in 4504, where the core's last poll stores 0xB65 in
+  frame 5292 and its load starts in 5293. The load's copy loop (KRNL:06033E0C) then ends in frame 5642 on
+  the core, with the stage task's first call in that frame and the first poll after the load (0xB66) in the
+  next. On ours it ends in VBlank 4789, and the stage task's first two calls and the first poll (0xB67)
+  come in that same VBlank. Both sides reach 0xB67 at the same moment, the core with one more stage call.
+  Why ours polls once more before the load, and why its two stage calls come in one VBlank, is not traced.
 - **`lab writes` took ours a tick sooner than the core's.** It read our tick as a VBlank began, before the
   VBlank's handler had run, and the core's after each frame, so the ticks it printed for the same moment
   were one apart. `ticks_after` now reads ours from the next VBlank. Which store pairs with which, and where
