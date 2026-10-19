@@ -205,9 +205,19 @@ it. On 2026-10-19:
   stage's restart after the death, 105 addresses), at 522 where the window opens in a load, and at
   3416, the story intro's first Play, as on `normal`. On `master`, 63,128 of 65,348 matched, 109 more up
   to the end, and 2,111 did not: 1,440 at tick 522, where the core is still filling buffers that ours
-  filled before the window, and 522 at tick 4861 in the 8-bit buffer at 060C1260. There both write a
-  byte a frame while a load goes on, and ours stops after 71 frames to stream data while the core keeps
-  going, so the same values come at different counts. These are the drive's load timing again.
+  filled before the window, and 522 at tick 4861 in the 8-bit buffer at 060C1260. That buffer is the
+  256-byte ring of an LZ decompressor (KRNL:06033E0C stores each byte at the ring plus its position
+  masked to 0xFF), and the difference in it comes from the VBlank count. See the next point.
+- **`master`'s 060C1260, traced.** Each side's decompressions give the same bytes, matched whole or as
+  the same runs end to end, in the same order up to tick 4740. From tick 4740 a screen loads one of
+  four pictures a frame, each a 320-byte decompression through the file loader (KRNL:06009470), and
+  shows the next picture each time. In a frame where the VBlank counter at 060031B0 is 7 modulo 8, it
+  loads none. Both sides skip at that count (0x1727 and 0x172F on ours, 0x17CF and 0x17D7 on the core),
+  but the core's counter is 165 VBlanks ahead at the same tick, from the VBlanks its longer loads add
+  while the tick stands still. So ours skips at ticks 4741, 4749 and so on, the core at 4744, 4752 and
+  so on. In the 4 ticks from each of our skips to the core's, ours is a picture behind; in the other 4
+  they match. The next load cuts the cycle at a different picture on each, which is where the stream
+  comparison parts. This is the drive's load timing again, through a counter that runs during loads.
 - **`die`'s death, traced.** Everything in the death comes at the same tick on both: the bomber's death
   at tick 3981, the stage's end flag (060D7E68) at 3982, the fade 180 ticks later, and the restart at 4180.
   The stage task's call count at 060C0630 is one higher on the core at each of them (0x429 against 0x428 at
