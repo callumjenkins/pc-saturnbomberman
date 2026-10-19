@@ -273,3 +273,36 @@ def test_a_silent_device_a_fatal_error_and_a_log_with_no_stream_line_are_problem
     assert frames.device_problems(MADE, MADE, played(MADE), log(more="[FATAL] call to 06012345\n")) == [
         "[FATAL] call to 06012345"]
     assert frames.device_problems(MADE, MADE, played(MADE), "") == ["no audio stream line in the log"]
+
+
+def test_arm_sound_one_step_from_the_recording_matches_and_two_does_not(tmp_path, monkeypatch):
+    kept, now = kept_and_now(tmp_path, monkeypatch, "r", {"sound": "sound.wav"})
+    tone = [100] * 50
+    audio.write_wav(str(kept / "sound.wav"), tone, tone)
+    off_by = lambda n: tone[:10] + [100 + n] + tone[11:]
+    monkeypatch.setattr(frames, "ARM", True)
+    audio.write_wav(str(now / "sound.wav"), off_by(1), off_by(-1))
+    assert frames.sound_is_close("r", "sound")
+    audio.write_wav(str(now / "sound.wav"), off_by(1), off_by(2))
+    assert not frames.sound_is_close("r", "sound")
+    audio.write_wav(str(now / "sound.wav"), tone[:49], tone[:49])
+    assert not frames.sound_is_close("r", "sound")
+    monkeypatch.setattr(frames, "ARM", False)
+    audio.write_wav(str(now / "sound.wav"), off_by(1), tone)
+    assert not frames.sound_is_close("r", "sound")
+
+
+def test_only_the_sound_gets_the_tolerance_and_a_missing_recording_gets_none(tmp_path, monkeypatch):
+    kept, now = kept_and_now(tmp_path, monkeypatch, "r", {"sound": "sound.wav", "100": "shot-100.png"})
+    monkeypatch.setattr(frames, "ARM", True)
+    audio.write_wav(str(now / "sound.wav"), [1] * 5, [1] * 5)
+    assert not frames.sound_is_close("r", "sound")
+    assert not frames.sound_is_close("r", "100")
+
+
+def test_a_tolerated_key_does_not_fail_the_run():
+    status, diffs, _, _ = frames.outcome({"100": "x", "sound": "y"}, [], {"100": "x", "sound": "z"}, False,
+                                         tolerated=lambda k: k == "sound")
+    assert (status, diffs) == ("ok", [])
+    assert frames.outcome({"100": "x", "sound": "y"}, [], {"100": "w", "sound": "z"}, False,
+                          tolerated=lambda k: k == "sound")[:2] == ("FAIL", ["100"])

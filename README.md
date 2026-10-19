@@ -232,7 +232,9 @@ record them with `--update`. A run with a problem or a missing frame is never re
 `--update` also keeps what it recorded in `build/test-expected/`. When a frame later differs, the
 report counts the dots that changed and the largest channel error, and `build/test/NAME/diff-V.png`
 shows this run, the recording and the changed dots side by side. For sound, it gives the time of the
-first sample that differs.
+first sample that differs. On arm64, a sound whose samples are all within one step of the kept recording's
+counts as the same, since the sound's floating point rounds differently there; it needs that recording in
+`build/test-expected/`.
 
 `--saturn EXE` runs another executable as it is, without building, and `--expected FILE` compares with
 or records into that file, keeping its pictures beside it in `NAME.kept/`. Together they check a build for

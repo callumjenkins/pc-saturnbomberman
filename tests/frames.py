@@ -14,6 +14,7 @@ import dataclasses
 import hashlib
 import json
 import os
+import platform
 import re
 import shutil
 import subprocess
@@ -117,12 +118,28 @@ def difference(name, key, expected):
     return f"frame {key} differs in {n} dots, by up to {worst} in a channel (diff-{key}.png: this run, the recording, the dots)"
 
 
-def outcome(frames, problems, expected, update):
+# arm64 rounds the sound's floating point differently from x86-64, so a sample can come out one step off
+ARM = platform.machine().lower() in {"arm64", "aarch64"}
+
+
+def sound_is_close(name, key):
+    """Whether, on arm64, the run's sound is the kept recording's with every sample within one step."""
+    file = files(name)[key]
+    now, kept = f"{BUILD}/test/{name}/{file}", f"{KEPT}/{name}/{file}"
+    if not ARM or key != "sound" or not os.path.exists(kept) or not os.path.exists(now):
+        return False
+    _, *ours = audio.read_wav(now)
+    _, *theirs = audio.read_wav(kept)
+    return all(len(a) == len(b) and all(abs(x - y) <= 1 for x, y in zip(a, b)) for a, b in zip(ours, theirs))
+
+
+def outcome(frames, problems, expected, update, tolerated=lambda key: False):
     """(status, the keys that differ, problems, whether to record the frames) for a run.
-    A run with a problem is never recorded, and a missing frame or sound is a problem."""
+    A run with a problem is never recorded, and a missing frame or sound is a problem.
+    A key that differs but is `tolerated` does not count."""
     problems = problems + [f"no {'sound' if k == 'sound' else f'frame {k}'}" for k in frames if frames[k] is None]
     record = update and not problems
-    diffs = [] if update else [k for k in frames if frames[k] is not None and frames[k] != expected.get(k)]
+    diffs = [] if update else [k for k in frames if frames[k] is not None and frames[k] != expected.get(k) and not tolerated(k)]
     status = "FAIL" if problems or diffs else "recorded" if record else "ok"
     return status, diffs, problems, record
 
@@ -392,7 +409,8 @@ def main():
     failed = 0
     for name in names:
         frames, problems = results[name]
-        status, diffs, problems, record = outcome(frames, problems, expected.get(name, {}), args.update)
+        status, diffs, problems, record = outcome(frames, problems, expected.get(name, {}), args.update,
+                                                    lambda k: sound_is_close(name, k))
         if record:
             expected[name] = frames
             keep(name)
