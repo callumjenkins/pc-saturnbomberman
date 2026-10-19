@@ -152,6 +152,35 @@ Every run, with its reason, goes to `build/lab/memory-ROUTE.txt`. On 2026-10-17,
   (executed-notes.tsv) and ours keeps its own. A checkpoint inside the core's longer load finds what
   ours wrote earlier, as `master`'s 12 KB at 00271000 at VBlank 3900, which match by 4900.
 
+### Writes
+
+`bomberman lab writes ROUTE LO:HI` logs every store the master SH-2 makes into a range of work RAM, on
+ours through `--watch` and on the core through `write-log.patch` (WRITE_LOG and WRITE_RANGE). It runs
+from the route's first press to our last VBlank, and on the core to the frame `play_synced` places that
+VBlank at. For each address and size it keeps the values in order, leaving out a store of the value
+already there, and pairs ours with the core's. On the core it leaves out the stores made by code in the
+ROM and below IP.BIN (06002000), which is the BIOS's and has nothing in ours to pair with. A checkpoint
+sees what memory holds every 1000 VBlanks. This sees every value in between, and the code that stored
+it. On 2026-10-19:
+
+- **It found two faults, both in our replacement for the BIOS.** The backup library's `Stat` gave
+  the free bytes as 64 a free block, and the saves that fit as 0 for a data size of 0. The core's
+  BIOS gives 0x736E bytes in 0x1FE free blocks, and after Bomberman's 12-byte save 0x7334 in 0x1FD,
+  which is 58 bytes a free block less 30, with that save in one block. Ours had put it in two. The
+  game also copies its save's comment from address 0. The ROM starts there with the reset vectors,
+  so the comment is " ", the 0x20 at the top of the first PC. Ours read 0 there. Ours now counts as
+  the BIOS does and gives both reset vectors at 0 to 15. No save larger than 12 bytes was compared.
+- **The random generator draws as often, in the same order.** On `normal` its index, 060BF4F4, took
+  the same 3,058 values on both. The drift the memory checkpoints show there is the same draws a few
+  hundred VBlanks apart.
+- **The game's globals mostly match.** From 060C0000 to 060C1FFF, 1,786 of 1,807 addresses on
+  `normal` took the same values in the same order, and 9 more did up to the last frame or two. The
+  other 12 part from tick 3416 to 3420, where the story intro's first Play comes (tick 3415 on the
+  core, 3418 on ours), in fields that KRNL 06069906 and 0606B8CA write. On `battle-round`, 2,060 of
+  2,078 matched and 1 more up to the end, and the other 17 part from tick 4748, during the round.
+- **The game's copy of the CD report at 060BF4F0 differs from its first store on.** It holds the
+  drive's position.
+
 ### Sound
 
 `bomberman compare ROUTE --sound` records both runs' sound and compares them a second (60 of our

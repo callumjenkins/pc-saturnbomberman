@@ -15,6 +15,8 @@
     memory ROUTE      work RAM on ours and on Beetle Saturn at the same tick every N VBlanks: how many bytes differ,
                       how many have a reason (memory-notes.tsv, unchanged since the last checkpoint, a stack, a
                       VBlank count, a VBlank's lag), and the rest
+    writes ROUTE LO:HI the values the game's code stores to a range of work RAM on ours and on Beetle Saturn,
+                      address by address in order, and the first each address takes differently
 
 The helpers below are for scenario scripts played through the agent (see docs/RESEARCH.md).
 """
@@ -530,6 +532,137 @@ def watch(route, lo, hi, first=0, last=None, examples=3):
     for fn, stores in sorted(groups.items(), key=lambda kv: -len(kv[1])):
         shown = ", ".join(f"{a:08X}={v}@{t}" for t, a, v in stores[:examples])
         lines.append(f"{fn}: {len(stores)} stores, VBlanks {stores[0][0]}-{stores[-1][0]}: {shown}")
+    return lines
+
+
+# ---- writes ---------------------------------------------------------------------------------------
+OUR_STORE = re.compile(r"\[ *[0-9.]+ M\] store(\d+) ([0-9A-F]{8}) = ([0-9A-F]+) in (\S+) \(pr [0-9A-F]{8}, VBlank (\d+)\)")
+BIOS_CODE = ((0x00000000, 0x00100000), (0x06000000, 0x06002000))   # the ROM, and the BIOS's code below IP.BIN
+
+
+def our_stores(lines):
+    """[(VBlank, address, size, value, writer)] from a run's --watch log lines, the master SH-2's alone."""
+    out = []
+    for line in lines:
+        m = OUR_STORE.search(line)
+        if m:
+            size = int(m.group(1)) // 8
+            out.append((int(m.group(5)), int(m.group(2), 16) & 0x07FFFFFF, size,
+                        int(m.group(3), 16) & (1 << size * 8) - 1, m.group(4)))
+    return out
+
+
+def core_stores(lines):
+    """[(frame, address, size, value, writer)] from the WRITE_LOG of a core built with write-log.patch,
+    leaving out the slave SH-2's and those from the BIOS's own code, which ours runs none of."""
+    out = []
+    for line in lines:
+        frame, cpu, pc, addr, size, value = line.split()
+        at = int(pc, 16) & 0x07FFFFFF
+        if cpu == "0" and not any(lo <= at < hi for lo, hi in BIOS_CODE):
+            out.append((int(frame), int(addr, 16), int(size), int(value, 16), pc))
+    return out
+
+
+def window(stores, first, last):
+    """The stores from time `first` to before `last`."""
+    return [s for s in stores if first <= s[0] < last]
+
+
+def streams(stores, ticks):
+    """{(address, size): [(time, tick, value, writer)]}: the values stored at each address in order, a
+    store of the value already there left out, since how often a waiting loop rewrites one depends on
+    each side's speed."""
+    out = collections.defaultdict(list)
+    for time, addr, size, value, writer in stores:
+        stream = out[addr, size]
+        if not stream or stream[-1][2] != value:
+            stream.append((time, ticks.get(time), value, writer))
+    return out
+
+
+ENDING = 4                          # VBlanks or frames before the cut where one side may have run on a little further
+
+
+def pair_streams(ours, theirs, ends=(None, None)):
+    """{(address, size): (paired, note)}: how many values each address took in the same order on both,
+    and the first it took differently (None if none). With `ends`, our last VBlank and the core's last
+    frame, a side running out within ENDING of its end is "the end", since the cut can fall a frame or
+    two apart on each."""
+    out = {}
+    for key in sorted(set(ours) | set(theirs)):
+        a, b, note, n = ours.get(key, []), theirs.get(key, []), None, 0
+        while n < max(len(a), len(b)):
+            mine = n < len(a) and f"ours {a[n][2]:X} at VBlank {a[n][0]} (tick {a[n][1]}, {a[n][3]})"
+            core = n < len(b) and f"the core's {b[n][2]:X} at frame {b[n][0]} (tick {b[n][1]}, pc {b[n][3]})"
+            if not mine or not core or a[n][2] != b[n][2]:
+                rest, end = (b[n][0], ends[1]) if not mine else (a[n][0], ends[0]) if not core else (None, None)
+                note = ("the end" if end is not None and rest >= end - ENDING else
+                        f"{mine or 'nothing more on ours'}, {core or 'nothing more on the core'}")
+                break
+            n += 1
+        out[key] = n, note
+    return out
+
+
+def writes(route, name, lo, hi, start=None, shown=20, log=print):
+    """Lines: how many addresses in lo..hi the game's code stored the same values to, in the same order,
+    on ours and on Beetle Saturn from our VBlank `start` (by default the route's first press), and the
+    first value each other address took differently. Every address goes to build/lab/writes-ROUTE.txt.
+    The core is $SATURN_EXEC_CORE, built with exec-trace.patch and write-log.patch."""
+    core_so, bios = os.environ.get("SATURN_EXEC_CORE"), os.environ.get("SATURN_BIOS")
+    if not core_so or not bios:
+        raise SystemExit("writes needs SATURN_EXEC_CORE (with write-log.patch) and SATURN_BIOS")
+    if route.invincible or "--multitap" in route.args:
+        raise SystemExit("writes plays presses and writes only: no hooks or multitap")
+    run.check_prepared()
+    run.build.ensure(run.GAME, log=lambda s: None)
+    if start is None:
+        start = min(int(p.split(":", 1)[0]) for p in route.presses)
+    out = f"{BUILD}/lab/writes"
+    more = ["--watch", f"{lo:08X}:{hi:08X}", "--watch-vblanks", f"{start}:{route.vblanks}"]
+    tick, ticks = GAME.symbols["tick"], {}
+    with run.play(out, route, accurate_drive=True, more=more) as r:
+        while r.vblank <= route.vblanks:
+            ticks[r.vblank] = r.read32(tick)
+            run.advance(r, route, r.vblank + 1)
+    ours = streams(window(our_stores(open(f"{out}/log.txt")), start, route.vblanks), ticks)
+    os.environ["WRITE_LOG"] = os.path.abspath(f"{out}/core.txt")
+    os.environ["WRITE_RANGE"] = f"{lo:08X}:{hi:08X}"
+    two = any(p.split(":", 1)[1].startswith("2.") for p in route.presses)
+    core = reference.Core(core_so, bios, cue(), save_dir=f"{BUILD}/lab", ports=2 if two else 1)
+    core_ticks, started = {}, []          # the core's frames at our `start` and our last VBlank
+
+    class Sampled:
+        """The core, its tick read after every frame."""
+        def __getattr__(self, attr):
+            return getattr(core, attr)
+
+        def run(self):
+            core.run()
+            core_ticks[core.frames] = core.read32(tick)
+
+    def on(v, n):
+        started.append(n)
+
+    reference.play_synced(Sampled(), tick, ticks, reference.presses(",".join(route.presses)),
+                          [start, route.vblanks], 4 * route.vblanks, on, parse_writes(route.writes))
+    core.close()
+    if len(started) < 2:
+        raise SystemExit(f"the core never reached our VBlank {route.vblanks}")
+    theirs = streams(window(core_stores(open(f"{out}/core.txt")), *started), core_ticks)
+    paired = pair_streams(ours, theirs, (route.vblanks, started[1]))
+    differ = [(key, n, note) for key, (n, note) in paired.items() if note and note != "the end"]
+    ended = sum(note == "the end" for _, note in paired.values())
+    with open(f"{BUILD}/lab/writes-{name}.txt", "w") as f:
+        f.write("address size, values paired, the first taken differently\n")
+        f.writelines(f"{a:08X} {size} {n} {note or ''}\n" for (a, size), (n, note) in paired.items())
+    lines = [f"{len(paired)} addresses stored to from VBlank {start}: {len(paired) - len(differ) - ended} took the "
+             f"same values in the same order, {ended} the same up to the end, where one side stopped a frame or "
+             f"two sooner, and {len(differ)} did not"]
+    lines += [f"{a:08X}.{size * 8}: {n} paired, then {note}" for (a, size), n, note in differ[:shown]]
+    for line in lines:
+        log(line)
     return lines
 
 

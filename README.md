@@ -279,5 +279,10 @@ uv run python -m saturnrecomp.executed game.toml build/trace/*/exec.tsv --notes 
 core's enemies. A stage it does not clear with walking flame is played again without it. `--video` keeps
 the stage's play as `core/NAME.mp4` in `$BOMBERMAN_RUNS`.
 
+`bomberman lab writes ROUTE LO:HI` compares the values the game's code stores to a range of work RAM,
+address by address, on ours and on that core built with `write-log.patch` as well. On the core it leaves
+out the stores from the BIOS's own code, in the ROM and below 06002000, since ours replaces the BIOS. It
+reports the first value each address takes differently, with the function or instruction that stored it.
+
 The title and menus match exactly. In play the enemies drift a few dots apart, because the game
 runs some tasks on every VBlank while it loads, and the core's loads are longer than ours.

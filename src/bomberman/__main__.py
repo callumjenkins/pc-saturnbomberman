@@ -125,6 +125,10 @@ def main(argv=None):
     v.add_argument("range", help="LO:HI in hex")
     v.add_argument("--from", dest="start", type=int, default=0)
     v.add_argument("--to", type=int)
+    v = labs.add_parser("writes", help="the values the game stores to LO:HI, on ours and on Beetle Saturn")
+    v.add_argument("route", choices=list(routes.ROUTES))
+    v.add_argument("range", help="LO:HI in hex, in a work RAM")
+    v.add_argument("--from", dest="start", type=int, help="first VBlank compared (default: the route's first press)")
     v = labs.add_parser("disasm", help="instructions from ADDR")
     v.add_argument("addr")
     v.add_argument("count", nargs="?", type=int, default=40)
@@ -197,6 +201,8 @@ def main(argv=None):
             lab.memory(routes.ROUTES[args.route](), args.route, args.every, args.start)
         elif args.tool == "sheet":
             print(lab.sheet(args.route, tuple(map(int, args.crop.split(","))) if args.crop else None, args.columns))
+        elif args.tool == "writes":
+            lab.writes(routes.ROUTES[args.route](), args.route, *span(args.range), args.start)
         elif args.tool == "watch":
             print("\n".join(lab.watch(routes.ROUTES[args.route](), *span(args.range), args.start, args.to)))
         elif args.tool == "disasm":

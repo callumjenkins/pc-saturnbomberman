@@ -369,3 +369,55 @@ def test_memory_a_noted_byte_is_counted_as_noted_at_every_checkpoint():
     ours, core = snap(1), snap(2)
     counts, pieces = lab.checkpoint(ours, core, {}, (ours, core), [(0x060FA939, 0x060FA947, "the clock")])
     assert counts == {"noted": 1} and pieces == [(0x060FA939, 0x060FA939, 1, "the clock")]
+
+
+def test_our_stores_are_the_master_s_with_their_size_and_the_cache_area_bits_cleared():
+    lines = ["[ 5.551 M] store8 260BF4EC = FFFFFF80 in KRNL:060A5058 (pr 06002D90, VBlank 1922)",
+             "something else",
+             "[ 5.552 S] store8 060BF4EC = 81 in KRNL:060A5058 (pr 06002D90, VBlank 1922)",
+             "[ 9.120 M] store32 060BF4F4 = 00003EA7 in KRNL:0600A080 (pr 06022356, VBlank 1930)"]
+    assert lab.our_stores(lines) == [(1922, 0x060BF4EC, 1, 0x80, "KRNL:060A5058"),
+                                     (1930, 0x060BF4F4, 4, 0x3EA7, "KRNL:0600A080")]
+
+
+def test_the_core_s_stores_leave_out_the_slave_s_and_the_bios_code_s():
+    lines = ["2679 0 060A505E 060BF4EC 1 80", "2680 1 060A505E 060BF4EC 1 81",
+             "2681 0 06000928 060BF4EC 1 82", "2681 0 20000928 060BF4EC 1 83", "2681 0 000002B0 060BF4EC 1 84",
+             "2681 0 06001FFE 060BF4EC 1 85", "2682 0 06002000 060BF4EC 1 86", "2682 0 06002F10 060BF4EC 1 87",
+             "2682 0 00201000 060BF4EC 1 88", "2682 0 260A5074 060BF4F0 4 00003E66"]
+    assert lab.core_stores(lines) == [(2679, 0x060BF4EC, 1, 0x80, "060A505E"), (2682, 0x060BF4EC, 1, 0x86, "06002000"),
+                                      (2682, 0x060BF4EC, 1, 0x87, "06002F10"), (2682, 0x060BF4EC, 1, 0x88, "00201000"),
+                                      (2682, 0x060BF4F0, 4, 0x3E66, "260A5074")]
+
+
+def test_a_window_runs_from_the_first_time_to_before_the_last():
+    stores = [(t, 0x100, 1, t, "f") for t in (9, 10, 11, 12, 13)]
+    assert lab.window(stores, 10, 12) == [stores[1], stores[2]]
+
+
+def test_a_stream_holds_each_address_and_size_s_values_with_repeats_left_out():
+    stores = [(10, 0x100, 4, 1, "f"), (11, 0x100, 4, 1, "f"), (12, 0x100, 4, 2, "g"),
+              (12, 0x100, 2, 2, "h"), (13, 0x100, 4, 1, "f")]
+    assert lab.streams(stores, {10: 5, 12: 6}) == {
+        (0x100, 4): [(10, 5, 1, "f"), (12, 6, 2, "g"), (13, None, 1, "f")], (0x100, 2): [(12, 6, 2, "h")]}
+
+
+def test_streams_pair_in_order_up_to_the_first_value_taken_differently():
+    ours = {(0x100, 4): [(10, 5, 1, "f"), (12, 6, 2, "g")], (0x104, 1): [(10, 5, 7, "f")],
+            (0x108, 1): [(10, 5, 7, "f")]}
+    theirs = {(0x100, 4): [(30, 5, 1, "0600A000"), (32, 6, 3, "0600A002")], (0x104, 1): [(30, 5, 7, "0600A004")],
+              (0x10C, 1): [(31, 5, 9, "0600A006")]}
+    assert lab.pair_streams(ours, theirs) == {
+        (0x100, 4): (1, "ours 2 at VBlank 12 (tick 6, g), the core's 3 at frame 32 (tick 6, pc 0600A002)"),
+        (0x104, 1): (1, None),
+        (0x108, 1): (0, "ours 7 at VBlank 10 (tick 5, f), nothing more on the core"),
+        (0x10C, 1): (0, "nothing more on ours, the core's 9 at frame 31 (tick 5, pc 0600A006)")}
+
+
+def test_a_stream_running_out_within_a_few_frames_of_the_cut_is_the_end():
+    ours = {(0x100, 4): [(10, 5, 1, "f")], (0x104, 4): [(10, 5, 1, "f")]}
+    theirs = {(0x100, 4): [(30, 5, 1, "pc"), (96, 40, 2, "pc")], (0x104, 4): [(30, 5, 1, "pc"), (95, 40, 2, "pc")]}
+    paired = lab.pair_streams(ours, theirs, (60, 100))
+    assert paired[0x100, 4] == (1, "the end")
+    assert paired[0x104, 4] == (1, "nothing more on ours, the core's 2 at frame 95 (tick 40, pc pc)")
+    assert lab.pair_streams({(0x100, 4): [(57, 5, 1, "f")]}, {}, (60, 100))[0x100, 4] == (0, "the end")
