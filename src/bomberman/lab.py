@@ -537,11 +537,13 @@ def watch(route, lo, hi, first=0, last=None, examples=3):
 
 # ---- writes ---------------------------------------------------------------------------------------
 OUR_STORE = re.compile(r"\[ *[0-9.]+ M\] store(\d+) ([0-9A-F]{8}) = ([0-9A-F]+) in (\S+) \(pr [0-9A-F]{8}, VBlank (\d+)\)")
-BIOS_CODE = ((0x00000000, 0x00100000), (0x06000000, 0x06002000))   # the ROM, and the BIOS's code below IP.BIN
+# The ROM, the BIOS's code below IP.BIN, and its backup library, which the core copies to 060EC8B0 and runs
+BIOS_CODE = ((0x00000000, 0x00100000), (0x06000000, 0x06002000), (0x060EC800, 0x060EF000))
 
 
 def our_stores(lines):
-    """[(VBlank, address, size, value, writer)] from a run's --watch log lines, the master SH-2's alone."""
+    """[(VBlank, address, size, value, writer)] from a run's --watch log lines, the master SH-2's alone.
+    The log names a store made outside the game's code "?:00000000"."""
     out = []
     for line in lines:
         m = OUR_STORE.search(line)
@@ -550,6 +552,15 @@ def our_stores(lines):
             out.append((int(m.group(5)), int(m.group(2), 16) & 0x07FFFFFF, size,
                         int(m.group(3), 16) & (1 << size * 8) - 1, m.group(4)))
     return out
+
+
+def without_dma(ours, theirs):
+    """(ours, theirs, bytes left out): both without the stores to any byte that ours filled outside the
+    game's code. That is a DMA, which the core's WRITE_LOG does not see, so the two sides' stores to
+    those bytes cannot be paired."""
+    dma = {a + i for _, a, size, _, who in ours if who == "?:00000000" for i in range(size)}
+    keep = lambda stores: [s for s in stores if dma.isdisjoint(range(s[1], s[1] + s[2]))]
+    return keep(ours), keep(theirs), len(dma)
 
 
 def core_stores(lines):
@@ -626,7 +637,7 @@ def writes(route, name, lo, hi, start=None, shown=20, log=print):
         while r.vblank <= route.vblanks:
             ticks[r.vblank] = r.read32(tick)
             run.advance(r, route, r.vblank + 1)
-    ours = streams(window(our_stores(open(f"{out}/log.txt")), start, route.vblanks), ticks)
+    ours = window(our_stores(open(f"{out}/log.txt")), start, route.vblanks)
     os.environ["WRITE_LOG"] = os.path.abspath(f"{out}/core.txt")
     os.environ["WRITE_RANGE"] = f"{lo:08X}:{hi:08X}"
     two = any(p.split(":", 1)[1].startswith("2.") for p in route.presses)
@@ -650,7 +661,8 @@ def writes(route, name, lo, hi, start=None, shown=20, log=print):
     core.close()
     if len(started) < 2:
         raise SystemExit(f"the core never reached our VBlank {route.vblanks}")
-    theirs = streams(window(core_stores(open(f"{out}/core.txt")), *started), core_ticks)
+    ours, theirs, dma = without_dma(ours, window(core_stores(open(f"{out}/core.txt")), *started))
+    ours, theirs = streams(ours, ticks), streams(theirs, core_ticks)
     paired = pair_streams(ours, theirs, (route.vblanks, started[1]))
     differ = [(key, n, note) for key, (n, note) in paired.items() if note and note != "the end"]
     ended = sum(note == "the end" for _, note in paired.values())
@@ -659,7 +671,7 @@ def writes(route, name, lo, hi, start=None, shown=20, log=print):
         f.writelines(f"{a:08X} {size} {n} {note or ''}\n" for (a, size), (n, note) in paired.items())
     lines = [f"{len(paired)} addresses stored to from VBlank {start}: {len(paired) - len(differ) - ended} took the "
              f"same values in the same order, {ended} the same up to the end, where one side stopped a frame or "
-             f"two sooner, and {len(differ)} did not"]
+             f"two sooner, and {len(differ)} did not. {dma} bytes were left out, filled by a DMA"]
     lines += [f"{a:08X}.{size * 8}: {n} paired, then {note}" for (a, size), n, note in differ[:shown]]
     for line in lines:
         log(line)

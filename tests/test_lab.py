@@ -380,14 +380,23 @@ def test_our_stores_are_the_master_s_with_their_size_and_the_cache_area_bits_cle
                                      (1930, 0x060BF4F4, 4, 0x3EA7, "KRNL:0600A080")]
 
 
+def test_stores_to_the_bytes_a_dma_filled_are_left_out_of_both_sides():
+    ours = [(4270, 0x060D0000, 4, 0x20B0, "?:00000000"), (4271, 0x060D0002, 1, 7, "KRNL:060A5058"),
+            (4272, 0x060D0010, 4, 1, "KRNL:060A5058")]
+    theirs = [(5070, 0x060D0000, 4, 0, "060A5190"), (5071, 0x060D0003, 1, 9, "060A5190"),
+              (5072, 0x060D0010, 4, 1, "060A5190")]
+    assert lab.without_dma(ours, theirs) == ([ours[2]], [theirs[2]], 4)
+
+
 def test_the_core_s_stores_leave_out_the_slave_s_and_the_bios_code_s():
     lines = ["2679 0 060A505E 060BF4EC 1 80", "2680 1 060A505E 060BF4EC 1 81",
              "2681 0 06000928 060BF4EC 1 82", "2681 0 20000928 060BF4EC 1 83", "2681 0 000002B0 060BF4EC 1 84",
              "2681 0 06001FFE 060BF4EC 1 85", "2682 0 06002000 060BF4EC 1 86", "2682 0 06002F10 060BF4EC 1 87",
-             "2682 0 00201000 060BF4EC 1 88", "2682 0 260A5074 060BF4F0 4 00003E66"]
+             "2682 0 00201000 060BF4EC 1 88", "2682 0 260A5074 060BF4F0 4 00003E66",
+             "2683 0 060ED040 060F08E0 4 20180000", "2683 0 060EEFFE 060F08E0 4 1", "2683 0 060EF000 060F08E0 4 2"]
     assert lab.core_stores(lines) == [(2679, 0x060BF4EC, 1, 0x80, "060A505E"), (2682, 0x060BF4EC, 1, 0x86, "06002000"),
                                       (2682, 0x060BF4EC, 1, 0x87, "06002F10"), (2682, 0x060BF4EC, 1, 0x88, "00201000"),
-                                      (2682, 0x060BF4F0, 4, 0x3E66, "260A5074")]
+                                      (2682, 0x060BF4F0, 4, 0x3E66, "260A5074"), (2683, 0x060F08E0, 4, 2, "060EF000")]
 
 
 def test_a_window_runs_from_the_first_time_to_before_the_last():

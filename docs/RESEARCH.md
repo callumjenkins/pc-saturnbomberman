@@ -180,6 +180,17 @@ it. On 2026-10-19:
   2,078 matched and 1 more up to the end, and the other 17 part from tick 4748, during the round.
 - **The game's copy of the CD report at 060BF4F0 differs from its first store on.** It holds the
   drive's position.
+- **A DMA fills bytes the core's log cannot see.** Ours reports a store the runtime makes for a DMA
+  as made outside the game's code, and the core's write log has no such store, so both sides leave out
+  every byte a DMA filled on ours. In 060D0000 to 060DFFFF that is all 65,536 bytes, so nothing there
+  compares. The core's copy of the backup library at 060EC800 to 060EEFFF is left out with the BIOS's
+  other code.
+- **Further ranges, 060C2000 to 060FFFFF on `normal` and `battle-round`.** On `normal`, 24,161 of 24,230
+  addresses in 060E0000 to 060FFFFF took the same values in the same order. The 64 that did not are the
+  game's data at 060FA8B8 to 060FA940, whose first values at the start of the window differ by a few
+  bytes, and the buffer at 060EC41C, which the game fills by copying. On `battle-round`, 64,344 of 65,623 matched.
+  Most of the 1,254 that did not are in the game's task stacks, such as 060C3778, where the same code
+  stores at an offset 0x30 lower on ours. Neither is traced to a cause yet.
 
 ### Sound
 
