@@ -211,10 +211,13 @@ RESEARCH.md ("The extra poll before `die`'s stage load is VDP1's draw time"):
   START to the load `die` now polls once on each side. 12 of the 120 saved clears no longer cleared:
   the bot cleared ten again, and 2-9 and 4-10 co-op only with every item (`COOP_ITEMS`), so those two
   old clears are gone. Every frame test was recorded again.
-- **The drive's pause.** Ours answers Seek Disc 0xFFFFFF with PAUSE at once. Beetle answers BUSY
-  for one more sector and a periodic check, about 8 to 15 ms. A probe holding ours BUSY for 11.6 ms
-  left `die`'s extra poll in place, so this gap is not that one's cause. A fix belongs behind
-  `--accurate-drive`.
+- **The drive's pause**, closed on 2026-10-20. Ours answered Seek Disc 0xFFFFFF with PAUSE at once,
+  and Beetle answers BUSY until its drive's status check, about 8 to 15 ms when playing. With
+  `--accurate-drive`, saturn-recomp now keeps the drive BUSY to Mednafen's check. `die`'s pad stores
+  at 06006100-1F now pair with the core's to the end, where before they parted at START (tick 2940).
+  Over 060C0000-060FFFFF, 88 addresses differ against 101 before, apart from one menu picture: the
+  extra time at the first pause shifts the menu's data stream, and the core's last picture before
+  START no longer fits on ours. Frame tests and clears run without the flag and are unchanged.
 
 ## Deferred work
 

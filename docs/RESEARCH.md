@@ -250,7 +250,14 @@ it. On 2026-10-19:
   BUSY until the drive has read one more sector and seen the end, then PAUSE a sector later, about 8 to 15 ms
   in all, and the core's wait at 060A8CA6 reads the status 196 times. A probe that kept ours BUSY for 11.6 ms moved
   the poll after the pause into the next field but left the extra poll, so this is a second gap and not the
-  cause.
+  cause. Mednafen checks the drive's status 17 712 of its clocks (1.57 ms) after each sector it reads. A
+  pause while playing shows at the second check after the command, since the first sees the play's end,
+  and a pause on a paused drive at the first. `--accurate-drive` does the same (2026-10-20). Then `die`'s
+  stores at 06006100-1F pair with the core's to the end, START included. Over 060C0000-060FFFFF, 88
+  addresses differ against 101 before, leaving out one block of 1 586: the core's last menu picture
+  before START, copied at frame 5352 by 060B00CA. Ours copied it at VBlank 4500 before; now its copies
+  start 6 VBlanks later (4416 against 4410), after the first pause (VBlank 1910) took its BUSY time, and
+  that one no longer fits before START. `normal` and `battle-round` screenshots are unchanged.
 - **`lab writes` took ours a tick sooner than the core's.** It read our tick as a VBlank began, before the
   VBlank's handler had run, and the core's after each frame, so the ticks it printed for the same moment
   were one apart. `ticks_after` now reads ours from the next VBlank. Which store pairs with which, and where
