@@ -26,3 +26,14 @@ work RAM is left out because the game spills registers onto its stack.
 `shc_compare.py` is a second, separate measure. The game was built with Hitachi SHC, and these
 functions are the ones whose SHC 5.0 output has the same instructions as the game's, some in another
 order. SHC is not included and is not freely available.
+
+## Running them in the game
+
+`swap.cpp` and `swap.cmake` build `krnl.c` into the recompiled game, and the `[[replace]]` entries in
+`game.toml` make the generated `KRNL` functions call it. `swap.cpp` passes the arguments the way the
+SH-2 does (r4 to r7, the result in r0), and `g_rd` and `g_wr` read and write the runtime's own address
+space. Remove the `[[replace]]` entries and the `SATURN_EXTRA` option to get the plain recompile.
+
+On the `normal` and `battle-round` routes, `bomberman compare` against Beetle Saturn gives the same
+shots with the swaps as without them. Across `normal`, `battle-round`, `single`, `die` and `items`, six
+of the eight KRNL functions ran. `f0600A4B0` and `f0600A25E` ran in none of them.

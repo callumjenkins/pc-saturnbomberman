@@ -2,7 +2,7 @@
 name = "Saturn Bomberman (USA)"
 seeds = "seeds.json"
 build = "build"
-cmake = ["SATURN_VDP1_GPL=ON"]     # VDP1 by Mednafen's rules: builds are GPL (saturn-recomp THIRD_PARTY.md)
+cmake = ["SATURN_VDP1_GPL=ON", "SATURN_EXTRA={root}/decomp/swap.cmake"]     # VDP1 by Mednafen's rules: builds are GPL (saturn-recomp THIRD_PARTY.md)
 
 # What the disc holds and what became of each part: python -m saturnrecomp.inventory game.toml.
 [inventory]
@@ -238,3 +238,50 @@ at = "bomber_fire_under"
 [[hook]]
 module = "KRNL"
 at = "bomber_touched"
+
+# Functions the decomp has rewritten and checked (decomp/README.md): the recompile calls these instead.
+[[replace]]
+module = "KRNL"
+at = 0x0600665C
+symbol = "swap_f0600665C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06006B38
+symbol = "swap_f06006B38"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600940A
+symbol = "swap_f0600940A"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600942E
+symbol = "swap_f0600942E"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600A3E0
+symbol = "swap_f0600A3E0"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600A4B0
+symbol = "swap_f0600A4B0"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600B934
+symbol = "swap_f0600B934"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600A25E
+symbol = "swap_f0600A25E"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600A2D8
+symbol = "swap_f0600A2D8"
+
