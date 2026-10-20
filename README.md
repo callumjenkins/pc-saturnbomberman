@@ -6,6 +6,10 @@ Saturn Bomberman (USA) recompiled to run natively on PC, built on
 The repository holds the game's config, routes and tools only. Bring your own disc: nothing from it
 goes in the repo, and everything made from it goes in `build/`, which git ignores.
 
+## AI disclosure
+
+Claude Code wrote most of this code, working from my direction and review. The recompiled game is compared against Beetle Saturn, and the shared runtime in saturn-recomp has its own disclosure.
+
 ## Setup
 
 ```sh
