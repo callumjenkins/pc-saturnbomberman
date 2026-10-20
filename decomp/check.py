@@ -30,6 +30,9 @@ VDP1_DATA = 0x100
 STACK = 0x06100000 - 0x1000
 
 
+CALL_HOOK = ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32), ctypes.c_int)
+
+
 def ptr(lo, span, align=4):
     return ("ptr", lo, span, align)
 
@@ -49,6 +52,14 @@ SPEC = {
     "f0600B934": ([rng_int(0, 1000), rng_int(0, 1000)], True),
     "f0600A25E": ([rng_int(-(1 << 31), (1 << 31) - 1)], False),
     "f0600A2D8": ([rng_int(-(1 << 31), (1 << 31) - 1)], False),
+    "f060A5EEC": ([ptr(0x060C0000, 0x400)], True),
+}
+
+
+# The game's code a function calls, in order. Memory alone cannot tell two calls apart when their
+# stores do not overlap.
+CALLS = {
+    "f060A5EEC": [0x060A5F2E, 0x060A5F22],
 }
 
 
@@ -66,18 +77,50 @@ def value(kind, r):
     return lo + r.randrange(0, span // align) * align
 
 
+def hook_for(cpu, state):
+    """What the host build's g_call runs: the game's function on the interpreter that holds the host
+    build's memory. Registers r8 to r15 and pr come back unchanged, as the runtime's swap does."""
+    @CALL_HOOK
+    def hook(addr, args, n):
+        keep = (cpu.r[8:], cpu.pr)
+        sp = cpu.r[15]
+        try:
+            if n > 4:
+                sp -= 4 * (n - 4)
+                for i in range(4, n):
+                    cpu.mem.write(sp + 4 * (i - 4), 4, args[i])
+                cpu.r[15] = sp
+            return cpu.call(addr, **{"r%d" % (4 + i): args[i] for i in range(min(n, 4))})
+        except Exception as e:                      # an access outside the mapped memory, or no return
+            state["error"] = str(e)
+            return 0
+        finally:
+            cpu.r[8:], cpu.pr = keep
+            state["calls"].append(addr)
+    return hook
+
+
 def trial(lib, name, args, returns, r):
-    cpu = sh2emu.load(KRNL, BASE)
+    cpu = sh2emu.load(KRNL, BASE)               # the game's own function
+    host = sh2emu.load(KRNL, BASE)              # the memory the host build runs on, and its callees
     wram = cpu.mem.regions[0][2]
     vdp1 = cpu.mem.add(VDP1, 0x80000)
+    hwram = host.mem.regions[0][2]
+    hvdp1 = host.mem.add(VDP1, 0x80000)
     lo, hi = DATA[0] - WRAM, DATA[1] - WRAM
     wram[lo:hi] = r.randbytes(hi - lo)
     vdp1[:VDP1_DATA] = r.randbytes(VDP1_DATA)
+    hwram[:] = wram
+    hvdp1[:] = vdp1
     vals = [value(a, r) for a in args]
 
+    state = {"calls": []}
+    keep = (ctypes.c_char * len(hwram)).from_buffer(hwram), (ctypes.c_char * len(hvdp1)).from_buffer(hvdp1)
+    ctypes.c_void_p.in_dll(lib, "g_wram").value = ctypes.addressof(keep[0])
+    ctypes.c_void_p.in_dll(lib, "g_vdp1").value = ctypes.addressof(keep[1])
+    hook = hook_for(host, state)
+    ctypes.c_void_p.in_dll(lib, "g_call_hook").value = ctypes.cast(hook, ctypes.c_void_p).value
     ctypes.c_int.in_dll(lib, "g_fault").value = 0
-    ctypes.memmove(ctypes.addressof(ctypes.c_char.in_dll(lib, "g_wram")), bytes(wram), len(wram))
-    ctypes.memmove(ctypes.addressof(ctypes.c_char.in_dll(lib, "g_vdp1")), bytes(vdp1), len(vdp1))
     fn = getattr(lib, name)
     fn.restype = ctypes.c_int32
     fn.argtypes = [ctypes.c_int32] * len(vals)
@@ -87,17 +130,21 @@ def trial(lib, name, args, returns, r):
 
     regs = {"r%d" % (4 + i): v for i, v in enumerate(vals)}
     want = cpu.call(int(name[1:], 16), **regs)
-    after_w = ctypes.string_at(ctypes.addressof(ctypes.c_char.in_dll(lib, "g_wram")), len(wram))
-    after_v = ctypes.string_at(ctypes.addressof(ctypes.c_char.in_dll(lib, "g_vdp1")), len(vdp1))
+    del keep
 
     problems = []
     if fault:
         problems.append("the host build touched unmapped memory")
+    if "error" in state:
+        problems.append("a call into the game failed: " + state["error"])
+    if state["calls"] != CALLS.get(name, []):
+        problems.append("called %s, expected %s" % ([hex(a) for a in state["calls"]],
+                                                  [hex(a) for a in CALLS.get(name, [])]))
     if returns and (got & 0xFFFFFFFF) != want:
         problems.append("returned %08X, the game's code %08X" % (got & 0xFFFFFFFF, want))
-    keep = STACK - WRAM
-    for label, mine, theirs, base in (("work RAM", after_w[:keep], bytes(wram[:keep]), WRAM),
-                                      ("VDP1", after_v, bytes(vdp1), VDP1)):
+    keep_to = STACK - WRAM
+    for label, mine, theirs, base in (("work RAM", bytes(hwram[:keep_to]), bytes(wram[:keep_to]), WRAM),
+                                      ("VDP1", bytes(hvdp1), bytes(vdp1), VDP1)):
         if mine != theirs:
             i = next(i for i in range(len(mine)) if mine[i] != theirs[i])
             problems.append("%s differs first at %08X: host %02X, game %02X" % (label, base + i, mine[i], theirs[i]))

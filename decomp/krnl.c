@@ -8,6 +8,8 @@ typedef struct { char pad[8]; short w8; char pad2[1]; char f; char pad3[4]; } En
 typedef struct { char pad[16]; short w16; short p1; short w20; short p2; short w24; } Pos;
 typedef struct { char pad[12]; short w12; short w14; short w16; short w18; char rest[64]; } Obj84;
 
+typedef struct { int f0, f4, f8, f12, f16, f20, f24, f28, f32, f36, f40, f44, f48, f52, f56; } Thing;
+
 #define RECS   0x060BC190
 #define ENTS   0x060CE060
 #define CNT    0x060BF4A0
@@ -103,4 +105,23 @@ void f0600A2D8(int d)
 
     SET(Obj84, o, w18, v >> 16);
     SET(Obj84, o, w14, v);
+}
+
+/* Sets a 60-byte record up: zero except a 1 at 20, then the two setters, which the game keeps as
+ * functions of their own. Returns the record. */
+REF(Thing) f060A5EEC(REF(Thing) t)
+{
+    SET(Thing, t, f0, 0);
+    SET(Thing, t, f4, 0);
+    SET(Thing, t, f8, 0);
+    SET(Thing, t, f12, 0);
+    SET(Thing, t, f16, 0);
+    SET(Thing, t, f20, 1);
+    SET(Thing, t, f24, 0);
+    SET(Thing, t, f28, 0);
+    SET(Thing, t, f32, 0);
+    GCALL(0x060A5F2E, t, 1);
+    SET(Thing, t, f52, 0);
+    GCALL(0x060A5F22, t, 3);
+    return t;
 }

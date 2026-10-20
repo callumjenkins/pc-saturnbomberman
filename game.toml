@@ -285,3 +285,7 @@ module = "KRNL"
 at = 0x0600A2D8
 symbol = "swap_f0600A2D8"
 
+[[replace]]
+module = "KRNL"
+at = 0x060A5EEC
+symbol = "swap_f060A5EEC"
