@@ -204,10 +204,13 @@ as an explicit gap; lack of reference trace support is reported as an uncomplete
 The write comparison in step 7 found two gaps in the runtime's hardware, both traced on `die` in
 RESEARCH.md ("The extra poll before `die`'s stage load is VDP1's draw time"):
 
-- **VDP1 draw time.** Our draws end 1 ms after they start, so the draw-end interrupt (vector 0x4D)
-  comes straight after VBlank-OUT. On the core it comes later in the field. A task that waits on it
-  can start a field later on ours, which gave `die` one extra pad poll before its stage load.
-  Closing it needs a model of how long VDP1 takes to draw a list, then re-recorded frame tests.
+- **VDP1 draw time**, closed on 2026-10-20. Our draws ended 1 ms after they started, so the draw-end
+  interrupt (vector 0x4D) came straight after VBlank-OUT, and a task waiting on it could start a field
+  late, which gave `die` one extra pad poll before its stage load. saturn-recomp now ends a draw after
+  the cycles Mednafen charges its commands and decides the frame change a line after VBlank-OUT. From
+  START to the load `die` now polls once on each side. 12 of the 120 saved clears no longer cleared:
+  the bot cleared ten again, and 2-9 and 4-10 co-op only with every item (`COOP_ITEMS`), so those two
+  old clears are gone. Every frame test was recorded again.
 - **The drive's pause.** Ours answers Seek Disc 0xFFFFFF with PAUSE at once. Beetle answers BUSY
   for one more sector and a periodic check, about 8 to 15 ms. A probe holding ours BUSY for 11.6 ms
   left `die`'s extra poll in place, so this gap is not that one's cause. A fix belongs behind

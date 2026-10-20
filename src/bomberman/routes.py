@@ -658,7 +658,7 @@ def saved(world, number, items, coop, pad=1):
 
 
 # The bosses the bot beats for two only with every item.
-COOP_ITEMS = {(5, 9), (5, 10)}
+COOP_ITEMS = {(4, 10), (5, 9), (5, 10)}
 
 COOP_ROUTES = {"coop-start": coop_start,
                **{f"coop-{w}-{n}": (lambda w=w, n=n: coop_boss(w, n, items=(w, n) in COOP_ITEMS))

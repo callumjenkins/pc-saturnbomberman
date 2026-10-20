@@ -240,8 +240,11 @@ it. On 2026-10-19:
   the same field as the poll, after it: VBlank-OUT, the poll, draw-end. Ours ends its draws 1 ms after they
   start, so draw-end follows VBlank-OUT at once and the poll comes in the next field. The CD task therefore
   starts a field later on ours, and from START to the load takes 3 VBlanks on ours and 2 frames on the core.
-  This is the draw-time model `projects/saturn-recomp/context/vdp1-frame-change-timing.md` in agent-home
-  says is missing.
+  This was the draw-time model `projects/saturn-recomp/context/vdp1-frame-change-timing.md` in agent-home
+  said was missing. With it (2026-10-20), ours sees START at 0xB7D and stalls for the load after 0xB7E, and
+  the core at 0xB7C and after 0xB7D: one poll after START on each. START itself now comes a poll later on
+  ours. Six VBlanks before it ours stops polling for the menu's data stream while the core goes on, so the
+  press, placed by our tick, lands after a different poll on each.
 - **The drive's pause answers BUSY first on the core.** That CD task sends End Data Transfer, Set CD Device
   Connection, Reset Selector, and Seek Disc to 0xFFFFFF. Ours answers PAUSE (0x01) at once. Mednafen answers
   BUSY until the drive has read one more sector and seen the end, then PAUSE a sector later, about 8 to 15 ms
