@@ -452,6 +452,14 @@ def mad_bomber():
                             presses, 7420, "6880,7220,7268,7420"), mad_bomber=1)
 
 
+def mad_bomber_com():
+    """The mad-bomber run played on past the CPU's death: it becomes a Mad Bomber too, and the game
+    steers it round the edge itself (the CPU's pad bits, from where it is), until 9500."""
+    r = mad_bomber()
+    return dataclasses.replace(r, about="a single battle with Mad Bomber, played on while a CPU Mad Bomber steers itself",
+                               vblanks=9500, shots="8200,9000,9500")
+
+
 def team():
     """Mode turned to Team on the battle screen (RIGHT at 4610). After character select, the Team
     Battle screen places each player on White, Red, Blue, Yellow or Green: A alone puts four on White
@@ -703,7 +711,7 @@ ROUTES = {"normal": normal, "single": single, "battle": battle,
           "dino-evolve": dino_evolve, "open-arena": open_arena,
           **{f"com-level-{n}": (lambda n=n: com_level(n)) for n in (1, 3)},
           **{name: (lambda name=name: mechanic(name)) for name in MECHANICS},
-          "mad-bomber": mad_bomber, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
+          "mad-bomber": mad_bomber, "mad-bomber-com": mad_bomber_com, "kick-goal": kick_goal, "dino-hatch": dino_hatch, **DINO_ROUTES, "team": team, "five-minutes": five_minutes, "bonus-game": bonus_game,
           "master": master, "master-boss": master_boss, "master-result": master_result,
           "master-ending": master_ending, "cannon": cannon, **BOSS_ROUTES, **COOP_ROUTES,
           **{f"arena-{n}": (lambda n=n: arena(n)) for n in range(2, len(ARENAS) + 1)},

@@ -161,6 +161,7 @@ reference comparisons, and automation runs. `AGENTS.md` is the shared project en
 | `com-level-1`, `com-level-3` | the CPUs at level 3 bomb about twice as often as at 1 and kill each other inside 40 seconds |
 | `dino-blue-onto-bomb`, `kick-item-wall`, `glove-throw`, `glove-bounce`, `glove-wrap` | kicked and thrown bombs: stopping beside a bomb, stopping at the wall, bouncing off a hard block and coming down on the far side |
 | `mad-bomber` | a single battle with the Mad Bomber rule: pad 1 dies, rides a hovercraft round the edge, and a bomb it throws takes a CPU |
+| `mad-bomber-com` | the same, played on to 9500: the CPU becomes a Mad Bomber too, and the game steers it round the edge with pad bits it makes itself |
 | `arena-2` to `arena-8` | a single battle in each of the other normal-size arenas: Soccer Stadium, Jungle Trap, Desert Twister, Space Colony, Bouncing Bomber, Ninja House and Factory Floor. `single` plays the first, Path to Glory, and `battle` the one wide arena, Field of Glory |
 | `arena-N-night`, `-orange`, `-white` | arena N (1 to 8) as one of its three variants, picked by holding X+Y+Z on the stage wheel and pressing UP to change the sky; each sky changes the arena's layout and gimmicks |
 | `slot` | the slot machine won: three fires and the Fire Up picked up |

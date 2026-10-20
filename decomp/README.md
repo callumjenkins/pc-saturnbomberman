@@ -34,6 +34,10 @@ order. SHC is not included and is not freely available.
 SH-2 does (r4 to r7, the result in r0), and `g_rd` and `g_wr` read and write the runtime's own address
 space. Remove the `[[replace]]` entries and the `SATURN_EXTRA` option to get the plain recompile.
 
-On the `normal` and `battle-round` routes, `bomberman compare` against Beetle Saturn gives the same
-shots with the swaps as without them. Across `normal`, `battle-round`, `single`, `die` and `items`, six
-of the eight KRNL functions ran. `f0600A4B0` and `f0600A25E` ran in none of them.
+On the `normal`, `battle-round` and `bonus-game` routes, `bomberman compare` against Beetle Saturn gives
+the same shots with the swaps as without them, and `tests/frames.py` passes on `bonus-game` and
+`clear-M-1`. Together the routes run eight of the nine functions (the ninth, `f0600A2D8`, is XBAND's address, so the
+KRNL replace never runs). `f0600A25E` runs in `bonus-game` and `clear-M-1`. `f0600A4B0` runs in `mad-bomber-com`, where the CPU that the route's bomb kills becomes a Mad Bomber:
+the game steers a CPU-controlled bomber (byte +4 of its 0x7C-byte object record is 2) with pad bits it
+builds from its position, in `060275E4`, and picks among them with `f0600A4B0`. The swapped build's frames
+there match the build without the swaps. The earlier routes stop before that CPU dies.
