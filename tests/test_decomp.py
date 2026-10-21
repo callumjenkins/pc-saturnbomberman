@@ -116,14 +116,14 @@ def test_an_if_without_work_in_its_first_arm_is_negated():
     assert structure.Structurer(blocks, 1).run() == ["if (!(c)) {", "    a;", "}", "return;"]
 
 
-def test_a_header_that_only_tests_is_the_whiles_condition():
+def test_a_header_that_only_tests_is_the_whiles_condition_and_going_round_advances_time():
     blocks = {1: block(1, "branch", [2, 3], "n"), 2: block(2, "goto", [1], stmts=["work;"]), 3: block(3, "return")}
-    assert structure.Structurer(blocks, 1).run() == ["while (n) {", "    work;", "}", "return;"]
+    assert structure.Structurer(blocks, 1).run() == ["while (n) {", "    work;", "    POLL();", "}", "return;"]
 
 
 def test_a_loop_that_tests_at_the_bottom_is_a_do_while():
     blocks = {1: block(1, "branch", [1, 2], "again", stmts=["work;"]), 2: block(2, "return")}
-    assert structure.Structurer(blocks, 1).run() == ["do {", "    work;", "} while (again);", "return;"]
+    assert structure.Structurer(blocks, 1).run() == ["do {", "    work;", "} while (AGAIN(again));", "return;"]
 
 
 def test_a_loop_with_two_exits_is_refused():
@@ -232,6 +232,20 @@ def test_a_function_a_task_can_park_in_cannot_be_swapped(tmp_path):
         gen.swapped(str(table))
 
 
+def test_a_function_with_a_hook_on_one_of_its_instructions_cannot_be_swapped(tmp_path):
+    table = tmp_path / "status.tsv"
+    status.write_table([status.Row("KRNL", 0x0606CF28, 11, 0, True, "swapped", hooked=True)], str(table))
+    with pytest.raises(SystemExit, match="0606CF28"):
+        gen.swapped(str(table))
+
+
+def test_the_hooked_column_survives_a_round_trip(tmp_path):
+    table = tmp_path / "status.tsv"
+    status.write_table([status.Row("KRNL", 1, 5, 0, False, hooked=True), status.Row("KRNL", 2, 5, 0, False)], str(table))
+    old = status.previous(str(table))
+    assert (old[("KRNL", 1)].hooked, old[("KRNL", 2)].hooked) == (True, False)
+
+
 def test_the_yields_column_survives_a_round_trip(tmp_path):
     table = tmp_path / "status.tsv"
     status.write_table([status.Row("KRNL", 1, 5, 0, False, yields=True), status.Row("KRNL", 2, 5, 0, False)], str(table))
@@ -269,18 +283,19 @@ def test_an_argument_set_in_a_branch_delay_slot_reaches_the_call_after_it():
     assert "GCALL1(0x06006024, r4)" in code
 
 
-def test_a_tail_call_hands_on_all_four_argument_registers():
+def test_a_tail_call_is_a_jump_that_hands_on_all_four_argument_registers():
     # mov.l @(pc),r1 literal-free form: mov #imm,r1 only builds a small number, so jump through a known one
     code = lifted(encode("mov #imm,Rn", 1, low=0x20), encode("jmp @Rn", 1), NOP)
     assert code.splitlines()[0] == "int f06006000(int r4, int r5, int r6, int r7)"
-    assert "GCALL4(32, r4, r5, r6, r7)" in code
+    assert "GJUMP4(32, r4, r5, r6, r7)" in code
 
 
 def test_leaving_a_loop_early_is_a_break():
     blocks = {1: block(1, "branch", [2, 4], "n"), 2: block(2, "branch", [4, 3], "done", stmts=["a;"]),
               3: block(3, "goto", [1], stmts=["b;"]), 4: block(4, "return")}
     assert structure.Structurer(blocks, 1).run() == [
-        "while (n) {", "    a;", "    if (done) {", "        break;", "    } else {", "        b;", "    }", "}", "return;"]
+        "while (n) {", "    a;", "    if (done) {", "        break;", "    } else {", "        b;", "    }", "    POLL();", "}",
+        "return;"]
 
 
 def test_a_loop_inside_a_loop_is_a_nested_while():
@@ -288,4 +303,4 @@ def test_a_loop_inside_a_loop_is_a_nested_while():
               3: block(3, "branch", [4, 5], "inner"), 4: block(4, "goto", [3], stmts=["x;"]),
               5: block(5, "goto", [1], stmts=["y;"]), 6: block(6, "return")}
     assert structure.Structurer(blocks, 1).run() == [
-        "while (outer) {", "    while (inner) {", "        x;", "    }", "    y;", "}", "return;"]
+        "while (outer) {", "    while (inner) {", "        x;", "        POLL();", "    }", "    y;", "    POLL();", "}", "return;"]

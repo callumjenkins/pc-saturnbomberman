@@ -1,8 +1,9 @@
-// The decompiled kernel functions as the recompiled game's own: each [[replace]] in game.toml
-// calls one of the wrappers in swap_gen.inc (decomp/gen.py writes both) in place of the generated body. They run krnl.c, built with DECOMP_HOST, on the
-// runtime's address space, and pass arguments and the result the way the SH-2 does (r4 to r7, r0).
-// A call from that C into the game (GCALL in guest.h) comes back here as g_call, and runs the
-// generated function, or another swap, on the context of the function that made it.
+// The decompiled kernel functions as the recompiled game's own: each [[replace]] in game.toml calls one
+// of the wrappers in swap_gen.inc (decomp/gen.py writes both) in place of the generated body.
+// They run src/, built with DECOMP_HOST, on the runtime's address space, and pass arguments and the
+// result the way the SH-2 does (r4 to r7, r0).
+// A call from that C into the game (GCALLn and GJUMPn in guest.h) comes back here as g_call or g_jump,
+// and runs the generated function, or another swap, on the context of the function that made it.
 #include <cstdint>
 
 #include "saturn/sh2.h"
@@ -28,9 +29,15 @@ void g_wr(uint32_t addr, int size, uint32_t value)
     else st32(addr, value);
 }
 
+void g_poll(void)
+{
+    SH2_POLL(*g_cur);
+}
+
 // Arguments beyond the fourth go on the stack, lowest first, as SHC passes them. The callee may use
 // r0 to r7 freely; r8 to r15 and pr are put back, since the C that called has no registers to lose.
-uint32_t g_call(uint32_t addr, const uint32_t* args, int n)
+// A call advances time where the generated code's jsr would; a tail call, a branch, does not.
+static uint32_t enter(uint32_t addr, const uint32_t* args, int n, bool poll)
 {
     SH2Context& c = *g_cur;
     const uint32_t ret = c.pr, sp = c.r[15], keep[7] = {c.r[8], c.r[9], c.r[10], c.r[11], c.r[12], c.r[13], c.r[14]};
@@ -40,7 +47,8 @@ uint32_t g_call(uint32_t addr, const uint32_t* args, int n)
         c.r[15] = sp - 4 * (n - 4);
         for (int i = 4; i < n; i++) st32(c.r[15] + 4 * (i - 4), args[i]);
     }
-    SH2_POLL(c);
+    if (poll)
+        SH2_POLL(c);
     sh2_call(c, addr);
     SH2_RET(c, ret);
     const uint32_t result = c.r[0];
@@ -48,6 +56,16 @@ uint32_t g_call(uint32_t addr, const uint32_t* args, int n)
     c.r[15] = sp;
     c.pr = ret;
     return result;
+}
+
+uint32_t g_call(uint32_t addr, const uint32_t* args, int n)
+{
+    return enter(addr, args, n, true);
+}
+
+uint32_t g_jump(uint32_t addr, const uint32_t* args, int n)
+{
+    return enter(addr, args, n, false);
 }
 }
 

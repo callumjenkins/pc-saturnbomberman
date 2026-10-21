@@ -34,3 +34,19 @@ def test_a_function_declared_with_the_games_widths_agrees(tmp_path):
 ])
 def test_a_narrower_type_than_the_game_uses_is_caught(tmp_path, returns, param):
     assert differing(tmp_path, returns, param) > 0
+
+
+CLEAR = '#include "krnl.h"\nvoid f0608AAD8(void)\n{\n    int i = 0;\n\n    do {\n        ST8(0x060C2F04 + i * 88, 0);\n    } while (%s);\n}\n'
+
+
+@pytest.mark.parametrize("condition, agrees", [
+    pytest.param("AGAIN(++i < 8)", True, id="advancing time each time the loop goes round"),
+    pytest.param("++i < 8", False, id="never advancing it"),
+    pytest.param("(POLL(), ++i < 8)", False, id="advancing it once too often"),
+])
+def test_a_loop_must_advance_time_as_often_as_the_games_branch_back(tmp_path, condition, agrees):
+    path = tmp_path / "f.c"
+    path.write_text(CLEAR % condition)
+    sig = gen.signatures([str(path)])[0x0608AAD8]
+    fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 20, 1, sig)
+    assert ran == 20 and (not fails) == agrees

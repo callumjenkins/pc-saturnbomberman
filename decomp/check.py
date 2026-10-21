@@ -9,6 +9,7 @@ and every byte of work RAM and VDP1 VRAM afterwards.
 """
 import argparse
 import ctypes
+import json
 import os
 import random
 import subprocess
@@ -26,11 +27,12 @@ from saturnrecomp import sh2emu  # noqa: E402
 KRNL = os.path.join(ROOT, "build", "extract", "BOMSS", "0KRNL.BIN")
 BASE = 0x06006000
 WRAM, WRAML, VDP1 = 0x06000000, 0x00200000, 0x05D00000
-# Random data covers the tables the functions read. Code and the literal pools below stay as they are.
-DATA = (0x060B0000, 0x060F0000)
-VDP1_DATA = 0x100
 # The game's functions spill registers onto the stack, which the host build has no counterpart for.
 STACK = 0x06100000 - 0x1000
+# Random data covers the tables the functions read, up to the stack. Half the trials also randomise the
+# variables inside the image, around the code.
+DATA = (0x060B0000, STACK)
+VDP1_DATA = 0x100
 
 
 # How a parameter or result of each type crosses into the host build: at its own width, so a narrow
@@ -44,6 +46,58 @@ CALL_HOOK = ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.c_uint32, ctypes.POINTER(ct
 # Values where a comparison, a width or a sign changes, which random numbers rarely land on.
 EDGES = [0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF,
          0xFFFFFFFE, 0xFFFFFF80, 0xFFFF8000]
+
+
+class Counting(sh2emu.CPU):
+    """The interpreter, also counting the places the recompiled game advances time: a call, a branch back
+    within the function that is running, and an ldc to sr. A branch out of the function is a tail call
+    and counts nothing. Those are the generator's rules for SH2_POLL, over its own function boundaries."""
+    _image = None
+    _bodies: dict = {}
+    _code: dict | None = None
+
+    def call(self, entry, max_steps=10_000_000, **regs):
+        self.code, self.outer = self._body(entry), []
+        return super().call(entry, max_steps, **regs)
+
+    def step(self):
+        pc = self.pc
+        ins = self.fetch(pc)
+        super().step()
+        op = ins.op
+        if op in ("bsr", "jsr", "bsrf"):
+            self.polls += 1
+            self.outer.append(self.code)
+            self.code = self._body(self.pc)
+        elif op in ("rts", "rte"):
+            self.code = self.outer.pop() if self.outer else self.code
+        elif op in ("ldc", "ldc.l") and ins.fmt.endswith("sr"):
+            self.polls += 1
+        elif op in ("bt", "bf", "bt/s", "bf/s", "bra", "braf", "jmp") and self.pc != pc + (4 if ins.delay else 2):
+            if self.pc not in self.code:
+                self.code = self._body(self.pc)
+            elif self.pc <= pc:
+                self.polls += 1
+
+    @classmethod
+    def _body(cls, entry):
+        if cls._code is None:
+            cls._code = status.function_code()
+        if entry in cls._code:
+            return cls._code[entry]
+        if entry not in cls._bodies:
+            if cls._image is None:
+                cls._image = status.krnl_image()
+            cls._bodies[entry] = {ins.pc for ins in status.body(cls._image, entry)}
+        return cls._bodies[entry]
+
+
+
+
+def counting(cpu):
+    cpu.__class__ = Counting
+    cpu.polls = 0
+    return cpu
 
 
 def ptr(lo, span, align=4):
@@ -84,6 +138,40 @@ def default_spec(sig):
     if unknown:
         raise SystemExit("%s: no default argument for %s; add it to SPEC" % (sig.name, ", ".join(unknown)))
     return [ptr(0x060C0000, 0x400) if t == "uint32_t" else ("any",) for t in sig.params], sig.returns != "void"
+
+
+def code_runs():
+    """The (start, end) offsets into 0KRNL.BIN of every function's instructions and the literals they load,
+    which randomising the image must leave alone. Cached beside the extracted disc, as walking every
+    function takes a few seconds."""
+    cache = os.path.join(ROOT, "build", "decomp", "code-runs.json")
+    stamp = [os.path.getmtime(KRNL), os.path.getmtime(status.TABLE)]
+    try:
+        with open(cache, encoding="utf-8") as f:
+            saved = json.load(f)
+        if saved["stamp"] == stamp:
+            return saved["runs"]
+    except (OSError, ValueError, KeyError):
+        pass
+    image = status.krnl_image()
+    used = set()
+    for row in status.previous().values():
+        if row.module != "KRNL":
+            continue
+        for ins in status.body(image, row.address):
+            used.update((ins.pc, ins.pc + 1))
+            if ins.target is not None and ins.op in ("mov.w", "mov.l", "mova"):
+                used.update(range(ins.target, ins.target + (2 if ins.op == "mov.w" else 4)))
+    runs = []
+    for at in sorted(a - BASE for a in used if a >= BASE):
+        if runs and runs[-1][1] == at:
+            runs[-1][1] = at + 1
+        else:
+            runs.append([at, at + 1])
+    os.makedirs(os.path.dirname(cache), exist_ok=True)
+    with open(cache, "w", encoding="utf-8") as f:
+        json.dump({"stamp": stamp, "runs": runs}, f)
+    return runs
 
 
 def build(sources=None):
@@ -130,19 +218,19 @@ def hook_for(cpu, state):
 
 
 def trial(lib, name, args, returns, r, sig=None):
-    cpu = sh2emu.load(KRNL, BASE)               # the game's own function
-    host = sh2emu.load(KRNL, BASE)              # the memory the host build runs on, and its callees
+    cpu = counting(sh2emu.load(KRNL, BASE))     # the game's own function
+    host = counting(sh2emu.load(KRNL, BASE))    # the memory the host build runs on, and its callees
     wram, wraml = cpu.mem.regions[0][2], cpu.mem.regions[1][2]
     vdp1 = cpu.mem.add(VDP1, 0x80000)
     hwram, hwraml = host.mem.regions[0][2], host.mem.regions[1][2]
     hvdp1 = host.mem.add(VDP1, 0x80000)
     lo, hi = DATA[0] - WRAM, DATA[1] - WRAM
+    if r.random() < 0.5:
+        lo = BASE - WRAM
+    image = bytes(wram[BASE - WRAM:BASE - WRAM + os.path.getsize(KRNL)])
     wram[lo:hi] = r.randbytes(hi - lo)
-    entry = int(name[1:], 16) - WRAM
-    if lo <= entry < hi:                        # KRNL's code runs into the data: keep the function and its pools
-        image = open(KRNL, "rb").read()
-        start, end = entry, min(entry + 0x400, BASE - WRAM + len(image))
-        wram[start:end] = image[start - (BASE - WRAM):end - (BASE - WRAM)]
+    for start, end in code_runs():
+        wram[BASE - WRAM + start:BASE - WRAM + end] = image[start:end]
     vdp1[:VDP1_DATA] = r.randbytes(VDP1_DATA)
     hwram[:] = wram
     hvdp1[:] = vdp1
@@ -155,10 +243,12 @@ def trial(lib, name, args, returns, r, sig=None):
     hook = hook_for(host, state)
     ctypes.c_void_p.in_dll(lib, "g_call_hook").value = ctypes.cast(hook, ctypes.c_void_p).value
     ctypes.c_int.in_dll(lib, "g_fault").value = 0
+    ctypes.c_int.in_dll(lib, "g_polls").value = 0
     fn = getattr(lib, name)
     fn.restype = C_TYPES.get(sig.returns if sig else "int", ctypes.c_int32)
     fn.argtypes = [C_TYPES[t] for t in sig.params] if sig else [ctypes.c_int32] * len(vals)
     got = fn(*[t(v).value for t, v in zip(fn.argtypes, vals)])
+    polls = ctypes.c_int.in_dll(lib, "g_polls").value + host.polls
     fault = ctypes.c_int.in_dll(lib, "g_fault").value or "error" in state
 
     regs = {"r%d" % (4 + i): v for i, v in enumerate(vals)}
@@ -176,6 +266,8 @@ def trial(lib, name, args, returns, r, sig=None):
     if fault != original_fault:
         problems.append("%s touched memory the check does not model; %s did not"
                         % (("the host build", "the game's code") if fault else ("the game's code", "the host build")))
+    if polls != cpu.polls:
+        problems.append("advanced time %d times, the game's code %d" % (polls, cpu.polls))
     if name in CALLS and state["calls"] != CALLS[name]:
         problems.append("called %s, expected %s" % ([hex(a) for a in state["calls"]],
                                                   [hex(a) for a in CALLS.get(name, [])]))

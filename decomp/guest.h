@@ -13,6 +13,11 @@
  *   GCALLn(a, ...)  call the function at guest address a with n arguments, 0 to 8, as GCALL2(a, x, y);
  *                   the result is an int. The host build runs it on the runtime (g_call), SHC
  *                   compiles a plain call. SHC has no variadic macros, hence one per count.
+ *   GJUMPn(a, ...)  the same for a tail call, where the game branches to a and never comes back.
+ *   POLL()          where the game's code branches back to an earlier instruction, as a loop does.
+ *   AGAIN(cond)     cond, with a POLL() when it holds: a do-while's condition.
+ *                   The recompiled game advances time at each of those branches and at each call, so the C
+ *                   has to reach the same number, and check.py counts both sides.
  */
 #ifndef DECOMP_GUEST_H
 #define DECOMP_GUEST_H
@@ -47,6 +52,10 @@ typedef gaddr H16PTR;
 /* Calls into the game's own code, generated or swapped. The first four arguments go in r4 to r7 and
  * any more on the stack, as SHC passes them. r8 to r15 and pr come back unchanged. */
 uint32_t g_call(uint32_t addr, const uint32_t *args, int n);
+uint32_t g_jump(uint32_t addr, const uint32_t *args, int n);
+void g_poll(void);
+#define POLL() g_poll()
+#define AGAIN(cond) ((cond) ? (g_poll(), 1) : 0)
 #define GCALL0(a) ((int)g_call((a), 0, 0))
 #define GCALL_(a, n, ...) ((int)g_call((a), (const uint32_t[]){__VA_ARGS__}, (n)))
 #define GCALL1(a, x1) GCALL_(a, 1, x1)
@@ -57,6 +66,16 @@ uint32_t g_call(uint32_t addr, const uint32_t *args, int n);
 #define GCALL6(a, x1, x2, x3, x4, x5, x6) GCALL_(a, 6, x1, x2, x3, x4, x5, x6)
 #define GCALL7(a, x1, x2, x3, x4, x5, x6, x7) GCALL_(a, 7, x1, x2, x3, x4, x5, x6, x7)
 #define GCALL8(a, x1, x2, x3, x4, x5, x6, x7, x8) GCALL_(a, 8, x1, x2, x3, x4, x5, x6, x7, x8)
+#define GJUMP0(a) ((int)g_jump((a), 0, 0))
+#define GJUMP_(a, n, ...) ((int)g_jump((a), (const uint32_t[]){__VA_ARGS__}, (n)))
+#define GJUMP1(a, x1) GJUMP_(a, 1, x1)
+#define GJUMP2(a, x1, x2) GJUMP_(a, 2, x1, x2)
+#define GJUMP3(a, x1, x2, x3) GJUMP_(a, 3, x1, x2, x3)
+#define GJUMP4(a, x1, x2, x3, x4) GJUMP_(a, 4, x1, x2, x3, x4)
+#define GJUMP5(a, x1, x2, x3, x4, x5) GJUMP_(a, 5, x1, x2, x3, x4, x5)
+#define GJUMP6(a, x1, x2, x3, x4, x5, x6) GJUMP_(a, 6, x1, x2, x3, x4, x5, x6)
+#define GJUMP7(a, x1, x2, x3, x4, x5, x6, x7) GJUMP_(a, 7, x1, x2, x3, x4, x5, x6, x7)
+#define GJUMP8(a, x1, x2, x3, x4, x5, x6, x7, x8) GJUMP_(a, 8, x1, x2, x3, x4, x5, x6, x7, x8)
 
 #else
 
@@ -88,6 +107,17 @@ typedef volatile unsigned short *H16PTR;
 #define GCALL6(a, x1, x2, x3, x4, x5, x6) (((int (*)())(a))(x1, x2, x3, x4, x5, x6))
 #define GCALL7(a, x1, x2, x3, x4, x5, x6, x7) (((int (*)())(a))(x1, x2, x3, x4, x5, x6, x7))
 #define GCALL8(a, x1, x2, x3, x4, x5, x6, x7, x8) (((int (*)())(a))(x1, x2, x3, x4, x5, x6, x7, x8))
+#define GJUMP0(a) GCALL0(a)
+#define GJUMP1(a, x1) GCALL1(a, x1)
+#define GJUMP2(a, x1, x2) GCALL2(a, x1, x2)
+#define GJUMP3(a, x1, x2, x3) GCALL3(a, x1, x2, x3)
+#define GJUMP4(a, x1, x2, x3, x4) GCALL4(a, x1, x2, x3, x4)
+#define GJUMP5(a, x1, x2, x3, x4, x5) GCALL5(a, x1, x2, x3, x4, x5)
+#define GJUMP6(a, x1, x2, x3, x4, x5, x6) GCALL6(a, x1, x2, x3, x4, x5, x6)
+#define GJUMP7(a, x1, x2, x3, x4, x5, x6, x7) GCALL7(a, x1, x2, x3, x4, x5, x6, x7)
+#define GJUMP8(a, x1, x2, x3, x4, x5, x6, x7, x8) GCALL8(a, x1, x2, x3, x4, x5, x6, x7, x8)
+#define POLL() ((void)0)
+#define AGAIN(cond) (cond)
 
 #endif
 

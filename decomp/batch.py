@@ -34,7 +34,7 @@ def select(args: argparse.Namespace) -> list[int]:
     if args.addresses:
         return [int(a, 16) for a in args.addresses]
     rows = [r for r in status.previous().values()
-            if r.module == gen.MODULE and r.state == "todo" and not r.yields and (r.leaf or not args.leaves)
+            if r.module == gen.MODULE and r.state == "todo" and not r.yields and not r.hooked and (r.leaf or not args.leaves)
             and (r.executed or not args.executed)]
     rows.sort(key=lambda r: (r.insns, r.address))
     return [r.address for r in rows[:args.limit]]

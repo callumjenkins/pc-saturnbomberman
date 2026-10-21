@@ -75,6 +75,18 @@ arguments go in r4 to r7 and later ones on the stack, lowest first. r8 to r15 an
 unchanged. Calls between functions of `src/` are ordinary C calls (`f0600942E` calls `f0600940A`).
 Untested: more than four arguments. A callee that switches tasks is why `yields` functions are left alone.
 
+## Advancing the game's time
+
+The recompiled game advances its time (`SH2_POLL`) at each call, at each branch back to an earlier
+instruction of the function that is running, and at each `ldc` to sr. A branch out of the function is a
+tail call and advances nothing. C that stands in for a function has to do the same, or the game's
+timing shifts: 98 functions that agreed in memory moved the sound in `normal` until it did. So the C says
+where: `GCALLn` advances once, as a `bsr` does, and `GJUMPn` is the tail call that does not. `POLL()`
+goes where the game's code branches back, and `AGAIN(cond)` is a do-while's condition with a `POLL()`
+when it holds. A direct call to another function of `src/` needs a `POLL()` of its own. `check.py`
+counts both sides, using the recompiler's own function boundaries, and a different count fails the
+trial. Under SHC the three macros are nothing or a plain call.
+
 ## Running them in the game
 
 `swap.cpp` and `swap.cmake` build `src/` into the recompiled game, and the `[[replace]]` entries in

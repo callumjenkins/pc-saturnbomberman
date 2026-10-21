@@ -10,6 +10,7 @@ over.
 import argparse
 import collections
 import glob
+import json
 import os
 import re
 import sys
@@ -21,7 +22,7 @@ from saturnrecomp import sh2  # noqa: E402
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
-COLUMNS = ("module", "address", "insns", "calls", "leaf", "executed", "yields", "state", "name")
+COLUMNS = ("module", "address", "insns", "calls", "leaf", "executed", "yields", "hooked", "state", "name")
 COVERAGE = ("build/test/*/coverage.txt", "build/run/*/coverage.txt", "build/play/*/replay/coverage.txt")
 KRNL = ("KRNL", "build/extract/BOMSS/0KRNL.BIN", 0x06006000)
 SRC = os.path.join(HERE, "src")
@@ -45,6 +46,7 @@ class Row:
     state: str = "todo"
     name: str = ""
     yields: bool = False                    # a task can park inside it, so host code cannot stand in for it
+    hooked: bool = False                    # a [[hook]] is on one of its instructions, which C never runs
 
     @property
     def leaf(self) -> bool:
@@ -52,7 +54,8 @@ class Row:
 
     def fields(self) -> list[str]:
         return [self.module, "%08X" % self.address, str(self.insns), str(self.calls), "yes" if self.leaf else "no",
-                "yes" if self.executed else "no", "yes" if self.yields else "no", self.state, self.name]
+                "yes" if self.executed else "no", "yes" if self.yields else "no",
+                "yes" if self.hooked else "no", self.state, self.name]
 
 
 def drafted(paths: list[str] | None = None) -> set[int]:
@@ -119,7 +122,7 @@ def previous(path: str = TABLE) -> dict[tuple[str, int], Row]:
             address = int(fields["address"], 16)
             old[(fields["module"], address)] = Row(
                 fields["module"], address, int(fields["insns"]), int(fields["calls"]), fields["executed"] == "yes",
-                fields["state"], fields["name"], fields.get("yields") == "yes")
+                fields["state"], fields["name"], fields.get("yields") == "yes", fields.get("hooked") == "yes")
     return old
 
 
@@ -159,6 +162,39 @@ def body(image: sh2.Image, address: int) -> list[sh2.Insn]:
     return [found[at] for at in sorted(found)]
 
 
+def function_code(root: str = ROOT) -> dict[int, set[int]]:
+    """{entry: its instruction addresses} for KRNL, as the recompiler finds them from the build's seeds.
+    Cached against build/recomp/inputs.json, which changes whenever those could."""
+    from saturnrecomp import build as recomp_build, config
+    from saturnrecomp.recomp import discover
+    cache = os.path.join(root, "build", "decomp", "function-code.json")
+    with open(os.path.join(root, "build", "recomp", "inputs.json"), encoding="utf-8") as f:
+        stamp = f.read()
+    try:
+        with open(cache, encoding="utf-8") as f:
+            saved = json.load(f)
+        if saved["stamp"] == stamp:
+            return {int(k): set(v) for k, v in saved["code"].items()}
+    except (OSError, ValueError, KeyError):
+        pass
+    game = config.load(os.path.join(root, "game.toml"))
+    _, path, base, seeds = next(s for s in recomp_build.specs(game) if s[0] == "KRNL")
+    with open(path, "rb") as f:
+        program = discover.Program(sh2.Image(f.read(), base), [base, *seeds])
+    code = {e: sorted(fn.code) for e, fn in program.funcs.items()}
+    os.makedirs(os.path.dirname(cache), exist_ok=True)
+    with open(cache, "w", encoding="utf-8") as f:
+        json.dump({"stamp": stamp, "code": code}, f)
+    return {e: set(v) for e, v in code.items()}
+
+
+def hooked(root: str = ROOT) -> set[int]:
+    """The KRNL functions whose code holds an address game.toml hooks."""
+    from saturnrecomp import config
+    hooks = set(config.load(os.path.join(root, "game.toml")).hooks.get(KRNL[0], []))
+    return {entry for entry, code in function_code(root).items() if code & hooks}
+
+
 def krnl_image(root: str = ROOT) -> sh2.Image:
     _, rel, base = KRNL
     with open(os.path.join(root, rel), "rb") as f:
@@ -179,16 +215,18 @@ def build_table(root: str = ROOT) -> list[Row]:
     old = previous(os.path.join(HERE, "status.tsv"))
     rows = functions(root)
     found = {(row.module, row.address) for row in rows}
-    for key in sorted(({k for k, v in old.items() if v.state == "swapped"} or swapped) - found):
+    for key in sorted((set(old) or swapped) - found):       # the map leaves out a replaced function
         was = old.get(key)
         insns, calls = (was.insns, was.calls) if was else walk(root, key[1])
         rows.append(Row(key[0], key[1], insns, calls, False))
     rows.sort(key=lambda row: (row.module, row.address))
     parked = yielding(root)
+    caught = hooked(root)
     for row in rows:
         key = (row.module, row.address)
         row.executed = key in ran
         row.yields = row.module == KRNL[0] and row.address in parked
+        row.hooked = row.module == KRNL[0] and row.address in caught
         was = old.get(key)
         row.name = was.name if was else ""
         if was and was.state in ("dead", "swapped"):

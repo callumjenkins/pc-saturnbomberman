@@ -98,11 +98,16 @@ def loops(blocks: dict[int, Block], order: list[int]) -> dict[int, set[int]]:
     return bodies
 
 
+# A jump back to the header of the loop being written, until loop() turns it into C. The game's code
+# advances time on that branch, so each one that survives becomes POLL() and a continue.
+BACK = "<back>;"
+
+
 def drop_tail_continue(lines: list[str]) -> list[str]:
-    """The loop body without a `continue;` that is its last statement, or the last in an if or else at its end."""
+    """The loop body without a jump back that is its last statement, or the last in an if or else at its end."""
     lines = list(lines)
     for i in range(len(lines) - 1, -1, -1):
-        if lines[i].strip() == "continue;" and all(line.strip() == "}" for line in lines[i + 1:]):
+        if lines[i].strip() == BACK and all(line.strip() == "}" for line in lines[i + 1:]):
             del lines[i]
             if i < len(lines) and i > 0 and lines[i - 1].strip() == "} else {" and lines[i].strip() == "}":
                 del lines[i - 1]
@@ -110,6 +115,18 @@ def drop_tail_continue(lines: list[str]) -> list[str]:
         if lines[i].strip() != "}":
             break
     return lines
+
+
+def polled(lines: list[str]) -> list[str]:
+    """The lines with each jump back to this loop's header written as POLL() and a continue."""
+    out = []
+    for line in lines:
+        if line.strip() == BACK:
+            indent = line[:len(line) - len(line.lstrip())]
+            out += [indent + "POLL();", indent + "continue;"]
+        else:
+            out.append(line)
+    return out
 
 
 def negate(condition: str) -> str:
@@ -138,7 +155,7 @@ class Structurer:
     def leaving(self, at: int) -> str | None:
         for header, leave in reversed(self.active):
             if at == header:
-                return "continue;"
+                return BACK
             if at == leave:
                 return "break;"
         return None
@@ -196,8 +213,12 @@ class Structurer:
             inner = self.sequence(header, header, first=True)
             head = "while (1) {"
         self.active.pop()
-        inner = drop_tail_continue(inner)
-        if len(inner) >= 5 and inner[-5].startswith("if (") and inner[-4:] == ["    continue;", "} else {", "    break;", "}"]:
+        trimmed = drop_tail_continue(inner)
+        falls_back = trimmed != inner or not inner or inner[-1].strip().split(" ")[0] not in ("return", "return;", "break;")
+        inner = trimmed
+        if len(inner) >= 5 and inner[-5].startswith("if (") and inner[-4:] == ["    " + BACK, "} else {", "    break;", "}"]:
             condition = inner[-5][4:-3]
-            return ["do {"] + ["    " + line for line in inner[:-5]] + ["} while (%s);" % condition]
-        return [head] + ["    " + line for line in inner] + ["}"]
+            return ["do {"] + ["    " + line for line in polled(inner[:-5])] + ["} while (AGAIN(%s));" % condition]
+        if falls_back:
+            inner = inner + ["POLL();"]
+        return [head] + ["    " + line for line in polled(inner)] + ["}"]

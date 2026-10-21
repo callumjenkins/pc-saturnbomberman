@@ -41,6 +41,10 @@ def main() -> None:
             failed += 1
             print("%s  a task can park inside it, so host code cannot stand in for it" % sig.name)
             continue
+        if by_address[address].hooked:
+            failed += 1
+            print("%s  a hook is on one of its instructions, and the C never runs them" % sig.name)
+            continue
         spec = check.SPEC.get(sig.name) or check.default_spec(sig)
         fails, ran = check.run(lib, sig.name, spec, args.trials, args.seed, sig)
         if not fails and ran < MIN_RAN:

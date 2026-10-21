@@ -96,6 +96,9 @@ def swapped(table: str = status.TABLE) -> list[int]:
     parked = [r for r in rows if r.module == MODULE and r.state == "swapped" and r.yields]
     if parked:
         sys.exit("swapped, but a task can park inside: " + ", ".join("%08X" % r.address for r in parked))
+    caught = [r for r in rows if r.module == MODULE and r.state == "swapped" and r.hooked]
+    if caught:
+        sys.exit("swapped, but a hook is on one of its instructions: " + ", ".join("%08X" % r.address for r in caught))
     return sorted(r.address for r in rows if r.module == MODULE and r.state == "swapped")
 
 

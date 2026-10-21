@@ -8,12 +8,28 @@ uint8_t *g_wram;            /* 06000000, 0x100000 bytes */
 uint8_t *g_wraml;           /* 00200000, 0x100000 bytes */
 uint8_t *g_vdp1;            /* 05D00000, 0x80000 bytes */
 int g_fault;
+int g_polls;                /* the times the C advanced the game's time: POLL(), AGAIN() and each call */
 
 /* Runs the game's function at addr with the arguments; check.py sets it. */
 uint32_t (*g_call_hook)(uint32_t addr, const uint32_t *args, int n);
 
+void g_poll(void)
+{
+    g_polls++;
+}
+
+uint32_t g_jump(uint32_t addr, const uint32_t *args, int n)
+{
+    if (!g_call_hook) {
+        g_fault = 1;
+        return 0;
+    }
+    return g_call_hook(addr, args, n);
+}
+
 uint32_t g_call(uint32_t addr, const uint32_t *args, int n)
 {
+    g_polls++;
     if (!g_call_hook) {
         g_fault = 1;
         return 0;

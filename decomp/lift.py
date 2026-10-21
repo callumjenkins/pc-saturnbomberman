@@ -412,7 +412,7 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         if r not in st.fresh and r not in params and ins.op != "jmp":
             break
         args.append(st.get(r))
-    text = "GCALL%d(%s%s)" % (len(args), where, "".join(", " + a for a in args))
+    text = "%s%d(%s%s)" % ("GJUMP" if ins.op == "jmp" else "GCALL", len(args), where, "".join(", " + a for a in args))
     st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in range(1, 8)}))
     st.clobbered |= set(range(1, 8))
     st.clobbered.discard(0)
