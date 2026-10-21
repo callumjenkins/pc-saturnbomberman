@@ -10,9 +10,9 @@
  *   ELEM(T,base,i)  &((T *)base)[i]  BYTEOFF(T,base,n)  (T *)((char *)base + n)
  *   LD8/LD16/LD32   a scalar at an address, ST8/ST16/ST32 store one
  *   GETB(b,i)       b[i] for a signed byte pointer
- *   GCALL0(a)       call the function at guest address a, GCALL(a, x, y...) with arguments;
+ *   GCALLn(a, ...)  call the function at guest address a with n arguments, 0 to 8, as GCALL2(a, x, y);
  *                   the result is an int. The host build runs it on the runtime (g_call), SHC
- *                   compiles a plain call.
+ *                   compiles a plain call. SHC has no variadic macros, hence one per count.
  */
 #ifndef DECOMP_GUEST_H
 #define DECOMP_GUEST_H
@@ -47,9 +47,16 @@ typedef gaddr H16PTR;
 /* Calls into the game's own code, generated or swapped. The first four arguments go in r4 to r7 and
  * any more on the stack, as SHC passes them. r8 to r15 and pr come back unchanged. */
 uint32_t g_call(uint32_t addr, const uint32_t *args, int n);
-#define GCALL0(a)          ((int)g_call((a), 0, 0))
-#define GCALL(a, ...)      ((int)g_call((a), (const uint32_t[]){__VA_ARGS__}, \
-                                        (int)(sizeof((const uint32_t[]){__VA_ARGS__}) / 4)))
+#define GCALL0(a) ((int)g_call((a), 0, 0))
+#define GCALL_(a, n, ...) ((int)g_call((a), (const uint32_t[]){__VA_ARGS__}, (n)))
+#define GCALL1(a, x1) GCALL_(a, 1, x1)
+#define GCALL2(a, x1, x2) GCALL_(a, 2, x1, x2)
+#define GCALL3(a, x1, x2, x3) GCALL_(a, 3, x1, x2, x3)
+#define GCALL4(a, x1, x2, x3, x4) GCALL_(a, 4, x1, x2, x3, x4)
+#define GCALL5(a, x1, x2, x3, x4, x5) GCALL_(a, 5, x1, x2, x3, x4, x5)
+#define GCALL6(a, x1, x2, x3, x4, x5, x6) GCALL_(a, 6, x1, x2, x3, x4, x5, x6)
+#define GCALL7(a, x1, x2, x3, x4, x5, x6, x7) GCALL_(a, 7, x1, x2, x3, x4, x5, x6, x7)
+#define GCALL8(a, x1, x2, x3, x4, x5, x6, x7, x8) GCALL_(a, 8, x1, x2, x3, x4, x5, x6, x7, x8)
 
 #else
 
@@ -72,8 +79,15 @@ typedef char *gaddr;
 #define STORE16(p, v)      (*(p) = (v))
 typedef volatile unsigned short *H16PTR;
 
-#define GCALL0(a)          (((int (*)())(a))())
-#define GCALL(a, ...)      (((int (*)())(a))(__VA_ARGS__))
+#define GCALL0(a) (((int (*)())(a))())
+#define GCALL1(a, x1) (((int (*)())(a))(x1))
+#define GCALL2(a, x1, x2) (((int (*)())(a))(x1, x2))
+#define GCALL3(a, x1, x2, x3) (((int (*)())(a))(x1, x2, x3))
+#define GCALL4(a, x1, x2, x3, x4) (((int (*)())(a))(x1, x2, x3, x4))
+#define GCALL5(a, x1, x2, x3, x4, x5) (((int (*)())(a))(x1, x2, x3, x4, x5))
+#define GCALL6(a, x1, x2, x3, x4, x5, x6) (((int (*)())(a))(x1, x2, x3, x4, x5, x6))
+#define GCALL7(a, x1, x2, x3, x4, x5, x6, x7) (((int (*)())(a))(x1, x2, x3, x4, x5, x6, x7))
+#define GCALL8(a, x1, x2, x3, x4, x5, x6, x7, x8) (((int (*)())(a))(x1, x2, x3, x4, x5, x6, x7, x8))
 
 #endif
 

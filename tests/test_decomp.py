@@ -88,6 +88,19 @@ def test_a_pointer_to_a_local_is_refused():
                RTS, NOP)
 
 
+def test_popping_a_frame_it_never_pushed_is_refused_as_a_piece_of_a_larger_function():
+    # add #4,r15 ; lds.l @r15+,pr ; rts ; nop
+    with pytest.raises(lift.Unsupported, match="stack 8 bytes off"):
+        lifted(encode("add #imm,Rn", 15, low=4), encode("lds.l @Rm+,pr", m=15), RTS, NOP)
+
+
+def test_a_literal_pool_between_two_returns_is_not_read_as_code():
+    # bt over ; nop ; rts ; mov #3,r0 ; .word 0xFFFF ; .word 0x0000 ; over: rts ; mov #0,r0
+    found = status.body(image(0x8904, NOP, RTS, encode("mov #imm,Rn", 0, low=3), 0xFFFF, 0x0000,
+                              RTS, encode("mov #imm,Rn", 0, low=0)), BASE)
+    assert [ins.pc - BASE for ins in found] == [0, 2, 4, 6, 12, 14]
+
+
 def block(start: int, kind: str, targets: list[int] | None = None, value: str = "", stmts: list[str] | None = None):
     return structure.Block(start, stmts or [], kind, value, targets or [])
 
@@ -129,7 +142,7 @@ void f06006B38(short n)
 }
 REF(Thing) f060A5EEC(REF(Thing) t)
 {
-    GCALL(0x060A5F2E, t, 1);
+    GCALL2(0x060A5F2E, t, 1);
     return t;
 }
 int f0600A4B0(unsigned int x)
@@ -154,7 +167,14 @@ def krnl(tmp_path):
 
 
 def test_only_definitions_count_as_functions_krnl_c_has(krnl):
-    assert status.drafted(krnl) == {0x06006B38, 0x060A5EEC, 0x0600A4B0, 0x0600940A, 0x0600A3E0}
+    assert status.drafted([krnl]) == {0x06006B38, 0x060A5EEC, 0x0600A4B0, 0x0600940A, 0x0600A3E0}
+
+
+def test_every_file_of_src_counts_and_a_function_goes_in_the_file_for_its_64_kib(tmp_path):
+    (tmp_path / "krnl_0600.c").write_text("int f0600A4B0(unsigned int x)\n{\n}\n")
+    (tmp_path / "krnl_0603.c").write_text("void f06038174(void)\n{\n}\n")
+    assert status.drafted(status.sources(str(tmp_path))) == {0x0600A4B0, 0x06038174}
+    assert status.source_for(0x0603C7EE, str(tmp_path)) == str(tmp_path / "krnl_0603.c")
 
 
 @pytest.mark.parametrize("name, returns, params", [
@@ -164,12 +184,12 @@ def test_only_definitions_count_as_functions_krnl_c_has(krnl):
     pytest.param("f0600A3E0", "void", ["uint32_t", "uint32_t", "int"], id="several"),
 ])
 def test_a_signature_is_read_from_its_definition(krnl, name, returns, params):
-    sig = gen.signatures(krnl)[int(name[1:], 16)]
+    sig = gen.signatures([krnl])[int(name[1:], 16)]
     assert (sig.returns, sig.params) == (returns, params)
 
 
 def test_a_wrapper_passes_r4_to_r7_and_returns_in_r0(krnl):
-    sigs = gen.signatures(krnl)
+    sigs = gen.signatures([krnl])
     assert gen.wrapper(sigs[0x0600A4B0]) == (
         "void swap_f0600A4B0(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f0600A4B0((unsigned int)c.r[4]); }")
     assert gen.wrapper(sigs[0x06006B38]) == "void swap_f06006B38(SH2Context& c) { InSwap in(c); f06006B38((short)c.r[4]); }"
@@ -240,14 +260,20 @@ def test_a_logical_shift_then_a_signed_compare_stays_signed():
 def test_a_call_passes_the_argument_registers_it_just_set():
     # mov #3,r5 ; bsr 0x06006020 ; mov r4,r4 ; rts ; nop     (bsr at +2, target +4+2*0x0E)
     code = lifted(encode("mov #imm,Rn", 5, low=3), 0xB00E, NOP, RTS, NOP)
-    assert "GCALL(0x06006020, 3)" not in code and "GCALL" in code
+    assert "GCALL1(0x06006020, 3)" not in code and "GCALL" in code
+
+
+def test_an_argument_set_in_a_branch_delay_slot_reaches_the_call_after_it():
+    # bra call ; mov #5,r4 ; call: bsr 0x06006024 ; nop ; rts ; nop
+    code = lifted(0xA000, encode("mov #imm,Rn", 4, low=5), 0xB00E, NOP, RTS, NOP)
+    assert "GCALL1(0x06006024, r4)" in code
 
 
 def test_a_tail_call_hands_on_all_four_argument_registers():
     # mov.l @(pc),r1 literal-free form: mov #imm,r1 only builds a small number, so jump through a known one
     code = lifted(encode("mov #imm,Rn", 1, low=0x20), encode("jmp @Rn", 1), NOP)
     assert code.splitlines()[0] == "int f06006000(int r4, int r5, int r6, int r7)"
-    assert "GCALL(32, r4, r5, r6, r7)" in code
+    assert "GCALL4(32, r4, r5, r6, r7)" in code
 
 
 def test_leaving_a_loop_early_is_a_break():

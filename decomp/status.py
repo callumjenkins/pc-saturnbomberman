@@ -1,6 +1,6 @@
 """The per-function status table, decomp/status.tsv.
 
-    python decomp/status.py            # rewrite the table from the build, the coverage files and krnl.c
+    python decomp/status.py            # rewrite the table from the build, the coverage files and src/
     python decomp/status.py --summary  # counts by module and state
 
 One row per function the recompile found. Everything but `state` and `name` is read from the build, so
@@ -24,10 +24,13 @@ ROOT = os.path.dirname(HERE)
 COLUMNS = ("module", "address", "insns", "calls", "leaf", "executed", "yields", "state", "name")
 COVERAGE = ("build/test/*/coverage.txt", "build/run/*/coverage.txt", "build/play/*/replay/coverage.txt")
 KRNL = ("KRNL", "build/extract/BOMSS/0KRNL.BIN", 0x06006000)
+SRC = os.path.join(HERE, "src")
 STATES = ("todo", "drafted", "swapped", "dead")
 TABLE = os.path.join(HERE, "status.tsv")
 
+_BRANCHES = ("bt", "bf", "bt/s", "bf/s", "bra")
 _CALL = re.compile(r"\b(?:bsr|jsr|bsrf)\b")
+_ENDS = ("bra", "braf", "jmp", "rts", "rte")
 _DEFINED = re.compile(r"^[^\s#/*].*?\bf([0-9A-F]{8})\(", re.MULTILINE)
 _REPLACE = re.compile(r'\[\[replace\]\]\s*\nmodule = "(\w+)"\s*\nat = (0x[0-9A-Fa-f]+)')
 
@@ -52,10 +55,13 @@ class Row:
                 "yes" if self.executed else "no", "yes" if self.yields else "no", self.state, self.name]
 
 
-def drafted(path: str = os.path.join(HERE, "krnl.c")) -> set[int]:
-    """The addresses krnl.c defines a function for."""
-    with open(path, encoding="utf-8") as f:
-        return {int(m.group(1), 16) for m in _DEFINED.finditer(f.read())}
+def drafted(paths: list[str] | None = None) -> set[int]:
+    """The addresses the decompiled C defines a function for."""
+    found: set[int] = set()
+    for path in paths or sources():
+        with open(path, encoding="utf-8") as f:
+            found |= {int(m.group(1), 16) for m in _DEFINED.finditer(f.read())}
+    return found
 
 
 def executed(root: str = ROOT) -> set[tuple[str, int]]:
@@ -117,6 +123,16 @@ def previous(path: str = TABLE) -> dict[tuple[str, int], Row]:
     return old
 
 
+def source_for(address: int, folder: str = SRC) -> str:
+    """The file of src/ a function at this address belongs in."""
+    return os.path.join(folder, "krnl_%04X.c" % (address >> 16))
+
+
+def sources(folder: str = SRC) -> list[str]:
+    """The decompiled C, one file per 64 KiB of the module, so two people never edit the same file."""
+    return sorted(glob.glob(os.path.join(folder, "*.c")))
+
+
 def yielding(root: str = ROOT) -> set[int]:
     """The KRNL functions a task can park inside, by saturn-recomp's analysis of the game's [tasks]."""
     from saturnrecomp import config
@@ -124,31 +140,42 @@ def yielding(root: str = ROOT) -> set[int]:
     return resume.yielding_functions(config.load(os.path.join(root, "game.toml")))
 
 
-def walk(root: str, address: int) -> tuple[int, int]:
-    """Instructions and calls from a KRNL entry to the rts that no branch jumps past. A replaced function
-    has no rows in the map, so this counts one that was never in the table."""
+def body(image: sh2.Image, address: int) -> list[sh2.Insn]:
+    """The instructions reachable from an entry without leaving the function, in address order. A literal
+    pool between two returns is never reached, and a jump through a register is not followed."""
+    found: dict[int, sh2.Insn] = {}
+    pending = [address]
+    while pending:
+        at = pending.pop()
+        if at in found or not image.contains(at):
+            continue
+        ins = found[at] = image.insn(at)
+        if ins.delay:
+            found.setdefault(at + 2, image.insn(at + 2))
+        if ins.op in _BRANCHES:
+            pending.append(ins.target)
+        if ins.op not in _ENDS:
+            pending.append(at + 4 if ins.delay else at + 2)
+    return [found[at] for at in sorted(found)]
+
+
+def krnl_image(root: str = ROOT) -> sh2.Image:
     _, rel, base = KRNL
     with open(os.path.join(root, rel), "rb") as f:
-        image = sh2.Image(f.read(), base)
-    insns = calls = 0
-    at, farthest = address, address
-    while image.contains(at):
-        ins = image.insn(at)
-        insns += 1
-        calls += ins.op in ("bsr", "jsr", "bsrf")
-        at += 2
-        if ins.op in ("bt", "bf", "bt/s", "bf/s", "bra"):
-            farthest = max(farthest, ins.target)
-        if ins.op == "rts" and at + 2 > farthest:
-            insns += 1
-            break
-    return insns, calls
+        return sh2.Image(f.read(), base)
+
+
+def walk(root: str, address: int) -> tuple[int, int]:
+    """Instructions and calls of a KRNL function. A replaced function has no rows in the map, so this
+    counts one that was never in the table."""
+    insns = body(krnl_image(root), address)
+    return len(insns), sum(ins.op in ("bsr", "jsr", "bsrf") for ins in insns)
 
 
 def build_table(root: str = ROOT) -> list[Row]:
     ran = executed(root)
     swapped = replaced(os.path.join(root, "game.toml"))     # only to start a table; gen.py writes them after
-    written = drafted(os.path.join(HERE, "krnl.c"))
+    written = drafted()
     old = previous(os.path.join(HERE, "status.tsv"))
     rows = functions(root)
     found = {(row.module, row.address) for row in rows}

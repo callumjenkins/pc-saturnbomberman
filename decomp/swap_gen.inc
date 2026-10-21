@@ -1,4 +1,4 @@
-// Written by decomp/gen.py from status.tsv and krnl.c. Do not edit.
+// Written by decomp/gen.py from status.tsv and src/. Do not edit.
 
 extern "C" {
 void f0600665C(void);

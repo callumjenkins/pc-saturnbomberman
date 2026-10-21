@@ -54,15 +54,15 @@ def lift_all(addresses: list[int]) -> tuple[dict[int, str], dict[int, str]]:
     return drafts, refused
 
 
-def trials(name: str, spec: tuple, seed: int, queue: "multiprocessing.Queue", source: str) -> None:
-    lib = check.build(source)
-    fails, ran = check.run(lib, name, spec, TRIALS, seed)
+def trials(sig: gen.Signature, spec: tuple, seed: int, queue: "multiprocessing.Queue", source: str) -> None:
+    lib = check.build([source])
+    fails, ran = check.run(lib, sig.name, spec, TRIALS, seed, sig)
     queue.put(("differs", fails[0][1][0]) if fails else ("few", "%d ran" % ran) if ran < TRIALS // 4 else ("ok", ""))
 
 
-def judge(name: str, spec: tuple, source: str) -> tuple[str, str]:
+def judge(sig: gen.Signature, spec: tuple, source: str) -> tuple[str, str]:
     queue: multiprocessing.Queue = multiprocessing.Queue()
-    child = multiprocessing.Process(target=trials, args=(name, spec, 1, queue, source))
+    child = multiprocessing.Process(target=trials, args=(sig, spec, 1, queue, source))
     child.start()
     child.join(TIMEOUT)
     if child.is_alive():
@@ -88,12 +88,12 @@ def main() -> None:
         f.write('#include "guest.h"\n\n' + "\n".join(drafts.values()))
     results: dict[int, tuple[str, str]] = {a: ("unsupported", why) for a, why in refused.items()}
     try:
-        check.build(source)
+        check.build([source])
     except Exception as error:
         raise SystemExit("the drafts do not compile together: %s" % error)
-    sigs = gen.signatures(source)
+    sigs = gen.signatures([source])
     with concurrent.futures.ThreadPoolExecutor(args.jobs) as pool:
-        pending = {a: pool.submit(judge, sigs[a].name, check.default_spec(sigs[a]), source) for a in drafts}
+        pending = {a: pool.submit(judge, sigs[a], check.default_spec(sigs[a]), source) for a in drafts}
         for address, job in pending.items():
             results[address] = job.result()
     with open(os.path.join(OUT, "batch.tsv"), "w", encoding="utf-8") as f:

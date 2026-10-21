@@ -1,8 +1,8 @@
-"""Checks functions of krnl.c against the game and, when they agree, swaps them in.
+"""Checks decompiled functions (src/) against the game and, when they agree, swaps them in.
 
     python decomp/run.py ADDRESS... [--trials N] [--seed S]
 
-For each address: run the cosim (check.py) on the definition in krnl.c, and on agreement mark the row
+For each address: run the cosim (check.py) on the function's definition, and on agreement mark the row
 `swapped` in status.tsv, then rewrite swap_gen.inc and the replace block in game.toml (gen.py). A function
 that differs is left as it was. The game itself is rebuilt and run by tests/frames.py.
 """
@@ -35,14 +35,14 @@ def main() -> None:
     for text in args.addresses:
         address = int(text, 16)
         if address not in sigs or address not in by_address:
-            sys.exit("%08X: not a KRNL function defined in krnl.c" % address)
+            sys.exit("%08X: not a KRNL function defined in src/" % address)
         sig = sigs[address]
         if by_address[address].yields:
             failed += 1
             print("%s  a task can park inside it, so host code cannot stand in for it" % sig.name)
             continue
         spec = check.SPEC.get(sig.name) or check.default_spec(sig)
-        fails, ran = check.run(lib, sig.name, spec, args.trials, args.seed)
+        fails, ran = check.run(lib, sig.name, spec, args.trials, args.seed, sig)
         if not fails and ran < MIN_RAN:
             failed += 1
             print("%s  only %d of %d trials ran to the end; not enough to swap" % (sig.name, ran, args.trials))

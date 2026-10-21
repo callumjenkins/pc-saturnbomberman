@@ -1,14 +1,16 @@
-"""Compiles krnl.c with Hitachi SHC and compares each function with the game's.
+"""Compiles the files of src/ with Hitachi SHC and compares each function with the game's.
 
     SHC_DIR=/path/to/shc python decomp/shc_compare.py [-v] [shc options]
 
-SHC_DIR holds shc.exe, which runs under Wine; WINEPREFIX is used if set. The game's side comes from
-the recompiler's output in build/recomp. Instruction sequences are compared with literal addresses
+SHC_DIR holds shc.exe, which runs under Wine; WINEPREFIX is used if set. The game's side is read from
+0KRNL.BIN in build/extract. Instruction sequences are compared with literal addresses
 and branch targets ignored, at four levels: exact, the same up to register names, the same
 instructions in another order, and different.
 """
 import re,glob,sys,os,subprocess,collections
-HERE=os.path.dirname(os.path.abspath(__file__)); REC=os.path.join(os.path.dirname(HERE),"build","recomp")
+HERE=os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0,HERE)
+import status
 SHC_DIR=os.environ["SHC_DIR"]
 def norm(ins):
     ins=ins.strip().lower(); ins=re.sub(r"\s+"," ",ins); ins=re.sub(r",\s*",",",ins)
@@ -21,19 +23,8 @@ def norm(ins):
     if op in("jsr","jmp"): return op+" "+args
     args=re.sub(r"\(0,(r\d+)\)",r"@\1",args)
     return op+(" "+args if args else "")
-def game_funcs():
-    g={}
-    for fn in sorted(glob.glob(REC+"/p_krnl_*.cpp")):
-        cur=None
-        for line in open(fn):
-            m=re.match(r"void f_([0-9A-F]{8})\(",line)
-            if m: cur=g.setdefault(m.group(1),[]); continue
-            m=re.search(r"//\s+[0-9A-F]{8}\s+(.*)$",line)
-            if m and cur is not None:
-                for part in m.group(1).split(" ; "):
-                    n=norm(part)
-                    if n: cur.append(n)
-    return g
+def game_func(image,address):
+    return [n for n in (norm(ins.text) for ins in status.body(image,address)) if n]
 def shc_funcs(src):
     out={};cur=None
     for line in open(src,errors="ignore"):
@@ -61,19 +52,21 @@ def main():
     args=sys.argv[1:]; verbose="-v" in args
     opts=[a for a in args if a!="-v"] or ["-optimize=1"]
     env=dict(os.environ,WINEDEBUG="-all",SHC_LIB="Z:"+SHC_DIR,SHC_TMP="Z:"+HERE)
-    src=os.path.join(HERE,"krnl.src")
-    if os.path.exists(src): os.remove(src)
-    p=subprocess.run(["wine",os.path.join(SHC_DIR,"shc.exe"),"-cpu=sh2","-code=asmcode"]+opts+["krnl.c"],cwd=HERE,env=env,capture_output=True,text=True)
-    errs=[l for l in p.stdout.splitlines() if re.search(r"\((E|F)\)",l)]
-    if errs: print("\n".join(errs))
-    if not os.path.exists(src): return
-    G=game_funcs(); res=[]
+    funcs={}
+    for c in sorted(glob.glob(os.path.join(HERE,"src","*.c"))):
+        src=os.path.join(HERE,os.path.basename(c)[:-2]+".src")
+        if os.path.exists(src): os.remove(src)
+        p=subprocess.run(["wine",os.path.join(SHC_DIR,"shc.exe"),"-cpu=sh2","-code=asmcode","-include=."]+opts+["src/"+os.path.basename(c)],cwd=HERE,env=env,capture_output=True,text=True)
+        errs=[l for l in p.stdout.splitlines() if re.search(r"\((E|F)\)",l)]
+        if errs: print("\n".join(errs))
+        if os.path.exists(src):
+            funcs.update(shc_funcs(src)); os.remove(src)
+    image=status.krnl_image(); res=[]
     import difflib
-    for name,seq in shc_funcs(src).items():
+    for name,seq in funcs.items():
         m=re.match(r"f([0-9A-Fa-f]{8})",name)
         if not m: continue
-        a=m.group(1).upper(); g=G.get(a)
-        if g is None: print(a,"not in game"); continue
+        a=m.group(1).upper(); g=game_func(image,int(a,16))
         lvl = 1 if seq==g else 2 if canon(seq)==canon(g) else 3 if mnems(seq)==mnems(g) else 4
         res.append((a,len(g),len(seq),lvl))
         if lvl>1 and verbose:

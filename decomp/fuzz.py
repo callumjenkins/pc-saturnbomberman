@@ -166,7 +166,7 @@ def run_one(seed, trials=40):
     except Exception as e: return 'LIFTCRASH',repr(e)
     path=os.path.join(TMP,'f%d.c'%seed)
     open(path,'w').write('#include "guest.h"\n'+c)
-    try: lib=check.build(path)
+    try: lib=check.build([path])
     except Exception as e: return 'nocompile',c
     fn=getattr(lib,'f06006000'); fn.restype=ctypes.c_int32
     head=c.splitlines()[0]; returns=head.startswith('int'); nparams=head.count('int r')

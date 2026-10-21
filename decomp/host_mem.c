@@ -1,10 +1,11 @@
-/* The emulated address space the decompiled functions run on in check.py: work RAM-H and VDP1
- * VRAM, big-endian, with the cache-through mirror folded onto the cached address. check.py points
+/* The emulated address space the decompiled functions run on in check.py: work RAM-H, work RAM-L
+ * and VDP1 VRAM, big-endian, with the cache-through mirror folded onto the cached address. check.py points
  * g_wram and g_vdp1 at the buffers of the SH-2 interpreter it runs the callees on, so a function
  * and the code it calls see the same bytes. An access outside them sets g_fault and reads zero. */
 #include <stdint.h>
 
 uint8_t *g_wram;            /* 06000000, 0x100000 bytes */
+uint8_t *g_wraml;           /* 00200000, 0x100000 bytes */
 uint8_t *g_vdp1;            /* 05D00000, 0x80000 bytes */
 int g_fault;
 
@@ -24,9 +25,11 @@ static uint8_t *locate(uint32_t addr, int size)
 {
     if (addr >> 28 == 2)
         addr &= 0x1FFFFFFF;
-    if (addr >= 0x06000000u && addr + size <= 0x06100000u)
+    if (addr >= 0x06000000u && addr <= 0x06100000u - size)
         return g_wram + (addr - 0x06000000u);
-    if (addr >= 0x05D00000u && addr + size <= 0x05D80000u)
+    if (addr >= 0x00200000u && addr <= 0x00300000u - size)
+        return g_wraml + (addr - 0x00200000u);
+    if (addr >= 0x05D00000u && addr <= 0x05D80000u - size)
         return g_vdp1 + (addr - 0x05D00000u);
     g_fault = 1;
     return 0;

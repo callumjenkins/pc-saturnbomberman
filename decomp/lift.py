@@ -18,6 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "saturn-recomp", "src"))
+import status  # noqa: E402
 import structure  # noqa: E402
 from saturnrecomp import sh2  # noqa: E402
 
@@ -65,7 +66,7 @@ class State:
     stmts: list[Stmt] = field(default_factory=list)
     known: dict[int, int] = field(default_factory=dict)
     clobbered: set[int] = field(default_factory=set)
-    fresh: set[int] = field(default_factory=set)         # written since the last call in this block
+    fresh: set[int] = field(default_factory=set)         # written since the last call, on every path here
     flag: str | None = None
     macl: str | None = None
     flags: int = 0                          # how many flag variables have been made so far
@@ -349,6 +350,7 @@ class Read:
     stmts: list[Stmt]
     term: str                               # the branch condition or the returned expression
     tail: bool = False                      # it ends by jumping to another function
+    fresh: set[int] = field(default_factory=set)         # State.fresh where the block ends
 
 
 def strip(expr: str) -> str:
@@ -391,6 +393,9 @@ def leaders(image: "sh2.Image", entry: int) -> dict[int, int]:
                     reach(target, sp)
                 break
             if ins.op in ("rts", "jmp"):
+                if sp:
+                    raise Unsupported("returns with the stack %d bytes off at %08X: a piece of a larger function"
+                                      % (sp, at))
                 break
             at = nxt
     return found
@@ -407,7 +412,7 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         if r not in st.fresh and r not in params and ins.op != "jmp":
             break
         args.append(st.get(r))
-    text = "GCALL(%s%s)" % (where, "".join(", " + a for a in args)) if args else "GCALL0(%s)" % where
+    text = "GCALL%d(%s%s)" % (len(args), where, "".join(", " + a for a in args))
     st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in range(1, 8)}))
     st.clobbered |= set(range(1, 8))
     st.clobbered.discard(0)
@@ -418,8 +423,8 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
 
 
 def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: set[int], flags: int,
-               slots: dict[int, int]) -> tuple[Read, int]:
-    st = State(flags=flags, sp=stops[start], slots=slots)
+               slots: dict[int, int], fresh: set[int]) -> tuple[Read, int]:
+    st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh))
     block = structure.Block(start)
     term = ""
     tail = False
@@ -461,7 +466,7 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
         if at in stops:
             block.kind, block.targets = "goto", [at]
             break
-    return Read(block, st.stmts, term, tail), st.flags
+    return Read(block, st.stmts, term, tail, st.fresh), st.flags
 
 
 def uses_of(read: Read, returns: bool) -> set[str]:
@@ -535,16 +540,32 @@ def simplify(read: Read, live_out: set[str], returns: bool) -> None:
                 break
 
 
+def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int],
+                params: set[int]) -> tuple[dict[int, Read], dict[int, int]]:
+    """Every block, read until the registers a call may pass settle: those written since the last call
+    on every path into a block, so an argument set before a branch reaches the call after it."""
+    fresh = {at: set() if at == entry else set(range(16)) for at in stops}
+    while True:
+        flags = 0
+        reads: dict[int, Read] = {}
+        slots: dict[int, int] = {}
+        for at in sorted(stops):
+            reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at])
+        into: dict[int, list[set[int]]] = {at: [] for at in stops}
+        for read in reads.values():
+            for target in read.block.targets:
+                into[target].append(read.fresh)
+        settled = {at: set() if at == entry or not into[at] else set.intersection(*into[at]) for at in stops}
+        if settled == fresh:
+            return reads, slots
+        fresh = settled
+
+
 def lift(image: "sh2.Image", entry: int) -> str:
     stops = leaders(image, entry)
     params: set[int] = set()
     for attempt in range(2):
-        flags = 0
-        reads = {}
-        slots: dict[int, int] = {}
-        for at in sorted(stops):
-            reads[at], flags = read_block(image, at, {k: v for k, v in stops.items() if k != at} | {at: stops[at]},
-                                          params, flags, slots)
+        reads, slots = read_blocks(image, entry, stops, params)
         returns = any(s.var == "r0" for r in reads.values() for s in r.stmts)
         live_in, live_out = liveness(reads, returns)
         if returns and "r0" in live_in[entry]:
@@ -583,7 +604,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("address", help="hex entry address")
     parser.add_argument("--module", default="KRNL", choices=sorted(IMAGES))
-    parser.add_argument("--append", action="store_true", help="add the draft to krnl.c instead of printing it")
+    parser.add_argument("--append", action="store_true", help="add the draft to its file in src/ instead of printing it")
     args = parser.parse_args()
     path, base = IMAGES[args.module]
     with open(os.path.join(ROOT, path), "rb") as f:
@@ -595,8 +616,10 @@ def main() -> None:
     if not args.append:
         sys.stdout.write(draft)
         return
-    with open(os.path.join(HERE, "krnl.c"), "a", encoding="utf-8") as f:
-        f.write("\n/* Lifted by decomp/lift.py, not yet rewritten by hand. */\n" + draft)
+    target = status.source_for(int(args.address, 16))
+    start = "" if os.path.exists(target) else '#include "krnl.h"\n'
+    with open(target, "a", encoding="utf-8") as f:
+        f.write(start + "\n/* Lifted by decomp/lift.py, not yet rewritten by hand. */\n" + draft)
 
 
 if __name__ == "__main__":

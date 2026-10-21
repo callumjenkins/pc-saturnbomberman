@@ -3,7 +3,7 @@
     python decomp/gen.py          # rewrite decomp/swap_gen.inc and the replace block in game.toml
     python decomp/gen.py --check  # exit 1 if either is out of date
 
-The wrapper for each function comes from its definition in krnl.c: the SH-2 passes arguments in r4 to r7
+The wrapper for each function comes from its definition in src/: the SH-2 passes arguments in r4 to r7
 and on the stack after that, and takes the result from r0.
 """
 import argparse
@@ -19,7 +19,7 @@ import status  # noqa: E402
 
 BEGIN = "# BEGIN decomp replaces (python decomp/gen.py)"
 END = "# END decomp replaces"
-HEADER = "// Written by decomp/gen.py from status.tsv and krnl.c. Do not edit.\n"
+HEADER = "// Written by decomp/gen.py from status.tsv and src/. Do not edit.\n"
 MODULE = "KRNL"
 
 _DEFINITION = re.compile(r"^(?P<ret>[^\s#/*].*?)\bf(?P<address>[0-9A-F]{8})\((?P<params>[^)]*(?:\([^)]*\)[^)]*)*)\)\s*$",
@@ -62,9 +62,11 @@ def split_params(text: str) -> list[str]:
     return [re.sub(r"\s+\w+$", "", p.strip()) for p in parts]
 
 
-def signatures(path: str = os.path.join(HERE, "krnl.c")) -> dict[int, Signature]:
-    with open(path, encoding="utf-8") as f:
-        text = f.read()
+def signatures(paths: list[str] | None = None) -> dict[int, Signature]:
+    text = ""
+    for path in paths or status.sources():
+        with open(path, encoding="utf-8") as f:
+            text += f.read()
     found = {}
     for m in _DEFINITION.finditer(text):
         address = int(m.group("address"), 16)
@@ -122,7 +124,7 @@ def generate(check: bool = False) -> bool:
     known = signatures()
     missing = [a for a in addresses if a not in known]
     if missing:
-        sys.exit("swapped in status.tsv but not defined in krnl.c: " + ", ".join("%08X" % a for a in missing))
+        sys.exit("swapped in status.tsv but not defined in src/: " + ", ".join("%08X" % a for a in missing))
     inc = render_inc([known[a] for a in addresses])
     toml_path = os.path.join(ROOT, "game.toml")
     inc_path = os.path.join(HERE, "swap_gen.inc")

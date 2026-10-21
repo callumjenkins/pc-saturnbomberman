@@ -1,28 +1,29 @@
 # decomp
 
-A decompilation of the game's kernel (`BOMSS/0KRNL.BIN`). Each function in `krnl.c` is C that does what
+A decompilation of the game's kernel (`BOMSS/0KRNL.BIN`). Each function in `src/` is C that does what
 the game's function does, named by its address. A function is swapped into the recompiled game once it
 agrees with the game's own code.
 
 | File | What it does |
 |---|---|
-| `krnl.c` | The decompiled functions |
+| `src/krnl_06XX.c` | The decompiled functions, one file per 64 KiB of the module so two people never edit the same file |
+| `krnl.h` | Types and tables the files share |
 | `status.tsv` | A row per function the recompile found: size, calls, whether a route runs it, whether a task can park in it, and its state |
-| `status.py` | Rewrites `status.tsv` from the build, the coverage files and `krnl.c` |
+| `status.py` | Rewrites `status.tsv` from the build, the coverage files and `src/` |
 | `lift.py` | A first draft of a function's C from its instructions (`structure.py` rebuilds the if and while) |
 | `batch.py` | Lifts many functions and runs the cosim on each draft |
-| `run.py` | Runs the cosim on functions of `krnl.c` and swaps those that agree |
+| `run.py` | Runs the cosim on functions of `src/` and swaps those that agree |
 | `gen.py` | Writes `swap_gen.inc` and the `[[replace]]` block in `game.toml` from `status.tsv` |
 | `check.py` | Runs each function against the game's own code and compares results and memory |
 | `guest.h`, `host_mem.c` | Macros and memory that let one source compile for SHC and for the host |
 | `swap.cpp`, `swap.cmake` | The runtime side: `g_rd`, `g_wr`, `g_call` and the build option |
-| `shc_compare.py` | Compiles `krnl.c` with SHC and compares its instructions with the game's |
+| `shc_compare.py` | Compiles `src/` with SHC and compares its instructions with the game's |
 
 ## Doing a function
 
 ```sh
 python decomp/status.py --summary            # where things stand
-python decomp/lift.py 0605C6A2               # a draft; --append adds it to krnl.c
+python decomp/lift.py 0605C6A2               # a draft; --append adds it to its file in src/
 python decomp/batch.py --leaves --executed --limit 50   # drafts and cosim for many, in build/decomp/batch.tsv
 python decomp/run.py 0605C6A2                # cosim, then swap it in on agreement
 uv run tests/frames.py normal battle-round   # the game, with the swap
@@ -46,17 +47,19 @@ SHC_DIR=/path/to/shc python decomp/shc_compare.py -v   # needs Hitachi SHC and W
 ```
 
 `check.py` gives the game's function and the host build the same random arguments and the same
-random data, then compares the return value and every byte of work RAM and VDP1 VRAM. The host build's
+random data, then compares the return value and every byte of work RAM (high and low) and VDP1 VRAM. The host build's
 memory is the buffer of a second interpreter, so a call the C makes into the game (`GCALL`) runs the
 game's own code on the same bytes. The game's function runs on saturn-recomp's SH-2 interpreter, not on
 the recompiled output. The top 4 KiB of work RAM is left out because the game spills registers onto its
 stack.
 
 Memory outside work RAM and VDP1 VRAM is not modelled. A trial where both sides touch it is skipped, and
-`run.py` wants at least 30 of 300 to run to the end. So a function's hardware accesses are not compared:
-the frame hashes and the Beetle comparison are the evidence for those. Parameters of type `int` get a
-small count, a negative, a pointer into the data, or anything; `SPEC` in `check.py` narrows one that
-needs it. `CALLS` lists the calls a function makes, in order, where the order matters.
+`run.py` wants at least 100 of 300 to run to the end. So a function's hardware accesses are not compared:
+the frame hashes and the Beetle comparison are the evidence for those. A number parameter gets any 32-bit
+value whatever its declared width, passed at that width as the swap's wrapper does, so a type narrower than
+what the game reads fails. A `gaddr` or `REF(T)` gets a pointer into the data. `SPEC` in `check.py`
+narrows one that needs it. KRNL's code runs into the randomised data, so a function there keeps its own
+bytes. `CALLS` lists the calls a function makes, in order, where the order matters.
 
 `shc_compare.py` is a second, separate measure. The game was built with Hitachi SHC, and these
 functions are the ones whose SHC 5.0 output has the same instructions as the game's, some in another
@@ -64,17 +67,17 @@ order. SHC is not included and is not freely available.
 
 ## Calling the game's code
 
-A function that is not a leaf calls the game's code with `GCALL(address, args...)` (`GCALL0` for none),
+A function that is not a leaf calls the game's code with `GCALLn(address, args...)`, n being the count,
 as `f060A5EEC` does for the two setters it leaves in the game. The result is an `int`. Under SHC this is a
 plain call. On the host, `check.py` runs the callee on the interpreter, and in the game `g_call` in
 `swap.cpp` runs it through `sh2_call`, so the callee may be generated or another swap. The first four
 arguments go in r4 to r7 and later ones on the stack, lowest first. r8 to r15 and pr come back
-unchanged. Calls between functions of `krnl.c` are ordinary C calls (`f0600942E` calls `f0600940A`).
+unchanged. Calls between functions of `src/` are ordinary C calls (`f0600942E` calls `f0600940A`).
 Untested: more than four arguments. A callee that switches tasks is why `yields` functions are left alone.
 
 ## Running them in the game
 
-`swap.cpp` and `swap.cmake` build `krnl.c` into the recompiled game, and the `[[replace]]` entries in
+`swap.cpp` and `swap.cmake` build `src/` into the recompiled game, and the `[[replace]]` entries in
 `game.toml` make the generated `KRNL` functions call it. `swap.cpp` passes the arguments the way the
 SH-2 does (r4 to r7, the result in r0), and `g_rd` and `g_wr` read and write the runtime's own address
 space. Remove the `[[replace]]` entries and the `SATURN_EXTRA` option to get the plain recompile.
@@ -88,6 +91,6 @@ builds from its position, in `060275E4`, and picks among them with `f0600A4B0`. 
 there match the build without the swaps. The earlier routes stop before that CPU dies.
 
 Eight more functions came from the lifter (`f060086EA` and the others in `status.tsv` marked `swapped`
-that `krnl.c` marks "Lifted by"). Most are empty or return a constant, so they show the pipeline works
+that `src/` marks "Lifted by"). Most are empty or return a constant, so they show the pipeline works
 and little else. With all 18 swapped, `normal`, `battle-round`, `mad-bomber-com`, `bonus-game`,
 `clear-M-1`, `die` and `items` match their recorded frame and sound hashes.
