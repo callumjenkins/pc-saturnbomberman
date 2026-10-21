@@ -19,7 +19,7 @@ from dataclasses import dataclass
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "saturn-recomp", "src"))
 from saturnrecomp import build as recomp_build, config, sh2  # noqa: E402
 from saturnrecomp.analysis import resume  # noqa: E402
-from saturnrecomp.recomp import discover  # noqa: E402
+from saturnrecomp.recomp import __main__ as recomp_main, discover, emit  # noqa: E402
 
 COLUMNS = ("module", "address", "insns", "calls", "leaf", "executed", "yields", "hooked", "state", "name")
 COVERAGE = ("build/test/*/coverage.txt", "build/run/*/coverage.txt", "build/play/*/replay/coverage.txt")
@@ -131,27 +131,8 @@ def executed(root: str = ROOT) -> set[tuple[str, int]]:
 
 
 def function_code(root: str = ROOT) -> dict[int, set[int]]:
-    """{entry: its instruction addresses} for KRNL, as the recompiler finds them from the build's seeds.
-    Cached against build/recomp/inputs.json, which the last recompile wrote from everything it read."""
-    cache = os.path.join(root, "build", "decomp", "function-code.json")
-    with open(os.path.join(root, "build", "recomp", "inputs.json"), encoding="utf-8") as f:
-        stamp = f.read()
-    try:
-        with open(cache, encoding="utf-8") as f:
-            saved = json.load(f)
-        if saved["stamp"] == stamp:
-            return {int(k): set(v) for k, v in saved["code"].items()}
-    except (OSError, ValueError, KeyError):
-        pass
-    game = config.load(os.path.join(root, "game.toml"))
-    _, path, base, seeds = next(s for s in recomp_build.specs(game) if s[0] == "KRNL")
-    with open(path, "rb") as f:
-        program = discover.Program(sh2.Image(f.read(), base), [base, *seeds])
-    code = {e: sorted(fn.code) for e, fn in program.funcs.items()}
-    os.makedirs(os.path.dirname(cache), exist_ok=True)
-    with open(cache, "w", encoding="utf-8") as f:
-        json.dump({"stamp": stamp, "code": code}, f)
-    return {e: set(v) for e, v in code.items()}
+    """{entry: its instruction addresses} for KRNL, as the recompiler finds them from the build's seeds."""
+    return {int(k): set(v) for k, v in _discovery(root)["code"].items()}
 
 
 def functions(root: str = ROOT) -> list[Row]:
@@ -204,6 +185,12 @@ def own(image: sh2.Image, address: int, code: set[int] | None) -> list[sh2.Insn]
         if ins.delay:
             found.setdefault(at + 2, image.insn(at + 2))
     return [found[at] for at in sorted(found)]
+
+
+def polling_jumps(root: str = ROOT) -> set[int]:
+    """The KRNL jmp and braf instructions whose generated code advances time before it jumps, wherever the
+    jump then goes: one that may go back within its function."""
+    return set(_discovery(root)["polling"])
 
 
 def previous(path: str = TABLE) -> dict[tuple[str, int], Row]:
@@ -273,6 +260,50 @@ def write_table(rows: list[Row], path: str = TABLE) -> None:
 def yielding(root: str = ROOT) -> set[int]:
     """The KRNL functions a task can park inside, by saturn-recomp's analysis of the game's [tasks]."""
     return resume.yielding_functions(config.load(os.path.join(root, "game.toml")))
+
+
+def _discovery(root: str) -> dict:
+    """The recompiler's view of KRNL, cached against build/recomp/inputs.json, which the last recompile
+    wrote from everything it read."""
+    cache = os.path.join(root, "build", "decomp", "function-code.json")
+    with open(os.path.join(root, "build", "recomp", "inputs.json"), encoding="utf-8") as f:
+        stamp = f.read()
+    try:
+        with open(cache, encoding="utf-8") as f:
+            saved = json.load(f)
+        if saved["stamp"] == stamp and "polling" in saved:
+            return saved
+    except (OSError, ValueError, KeyError):
+        pass
+    game = config.load(os.path.join(root, "game.toml"))
+    _, path, base, seeds = next(s for s in recomp_build.specs(game) if s[0] == "KRNL")
+    with open(path, "rb") as f:
+        program = discover.Program(sh2.Image(f.read(), base), [base, *seeds])
+    saved = {"stamp": stamp, "code": {e: sorted(fn.code) for e, fn in program.funcs.items()},
+             "polling": _polling_jumps(program)}
+    os.makedirs(os.path.dirname(cache), exist_ok=True)
+    with open(cache, "w", encoding="utf-8") as f:
+        json.dump(saved, f)
+    return json.loads(json.dumps(saved))
+
+
+def _polling_jumps(program: discover.Program) -> list[int]:
+    """The generator's own rule: a jump table advances time when any target it may take is in its function
+    at or before the jump, and an unresolved one may take any instruction of its function."""
+    entries, volatile = set(program.funcs), recomp_main.volatile_literals(program)
+    polling = []
+    for fn in program.funcs.values():
+        jumps = [a for a in fn.code if program.img.insn(a).op in ("jmp", "braf")]
+        if not jumps:
+            continue
+        body = emit.Body(program, fn, entries, volatile, comments=False)
+        anywhere = [a for a in fn.code if a not in body.slots]
+        for a in jumps:
+            candidates, how = body._targets[a]
+            reach = anywhere if how == "unresolved" else candidates
+            if any(v in fn.code and v <= a for v in reach):
+                polling.append(a)
+    return sorted(polling)
 
 
 def main() -> None:

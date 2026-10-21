@@ -55,6 +55,7 @@ class Counting(sh2emu.CPU):
     _image = None
     _bodies: dict[int, set[int]] = {}
     _code: dict[int, set[int]] | None = None
+    _jumps: set[int] | None = None
     seen: set[tuple[int, bool]] | None = None     # (pc, taken) for each conditional branch of the called function's own code
 
     def call(self, entry: int, max_steps: int = 10_000_000, **regs: int) -> int:
@@ -77,7 +78,11 @@ class Counting(sh2emu.CPU):
             self.code = self.outer.pop() if self.outer else self.code
         elif op in ("ldc", "ldc.l") and ins.fmt.endswith("sr"):
             self.polls += 1
-        elif op in ("bra", "braf", "jmp") or op in CONDITIONAL and self.pc != pc + (4 if ins.delay else 2):
+        elif op in ("braf", "jmp"):
+            self.polls += pc in self._polling()
+            if self.pc not in self.code:
+                self.code = self._body(self.pc)
+        elif op == "bra" or op in CONDITIONAL and self.pc != pc + (4 if ins.delay else 2):
             if self.pc not in self.code:
                 self.code = self._body(self.pc)
             elif self.pc <= pc:
@@ -94,6 +99,12 @@ class Counting(sh2emu.CPU):
                 cls._image = status.krnl_image()
             cls._bodies[entry] = {ins.pc for ins in status.body(cls._image, entry)}
         return cls._bodies[entry]
+
+    @classmethod
+    def _polling(cls) -> set[int]:
+        if cls._jumps is None:
+            cls._jumps = status.polling_jumps()
+        return cls._jumps
 
 
 def branches(entry: int) -> list[int]:

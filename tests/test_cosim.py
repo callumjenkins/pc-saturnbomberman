@@ -129,3 +129,14 @@ def test_a_branch_to_itself_counts_each_time_it_is_taken(monkeypatch):
 def test_an_ldc_to_sr_counts_once(monkeypatch):
     words = [0x440E, RTS, NOP]
     assert polls(monkeypatch, words, {BASE: {BASE, BASE + 2, BASE + 4}}, r4=0) == 1
+
+
+@pytest.mark.parametrize("polling, expected", [
+    pytest.param({BASE}, 1, id="a jump table the generator advances time before"),
+    pytest.param(set(), 0, id="one it does not"),
+])
+def test_a_jump_advances_time_as_the_generated_code_does_wherever_it_goes(monkeypatch, polling, expected):
+    # jmp @r4 ; nop ; rts ; nop, jumping forward to the rts
+    monkeypatch.setattr(check.Counting, "_jumps", polling)
+    words = [sh2.encode("jmp @Rn", 4), NOP, RTS, NOP]
+    assert polls(monkeypatch, words, {BASE: {BASE + 2 * i for i in range(4)}}, r4=BASE + 4) == expected
