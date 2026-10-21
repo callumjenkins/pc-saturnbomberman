@@ -15,6 +15,9 @@ agrees with the game's own code.
 | `run.py` | Runs the cosim on functions of `src/` and swaps those that agree |
 | `gen.py` | Writes `swap_gen.inc` and the `[[replace]]` block in `game.toml` from `status.tsv` |
 | `check.py` | Runs each function against the game's own code and compares results and memory |
+| `machine.py`, `snapshots.py` | The memory a cosim trial runs on, and the route RAM dumps half the trials start from |
+| `cases.py`, `planted/` | Arguments and planted values that reach the branches default trials miss; one file in `planted/` per batch of workers |
+| `registers.py` | Which registers a function reads before writing them, and the runtime routines SHC calls for an operator |
 | `guest.h`, `host_mem.c` | Macros and memory that let one source compile for SHC and for the host |
 | `swap.cpp`, `swap.cmake` | The runtime side: `g_rd`, `g_wr`, `g_call` and the build option |
 | `shc_compare.py` | Compiles `src/` with SHC and compares its instructions with the game's |
@@ -35,9 +38,12 @@ It refuses a function a task can park inside (the `yields` column, from saturn-r
 functions changed the sound in `normal`.
 
 The lifter reads straight from the instructions: registers become locals, stack slots become `v`
-locals, and calls go through `GCALL`. It refuses a jump table, a pointer to a local, a stack argument, a
-control-register access, and code that reads a register it never set (a piece of a larger function or a
-task's entry). Its drafts are for reading and rewriting, and the cosim decides whether they are right.
+locals, and calls go through `GCALL`, passing the registers the callee reads (`registers.py`). A call to
+one of SHC's runtime routines becomes its operator: `DIVS`, `DIVU`, `MODS` or `MODU` for a division, or a
+shift in `HELPER()`. It refuses a jump table, a pointer to a local, a stack argument, a control-register
+access, a register read after a call overwrote it, and code that reads a register it never set (a piece
+of a larger function or a task's entry). Its drafts are for reading and rewriting, and the cosim decides
+whether they are right.
 
 ## Checks
 
@@ -86,6 +92,15 @@ plain call. On the host, `check.py` runs the callee on the interpreter, and in t
 arguments go in r4 to r7 and later ones on the stack, lowest first. r8 to r15 and pr come back
 unchanged. Calls between functions of `src/` are ordinary C calls (`f0600942E` calls `f0600940A`).
 Untested: more than four arguments. A callee that switches tasks is why `yields` functions are left alone.
+
+In the cosim, r0 to r7 that a call does not pass hold different values on the two sides, so C that
+leaves an argument to whatever a register held disagrees with the game. The game's function starts the
+same way, with random values in the registers its parameters do not cover.
+
+SHC compiles a division, and a shift it has no instruction for, into a call to a runtime routine that
+takes r0 and r1, which `GCALL` cannot pass. The C writes the operator instead, in `HELPER(expr)` so that
+time advances once, as for the call: `HELPER(x >> 13)`, or `DIVS(a, b)` and its kin, which also give
+SHC's result for a zero divisor (0).
 
 ## Advancing the game's time
 

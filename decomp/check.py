@@ -44,6 +44,7 @@ C_TYPES = {"int": ctypes.c_int32, "unsigned int": ctypes.c_uint32, "uint32_t": c
 EDGES = (0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF,
          0xFFFFFFFE, 0xFFFFFF80, 0xFFFF8000)
 KRNL = os.path.join(ROOT, "build", "extract", "BOMSS", "0KRNL.BIN")
+TABLE_MAX = 0x100                # bytes of a jump table code_runs keeps, at most
 
 
 class Counting(sh2emu.CPU):
@@ -121,7 +122,7 @@ def code_runs() -> list[list[int]]:
     """The (start, end) offsets into 0KRNL.BIN of every function's instructions and the literals they load,
     which randomising the image must leave alone. Cached in build/decomp, as walking every function is slow."""
     cache = os.path.join(ROOT, "build", "decomp", "code-runs.json")
-    stamp = [os.path.getmtime(KRNL), os.path.getmtime(status.TABLE)]
+    stamp = [os.path.getmtime(KRNL), os.path.getmtime(status.TABLE), TABLE_MAX]
     try:
         with open(cache, encoding="utf-8") as f:
             saved = json.load(f)
@@ -131,6 +132,7 @@ def code_runs() -> list[list[int]]:
         pass
     image = status.krnl_image()
     used = set()
+    tables = set()
     for row in status.previous().values():
         if row.module != "KRNL":
             continue
@@ -138,6 +140,13 @@ def code_runs() -> list[list[int]]:
             used.update((ins.pc, ins.pc + 1))
             if ins.target is not None and ins.op in ("mov.w", "mov.l", "mova"):
                 used.update(range(ins.target, ins.target + (2 if ins.op == "mov.w" else 4)))
+            if ins.op == "mova":
+                tables.add(ins.target)
+    for start in tables:            # a jump table runs on to the next instruction, as SHC places it
+        end = start + 4
+        while end - start < TABLE_MAX and end not in used:
+            end += 1
+        used.update(range(start, end))
     runs = []
     for at in sorted(a - BASE for a in used if a >= BASE):
         if runs and runs[-1][1] == at:
@@ -165,9 +174,11 @@ def default_spec(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
     return [cases.ptr(0x060C0000, 0x400) if t == "uint32_t" else ("any",) for t in sig.params], sig.returns != "void", []
 
 
-def hook_for(cpu, state):
+def hook_for(cpu, state, junk: list[int]):
     """What the host build's g_call runs: the game's function on the interpreter that holds the host
-    build's memory. Registers r8 to r15 and pr come back unchanged, as the runtime's swap does."""
+    build's memory. Registers r8 to r15 and pr come back unchanged, as the runtime's swap does. r0 to r7
+    that the call does not pass hold junk, so a callee that reads one the C did not pass disagrees with
+    the game, whose registers hold something else."""
     @CALL_HOOK
     def hook(addr, args, n):
         keep = (cpu.r[8:], cpu.pr)
@@ -178,6 +189,7 @@ def hook_for(cpu, state):
                 for i in range(4, n):
                     cpu.mem.write(sp + 4 * (i - 4), 4, args[i])
                 cpu.r[15] = sp
+            cpu.r[:8] = junk
             return cpu.call(addr, **{"r%d" % (4 + i): args[i] for i in range(min(n, 4))})
         except Exception as e:                      # an access outside the mapped memory, or no return
             state["error"] = str(e)
@@ -206,6 +218,7 @@ def run(lib: ctypes.CDLL, name: str, spec: tuple[list[tuple], bool, list[tuple]]
 
 
 def spec_for(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
+    cases.load()
     return cases.SPEC.get(sig.name) or default_spec(sig)
 
 
@@ -221,7 +234,7 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
 
     state = {"calls": []}
     keep = machine.point(lib, host)
-    hook = hook_for(host, state)
+    hook = hook_for(host, state, [value(("any",), r) & 0xFFFFFFFF for _ in range(8)])
     ctypes.c_void_p.in_dll(lib, "g_call_hook").value = ctypes.cast(hook, ctypes.c_void_p).value
     ctypes.c_int.in_dll(lib, "g_fault").value = 0
     ctypes.c_int.in_dll(lib, "g_polls").value = 0
@@ -232,7 +245,7 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     polls = ctypes.c_int.in_dll(lib, "g_polls").value + host.polls
     fault = ctypes.c_int.in_dll(lib, "g_fault").value or "error" in state
 
-    regs = {"r%d" % (4 + i): v for i, v in enumerate(vals)}
+    regs = {"r%d" % i: value(("any",), r) for i in range(8)} | {"r%d" % (4 + i): v for i, v in enumerate(vals)}
     original_fault = False
     want = 0
     try:

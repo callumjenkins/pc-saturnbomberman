@@ -49,7 +49,7 @@ def lift_all(addresses: list[int]) -> tuple[dict[int, str], dict[int, str]]:
     code = status.function_code()
     for address in addresses:
         try:
-            drafts[address] = lift.lift(image, address, code.get(address))
+            drafts[address] = lift.lift(image, address, code.get(address), code)
         except (lift.Unsupported, structure.Unstructured) as error:
             refused[address] = str(error)
     return drafts, refused

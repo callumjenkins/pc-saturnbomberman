@@ -333,6 +333,20 @@ def test_a_branch_out_of_the_function_is_a_tail_jump_not_a_copy_of_the_code_it_r
     assert body(code)[-2:] == ["r0 = GJUMP4(0x06006006, 1, r5, r6, r7);", "return r0;"]
 
 
+def test_a_branch_back_to_code_before_the_entry_advances_time_though_no_loop_runs():
+    # shared: mov #1,r0 ; rts ; nop ; entry: mov #2,r4 ; bra shared ; nop
+    words = (encode("mov #imm,Rn", 0, low=1), RTS, NOP, encode("mov #imm,Rn", 4, low=2), 0xAFFA, NOP)
+    code = lift.lift(image(*words), BASE + 6, {BASE + 2 * i for i in range(6)})
+    assert body(code)[-2:] == ["POLL();", "return 1;"]
+
+
+def test_a_loops_own_branch_back_advances_time_once():
+    blocks = {1: block(1, "goto", [2]), 2: block(2, "branch", [2, 3], "n", stmts=["a;"]), 3: block(3, "return")}
+    blocks[2].polls = [2]
+    lines = structure.Structurer(blocks, 1).run()
+    assert sum(line.count("POLL()") + line.count("AGAIN(") for line in lines) == 1
+
+
 def lines_around_continues(lines: list[str]) -> list[str]:
     return [lines[i - 1].strip() for i, line in enumerate(lines) if line.strip() == "continue;"]
 

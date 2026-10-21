@@ -18,6 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "saturn-recomp", "src"))
+import registers  # noqa: E402
 import status  # noqa: E402
 import structure  # noqa: E402
 from saturnrecomp import sh2  # noqa: E402
@@ -37,23 +38,42 @@ class Read:
     fresh: set[int] = field(default_factory=set)         # State.fresh where the block ends
 
 
-def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: "sh2.Image") -> bool:
-    """Writes the call as a statement. A tail call hands on r4 to r7 as they stand, so they all go in,
-    except those an earlier call overwrote: those at the end are left out, and one before a register
-    that does go in passes 0."""
+def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: "sh2.Image",
+         functions: dict[int, set[int]] | None = None) -> bool:
+    """Writes the call as a statement. With `functions`, the arguments are the registers the callee
+    reads. Without, a call passes those set since the last call, and a tail call hands on r4 to r7 as
+    they stand, except those an earlier call overwrote: those at the end are left out, and one before a
+    register that does go in passes 0."""
     tail = ins.op in ("jmp", "bra")
     where = const(ins.target) if ins.op in ("bsr", "bra") else st.get(ins.n)
     if ins.op == "jmp" and number(where) is None:
         raise Unsupported("a tail call through a register at %08X" % ins.pc)
     step(slot, st, image)
+    known = functions is not None and number(where) is not None
+    helper = registers.routine(image, number(where), functions) if known and not tail else None
+    if helper:
+        text, changes_r1 = helper
+        st.put(0, text.format(r0=st.get(0), r1=st.get(1) if "{r1}" in text else ""), False)
+        if changes_r1:
+            st.clobbered.add(1)
+            st.known.pop(1, None)
+        return False
+    reads = registers.reads(image, number(where), functions) if known else None
     args: list[str] = []
-    for r in range(4, 8):
-        if r not in st.fresh and r not in params and not tail:
-            break
-        args.append("" if r in st.clobbered else st.get(r))
-    while args and not args[-1]:
-        args.pop()
-    args = [a or "0" for a in args]
+    if reads is not None:
+        helper = sorted(reads & {0, 1, 2, 3})
+        if helper:
+            raise Unsupported("calls %s, which takes r%d, as a runtime routine does: write its operator in HELPER()"
+                              % (where, helper[0]))
+        args = [st.get(r) for r in range(4, max(reads, default=3) + 1)]
+    else:
+        for r in range(4, 8):
+            if r not in st.fresh and r not in params and not tail:
+                break
+            args.append("" if r in st.clobbered else st.get(r))
+        while args and not args[-1]:
+            args.pop()
+        args = [a or "0" for a in args]
     text = "%s%d(%s%s)" % ("GJUMP" if tail else "GCALL", len(args), where, "".join(", " + a for a in args))
     st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in range(1, 8)}))
     st.clobbered |= set(range(1, 8))
@@ -102,14 +122,14 @@ def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None) -> dic
     return found
 
 
-def lift(image: "sh2.Image", entry: int, code: set[int] | None = None) -> str:
+def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions: dict[int, set[int]] | None = None) -> str:
     """A draft of the function at entry. With its `code`, the recompiler's boundary, a `bra` outside
     that code is a tail call and a conditional branch outside it is refused; without, the draft follows
-    every branch."""
+    every branch. With `functions`, every function's code, a call passes the registers its callee reads."""
     stops = leaders(image, entry, code)
     params: set[int] = set()
     for attempt in range(2):
-        reads, slots = read_blocks(image, entry, stops, params, code)
+        reads, slots = read_blocks(image, entry, stops, params, code, functions)
         returns = any(s.var == "r0" for r in reads.values() for s in r.stmts)
         live_in, live_out = liveness(reads, returns)
         if returns and "r0" in live_in[entry]:
@@ -162,7 +182,8 @@ def liveness(reads: dict[int, Read], returns: bool) -> tuple[dict[int, set[str]]
 
 
 def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: set[int], flags: int,
-               slots: dict[int, int], fresh: set[int], code: set[int] | None) -> tuple[Read, int]:
+               slots: dict[int, int], fresh: set[int], code: set[int] | None,
+               functions: dict[int, set[int]] | None = None) -> tuple[Read, int]:
     st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh))
     block = structure.Block(start)
     term = ""
@@ -180,14 +201,16 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
                 step(slot, st, image)
             term = test if ins.op.startswith("bt") else "!" + test
             block.kind, block.targets = "branch", [ins.target, nxt]
+            block.polls = [ins.target] if ins.target <= at else []
             break
         if ins.op == "bra" and code is not None and ins.target not in code:
-            tail = call(ins, slot, st, params, image)
+            tail = call(ins, slot, st, params, image, functions)
             block.kind = "return"
             break
         if ins.op == "bra":
             step(slot, st, image)
             block.kind, block.targets = "goto", [ins.target]
+            block.polls = [ins.target] if ins.target <= at else []
             break
         if ins.op == "rts":
             step(slot, st, image)
@@ -196,11 +219,11 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
         if ins.op == "jmp":
             if ins.n not in st.known:
                 raise Unsupported("a jump through a register that is not a known address, a switch, at %08X" % at)
-            tail = call(ins, slot, st, params, image)
+            tail = call(ins, slot, st, params, image, functions)
             block.kind = "return"
             break
         if ins.op in _CALLS:
-            call(ins, slot, st, params, image)
+            call(ins, slot, st, params, image, functions)
         else:
             step(ins, st, image)
             if slot:
@@ -213,7 +236,7 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
 
 
 def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: set[int],
-                code: set[int] | None) -> tuple[dict[int, Read], dict[int, int]]:
+                code: set[int] | None, functions: dict[int, set[int]] | None = None) -> tuple[dict[int, Read], dict[int, int]]:
     """Every block, read until the registers a call may pass settle: those written since the last call
     on every path into a block, so an argument set before a branch reaches the call after it."""
     fresh = {at: set() if at == entry else set(range(16)) for at in stops}
@@ -222,7 +245,7 @@ def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: s
         reads: dict[int, Read] = {}
         slots: dict[int, int] = {}
         for at in sorted(stops):
-            reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code)
+            reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions)
         into: dict[int, list[set[int]]] = {at: [] for at in stops}
         for read in reads.values():
             for target in read.block.targets:
@@ -296,8 +319,9 @@ def main() -> None:
     path, base = IMAGES[args.module]
     with open(os.path.join(ROOT, path), "rb") as f:
         image = sh2.Image(f.read(), base)
+    functions = status.function_code() if args.module == "KRNL" else {}
     try:
-        draft = lift(image, int(args.address, 16), status.function_code().get(int(args.address, 16)) if args.module == "KRNL" else None)
+        draft = lift(image, int(args.address, 16), functions.get(int(args.address, 16)), functions or None)
     except (Unsupported, structure.Unstructured) as error:
         sys.exit("%s: %s" % (args.address, error))
     if not args.append:

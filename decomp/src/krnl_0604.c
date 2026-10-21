@@ -1,5 +1,39 @@
 #include "krnl.h"
 
+void f0604021C(short n)
+{
+    REF(Task) t;
+    int i = 0;
+    gaddr obj;
+
+    GCALL2(0x06022F1C, n, 0x06040336);
+    TSET(h6, 0);
+    ST16(LD32(TASK_OBJ) + 4, 70);
+    ST16(LD32(TASK_OBJ) + 46, 0x380);
+    t = TASK;
+    SET(Task, t, h10, GCALL1(0x060691DA, 1));
+    t = TASK;
+    SET(Task, t, h12, GCALL1(0x060691DA, 1));
+    do {
+        if (i == 0)
+            obj = OBJ(TGET(h10));
+        else if (i >= 2)
+            obj = LD32(TASK_OBJ);
+        else
+            obj = OBJ(TGET(h12));
+        ST16(obj + 44, 1);
+        GCALL2(0x0606AAC8, obj, 7);
+        GCALL2(0x0606950C, obj, 2);
+        GCALL1(0x0606AB4A, obj);
+        i++;
+        ST16(obj + 70, 0x100);
+        ST16(obj + 68, 0x100);
+    } while (AGAIN(i < 3));
+    TSET(h14, 2);
+    TSET(h18, 255);
+    TSET(h20, 0);
+}
+
 void f060407F2(unsigned short obj, unsigned short bits)
 {
     int flags = OBJ(obj) + 46;
@@ -33,9 +67,84 @@ int f06040918(short slot)
     return LD16(SLOT(slot) + 20);
 }
 
+void f06040BD4(short n, short x)
+{
+    GCALL2(0x06022F1C, n, 0x0603DDA6);
+    ST16(LD32(TASK_OBJ) + 44, 1);
+    ST16(LD32(TASK_OBJ) + 46, 0x380);
+    GCALL2(0x0606AAC8, LD32(TASK_OBJ), 3);
+    TSET(h16, x);
+}
+
+int f06040E4A(void)
+{
+    unsigned short key = GCALL1(0x0600CA6A, TGET(h8));
+    int i = 2;
+
+    do {
+        if (key == LDU16(0x060C1742 + (i - 1) * 2))
+            break;
+        i--;
+    } while (AGAIN(i > 0));
+    return i;
+}
+
+int f060413C6(void)
+{
+    return ((GCALL1(0x0600A0EC, 3) + 2) & 0xFFFF) * 60;
+}
+
+int f060413E2(void)
+{
+    int v = (short)TGET(h12);
+    int key = GCALL1(0x0600CA6A, TGET(h8)) & 63;
+
+    if (key == 26)
+        return 0;
+    if (key == 18)
+        return 1;
+    if ((unsigned)GCALL0(0x0600A0B8) < 16)
+        v ^= 1;
+    return v;
+}
+
+void f0604144E(void)
+{
+    int mode = TGET(h14);
+    gaddr obj;
+    int pos;
+
+    if (mode != 2 && mode != 3)
+        return;
+    obj = LD32(TASK_OBJ);
+    pos = (LD16(obj + 16) << 16) | LDU16(obj + 12);
+    pos += (TGET(h20) << 8) * (TGET(h12) ? 1 : -1);
+    ST16(LD32(TASK_OBJ) + 16, (unsigned)pos >> 16);
+    ST16(LD32(TASK_OBJ) + 12, pos);
+}
+
 void f060429A8(void)
 {
     SET(Slot24, ELEM(Slot24, SLOTS, 1), fn, 0x06042864);
+}
+
+int f06042C8C(void)
+{
+    gaddr obj = LD32(TASK_OBJ);
+    int y;
+
+    ST16(obj + 36, LD16(obj + 36) + (short)TGET(h12));
+    obj = LD32(TASK_OBJ);
+    ST16(obj + 38, LD16(obj + 38) + (short)TGET(h14));
+    TSET(h14, TGET(h14) + 1);
+    TSET(h10, TGET(h10) + 3);
+    ST16(LD32(TASK_OBJ) + 68, (short)TGET(h10) * 2 + 0x100);
+    ST16(LD32(TASK_OBJ) + 70, (short)TGET(h10) * 2 + 0x100);
+    obj = LD32(TASK_OBJ);
+    y = LD16(obj + 18) + LD16(obj + 38);
+    if (y <= 240)
+        return y;
+    return GJUMP0(0x06022F14);
 }
 
 int f060437A6(int n)
@@ -77,9 +186,117 @@ int f060465AC(void)
     return LDU16(OBJS + 60 + (unsigned short)(GET(Slot24, s, obj) * 84)) >= 0xFF00;
 }
 
+int f06046712(void)
+{
+    gaddr obj = LD32(TASK_OBJ);
+    int v;
+    int left;
+
+    if (!TGET(h20)) {
+        if (LDU16(obj + 68) > 0) {
+            v = LD16(obj + 68) - 16;
+            ST16(obj + 68, v);
+            ST16(obj + 70, v);
+            return 70;
+        }
+        TSET(h14, TGET(h10));
+        GCALL1(0x0600C9AA, TGET(h10));
+        GCALL3(0x0600D0E4, TGET(h8), LD16(0x060D7EB4), LD16(0x060D7EB6));
+        obj = LD32(TASK_OBJ);
+        ST16(obj + 68, 0);
+        ST16(obj + 70, 0);
+        TSET(h20, 0x384);
+        TSET(h12, 0);
+        if (!GCALL1(0x0600A0EC, 2)) {
+            TSET(h4, 0x708);
+            return 0x708;
+        }
+        TSET(h4, 0x384);
+        return 0x384;
+    }
+    if (LD16(obj + 68) && LDU16(obj + 68) >= 0x100) {
+        ST16(obj + 68, 0x100);
+        ST16(obj + 70, 0x100);
+        GCALL2(0x06046834, obj, 0x100);
+    } else {
+        v = LD16(obj + 68) + 16;
+        ST16(obj + 68, v);
+        ST16(obj + 70, v);
+    }
+    left = (short)TGET(h20) - 1;
+    TSET(h20, left);
+    return left;
+}
+
+int f060469A4(void)
+{
+    gaddr obj;
+    int target;
+
+    GCALL1(0x0600C9AA, (short)TGET(h14));
+    GCALL2(0x0600CA32, LDU16(0x060D7EB4), LDU16(0x060D7EB6));
+    obj = LD32(TASK_OBJ);
+    target = LD16(0x060D7E88);
+    if (LD16(obj + 16) >= target) {
+        if (LD16(obj + 16) > target)
+            ST16(obj + 16, LD16(obj + 16) - 1);
+    } else {
+        ST16(obj + 16, LD16(obj + 16) + 1);
+    }
+    target = LD16(0x060D7E8A);
+    obj = LD32(TASK_OBJ);
+    if (LD16(obj + 18) >= target) {
+        if (LD16(LD32(TASK_OBJ) + 18) > target)
+            ST16(LD32(TASK_OBJ) + 18, LD16(LD32(TASK_OBJ) + 18) - 1);
+    } else {
+        ST16(LD32(TASK_OBJ) + 18, LD16(LD32(TASK_OBJ) + 18) + 1);
+    }
+    return LD16(LD32(TASK_OBJ) + 18) == LD16(0x060D7E8A) && LD16(LD32(TASK_OBJ) + 16) == LD16(0x060D7E88);
+}
+
+void f06046C7E(void)
+{
+    if (GCALL2(0x06022F1C, 0, 0x06046D50) < 0)
+        return;
+    TSET(h6, 0);
+    ST8(0x060FB8DC, LD8(0x060FB8DC) | 128);
+    ST16(0x060FB8A6, LD16(0x060FB8A6) & 0xFFF3);
+    GCALL2(0x0609BBC0, 8, 1);
+    GCALL1(0x0609AFCC, 0x060B6790);
+    TSET(h6, 0);
+    GCALL1(0x06046CD8, 128);
+    GCALL0(0x06046D50);
+    TSET(h10, 0);
+}
+
 void f06046CD8(short value)
 {
     ST16(SLOTS + 12, value);
+}
+
+int f06047884(int which, int x, int y, gaddr pos)
+{
+    int a = x & 0x0007FF00;
+    int b = y & 0x0007FF00;
+    int px = (LD16(pos) + 160) << 16;
+    int py;
+
+    px = (px - GCALL2(0x060980B4, a, 0x00A00000)) & 0x07FFFF00;
+    py = (LD16(pos + 2) + 112) << 16;
+    py = (py - GCALL2(0x060980B4, b, 0x00700000)) & 0x07FFFF00;
+    if (which == 4) {
+        ST32(0x060C0328, px);
+        ST32(0x060C0328 + 4, py);
+        ST32(0x060C0328 + 8, a);
+        ST32(0x060C0328 + 12, b);
+    } else if (which == 8) {
+        ST32(0x060C0328 + 16, px);
+        ST32(0x060C0328 + 20, py);
+        ST32(0x060C0328 + 24, a);
+        ST32(0x060C0328 + 28, b);
+    }
+    ST16(0x060BB8FC, 1);
+    return which;
 }
 
 int f060482A6(unsigned short a, unsigned short b)
@@ -109,6 +326,23 @@ int f060496E4(void)
 void f06049B38(gaddr p)
 {
     ST16(OBJ(LDU16(p + 18)) + 4, LD32(TICK) & 1 ? 40 : 60);
+}
+
+void f06049E8C(gaddr p, unsigned char kind)
+{
+    gaddr a = OBJ(LDU16(p + 2));
+    gaddr b = OBJ(LDU16(p + 70));
+    gaddr q;
+    int v;
+
+    v = HELPER(GCALL1(0x0606CE8C, kind) >> 13);
+    ST16(a + 38, v);
+    ST16(b + 38, v);
+    q = p + 20;
+    do {
+        ST16(OBJ(LDU16(q)) + 38, v);
+        q += 2;
+    } while (AGAIN(q < p + 38));
 }
 
 int f0604B4CC(short n, gaddr list)

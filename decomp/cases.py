@@ -2,9 +2,16 @@
 reach all of its branches.
 
 A case is (arguments, whether it returns a value, plants). Each argument is drawn from one of the
-forms below, and each plant writes one of its values over the random data at an address, in a share
-of the trials, so that the branches random bytes almost never take run as well.
+forms below, and each plant writes one of its values over the memory at an address, in a share of the
+trials, so that the branches random bytes almost never take run as well. Cases written by a batch of
+workers go in a file of their own under planted/, which load() runs, so each keeps its own helpers.
 """
+import functools
+import glob
+import os
+import runpy
+
+PLANTED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "planted")
 
 # A pointer argument whose target the plants can name.
 FIX = 0x060C0100
@@ -24,6 +31,12 @@ def ent(k: int) -> int:
     return 0x060EC478 + 24 * k
 
 
+@functools.cache
+def load() -> None:
+    for path in sorted(glob.glob(os.path.join(PLANTED, "*.py"))):
+        runpy.run_path(path)
+
+
 def obj(i: int) -> int:
     return 0x060C381C + 84 * i
 
@@ -33,6 +46,8 @@ def slot(k: int) -> int:
 
 
 def case(name: str, args: list[tuple], returns: bool, plants: list[tuple] = ()) -> None:
+    if name in SPEC:
+        raise ValueError("%s has two cases" % name)
     SPEC[name] = (args, returns, list(plants))
 
 

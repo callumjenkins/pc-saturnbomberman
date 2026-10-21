@@ -17,6 +17,7 @@ class Block:
     kind: str = "return"                    # return, goto, or branch
     value: str = ""                         # the returned expression, or the branch condition
     targets: list[int] = field(default_factory=list)   # goto: [next]; branch: [taken, fallthrough]
+    polls: list[int] = field(default_factory=list)     # targets the branch reaches by going back, where the game advances time
 
 
 def successors(block: Block) -> list[int]:
@@ -141,6 +142,10 @@ class Structurer:
         self.bodies = loops(blocks, self.order)
         self.active: list[tuple[int, int | None]] = []          # (header, exit) of the loops being written
 
+    def poll(self, block: Block, target: int) -> list[str]:
+        """POLL() for an edge back that is not a loop's own, which gets one where the loop is written."""
+        return ["POLL();"] if target in block.polls and self.leaving(target) != BACK else []
+
     def run(self) -> list[str]:
         return self.sequence(self.entry, None)
 
@@ -178,6 +183,7 @@ class Structurer:
                 return out + ["return %s;" % block.value if block.value else "return;"]
             if block.kind == "goto":
                 at = block.targets[0]
+                out += self.poll(block, at)
                 continue
             at = self.branch(block, out)
         return out
@@ -187,7 +193,7 @@ class Structurer:
         merge = self.ipdom[block.start]
         in_loop = not self.active or merge in self.bodies[self.active[-1][0]]
         join = merge if in_loop else None
-        then, other = (self.sequence(t, join) for t in block.targets)
+        then, other = (self.poll(block, t) + self.sequence(t, join) for t in block.targets)
         condition = block.value
         if not then and other:
             condition, then, other = negate(condition), other, []

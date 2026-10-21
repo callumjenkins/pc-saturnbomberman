@@ -48,4 +48,57 @@ typedef struct { int src; char pad4[24]; int out, w32, w36, w40, phase; } Unpack
 #define PAD_SHADOW 0x260060CA
 #define TICK       0x26006038
 
+/* The record 060D8C08 points at. */
+typedef struct {
+    unsigned short w0, w2, w4;
+    unsigned char b6, b7;
+    unsigned short w8, w10;
+    char pad12;
+    unsigned char b13, b14, b15, b16;
+    char pad17[2];
+    unsigned char b19;
+    unsigned short w20;
+    char pad22[2];
+    unsigned char b24;
+    char pad25[5];
+    char pad30[4];
+    unsigned char b34, b35, b36;
+} Actor;
+
+/* The slot 060D7E60 points at. */
+typedef struct {
+    int fn;
+    unsigned short h4, h6, h8, h10, h12, h14, h16, h18, h20, h22;
+} Task;
+
+#define TASK_PTR    0x060D7E60
+#define TASK        ((REF(Task))LD32(TASK_PTR))
+#define TGET(f)     GET(Task, TASK, f)
+#define TSET(f, v)  SET(Task, TASK, f, v)
+#define TASK_OBJ    0x060D7E64      /* the 84-byte object of the task */
+
+/* The record 060D7B3C points at, which the movement routines walk along the lanes between the four limits. */
+typedef struct { char pad[16]; short x, y; } Mover;
+
+#define MOVER_PTR   0x060D7B3C
+#define MOVER       ((REF(Mover))LD32(MOVER_PTR))
+#define MX          GET(Mover, MOVER, x)
+#define MY          GET(Mover, MOVER, y)
+#define LIM_RIGHT   LDU16(0x060C0904)
+#define LIM_DOWN    LDU16(0x060C0906)
+#define LIM_LEFT    LDU16(0x060C0908)
+#define LIM_UP      LDU16(0x060C090A)
+
+#define ABS(v)      ((v) < 0 ? -(v) : (v))
+
+/* A ramp that steps through the keys at 060C0DF0 and writes 256 rows to a table. */
+typedef struct { int start, x, dx, y, dy, z, dz; gaddr key; short left, until; } Ramp;
+typedef struct { short until, ya, x, yb, z; } RampKey;
+
+#define RAMP        0x060C0F88
+
+#define ACTOR       ((REF(Actor))LD32(0x060D8C08))
+#define AGET(f)     GET(Actor, ACTOR, f)
+#define ASET(f, v)  SET(Actor, ACTOR, f, v)
+
 #endif

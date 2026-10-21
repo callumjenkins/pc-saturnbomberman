@@ -1,3 +1,4 @@
+import ctypes
 import os
 import shutil
 import sys
@@ -172,3 +173,41 @@ def test_every_case_names_a_decompiled_function_with_its_parameter_count():
     sigs = {s.name: s for s in gen.signatures().values()}
     assert [name for name, (args, returns, plants) in cases.SPEC.items()
             if name not in sigs or len(args) != len(sigs[name].params) or returns != (sigs[name].returns != "void")] == []
+
+
+@pytest.mark.parametrize("source, agrees", [
+    pytest.param("int f06020F7C(void)\n{\n    return LD8(0x060DFA15 + GCALL0(0x06020F50)) & 255;\n}\n", False,
+                 id="leaving the callee's argument to whatever the register held"),
+    pytest.param("unsigned char f06020F7C(int cell)\n{\n    return LD8(0x060DFA15 + GCALL1(0x06020F50, cell));\n}\n", True,
+                 id="passing it"),
+])
+def test_a_register_the_c_does_not_pass_to_a_call_holds_something_else_on_each_side(tmp_path, source, agrees):
+    path = tmp_path / "f.c"
+    path.write_text('#include "krnl.h"\n' + source)
+    sig = gen.signatures([str(path)])[0x06020F7C]
+    fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 40, 1, sig)
+    assert ran > 10 and (not fails) == agrees
+
+
+def test_the_image_keeps_a_jump_table_up_to_the_code_after_it():
+    # 060276D0 jumps through 19 halfwords at 06027710; its next instruction is at 06027736
+    kept = {a for start, end in check.code_runs() for a in range(BASE + start, BASE + end)}
+    assert set(range(0x06027710, 0x06027736)) <= kept
+
+
+@pytest.mark.parametrize("routine, symbol, signed", [
+    pytest.param(0x0609410C, "g_divs", True, id="signed quotient"),
+    pytest.param(0x060941C0, "g_divu", False, id="unsigned quotient"),
+    pytest.param(0x06094268, "g_mods", True, id="signed remainder"),
+    pytest.param(0x06094330, "g_modu", False, id="unsigned remainder"),
+])
+def test_the_host_divisions_give_what_the_games_routines_do(tmp_path, routine, symbol, signed):
+    path = tmp_path / "none.c"
+    path.write_text('#include "krnl.h"\n')
+    fn = getattr(check.build([str(path)]), symbol)
+    width = ctypes.c_int32 if signed else ctypes.c_uint32
+    fn.restype, fn.argtypes = width, [width, width]
+    pairs = [(0x80000000, 0xFFFFFFFF), (5, 0), (0xFFFFFFF9, 2), (7, 0xFFFFFFFE), (100, 7), (0xFFFFFFFF, 0x10)]
+    for dividend, divisor in pairs:
+        game = sh2emu.load(check.KRNL, BASE).call(routine, r0=divisor, r1=dividend)
+        assert fn(width(dividend).value, width(divisor).value) & 0xFFFFFFFF == game, (hex(dividend), hex(divisor))

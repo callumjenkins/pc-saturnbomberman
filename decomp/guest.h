@@ -16,6 +16,10 @@
  *   GJUMPn(a, ...)  the same for a tail call, where the game's code branches to a instead of calling it.
  *   POLL()          where the game's code branches to the same or an earlier instruction, as a loop does.
  *   AGAIN(cond)     cond, with a POLL() when it holds: a do-while's condition.
+ *   HELPER(expr)    expr, where SHC compiles its operator into a call to a runtime routine that takes r0
+ *                   (a shift by a variable or a long way, a division): the call advances time once.
+ *   DIVS/DIVU(a,b)  a / b, signed or unsigned, and MODS/MODU(a,b) a % b, as SHC's routines give them:
+ *                   0 for a zero divisor. Each is a HELPER.
  *                   The recompiled game advances time at each of those branches and at each call, so the C
  *                   has to reach the same number, and check.py counts both sides.
  */
@@ -56,6 +60,15 @@ uint32_t g_jump(uint32_t addr, const uint32_t *args, int n);
 void g_poll(void);
 #define POLL() g_poll()
 #define AGAIN(cond) ((cond) ? (g_poll(), 1) : 0)
+#define HELPER(expr) (g_poll(), (expr))
+int32_t g_divs(int32_t a, int32_t b);
+uint32_t g_divu(uint32_t a, uint32_t b);
+int32_t g_mods(int32_t a, int32_t b);
+uint32_t g_modu(uint32_t a, uint32_t b);
+#define DIVS(a, b) HELPER(g_divs((a), (b)))
+#define DIVU(a, b) HELPER(g_divu((a), (b)))
+#define MODS(a, b) HELPER(g_mods((a), (b)))
+#define MODU(a, b) HELPER(g_modu((a), (b)))
 #define GCALL0(a) ((int)g_call((a), 0, 0))
 #define GCALL_(a, n, ...) ((int)g_call((a), (const uint32_t[]){__VA_ARGS__}, (n)))
 #define GCALL1(a, x1) GCALL_(a, 1, x1)
@@ -118,6 +131,11 @@ typedef volatile unsigned short *H16PTR;
 #define GJUMP8(a, x1, x2, x3, x4, x5, x6, x7, x8) GCALL8(a, x1, x2, x3, x4, x5, x6, x7, x8)
 #define POLL() ((void)0)
 #define AGAIN(cond) (cond)
+#define HELPER(expr) (expr)
+#define DIVS(a, b) ((int)(a) / (int)(b))
+#define DIVU(a, b) ((unsigned int)(a) / (unsigned int)(b))
+#define MODS(a, b) ((int)(a) % (int)(b))
+#define MODU(a, b) ((unsigned int)(a) % (unsigned int)(b))
 
 #endif
 
