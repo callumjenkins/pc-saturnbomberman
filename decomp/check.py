@@ -40,6 +40,7 @@ VDP1_DATA = 0x100
 C_TYPES = {"int": ctypes.c_int32, "unsigned int": ctypes.c_uint32, "uint32_t": ctypes.c_uint32,
            "short": ctypes.c_int16, "unsigned short": ctypes.c_uint16, "char": ctypes.c_int8,
            "signed char": ctypes.c_int8, "unsigned char": ctypes.c_uint8}
+CONDITIONAL = ("bt", "bf", "bt/s", "bf/s")
 CALL_HOOK = ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32), ctypes.c_int)
 
 
@@ -55,9 +56,11 @@ class Counting(sh2emu.CPU):
     _image = None
     _bodies: dict = {}
     _code: dict | None = None
+    seen: set | None = None     # (pc, taken) for each conditional branch of the called function's own code
 
     def call(self, entry, max_steps=10_000_000, **regs):
         self.code, self.outer = self._body(entry), []
+        self.own = self.code
         return super().call(entry, max_steps, **regs)
 
     def step(self):
@@ -65,6 +68,8 @@ class Counting(sh2emu.CPU):
         ins = self.fetch(pc)
         super().step()
         op = ins.op
+        if self.seen is not None and op in CONDITIONAL and pc in self.own and self.code is self.own:
+            self.seen.add((pc, self.pc != pc + (4 if ins.delay else 2)))
         if op in ("bsr", "jsr", "bsrf"):
             self.polls += 1
             self.outer.append(self.code)
@@ -73,7 +78,7 @@ class Counting(sh2emu.CPU):
             self.code = self.outer.pop() if self.outer else self.code
         elif op in ("ldc", "ldc.l") and ins.fmt.endswith("sr"):
             self.polls += 1
-        elif op in ("bra", "braf", "jmp") or op in ("bt", "bf", "bt/s", "bf/s") and self.pc != pc + (4 if ins.delay else 2):
+        elif op in ("bra", "braf", "jmp") or op in CONDITIONAL and self.pc != pc + (4 if ins.delay else 2):
             if self.pc not in self.code:
                 self.code = self._body(self.pc)
             elif self.pc <= pc:
@@ -92,6 +97,12 @@ class Counting(sh2emu.CPU):
         return cls._bodies[entry]
 
 
+
+
+def branches(entry):
+    """The conditional branches of the function's own code."""
+    image = status.krnl_image()
+    return [at for at in Counting._body(entry) if image.contains(at) and image.insn(at).op in CONDITIONAL]
 
 
 def counting(cpu):
@@ -217,8 +228,9 @@ def hook_for(cpu, state):
     return hook
 
 
-def trial(lib, name, args, returns, r, sig=None):
+def trial(lib, name, args, returns, r, sig=None, seen=None):
     cpu = counting(sh2emu.load(KRNL, BASE))     # the game's own function
+    cpu.seen = seen
     host = counting(sh2emu.load(KRNL, BASE))    # the memory the host build runs on, and its callees
     wram, wraml = cpu.mem.regions[0][2], cpu.mem.regions[1][2]
     vdp1 = cpu.mem.add(VDP1, 0x80000)
@@ -231,8 +243,10 @@ def trial(lib, name, args, returns, r, sig=None):
     wram[lo:hi] = r.randbytes(hi - lo)
     for start, end in code_runs():
         wram[BASE - WRAM + start:BASE - WRAM + end] = image[start:end]
+    wraml[:] = r.randbytes(len(wraml))
     vdp1[:VDP1_DATA] = r.randbytes(VDP1_DATA)
     hwram[:] = wram
+    hwraml[:] = wraml
     hvdp1[:] = vdp1
     vals = [value(a, r) for a in args]
 
@@ -283,15 +297,16 @@ def trial(lib, name, args, returns, r, sig=None):
     return vals, problems, False
 
 
-def run(lib, name, spec, trials, seed, sig=None):
+def run(lib, name, spec, trials, seed, sig=None, seen=None):
     """The trials that differ, as (arguments, problems), and how many ran to the end, for one function.
-    Without its signature, every parameter and the result pass as an int."""
+    Without its signature, every parameter and the result pass as an int. `seen` collects which way each
+    of the game's conditional branches went."""
     args, returns = spec
     r = random.Random("%s:%d" % (name, seed))
     fails = []
     ran = 0
     for _ in range(trials):
-        vals, problems, skipped = trial(lib, name, args, returns, r, sig)
+        vals, problems, skipped = trial(lib, name, args, returns, r, sig, seen)
         ran += not skipped
         if problems:
             fails.append((vals, problems))
@@ -310,10 +325,13 @@ def main():
     bad = 0
     for name in [n for n in (a.names or ["f%08X" % x for x in sorted(sigs)])]:
         spec = SPEC.get(name) or default_spec(sigs[int(name[1:], 16)])
-        fails, ran = run(lib, name, spec, a.trials, a.seed, sigs[int(name[1:], 16)])
+        seen = set()
+        fails, ran = run(lib, name, spec, a.trials, a.seed, sigs[int(name[1:], 16)], seen)
         status = ("ok" if ran == a.trials else "ok, %d of %d trials ran" % (ran, a.trials)) if not fails \
             else "%d of %d trials differ" % (len(fails), a.trials)
-        print("%s  %s" % (name, status))
+        outcomes = 2 * len(branches(int(name[1:], 16)))
+        missed = "; %d of %d branch outcomes never reached" % (outcomes - len(seen), outcomes) if len(seen) < outcomes else ""
+        print("%s  %s%s" % (name, status, missed))
         for vals, problems in fails[:2]:
             print("   args %s: %s" % ([hex(v) for v in vals], "; ".join(problems)))
         bad += bool(fails)

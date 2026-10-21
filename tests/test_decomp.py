@@ -101,6 +101,32 @@ def test_a_literal_pool_between_two_returns_is_not_read_as_code():
     assert [ins.pc - BASE for ins in found] == [0, 2, 4, 6, 12, 14]
 
 
+def test_a_tail_branch_with_the_stack_off_is_refused():
+    # add #4,r15 ; bra other ; nop ; other: add #-4,r15 ; rts ; nop, where `other` is a function of its own
+    words = image(encode("add #imm,Rn", 15, low=4), 0xA000, NOP, encode("add #imm,Rn", 15, low=0xFC), RTS, NOP)
+    with pytest.raises(lift.Unsupported, match="stack 4 bytes off"):
+        lift.lift(words, BASE, {BASE, BASE + 2, BASE + 4})
+
+
+def test_an_argument_set_before_a_loop_reaches_the_call_after_it():
+    # mov #5,r4 ; top: dt r5 ; bf top ; bsr 0x06006026 ; nop ; rts ; nop
+    code = lifted(encode("mov #imm,Rn", 4, low=5), encode("dt Rn", 5), 0x8BFD, 0xB00E, NOP, RTS, NOP)
+    assert "GCALL2(0x06006026, r4, r5)" in code
+
+
+def test_an_argument_set_on_one_path_only_is_not_passed():
+    # tst r4,r4 ; bt call ; mov #1,r5 ; call: bsr 0x06006026 ; nop ; rts ; nop
+    code = lifted(encode("tst Rm,Rn", 4, 4), 0x8900, encode("mov #imm,Rn", 5, low=1), 0xB00E, NOP, RTS, NOP)
+    assert "GCALL1(0x06006026, r4)" in code and code.splitlines()[0].endswith("(int r4)")
+
+
+def test_the_game_side_of_an_shc_comparison_stops_at_a_tail_branch():
+    # mov #1,r4 ; bra other ; nop ; other: rts ; nop, where `other` is a function of its own
+    words = image(encode("mov #imm,Rn", 4, low=1), 0xA000, NOP, RTS, NOP)
+    assert [ins.pc - BASE for ins in status.own(words, BASE, {BASE, BASE + 2})] == [0, 2, 4]
+    assert len(status.body(words, BASE)) == 5
+
+
 def block(start: int, kind: str, targets: list[int] | None = None, value: str = "", stmts: list[str] | None = None):
     return structure.Block(start, stmts or [], kind, value, targets or [])
 
@@ -295,6 +321,29 @@ def test_a_branch_out_of_the_function_is_a_tail_jump_not_a_copy_of_the_code_it_r
     words = (encode("mov #imm,Rn", 4, low=1), 0xA000, NOP, encode("mov #imm,Rn", 0, low=2), RTS, NOP)
     code = lift.lift(image(*words), BASE, {BASE, BASE + 2, BASE + 4})
     assert body(code)[-2:] == ["r0 = GJUMP4(0x06006006, 1, r5, r6, r7);", "return r0;"]
+
+
+def lines_around_continues(lines: list[str]) -> list[str]:
+    return [lines[i - 1].strip() for i, line in enumerate(lines) if line.strip() == "continue;"]
+
+
+def test_a_continue_in_the_middle_of_a_loop_advances_time():
+    blocks = {1: block(1, "branch", [2, 4], "n"), 2: block(2, "branch", [1, 3], "skip", stmts=["a;"]),
+              3: block(3, "goto", [1], stmts=["b;"]), 4: block(4, "return")}
+    lines = structure.Structurer(blocks, 1).run()
+    assert lines_around_continues(lines) == ["POLL();"] and lines[-3:] == ["    POLL();", "}", "return;"]
+
+
+def test_a_continue_inside_a_do_while_advances_time():
+    blocks = {1: block(1, "branch", [1, 2], "early", stmts=["a;"]), 2: block(2, "branch", [1, 3], "again", stmts=["b;"]),
+              3: block(3, "return")}
+    lines = structure.Structurer(blocks, 1).run()
+    assert not any(structure.BACK in line for line in lines)
+    assert set(lines_around_continues(lines)) == {"POLL();"} and any("AGAIN(" in line for line in lines)
+
+
+def test_an_empty_endless_loop_still_advances_time():
+    assert structure.Structurer({1: block(1, "goto", [1])}, 1).run() == ["while (1) {", "    POLL();", "}"]
 
 
 def test_leaving_a_loop_early_is_a_break():

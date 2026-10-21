@@ -192,7 +192,12 @@ def hooked(root: str = ROOT) -> set[int]:
     """The KRNL functions whose code holds an address game.toml hooks."""
     from saturnrecomp import config
     hooks = set(config.load(os.path.join(root, "game.toml")).hooks.get(KRNL[0], []))
-    return {entry for entry, code in function_code(root).items() if code & hooks}
+    return holding(function_code(root), hooks)
+
+
+def holding(code: dict[int, set[int]], addresses: set[int]) -> set[int]:
+    """The entries whose code holds any of the addresses."""
+    return {entry for entry, insns in code.items() if insns & addresses}
 
 
 def krnl_image(root: str = ROOT) -> sh2.Image:
@@ -204,8 +209,20 @@ def krnl_image(root: str = ROOT) -> sh2.Image:
 def walk(root: str, address: int) -> tuple[int, int]:
     """Instructions and calls of a KRNL function. A replaced function has no rows in the map, so this
     counts one that was never in the table."""
-    insns = body(krnl_image(root), address)
+    insns = own(krnl_image(root), address, function_code(root).get(address))
     return len(insns), sum(ins.op in ("bsr", "jsr", "bsrf") for ins in insns)
+
+
+def own(image: sh2.Image, address: int, code: set[int] | None) -> list[sh2.Insn]:
+    """The function's own instructions with their delay slots: its code by the recompiler's boundaries,
+    or, without them, everything reachable."""
+    if code is None:
+        return body(image, address)
+    found = {at: image.insn(at) for at in code}
+    for at, ins in list(found.items()):
+        if ins.delay:
+            found.setdefault(at + 2, image.insn(at + 2))
+    return [found[at] for at in sorted(found)]
 
 
 def build_table(root: str = ROOT) -> list[Row]:

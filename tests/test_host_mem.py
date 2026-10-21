@@ -32,6 +32,7 @@ def fault(lib) -> int:
 @pytest.mark.parametrize("address", [
     pytest.param(0xFFFFFFFF, id="wraps past zero"),
     pytest.param(0x060FFFFF, id="runs off the end of work RAM"),
+    pytest.param(0x002FFFFF, id="runs off the end of work RAM-L"),
     pytest.param(0x05D7FFFF, id="runs off the end of VDP1"),
 ])
 def test_an_access_that_does_not_fit_faults_and_writes_nothing(mem, address):
@@ -50,3 +51,19 @@ def test_a_store_lands_big_endian_in_its_region(mem, address, buffer, offset):
     mem.g_wr(address, 4, 0x11223344)
     assert mem.buffers[buffer].raw[offset:offset + 4] == b"\x11\x22\x33\x44"
     assert mem.g_rd(address, 4) == 0x11223344 and fault(mem) == 0
+
+
+@pytest.mark.parametrize("address", [
+    pytest.param(0x060FFFFC, id="work RAM-H"),
+    pytest.param(0x002FFFFC, id="work RAM-L"),
+    pytest.param(0x05D7FFFC, id="VDP1 VRAM"),
+])
+def test_the_last_word_that_fits_does_not_fault(mem, address):
+    mem.g_wr(address, 4, 0x11223344)
+    assert fault(mem) == 0 and mem.g_rd(address, 4) == 0x11223344
+
+
+def test_a_tail_jump_with_no_runtime_to_run_it_faults(mem):
+    mem.g_jump.argtypes = [ctypes.c_uint32, ctypes.c_void_p, ctypes.c_int]
+    mem.g_jump(0x06006000, None, 0)
+    assert fault(mem) == 1

@@ -213,12 +213,9 @@ class Structurer:
             inner = self.sequence(header, header, first=True)
             head = "while (1) {"
         self.active.pop()
-        trimmed = drop_tail_continue(inner)
-        falls_back = trimmed != inner or not inner or inner[-1].strip().split(" ")[0] not in ("return", "return;", "break;")
-        inner = trimmed
+        inner = drop_tail_continue(inner)
         if len(inner) >= 5 and inner[-5].startswith("if (") and inner[-4:] == ["    " + BACK, "} else {", "    break;", "}"]:
             condition = inner[-5][4:-3]
             return ["do {"] + ["    " + line for line in polled(inner[:-5])] + ["} while (AGAIN(%s));" % condition]
-        if falls_back:
-            inner = inner + ["POLL();"]
-        return [head] + ["    " + line for line in polled(inner)] + ["}"]
+        # A block that returns has no successors, so it is never in a loop body: every pass goes round again.
+        return [head] + ["    " + line for line in polled(inner + ["POLL();"])] + ["}"]

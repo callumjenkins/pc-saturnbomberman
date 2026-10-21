@@ -23,8 +23,8 @@ def norm(ins):
     if op in("jsr","jmp"): return op+" "+args
     args=re.sub(r"\(0,(r\d+)\)",r"@\1",args)
     return op+(" "+args if args else "")
-def game_func(image,address):
-    return [n for n in (norm(ins.text) for ins in status.body(image,address)) if n]
+def game_func(image,address,code=None):
+    return [n for n in (norm(ins.text) for ins in status.own(image,address,code)) if n]
 def shc_funcs(src):
     out={};cur=None
     for line in open(src,errors="ignore"):
@@ -61,12 +61,12 @@ def main():
         if errs: print("\n".join(errs))
         if os.path.exists(src):
             funcs.update(shc_funcs(src)); os.remove(src)
-    image=status.krnl_image(); res=[]
+    image=status.krnl_image(); code=status.function_code(); res=[]
     import difflib
     for name,seq in funcs.items():
         m=re.match(r"f([0-9A-Fa-f]{8})",name)
         if not m: continue
-        a=m.group(1).upper(); g=game_func(image,int(a,16))
+        a=m.group(1).upper(); g=game_func(image,int(a,16),code.get(int(a,16)))
         lvl = 1 if seq==g else 2 if canon(seq)==canon(g) else 3 if mnems(seq)==mnems(g) else 4
         res.append((a,len(g),len(seq),lvl))
         if lvl>1 and verbose:

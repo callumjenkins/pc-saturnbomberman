@@ -58,8 +58,13 @@ Memory outside work RAM and VDP1 VRAM is not modelled. A trial where both sides 
 the frame hashes and the Beetle comparison are the evidence for those. A number parameter gets any 32-bit
 value whatever its declared width, passed at that width as the swap's wrapper does, so a type narrower than
 what the game reads fails. A `gaddr` or `REF(T)` gets a pointer into the data. `SPEC` in `check.py`
-narrows one that needs it. KRNL's code runs into the randomised data, so a function there keeps its own
-bytes. `CALLS` lists the calls a function makes, in order, where the order matters.
+narrows one that needs it. The random data runs from 060B0000 to the stack, and covers work RAM-L; half
+the trials also randomise the image's own variables. Every function's instructions and the literals they
+load keep their bytes. `CALLS` lists the calls a function makes, in order, where the order matters.
+
+Random data often stops a function at its first guard, so a wrong arm can pass. After each function
+`check.py` says how many of its branch outcomes no trial reached ("5 of 14 branch outcomes never
+reached"). Those arms are unchecked until a `SPEC` entry or planted data reaches them.
 
 `shc_compare.py` is a second, separate measure. The game was built with Hitachi SHC, and these
 functions are the ones whose SHC 5.0 output has the same instructions as the game's, some in another
