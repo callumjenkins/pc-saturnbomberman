@@ -14,6 +14,7 @@ _LOAD = {1: "LD8", 2: "LD16", 4: "LD32"}
 _NUMBER = re.compile(r"^-?(?:0x[0-9A-Fa-f]+|\d+)$")
 _SIZES = {"b": 1, "w": 2, "l": 4}
 _STORE = {1: "ST8", 2: "ST16", 4: "ST32"}
+_FRAMED = re.compile(r"sp|\(sp ([-+]) (\d+)\)")
 
 
 @dataclass
@@ -48,8 +49,14 @@ class State:
     flags: int = 0                          # how many flag variables have been made so far
     sp: int = 0                             # r15 relative to its value on entry
     slots: dict[int, int] = field(default_factory=dict)     # the function's stack locals: offset to size
+    framed: bool = False                    # locals live in guest memory below `sp`, r15 on entry
 
     def get(self, reg: int) -> str:
+        if reg == 15 and self.framed:
+            return framed(self.sp)
+        return self._get(reg)
+
+    def _get(self, reg: int) -> str:
         if reg in self.clobbered:
             raise Unsupported("r%d is read after a call overwrote it" % reg)
         return const(self.known[reg]) if reg in self.known else "r%d" % reg
@@ -84,7 +91,15 @@ class Unsupported(Exception):
 
 
 def address(base: str, offset: int | str) -> str:
+    at = _FRAMED.fullmatch(base)
+    if at and isinstance(offset, int):
+        return framed(int(at.group(2) or 0) * (-1 if at.group(1) == "-" else 1) + offset)
     return base if offset == 0 else op2(base, "+", str(offset))
+
+
+def framed(offset: int) -> str:
+    """The address `offset` bytes from sp."""
+    return "sp" if not offset else "(sp %s %d)" % ("-" if offset < 0 else "+", abs(offset))
 
 
 def compare(ins: "sh2.Insn", st: State) -> None:
@@ -121,15 +136,19 @@ def frame(ins: "sh2.Insn", st: State) -> bool:
         return True
     if op == "mov.l" and fmt == "mov.l Rm,@-Rn" and n == 15:
         st.sp -= 4
-        if not 8 <= m <= 14:
+        if st.framed and not 8 <= m <= 14:
+            st.effect("ST32(%s, %s);" % (st.get(15), strip(st.get(m))))
+        elif not 8 <= m <= 14:
             st.put_local(local(st, st.sp, 4, ins), st.get(m))
         return True
     if op == "mov.l" and fmt == "mov.l @Rm+,Rn" and m == 15:
-        if not 8 <= n <= 14:
+        if st.framed and not 8 <= n <= 14:
+            st.put(n, "LD32(%s)" % st.get(15), pure=False)
+        elif not 8 <= n <= 14:
             st.put(n, local(st, st.sp, 4, ins))
         st.sp += 4
         return True
-    if op.startswith("mov.") and "@" in fmt:
+    if op.startswith("mov.") and "@" in fmt and not st.framed:
         size = _SIZES[op[-1]]
         source, dest = operands(fmt)
         offset = ins.disp or 0
@@ -235,7 +254,11 @@ def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
     if n == 15 or m == 15 or "r15" in fmt:
         if frame(ins, st):
             return
-        raise Unsupported("takes the address of a local or moves r15 at %08X" % ins.pc)
+        if not st.framed:
+            raise Unsupported("takes the address of a local or moves r15 at %08X" % ins.pc)
+        writes = n == 15 and (not operands(fmt)[1].startswith("@") or "@-" in fmt) and not op.startswith(("cmp/", "tst"))
+        if writes or (m == 15 and "@Rm+" in fmt):
+            raise Unsupported("moves r15 at %08X" % ins.pc)
     if op == "nop":
         return
     if op == "mov" and fmt == "mov Rm,Rn":

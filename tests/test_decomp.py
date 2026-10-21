@@ -82,10 +82,24 @@ def test_a_stack_local_is_a_variable_not_a_pointer():
     assert "v4" in code and "r15" not in code
 
 
-def test_a_pointer_to_a_local_is_refused():
-    with pytest.raises(lift.Unsupported, match="address of a local"):
-        lifted(encode("add #imm,Rn", 15, low=0xFC), encode("mov Rm,Rn", 4, 15), encode("add #imm,Rn", 15, low=4),
-               RTS, NOP)
+def test_a_local_whose_address_goes_to_a_callee_lives_in_a_frame_on_the_games_stack():
+    # sts.l pr,@-r15 ; add #-8,r15 ; mov r15,r4 ; bsr callee ; nop ; mov.l @r15,r0 ; add #8,r15 ; lds.l @r15+,pr
+    # rts ; nop                                                                callee: rts ; nop
+    code = lifted(encode("sts.l pr,@-Rn", 15), encode("add #imm,Rn", 15, low=0xF8), encode("mov Rm,Rn", 4, 15), 0xB005,
+                  NOP, encode("mov.l @Rm,Rn", 0, 15), encode("add #imm,Rn", 15, low=8), encode("lds.l @Rm+,pr", 0, 15),
+                  RTS, NOP, RTS, NOP)
+    assert body(code)[1:4] == ["FRAME(sp, 12);", "r0 = GCALL1(0x06006014, (sp - 12));", "r0 = LD32(sp - 12);"]
+
+
+def test_an_argument_on_the_stack_is_read_from_the_frame():
+    # mov r15,r1 ; mov.l @(4,r1),r0 ; rts ; nop, which reads the sixth argument through a copy of r15
+    code = lifted(encode("mov Rm,Rn", 1, 15), encode("mov.l @(disp,Rm),Rn", 0, 1, low=1), RTS, NOP)
+    assert body(code)[1:3] == ["FRAME(sp, 0);", "r0 = LD32(sp + 4);"]
+
+
+def test_moving_r15_to_another_value_is_refused():
+    with pytest.raises(lift.Unsupported, match="moves r15"):
+        lifted(encode("mov Rm,Rn", 1, 15), encode("mov Rm,Rn", 15, 4), RTS, NOP)
 
 
 def test_popping_a_frame_it_never_pushed_is_refused_as_a_piece_of_a_larger_function():
@@ -152,10 +166,24 @@ def test_a_loop_that_tests_at_the_bottom_is_a_do_while():
     assert structure.Structurer(blocks, 1).run() == ["do {", "    work;", "} while (AGAIN(again));", "return;"]
 
 
-def test_a_loop_with_two_exits_is_refused():
+def test_a_loop_that_leaves_for_two_returns_writes_each_where_it_leaves():
     blocks = {1: block(1, "branch", [2, 3], "a"), 2: block(2, "branch", [1, 4], "b"), 3: block(3, "return"),
-              4: block(4, "return")}
-    with pytest.raises(structure.Unstructured):
+              4: block(4, "return", value="1")}
+    lines = [line.strip() for line in structure.Structurer(blocks, 1).run()]
+    assert lines[0] == "while (1) {" and {"return;", "return 1;"} <= set(lines) and lines[-1] == "}"
+
+
+def test_a_side_exit_runs_its_code_then_breaks_to_where_the_exits_meet():
+    blocks = {1: block(1, "branch", [2, 5], "a"), 2: block(2, "branch", [1, 3], "b", stmts=["w;"]),
+              3: block(3, "goto", [5], stmts=["side;"]), 5: block(5, "return")}
+    lines = [line.strip() for line in structure.Structurer(blocks, 1).run()]
+    assert lines[0] == "while (a) {" and lines[lines.index("side;") + 1] == "break;" and lines[-1] == "return;"
+
+
+def test_an_inner_loop_that_goes_round_the_outer_one_is_refused():
+    blocks = {1: block(1, "branch", [2, 9], "o"), 2: block(2, "branch", [3, 9], "i"), 3: block(3, "branch", [2, 4], "k"),
+              4: block(4, "goto", [1], stmts=["x;"]), 9: block(9, "return")}
+    with pytest.raises(structure.Unstructured, match="goto"):
         structure.Structurer(blocks, 1).run()
 
 

@@ -87,6 +87,13 @@ int f06050CB0(void)
     return n;
 }
 
+int f06050F4E(void)
+{
+    int a = GCALL1(0x06050F28, 6);
+
+    return GCALL1(0x06050F02, 3) | a;
+}
+
 int f06051D88(unsigned short flags, int row, int col)
 {
     int cell;
@@ -874,6 +881,22 @@ int f0605B614(void)
     return sel;
 }
 
+int f0605B960(void)
+{
+    REF(Fall) fall = FALL_PTR;
+    short index = GCALL1(0x060691DA, 0x1EB);
+    gaddr obj = OBJ(index);
+
+    SET(Fall, fall, id, index);
+    ST16(obj + 44, 1);
+    ST16(obj + 16, GET(Fall, FALL_PTR, col) << 3);
+    ST16(obj + 18, GET(Fall, FALL_PTR, row) << 3);
+    GCALL2(0x0606950C, obj, 2);
+    ST16(obj + 40, LD16(obj + 40) | 0x400);
+    SET(Fall, FALL_PTR, fn, 0x0605B9BC);
+    return 40;
+}
+
 void f0605BBEC(void)
 {
     gaddr obj;
@@ -889,6 +912,22 @@ void f0605BBEC(void)
     GCALL2(0x0606950C, obj, 2);
     ST16(obj + 40, LD16(obj + 40) | 0x400);
     SET(Fall, FALL_PTR, fn, 0x0605BC48);
+}
+
+int f0605BC9A(void)
+{
+    REF(Fall) fall = FALL_PTR;
+    short index = GCALL1(0x060691DA, 0x1EB);
+    gaddr obj = OBJ(index);
+
+    SET(Fall, fall, id, index);
+    ST16(obj + 44, 1);
+    ST16(obj + 16, GET(Fall, FALL_PTR, col) << 3);
+    ST16(obj + 18, GET(Fall, FALL_PTR, row) << 3);
+    GCALL2(0x0606950C, obj, 2);
+    ST16(obj + 40, LD16(obj + 40) | 0x400);
+    SET(Fall, FALL_PTR, fn, 0x0605BCF6);
+    return 40;
 }
 
 void f0605CAEC(void)

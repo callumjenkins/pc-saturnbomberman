@@ -50,6 +50,9 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         raise Unsupported("a tail call through a register at %08X" % ins.pc)
     step(slot, st, image)
     known = functions is not None and number(where) is not None
+    needs = sorted(registers.saved(image, number(where), functions)) if known else []
+    if needs:
+        raise Unsupported("goes to %s, the middle of a function that reads r%d from its caller" % (where, needs[0]))
     helper = registers.routine(image, number(where), functions) if known and not tail else None
     if helper:
         text, changes_r1 = helper
@@ -75,6 +78,8 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
             args.pop()
         args = [a or "0" for a in args]
     text = "%s%d(%s%s)" % ("GJUMP" if tail else "GCALL", len(args), where, "".join(", " + a for a in args))
+    if tail and st.framed:
+        st.effect("UNFRAME(sp);")
     st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in range(1, 8)}))
     st.clobbered |= set(range(1, 8))
     st.clobbered.discard(0)
@@ -128,8 +133,15 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
     every branch. With `functions`, every function's code, a call passes the registers its callee reads."""
     stops = leaders(image, entry, code)
     params: set[int] = set()
+    try:
+        read_blocks(image, entry, stops, params, code, functions)
+        framed = False
+    except Unsupported as e:
+        if "address of a local" not in str(e) and "argument passed on the stack" not in str(e):
+            raise
+        framed = True
     for attempt in range(2):
-        reads, slots = read_blocks(image, entry, stops, params, code, functions)
+        reads, slots = read_blocks(image, entry, stops, params, code, functions, framed)
         returns = any(s.var == "r0" for r in reads.values() for s in r.stmts)
         live_in, live_out = liveness(reads, returns)
         if returns and "r0" in live_in[entry]:
@@ -160,8 +172,24 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
     head = "%s f%08X(%s)" % ("int" if returns else "void", entry, ", ".join("int r%d" % p for p in sorted(params)) or "void")
     decl = ["    int %s;" % ", ".join(n for n in names if n[0] != "v")] if any(n[0] != "v" for n in names) else []
     decl += ["    %s v%d;" % (LOCAL_TYPES[size], -offset) for offset, size in sorted(slots.items(), reverse=True)]
+    decl += ["    FRAME(sp, %d);" % frame_size(image, stops)] if framed else []
     decl += [""] if decl else []
     return "\n".join([head, "{"] + decl + ["    " + line for line in lines] + ["}"]) + "\n"
+
+
+def frame_size(image: "sh2.Image", stops: dict[int, int]) -> int:
+    """How far below its entry value r15 goes."""
+    low = 0
+    for at, sp in stops.items():
+        while True:
+            ins = image.insn(at)
+            slot = image.insn(at + 2) if ins.delay else None
+            sp += sp_change(ins) + (sp_change(slot) if slot else 0)
+            low = min(low, sp)
+            at += 4 if slot else 2
+            if slot or ins.op in ("bt", "bf", "rts") or at in stops:
+                break
+    return -low
 
 
 def liveness(reads: dict[int, Read], returns: bool) -> tuple[dict[int, set[str]], dict[int, set[str]]]:
@@ -183,8 +211,8 @@ def liveness(reads: dict[int, Read], returns: bool) -> tuple[dict[int, set[str]]
 
 def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: set[int], flags: int,
                slots: dict[int, int], fresh: set[int], code: set[int] | None,
-               functions: dict[int, set[int]] | None = None) -> tuple[Read, int]:
-    st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh))
+               functions: dict[int, set[int]] | None = None, framed: bool = False) -> tuple[Read, int]:
+    st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh), framed=framed)
     block = structure.Block(start)
     term = ""
     tail = False
@@ -235,8 +263,8 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
     return Read(block, st.stmts, term, tail, st.fresh), st.flags
 
 
-def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: set[int],
-                code: set[int] | None, functions: dict[int, set[int]] | None = None) -> tuple[dict[int, Read], dict[int, int]]:
+def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: set[int], code: set[int] | None,
+                functions: dict[int, set[int]] | None = None, framed: bool = False) -> tuple[dict[int, Read], dict[int, int]]:
     """Every block, read until the registers a call may pass settle: those written since the last call
     on every path into a block, so an argument set before a branch reaches the call after it."""
     fresh = {at: set() if at == entry else set(range(16)) for at in stops}
@@ -245,7 +273,7 @@ def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: s
         reads: dict[int, Read] = {}
         slots: dict[int, int] = {}
         for at in sorted(stops):
-            reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions)
+            reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions, framed)
         into: dict[int, list[set[int]]] = {at: [] for at in stops}
         for read in reads.values():
             for target in read.block.targets:

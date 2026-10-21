@@ -8,7 +8,7 @@
  *   REF(T)          the address of a T
  *   GET(T,p,f)      p->f             SET(T,p,f,v)   p->f = v
  *   ELEM(T,base,i)  &((T *)base)[i]  BYTEOFF(T,base,n)  (T *)((char *)base + n)
- *   LD8/LD16/LD32   a scalar at an address, ST8/ST16/ST32 store one
+ *   LD8/LD16/LD32   a scalar at an address, LDU8/LDU16 unsigned, ST8/ST16/ST32 store one
  *   GETB(b,i)       b[i] for a signed byte pointer
  *   GCALLn(a, ...)  call the function at guest address a with n arguments, 0 to 8, as GCALL2(a, x, y);
  *                   the result is an int. The host build runs it on the runtime (g_call), SHC
@@ -22,6 +22,10 @@
  *                   0 for a zero divisor. Each is a HELPER.
  *                   The recompiled game advances time at each of those branches and at each call, so the C
  *                   has to reach the same number, and check.py counts both sides.
+ *   FRAME(sp, n)    declares sp, the game's stack pointer on entry, and reserves n bytes of the game's
+ *                   stack below it, for locals whose address the function passes on. sp + 4 and up are
+ *                   the arguments a caller passed on the stack. The frame goes when the function returns.
+ *   UNFRAME(sp)     gives the frame back before a GJUMP, whose callee finds its stack arguments at sp.
  */
 #ifndef DECOMP_GUEST_H
 #define DECOMP_GUEST_H
@@ -41,6 +45,7 @@ void g_wr(uint32_t addr, int size, uint32_t value);
 #define ELEM(T, base, i)   ((gaddr)(base) + (i) * sizeof(T))
 #define BYTEOFF(T, base, n) ((gaddr)(base) + (n))
 #define LD8(a)             ((int8_t)g_rd((a), 1))
+#define LDU8(a)            ((uint8_t)g_rd((a), 1))
 #define LD32(a)            ((int)g_rd((a), 4))
 #define LDU16(a)           ((uint16_t)g_rd((a), 2))
 #define LD16(a)            ((int16_t)g_rd((a), 2))
@@ -61,6 +66,10 @@ void g_poll(void);
 #define POLL() g_poll()
 #define AGAIN(cond) ((cond) ? (g_poll(), 1) : 0)
 #define HELPER(expr) (g_poll(), (expr))
+uint32_t g_frame(int size);
+void g_unframe(uint32_t top);
+#define FRAME(sp, size) gaddr sp = g_frame(size)
+#define UNFRAME(sp) g_unframe(sp)
 int32_t g_divs(int32_t a, int32_t b);
 uint32_t g_divu(uint32_t a, uint32_t b);
 int32_t g_mods(int32_t a, int32_t b);
@@ -100,6 +109,7 @@ typedef unsigned int gaddr;
 #define ELEM(T, base, i)   ((gaddr)&((T *)(base))[i])
 #define BYTEOFF(T, base, n) ((gaddr)(base) + (n))
 #define LD8(a)             (*(signed char *)(a))
+#define LDU8(a)            (*(unsigned char *)(a))
 #define LD32(a)            (*(int *)(a))
 #define LDU16(a)           (*(unsigned short *)(a))
 #define LD16(a)            (*(short *)(a))
@@ -132,6 +142,8 @@ typedef volatile unsigned short *H16PTR;
 #define POLL() ((void)0)
 #define AGAIN(cond) (cond)
 #define HELPER(expr) (expr)
+#define FRAME(sp, size) char sp##_frame[size]; gaddr sp = (gaddr)sp##_frame + (size)
+#define UNFRAME(sp) ((void)0)
 #define DIVS(a, b) ((int)(a) / (int)(b))
 #define DIVU(a, b) ((unsigned int)(a) / (unsigned int)(b))
 #define MODS(a, b) ((int)(a) % (int)(b))

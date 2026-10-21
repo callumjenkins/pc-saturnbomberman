@@ -170,6 +170,27 @@ void f06031BAA(int n, short bits)
     ST16(p, (LD16(p) & 0xFFCF) | bits);
 }
 
+int f060329A0(void)
+{
+    int i = 0;
+    int result;
+
+    GCALL1(0x06008A96, 0);
+    do {
+        GCALL1(0x06068CC4, i + 238);
+        GCALL1(0x06068CC4, i + 245);
+        GCALL1(0x06068CC4, i + 242);
+        result = GCALL1(0x06068CC4, i + 240);
+        i += 34;
+    } while (AGAIN(i < 0x198));
+    return result;
+}
+/* The unit `back` places before the write position in the ring, as a byte, halfword or word. */
+static int ring8(REF(Stream) s, int back)
+{
+    return LDU8(((ST_GET(s, pos) - back) & ST_GET(s, mask)) + ST_GET(s, ring));
+}
+
 int f06032EF2(void)
 {
     int mode = LD32(0x060C1048);
@@ -484,6 +505,360 @@ void f06033C9C(void)
     }
 }
 
+static int ring16(REF(Stream) s, int back)
+{
+    return LDU16((((ST_GET(s, pos) - back) & ST_GET(s, mask)) << 1) + ST_GET(s, ring));
+}
+
+static int ring32(REF(Stream) s, int back)
+{
+    return LD32((((ST_GET(s, pos) - back) & ST_GET(s, mask)) << 2) + ST_GET(s, ring));
+}
+
+int f06033DF0(REF(Stream) s)
+{
+    gaddr p = ST_GET(s, in);
+
+    ST_SET(s, in, p + 1);
+    return LDU8(p);
+}
+
+void f06033DFE(REF(Stream) s)
+{
+    gaddr p = ST_GET(s, out) + 1;
+
+    ST_SET(s, out, p);
+    ST8(p - 1, ST_GET(s, value));
+}
+
+void f06033E0C(REF(Stream) s)
+{
+    int p = ST_GET(s, pos) + 1;
+
+    ST_SET(s, pos, p);
+    ST8(p - 1 + ST_GET(s, ring), ST_GET(s, value));
+    ST_SET(s, pos, ST_GET(s, pos) & ST_GET(s, mask));
+}
+
+int f06033E26(REF(Stream) s)
+{
+    return ring8(s, 1);
+}
+
+int f06033E36(REF(Stream) s)
+{
+    return ring8(s, 1) + 1;
+}
+
+int f06033E48(REF(Stream) s)
+{
+    return ring8(s, 1) + 2;
+}
+
+int f06033E5A(REF(Stream) s)
+{
+    return ring8(s, 1) + 4;
+}
+
+int f06033E6C(REF(Stream) s)
+{
+    return ring8(s, 1) + 8;
+}
+
+int f06033E7E(REF(Stream) s)
+{
+    return ring8(s, 1) + 16;
+}
+
+int f06033E90(REF(Stream) s)
+{
+    return ring8(s, 1) + 32;
+}
+
+int f06033EA2(REF(Stream) s)
+{
+    return ring8(s, 1) - 1;
+}
+
+int f06033EB4(REF(Stream) s)
+{
+    return ring8(s, 1) - 2;
+}
+
+int f06033EC6(REF(Stream) s)
+{
+    return ring8(s, 1) - 4;
+}
+
+int f06033ED8(REF(Stream) s)
+{
+    return ring8(s, 1) - 8;
+}
+
+int f06033EEA(REF(Stream) s)
+{
+    return ring8(s, 1) - 16;
+}
+
+int f06033EFC(REF(Stream) s)
+{
+    return ring8(s, 1) - 32;
+}
+
+int f06033F0E(REF(Stream) s)
+{
+    return ring8(s, 2);
+}
+
+int f06033F1E(REF(Stream) s)
+{
+    return ring8(s, 4);
+}
+
+int f06033F2E(REF(Stream) s)
+{
+    return ring8(s, 8);
+}
+
+int f06033F3E(REF(Stream) s)
+{
+    return ring8(s, 16);
+}
+
+int f06033F4E(REF(Stream) s)
+{
+    return ring8(s, 32);
+}
+
+int f06033F5E(REF(Stream) s)
+{
+    return ring8(s, 64);
+}
+
+int f06033F6E(REF(Stream) s)
+{
+    gaddr p = ST_GET(s, in);
+
+    ST_SET(s, in, ST_GET(s, in) + 2);
+    return LDU8(p) << 8 | LDU8(p + 1);
+}
+
+void f06033F88(REF(Stream) s)
+{
+    gaddr p = ST_GET(s, out) + 1;
+
+    ST_SET(s, out, p);
+    ST8(p - 1, (unsigned int)ST_GET(s, value) >> 8);
+    p = ST_GET(s, out) + 1;
+    ST_SET(s, out, p);
+    ST8(p - 1, ST_GET(s, value));
+}
+
+void f06033FA4(REF(Stream) s)
+{
+    int p = ST_GET(s, pos) + 1;
+
+    ST_SET(s, pos, p);
+    ST16((p - 1) * 2 + ST_GET(s, ring), ST_GET(s, value));
+    ST_SET(s, pos, ST_GET(s, pos) & ST_GET(s, mask));
+}
+
+int f06033FC0(REF(Stream) s)
+{
+    return ring16(s, 1);
+}
+
+int f06033FD2(REF(Stream) s)
+{
+    return ring16(s, 1) + 1;
+}
+
+int f06033FE6(REF(Stream) s)
+{
+    return ring16(s, 1) + 2;
+}
+
+int f06033FFA(REF(Stream) s)
+{
+    return ring16(s, 1) + 4;
+}
+
+int f0603400E(REF(Stream) s)
+{
+    return ring16(s, 1) + 8;
+}
+
+int f06034036(REF(Stream) s)
+{
+    return ring16(s, 1) + 32;
+}
+
+int f0603404A(REF(Stream) s)
+{
+    return ring16(s, 1) - 1;
+}
+
+int f0603405E(REF(Stream) s)
+{
+    return ring16(s, 1) - 2;
+}
+
+int f06034086(REF(Stream) s)
+{
+    return ring16(s, 1) - 8;
+}
+
+int f060340C2(REF(Stream) s)
+{
+    return ring16(s, 2);
+}
+
+int f060340D4(REF(Stream) s)
+{
+    return ring16(s, 4);
+}
+
+int f060340E6(REF(Stream) s)
+{
+    return ring16(s, 8);
+}
+
+int f060340F8(REF(Stream) s)
+{
+    return ring16(s, 16);
+}
+
+int f0603410A(REF(Stream) s)
+{
+    return ring16(s, 32);
+}
+
+int f0603411C(REF(Stream) s)
+{
+    return ring16(s, 64);
+}
+
+int f0603412E(REF(Stream) s)
+{
+    gaddr p = ST_GET(s, in);
+
+    ST_SET(s, in, ST_GET(s, in) + 4);
+    return LDU8(p) << 24 | LDU8(p + 1) << 16 | LDU8(p + 2) << 8 | LDU8(p + 3);
+}
+
+void f0603415A(REF(Stream) s)
+{
+    gaddr p = ST_GET(s, out) + 1;
+
+    ST_SET(s, out, p);
+    ST8(p - 1, (unsigned int)ST_GET(s, value) >> 24);
+    p = ST_GET(s, out) + 1;
+    ST_SET(s, out, p);
+    ST8(p - 1, (unsigned int)ST_GET(s, value) >> 16);
+    p = ST_GET(s, out) + 1;
+    ST_SET(s, out, p);
+    ST8(p - 1, (unsigned int)ST_GET(s, value) >> 8);
+    p = ST_GET(s, out) + 1;
+    ST_SET(s, out, p);
+    ST8(p - 1, ST_GET(s, value));
+}
+
+void f06034194(REF(Stream) s)
+{
+    int p = ST_GET(s, pos) + 1;
+
+    ST_SET(s, pos, p);
+    ST32((p - 1) * 4 + ST_GET(s, ring), ST_GET(s, value));
+    ST_SET(s, pos, ST_GET(s, pos) & ST_GET(s, mask));
+}
+
+int f060341B0(REF(Stream) s)
+{
+    return ring32(s, 1);
+}
+
+int f060341C0(REF(Stream) s)
+{
+    return ring32(s, 1) + 1;
+}
+
+int f060341D2(REF(Stream) s)
+{
+    return ring32(s, 1) + 2;
+}
+
+int f060341E4(REF(Stream) s)
+{
+    return ring32(s, 1) + 4;
+}
+
+int f060341F6(REF(Stream) s)
+{
+    return ring32(s, 1) + 8;
+}
+
+int f06034208(REF(Stream) s)
+{
+    return ring32(s, 1) + 16;
+}
+
+int f0603422C(REF(Stream) s)
+{
+    return ring32(s, 1) - 1;
+}
+
+int f0603423E(REF(Stream) s)
+{
+    return ring32(s, 1) - 2;
+}
+
+int f06034250(REF(Stream) s)
+{
+    return ring32(s, 1) - 4;
+}
+
+int f06034262(REF(Stream) s)
+{
+    return ring32(s, 1) - 8;
+}
+
+int f06034298(REF(Stream) s)
+{
+    return ring32(s, 2);
+}
+
+int f060342A8(REF(Stream) s)
+{
+    return ring32(s, 4);
+}
+
+int f060342B8(REF(Stream) s)
+{
+    return ring32(s, 8);
+}
+
+int f060342C8(REF(Stream) s)
+{
+    return ring32(s, 16);
+}
+
+int f060342D8(REF(Stream) s)
+{
+    return ring32(s, 32);
+}
+
+int f060342E8(REF(Stream) s)
+{
+    return ring32(s, 64);
+}
+void f06034FC4(void)
+{
+    int b = SP(b1);
+
+    SP_SET(count, ((b >> 4) - (b & 15)) * 3);
+    SP_STATE(2);
+}
+
 /* Reads the next bit, least significant first, from the bytes at r->src. */
 int f060342F8(REF(BitReader) r)
 {
@@ -638,6 +1013,127 @@ void f06034F80(void)
         p += 10;
     } while (AGAIN(n != 0));
     ST32(0x060C1648, 0);
+}
+
+void f06034FF6(void)
+{
+    SP_SET(count, 0);
+    SP_STATE(2);
+}
+
+void f060350AC(void)
+{
+    if (!SP(count))
+        SP_STATE(3);
+    else
+        SP_SET(count, SP(count) - 1);
+}
+
+void f060350CA(void)
+{
+    int b = SP(b1);
+    int hi = b >> 4;
+    int lo = b & 15;
+    int t = SP(count);
+    gaddr obj = OBJ(SP(obj));
+    int w8;
+    int x, y, d, drift, rise;
+
+    if (t > 30) {
+        SP_SET(count, lo * 3 + 20);
+        SP_STATE(4);
+        return;
+    }
+    w8 = SP(w8);
+    rise = DIVS(((t - 15) * (t - 15) - 225) * w8, 128);
+    drift = ((hi - lo * 2) * w8) >> 1;
+    d = DIVS(t * drift, 30);
+    x = LD16(obj + 16) + d;
+    y = rise + LD16(obj + 18);
+    ST16(obj + 20, x);
+    ST16(obj + 24, SP(b6) + x - 1);
+    ST16(obj + 22, y);
+    ST16(obj + 26, SP(b7) + y - 1);
+    SP_SET(count, SP(count) + 1);
+}
+
+void f060351A4(void)
+{
+    int b = SP(b1);
+    int t = SP(count);
+    gaddr obj = OBJ(SP(obj));
+    int hi = b >> 4;
+    int lo = b & 15;
+    int speed = hi - lo * 2;
+    int ang, d, x, y;
+
+    if (t > 30) {
+        x = (speed * SP(w8) >> 1) + LD16(obj + 16);
+        y = LD16(obj + 18);
+        SP_SET(count, 20);
+        SP_STATE(4);
+    } else {
+        ang = (int)0xFF4C0000 + MODS(t * 24, 0x168) * 65536;
+        d = DIVS(speed * SP(w8) * t, 60);
+        x = LD16(obj + 16);
+        x -= GCALL2(0x060980B4, GCALL1(0x0609816C, ang), d);
+        y = LD16(obj + 18);
+        y += GCALL2(0x060980B4, GCALL1(0x0609812C, ang), d);
+        SP_SET(count, SP(count) + 1);
+    }
+    ST16(obj + 20, x);
+    ST16(obj + 24, SP(b6) + x - 1);
+    ST16(obj + 22, y);
+    ST16(obj + 26, SP(b7) + y - 1);
+}
+
+void f060353A2(void)
+{
+    if (!SP(count))
+        SP_STATE(5);
+    else
+        SP_SET(count, SP(count) - 1);
+}
+
+void f060353C0(void)
+{
+    gaddr obj;
+
+    if (SP(count) > 30) {
+        SP_STATE(6);
+        return;
+    }
+    obj = OBJ(SP(obj));
+    ST16(obj + 22, LD16(obj + 26) - DIVS((SP(b7) - 1) * (30 - SP(count)), 30));
+    SP_SET(count, SP(count) + 1);
+}
+
+void f0603541C(void)
+{
+    gaddr obj;
+    int step;
+
+    if (SP(count) > 15) {
+        SP_STATE(6);
+        return;
+    }
+    obj = OBJ(SP(obj));
+    step = DIVS(15 - SP(count), DIVS(35, SP(b7)));
+    ST16(obj + 26, LD16(obj + 26) - step);
+    ST16(obj + 20, LD16(obj + 20) + DIVS(SP(w8), 4));
+    ST16(obj + 24, LD16(obj + 24) + DIVS(SP(w8), 4));
+    ST16(obj + 22, LD16(obj + 26) - DIVS(SP(b7) * (15 - SP(count)), 15));
+    SP_SET(count, SP(count) + 1);
+}
+
+int f060354C0(void)
+{
+    int result;
+
+    ST8(LD32(0x060C164C), 0);
+    result = GCALL1(0x060692DC, LDU16(LD32(0x060C164C) + 4));
+    ST32(0x060C1648, LD32(0x060C1648) - 1);
+    return result;
 }
 
 void f06035926(void)
@@ -1200,6 +1696,23 @@ void f0603847E(int i)
     }
 }
 
+short f060387EC(int id, gaddr dst)
+{
+    gaddr src = GCALL2(0x06008ABA, id, 1) + 2;
+    short n = LD16(src);
+    int left = n;
+
+    src += 2;
+    while ((unsigned short)left) {
+        POLL();
+        left--;
+        ST16(dst, LD16(src));
+        dst += 2;
+        src += 2;
+    }
+    return n;
+}
+
 void f060389E2(void)
 {
     gaddr p;
@@ -1415,6 +1928,11 @@ void f0603A2B8(void)
     } while (AGAIN(i < 2));
 }
 
+int f0603A45A(void)
+{
+    return GJUMP1(0x0606948A, GET(Fall, FALL_PTR, id));
+}
+
 int f0603A4A4(int a, int b, int c)
 {
     if ((short)c == -1)
@@ -1570,6 +2088,27 @@ void f0603B32E(void)
     GCALL2(0x0600A3DC, LDU16(0x060D7E38), LDU16(0x060D7E3E));
     GCALL2(0x0603B25E, LD16(0x060D7E38), LD16(0x060D7E40));
     GCALL1(0x0606948A, TGET(h8));
+    base = LD16(OBJ(TGET(h8)) + 4);
+    ST16(OBJ(TGET(h10)) + 4, base + 5);
+    ST16(OBJ(TGET(h12)) + 4, base + 5);
+    ST16(OBJ(TGET(h14)) + 4, base + 7);
+    ST16(OBJ(TGET(h16)) + 4, 10);
+}
+
+void f0603B368(short x, short y, short value)
+{
+    int base;
+
+    ST16(0x060D7E42, GCALL2(0x0600C950, x, y));
+    ST16(0x060D7E44, value);
+    GCALL3(0x0600D0E4, LD16(0x060D7E38), x, y);
+    ST16(OBJ(LDU16(0x060D7E38)) + 38, value);
+    POLL();
+    GCALL2(0x0600A3DC, LDU16(0x060D7E38), LDU16(0x060D7E3A));
+    GCALL2(0x0600A3DC, LDU16(0x060D7E38), LDU16(0x060D7E3C));
+    GCALL2(0x0600A3DC, LDU16(0x060D7E38), LDU16(0x060D7E3E));
+    GCALL2(0x0603B25E, LD16(0x060D7E38), LD16(0x060D7E40));
+    GCALL1(0x0606948A, (short)TGET(h8));
     base = LD16(OBJ(TGET(h8)) + 4);
     ST16(OBJ(TGET(h10)) + 4, base + 5);
     ST16(OBJ(TGET(h12)) + 4, base + 5);

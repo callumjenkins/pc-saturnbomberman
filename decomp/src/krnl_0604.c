@@ -374,6 +374,18 @@ void f06049E8C(gaddr p, unsigned char kind)
     } while (AGAIN(q < p + 38));
 }
 
+void f0604AFE2(unsigned int n, gaddr list)
+{
+    int value = (DIVU(n, 10) << 7) + 128;
+    short i;
+
+    list += 20;
+    for (i = 0; i < (unsigned char)LD8(0x060C1760); i++, list += 2) {
+        POLL();
+        ST16(OBJ(LDU16(list)) + 62, value);
+    }
+}
+
 int f0604B4CC(short n, gaddr list)
 {
     int obj = OBJ(LDU16(list + 20 + n * 2));

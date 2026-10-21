@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.join(ROOT, "decomp"))
 import cases  # noqa: E402
 import check  # noqa: E402
 import gen  # noqa: E402
+import machine  # noqa: E402
 import status  # noqa: E402
 from saturnrecomp import sh2, sh2emu  # noqa: E402
 
@@ -170,9 +171,25 @@ def test_a_plant_lands_in_both_copies_of_memory(tmp_path):
 
 
 def test_every_case_names_a_decompiled_function_with_its_parameter_count():
+    cases.load()
     sigs = {s.name: s for s in gen.signatures().values()}
     assert [name for name, (args, returns, plants) in cases.SPEC.items()
             if name not in sigs or len(args) != len(sigs[name].params) or returns != (sigs[name].returns != "void")] == []
+
+
+def test_every_plant_lands_in_memory_a_trial_maps():
+    cases.load()
+    cpu = sh2emu.load(os.devnull, BASE)
+    for name, lo, size in machine.DEVICES:
+        cpu.mem.add(lo, size)
+    unmapped = []
+    for name, (args, returns, plants) in cases.SPEC.items():
+        for address, size, values, chance in plants:
+            try:
+                cpu.mem.read(address, size)
+            except sh2emu.MemoryError_:
+                unmapped.append((name, hex(address)))
+    assert unmapped == []
 
 
 @pytest.mark.parametrize("source, agrees", [
@@ -204,10 +221,16 @@ def test_the_image_keeps_a_jump_table_up_to_the_code_after_it():
 def test_the_host_divisions_give_what_the_games_routines_do(tmp_path, routine, symbol, signed):
     path = tmp_path / "none.c"
     path.write_text('#include "krnl.h"\n')
-    fn = getattr(check.build([str(path)]), symbol)
+    lib = check.build([str(path)])
+    fn = getattr(lib, symbol)
     width = ctypes.c_int32 if signed else ctypes.c_uint32
     fn.restype, fn.argtypes = width, [width, width]
     pairs = [(0x80000000, 0xFFFFFFFF), (5, 0), (0xFFFFFFF9, 2), (7, 0xFFFFFFFE), (100, 7), (0xFFFFFFFF, 0x10)]
     for dividend, divisor in pairs:
-        game = sh2emu.load(check.KRNL, BASE).call(routine, r0=divisor, r1=dividend)
-        assert fn(width(dividend).value, width(divisor).value) & 0xFFFFFFFF == game, (hex(dividend), hex(divisor))
+        game, host = sh2emu.load(check.KRNL, BASE), sh2emu.load(check.KRNL, BASE)
+        keep = machine.point(lib, host)
+        got = fn(width(dividend).value, width(divisor).value) & 0xFFFFFFFF
+        want = game.call(routine, r0=divisor, r1=dividend)
+        assert (got, host.mem.read(0x060FA8B4, 4)) == (want, game.mem.read(0x060FA8B4, 4)), (hex(dividend), hex(divisor))
+        del keep
+

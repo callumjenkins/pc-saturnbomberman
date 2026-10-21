@@ -141,27 +141,52 @@ class Structurer:
         self.ipdom = postdominators(blocks, self.order)
         self.bodies = loops(blocks, self.order)
         self.active: list[tuple[int, int | None]] = []          # (header, exit) of the loops being written
+        self.sides: dict[int, set[int]] = {}                    # each loop's exits other than its exit
 
     def poll(self, block: Block, target: int) -> list[str]:
         """POLL() for an edge back that is not a loop's own, which gets one where the loop is written."""
-        return ["POLL();"] if target in block.polls and self.leaving(target) != BACK else []
+        return ["POLL();"] if target in block.polls and not self.goes_round(target) else []
 
     def run(self) -> list[str]:
         return self.sequence(self.entry, None)
 
     def exit_of(self, header: int) -> int | None:
+        """Where the loop carries on: the one place it leaves to, or where all of them meet. The others
+        are its side exits, written in the loop where it leaves for them."""
         body = self.bodies[header]
         outside = {n for at in body for n in successors(self.blocks[at]) if n not in body}
-        if len(outside) > 1:
-            raise Unstructured("the loop at %08X leaves in more than one place" % header)
-        return outside.pop() if outside else None
+        if len(outside) <= 1:
+            self.sides[header] = set()
+            return outside.pop() if outside else None
+        chains = []
+        for at in sorted(outside):
+            chain = []
+            while at is not None:
+                chain.append(at)
+                at = self.ipdom[at]
+            chains.append(chain)
+        leave = next((at for at in chains[0] if all(at in chain for chain in chains[1:])), None)
+        self.sides[header] = outside - {leave}
+        if self.sides[header] & set(self.bodies):
+            raise Unstructured("the loop at %08X leaves for another loop" % header)
+        return leave
 
-    def leaving(self, at: int) -> str | None:
+    def goes_round(self, at: int) -> bool:
+        """Whether going to `at` is a jump back to the header of a loop being written."""
         for header, leave in reversed(self.active):
+            if at in (header, leave) or at in self.sides[header]:
+                return at == header
+        return False
+
+    def leaving(self, at: int) -> list[str] | None:
+        for depth, (header, leave) in enumerate(reversed(self.active)):
+            if at not in (header, leave) and at not in self.sides[header]:
+                continue
+            if depth:
+                raise Unstructured("a loop inside the loop at %08X goes to %08X, which needs a goto" % (header, at))
             if at == header:
-                return BACK
-            if at == leave:
-                return "break;"
+                return [BACK]
+            return ["break;"] if at == leave else self.sequence(at, None, first=True)
         return None
 
     def sequence(self, at: int | None, stop: int | None, first: bool = False) -> list[str]:
@@ -171,7 +196,7 @@ class Structurer:
             if not first:
                 jump = self.leaving(at)
                 if jump:
-                    return out + [jump]
+                    return out + jump
                 if at in self.bodies and all(at != header for header, _ in self.active):
                     out += self.loop(at)
                     at = self.exit_of(at)
@@ -212,7 +237,8 @@ class Structurer:
         enters = any(target in body and target != header for target in block.polls)
         if enters and any(header in self.blocks[at].polls for at in body):
             raise Unstructured("the loop at %08X goes back in two places" % header)
-        tests_only = block.kind == "branch" and not block.stmts and (block.targets[0] in body) != (block.targets[1] in body)
+        tests_only = (block.kind == "branch" and not block.stmts and (block.targets[0] in body) != (block.targets[1] in body)
+                      and leave in block.targets)
         if tests_only:
             stay = block.targets[0] if block.targets[0] in body else block.targets[1]
             condition = block.value if stay == block.targets[0] else negate(block.value)

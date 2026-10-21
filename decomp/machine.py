@@ -53,7 +53,7 @@ def differences(host: sh2emu.CPU, game: sh2emu.CPU) -> list[str]:
 def fill(cpu: sh2emu.CPU, r: random.Random, base: int, code: list[tuple[int, int]], plants: list[tuple]) -> None:
     """Maps the devices on cpu, then fills its memory: half the time a route's work RAM, if any was
     dumped, and otherwise random data. Then the image's code, from base, goes back over it and the plants
-    over that."""
+    over that, in any mapped region; a plant anywhere else raises sh2emu.MemoryError_."""
     for name, lo, size in DEVICES:
         cpu.mem.add(lo, size)[:] = r.randbytes(size)
     wram, wraml = cpu.mem.regions[0][2], cpu.mem.regions[1][2]
@@ -71,7 +71,7 @@ def fill(cpu: sh2emu.CPU, r: random.Random, base: int, code: list[tuple[int, int
         wram[base - WRAM + start:base - WRAM + end] = image[start:end]
     for address, size, values, chance in plants:
         if r.random() < chance:
-            wram[address - WRAM:address - WRAM + size] = (r.choice(values) & ((1 << 8 * size) - 1)).to_bytes(size, "big")
+            cpu.mem.write(address, size, r.choice(values))
 
 
 def point(lib: ctypes.CDLL, cpu: sh2emu.CPU) -> list:

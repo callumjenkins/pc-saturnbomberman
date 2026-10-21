@@ -59,6 +59,93 @@ void f06010132(int a, int b)
     ST16(0x060DF980, LD16(0x060DF980) + 1);
 }
 
+void f060101E4(void)
+{
+    int i = 0;
+    int node;
+
+    ST32(CURSOR, 0x060D8C0C);
+    while (i < LDU16(0x060DF980)) {
+        POLL();
+        node = LD32(CURSOR);
+        if (LD16(node))
+            GCALL1(0x060692DC, LDU16(node));
+        i++;
+        ST32(CURSOR, LD32(CURSOR) + 14);
+    }
+    POLL();
+    ST32(CURSOR, 0x060D8C0C);
+    i = 0;
+    do {
+        SET(Node14, NODE, h0, 0);
+        SET(Node14, NODE, h2, 0);
+        SET(Node14, NODE, h4, 0);
+        SET(Node14, NODE, b6, 0);
+        SET(Node14, NODE, b7, 0);
+        SET(Node14, NODE, b8, 0);
+        SET(Node14, NODE, b9, 0);
+        ST32(CURSOR, LD32(CURSOR) + 14);
+    } while (AGAIN(++i < 2000));
+    ST16(0x060DF980, 0);
+}
+int f060110AC(REF(Brain) brain)
+{
+    gaddr cur;
+    gaddr other;
+    int cell;
+    int ok = 1;
+    int i;
+    int odd;
+    int mask;
+
+    if (BR(brain, b24) != LDU16(0x060C062C)) {
+        other = REC(BR(brain, b24));
+        GCALL1(0x0600C9AA, LDU16(other + 20));
+        ST16(0x060D7E88, LD16(0x060D7EB4));
+        ST16(0x060D7E8A, LD16(0x060D7EB6));
+        if (LD16(other + 42)) {
+            ST16(0x060D7E88, -LD16(0x060D7E88));
+            ST16(0x060D7E8A, -LD16(0x060D7E8A));
+        }
+    } else if (!GCALL0(0x060112A2)) {
+        ok = 0;
+    }
+    if (ok) {
+        cell = LDU16(LD32(CURRENT) + 20);
+        GCALL1(0x0600C9AA, cell);
+        odd = GCALL0(0x0600A0B8) & 1;
+        i = 0;
+        do {
+            if (!odd) {
+                cell = GCALL1(0x0601126E, cell);
+                cell = GCALL1(0x0601123A, cell);
+            } else {
+                cell = GCALL1(0x0601123A, cell);
+                cell = GCALL1(0x0601126E, cell);
+            }
+        } while (AGAIN(++i < 2));
+        if (cell == LDU16(LD32(CURRENT) + 20))
+            cell = 0;
+    } else {
+        cell = 0;
+    }
+    if (LDU16(LD32(CURRENT) + 46) & 0x800) {
+        if (LDU16(REC(LDU16(LD32(CURRENT) + 36)) + 64) == 3) {
+            cur = LD32(CURRENT);
+            mask = (LDU8(cur + 6) & 1) ? 63 : 0xFFC0;
+            if ((LDU16(cur + 20) & mask) == (cell & mask))
+                GCALL1(0x06011642, LDU16(0x060BF5E6));
+        }
+    }
+    if (!cell) {
+        cur = LD32(CURRENT);
+        cell = LD32(0x060B3C08 + ((BR(brain, b25) + LDU16(0x060C062C)) & 7) * 4) + LDU16(cur + 20);
+        if (LDU16(FLAGS_AT(cell)) & LDU16(0x060C04DC))
+            BR_SET(brain, b25, (GCALL0(0x0600A0B8) & 3) + 1);
+    }
+    return cell;
+}
+
 void f06010508(void)
 {
     GCALL2(0x06022F1C, 31, 0x0601051E);
@@ -272,6 +359,27 @@ int f0601126E(int pos)
     return pos;
 }
 
+void f06011320(REF(Brain) brain)
+{
+    int i;
+
+    ST16(0x060C04A0, 0);
+    i = 0;
+    do {
+        ST8(0x060C04A0 + i * 6 + 3, 0);
+        ST8(0x060C04A0 + i * 6 + 2, 0);
+        ST8(0x060C04A0 + i * 6 + 4, 0);
+    } while (AGAIN(++i < 6));
+    i = 0;
+    do {
+        ST8(0x060C04E0 + i, 0);
+    } while (AGAIN(++i < 5));
+    ST16(0x060C04CE, 0xFFFF);
+    ST8(0x060C04C5, 0);
+    if (BR(brain, w16) == LDU16(LD32(CURRENT) + 20))
+        BR_SET(brain, w16, 0);
+}
+
 void f0601136A(void)
 {
     int i;
@@ -295,6 +403,31 @@ void f06011642(short bits)
     ST16(0x260060CA + i, LD16(0x260060CA + i) | bits);
 }
 
+/* Which of four boxes (numbered from 1) the other bomber's position falls in, 0 if none. */
+int f060116C0(REF(Brain) brain, int set)
+{
+    gaddr cur, other, box;
+    int cx, cy, ox, oy;
+    int i;
+
+    if (BR(brain, b24) == LDU16(0x060C062C))
+        return 0;
+    cur = LD32(CURRENT);
+    cx = LD16(cur + 24);
+    cy = LD16(cur + 28);
+    other = REC(BR(brain, b24));
+    ox = LD16(other + 24);
+    oy = LD16(other + 28);
+    box = 0x060B3C88 + set * 32;
+    i = 0;
+    do {
+        if (LD16(box) + cx < ox && LD16(box + 2) + cx >= ox && LD16(box + 4) + cy < oy && LD16(box + 6) + cy >= oy)
+            return i + 1;
+        box += 8;
+    } while (AGAIN(++i < 4));
+    return 0;
+}
+
 void f06011762(gaddr p)
 {
     ST16(p + 12, 0);
@@ -303,6 +436,17 @@ void f06011762(gaddr p)
     ST16(p + 20, 0);
     ST8(p + 22, 0);
     ST8(p + 27, 0);
+}
+
+void f06011778(REF(Brain) brain, int n)
+{
+    GCALL1(0x06011762, brain);
+    BR_SET(brain, w12, LD16(0x060B4800 + n * 2));
+}
+
+void f0601179A(REF(Brain) brain)
+{
+    BR_SET(brain, w12, LD16(0x060B4800 + LDU8(LD32(CURRENT) + 6) * 2));
 }
 
 int f060117AC(gaddr task)
@@ -341,6 +485,76 @@ int f060119E8(void)
     return !(LDU16(0x060EC8B0 + LDU16(t + 20) * 2) & 0x42F0);
 }
 
+/* Walks `stride` halfwords at a time down three tables while the cells they describe are open. */
+int f06011B00(int stride, gaddr flags, gaddr bits, gaddr kinds)
+{
+    int count = 0;
+    int i = 0;
+    int kind;
+
+    stride *= 2;
+    while (i < LDU16(LD32(CURRENT) + 52) && !count) {
+        POLL();
+        flags += stride;
+        kinds += stride;
+        bits += stride;
+        if (LDU16(flags) & 16) {
+            if (LDU16(flags) & 7)
+                break;
+            if (LDU16(bits) & 0xF00)
+                break;
+            count++;
+        } else if (LDU16(flags) & 64) {
+            kind = LDU8(0x060DFB9B + (LDU16(kinds) & 255) * 8);
+            if (kind == 16 || kind == 10 || kind == 26)
+                count++;
+            else if (kind == 21 && !GCALL0(0x06011046))
+                count++;
+        } else if (LDU16(bits) & 0x1000) {
+            count++;
+        }
+        if (LDU16(flags) & 160)
+            break;
+        i++;
+    }
+    return count;
+}
+
+void f06011BF0(REF(Brain) brain)
+{
+    if (!(BR(brain, w12) & 0xF000)) {
+        BR_SET(brain, fn, BR(brain, next));
+    } else {
+        BR_SET(brain, w18, LD16(LD32(CURRENT) + 20));
+        BR_SET(brain, b29, 4);
+        BR_SET(brain, fn, 0x06011C16);
+    }
+}
+
+/* Puts the brain back on the course it was last given and starts it on its next step. */
+static void retarget(REF(Brain) brain)
+{
+    GCALL1(0x060126E4, brain);
+    GJUMP1(0x06011BF0, brain);
+}
+
+void f06011C50(REF(Brain) brain)
+{
+    ST8(0x060C04C4, 3);
+    GCALL1(0x06011320, brain);
+    do {
+        GCALL1(0x06011CBA, brain);
+        GCALL0(0x0601136A);
+    } while (AGAIN(GCALL0(0x060113FC)));
+    if (LDU16(0x060C04CE) >= 16) {
+        BR_SET(brain, fn, 0x06012410);
+    } else {
+        BR_SET(brain, b27, 255);
+        BR_SET(brain, next, 0x06010C0C);
+        retarget(brain);
+    }
+}
+
 /* 0609497E shifts r0 right by 8, and a GCALL cannot pass r0. The call stays for the time it advances, and the shift is done here. */
 void f06011CBA(gaddr task)
 {
@@ -368,6 +582,17 @@ void f06011CBA(gaddr task)
                 ST16(0x060C04D0, LD16(0x060C04D0) | 1);
         }
     }
+}
+
+void f06011E62(REF(Brain) brain)
+{
+    if (LDU16(LD32(CURRENT) + 64) & 1) {
+        if (!LD16(0x060C04CA) && !LD16(0x260060B0 + LDU16(0x060C062C) * 2))
+            GCALL1(0x06011642, LDU16(0x060BF5E0));
+    }
+    if (GCALL0(0x060119E8) && GCALL1(0x06011570, brain) && GCALL1(0x06011A6C, brain))
+        GCALL1(0x06011EBE, brain);
+    BR_SET(brain, fn, BR(brain, next));
 }
 
 void f06011EBE(gaddr task)
@@ -403,6 +628,13 @@ int f06011F1A(gaddr p)
     return wait;
 }
 
+void f06011F26(REF(Brain) brain)
+{
+    BR_SET(brain, w12, BR(brain, w14));
+    BR_SET(brain, w18, LD16(LD32(CURRENT) + 20));
+    BR_SET(brain, fn, 0x06011F38);
+}
+
 int f06011F98(gaddr task, unsigned int need)
 {
     gaddr t = LD32(CURRENT);
@@ -412,6 +644,17 @@ int f06011F98(gaddr task, unsigned int need)
     if ((unsigned int)(LDU16(t + 62) - LDU16(t + 40)) < need)
         return 0;
     return GCALL0(0x060119E8) && GCALL1(0x060120B4, task);
+}
+
+int f06012184(gaddr base)
+{
+    int bits = 0;
+    int i = 0;
+
+    do {
+        bits |= LDU16(base + LD32(0x060B3BB8 + i * 4) * 2);
+    } while (AGAIN(++i < 4));
+    return bits;
 }
 
 int f060121D4(gaddr p)
@@ -441,6 +684,15 @@ int f06012226(gaddr task)
     return 29;
 }
 
+void f0601224A(REF(Brain) brain)
+{
+    BR_SET(brain, b29, BR(brain, b29) - 1);
+    if (!BR(brain, b29) || (LDU16(LD32(CURRENT) + 46) & 2)) {
+        GCALL1(0x06011642, LDU16(0x060BF5E2));
+        BR_SET(brain, fn, BR(brain, next));
+    }
+}
+
 int f0601227E(gaddr task, unsigned int need)
 {
     gaddr t = LD32(CURRENT);
@@ -450,6 +702,52 @@ int f0601227E(gaddr task, unsigned int need)
     if ((unsigned int)(LDU16(t + 62) - LDU16(t + 40)) < need)
         return 0;
     return GCALL0(0x060119E8) && GCALL1(0x06012376, task);
+}
+
+void f06012410(REF(Brain) brain)
+{
+    int i, best = 0, step = 0;
+
+    GCALL1(0x060124B8, brain);
+    if (!(LDU16(0x060EE8B0 + LDU16(0x060C04D6) * 2) & 0xF00)) {
+        BR_SET(brain, next, 0x06010C0C);
+        retarget(brain);
+        return;
+    }
+    BR_SET(brain, next, 0x06012638);
+    if (LD8(0x060C04E0 + LDU8(0x060C04A3))) {
+        retarget(brain);
+        return;
+    }
+    i = 4;
+    while (i) {
+        POLL();
+        if (LDU8(0x060C04E0 + i) > best) {
+            best = LDU8(0x060C04E0 + i);
+            step = i;
+        }
+        i--;
+    }
+    if (!best) {
+        if (!(LDU16(LD32(CURRENT) + 64) & 0x100))
+            BR_SET(brain, fn, 0x06012410);
+        else
+            retarget(brain);
+        return;
+    }
+    BR_SET(brain, w12, LD16(0x060B4800 + step * 2));
+    BR_SET(brain, b23, step);
+    GJUMP1(0x06011BF0, brain);
+}
+
+void f060124B8(REF(Brain) brain)
+{
+    ST8(0x060C04C4, 5);
+    GCALL1(0x06011320, brain);
+    do {
+        GCALL0(0x0601251C);
+        GCALL0(0x0601136A);
+    } while (AGAIN(GCALL0(0x060113FC)));
 }
 
 void f0601251C(void)
@@ -483,6 +781,42 @@ void f0601251C(void)
     total = c == 0 ? 0 : LD16(p - 2) + step;
     ST16(p, total);
     ST16(0x060C04D0, (step << 4) + total);
+}
+
+void f06012638(REF(Brain) brain)
+{
+    gaddr cur;
+    int mask;
+
+    GCALL1(0x060124B8, brain);
+    if (!HELPER((LDU16(0x060EE8B0 + LDU16(0x060C04D6) * 2) & 0xF00) >> 8)) {
+        BR_SET(brain, next, 0x06010C0C);
+        retarget(brain);
+        return;
+    }
+    if (BR(brain, w18) == LDU16(LD32(CURRENT) + 20))
+        BR_SET(brain, b23, (BR(brain, b23) & 3) + 1);
+    mask = LDU16(LD32(CURRENT) + 18);
+    if (LDU16(LD32(CURRENT) + 64) & 0x100)
+        mask &= -33;
+    cur = LD32(CURRENT);
+    if (!(LDU16(FLAGS_AT(LDU16(cur + 20) + LD16(0x060B47F0 + BR(brain, b23) * 2))) & mask)) {
+        BR_SET(brain, w12, LD16(0x060B4800 + BR(brain, b23) * 2));
+        BR_SET(brain, next, 0x06012638);
+        GJUMP1(0x06011BF0, brain);
+    } else {
+        BR_SET(brain, b23, 0);
+    }
+}
+
+void f060126E4(REF(Brain) brain)
+{
+    int dir = LDU8(0x060C04A3);
+
+    BR_SET(brain, w12, LD16(0x060B4800 + dir * 2));
+    BR_SET(brain, b23, dir);
+    BR_SET(brain, w18, LD16(LD32(CURRENT) + 20));
+    BR_SET(brain, w16, LD16(0x060C04D6));
 }
 
 int f060127CA(gaddr task)
@@ -540,10 +874,72 @@ int f06012AF4(gaddr task)
     return 0;
 }
 
+int f06012B3E(REF(Brain) brain)
+{
+    BR_SET(brain, next, 0x06012B58);
+    GCALL1(0x0601179A, brain);
+    return GJUMP1(0x06011EDC, brain);
+}
+
+int f06012B58(REF(Brain) brain)
+{
+    BR_SET(brain, next, 0x06012B72);
+    GCALL1(0x0601179A, brain);
+    return GJUMP1(0x06011EDC, brain);
+}
+
+void f06012B72(REF(Brain) brain)
+{
+    if (!GCALL0(0x060119E8)) {
+        GCALL1(0x06012410, brain);
+    } else if (LDU16(0x060C04CA) >= 8) {
+        GCALL1(0x06012410, brain);
+    } else {
+        GCALL1(0x0601179A, brain);
+        BR_SET(brain, next, 0x06012410);
+        GCALL1(0x06011EDC, brain);
+    }
+    BR_SET(brain, b28, BR(brain, b28) + 1);
+}
+
+int f06012C0C(REF(Brain) brain)
+{
+    int idx;
+
+    if (GCALL1(0x060121D4, 0x060EE8B0 + LDU16(LD32(CURRENT) + 20) * 2) & 0xF00)
+        return 1;
+    idx = GCALL2(0x060116C0, brain, 0);
+    if (!idx)
+        return 1;
+    if (!GCALL2(0x06011F98, idx, 2))
+        return 1;
+    GCALL2(0x06011778, brain, idx);
+    BR_SET(brain, fn, 0x06012C62);
+    return 0;
+}
+
+int f06012C62(REF(Brain) brain)
+{
+    BR_SET(brain, next, 0x06012C7C);
+    GCALL1(0x0601179A, brain);
+    return GJUMP1(0x06011EDC, brain);
+}
+
 void f06012C7C(gaddr p)
 {
     ST8(p + 28, 3);
     ST32(p, 0x06012C88);
+}
+
+void f06012EDA(REF(Brain) brain)
+{
+    if (!GCALL0(0x060119E8) || !GCALL1(0x06012376, LDU8(LD32(CURRENT) + 6)) || BR(brain, b28) >= 3) {
+        BR_SET(brain, fn, 0x06010C0C);
+    } else {
+        BR_SET(brain, next, 0x06012F24);
+        GCALL1(0x060121EC, brain);
+    }
+    BR_SET(brain, b28, BR(brain, b28) + 1);
 }
 
 int f06012F24(gaddr task)
@@ -553,6 +949,21 @@ int f06012F24(gaddr task)
     if (flags == 0)
         ST32(task, 0x06012EDA);
     return flags;
+}
+
+int f06012FB8(REF(Brain) brain)
+{
+    int idx = GCALL0(0x06013094);
+
+    if (!idx)
+        return 1;
+    if (!GCALL2(0x0601227E, idx, 2))
+        return 1;
+    GCALL2(0x06011778, brain, (2 ^ (idx - 1)) + 1);
+    GCALL1(0x06011642, LDU16(0x060BF5DC));
+    BR_SET(brain, next, 0x06013006);
+    GCALL1(0x06011BF0, brain);
+    return 0;
 }
 
 int f0601329E(gaddr task)
@@ -565,6 +976,16 @@ int f0601329E(gaddr task)
     ST32(task, 0x06013318);
     ST8(task + 28, 32);
     return 0;
+}
+
+void f06013318(REF(Brain) brain)
+{
+    if (!GCALL1(0x060117AC, brain) || !BR(brain, b28)) {
+        BR_SET(brain, fn, 0x06010C0C);
+    } else {
+        ST16(LD32(CURRENT) + 54, 0x12C);
+        BR_SET(brain, b28, BR(brain, b28) - 1);
+    }
 }
 
 int f06013400(gaddr task)
@@ -650,6 +1071,14 @@ int f06013918(gaddr obj)
     ST16(obj + 12, LD16((LD8(obj + 30) & 255) * 2 + 0x060B4150));
     ST8(obj + 30, LD8(obj + 30) + 1);
     return GJUMP1(0x06011BF0, obj);
+}
+
+void f0601391E(REF(Brain) brain, int state)
+{
+    BR_SET(brain, next, state);
+    BR_SET(brain, w12, LD16(0x060B4150 + BR(brain, b30) * 2));
+    BR_SET(brain, b30, BR(brain, b30) + 1);
+    GJUMP1(0x06011BF0, brain);
 }
 
 int f0601393A(gaddr task)
@@ -990,6 +1419,18 @@ void f06014BD2(void)
     GJUMP0(0x06014B54);
 }
 
+int f06014F68(int n, unsigned short first)
+{
+    if (LDU8(0x060C029C) != 8) {
+        GCALL2(0x06008A6A, 1, 0);
+        n += 4;
+    } else {
+        GCALL2(0x06008A6A, 1, 1);
+        n = 1;
+    }
+    return GJUMP2(0x06008ECA, n, first);
+}
+
 void f06015012(unsigned short a, unsigned short b, unsigned short c, unsigned int d)
 {
     int i;
@@ -1296,6 +1737,15 @@ int f060167DE(void)
     if (!LD16(t + 36))
         return 0;
     return LD16(0x060B45F6 + LDU16(REC(LDU16(t + 36)) + 52) * 2);
+}
+
+int f06016812(void)
+{
+    int a = LDU16(0x060C062C);
+    int b = LD16(LD32(0x060D7B3C) + 46);
+
+    GCALL2(0x06014F68, LDU8(0x060C064A + a), b & 255);
+    return GJUMP0(0x0601BC7E);
 }
 
 void f06016836(void)
@@ -1674,6 +2124,24 @@ int f06019836(int dir)
     return GCALL3(0x06017E70, 1, dir, 0) && !(LDU16(0x060EC8B0 + LDU16(0x060D7E8C) * 2) & LDU16(LD32(CURRENT) + 18));
 }
 
+void f06019BB4(void)
+{
+    gaddr cur, rec, row;
+    int n;
+
+    GCALL0(0x06015CD2);
+    cur = LD32(CURRENT);
+    if (LD16(cur + 36)) {
+        rec = REC(LDU16(cur + 36));
+        n = GCALL1(0x06068B4E, OBJ(LDU16(rec + 22)));
+        row = 0x060B463E + (signed char)(LDU8(rec + 53) * 40) + (n - 1) * 4;
+        ST16(LD32(0x060D7B3C) + 36, LD16(row));
+        cur = LD32(0x060D7B3C);
+        n = GCALL0(0x060167DE);
+        ST16(cur + 38, LD16(row + 2) + n);
+    }
+}
+
 void f06019D48(void)
 {
     gaddr entry;
@@ -1693,6 +2161,17 @@ void f06019D48(void)
         GCALL0(0x06020276);
     entry = 0x060EE8B0 + (LDU16(LD32(0x060D7768) + 20) << 1);
     ST16(entry, LD16(entry) & 0xEFFF);
+}
+
+int f06019EDE(void)
+{
+    ST16(LD32(CURRENT) + 64, 0);
+    ST16(LD32(CURRENT) + 80, 0);
+    ST16(LD32(CURRENT) + 18, 0x4B0);
+    ST16(LD32(CURRENT) + 46, 0);
+    GCALL0(0x06014B54);
+    ST8(0x060C0654 + LDU16(0x060C062C), 0);
+    return GJUMP0(0x06016812);
 }
 
 void f0601A394(int i, int v)
@@ -1762,6 +2241,22 @@ void f0601AE68(void)
     ST32(0x060D7B3C, LD32(0x060D8314));
     ST32(0x060D8310, bomber);
     ST32(0x060D8314, other);
+}
+
+void f0601AEC2(int n)
+{
+    ST16(LD32(0x060D8318) + n * 2, 0);
+    ST8(LD32(0x060D8318) + 24 + n, 0);
+    ST8(n + LD32(0x060D8318) + 36, 0);
+}
+
+void f0601AEE2(void)
+{
+    int i = 0;
+
+    do {
+        GCALL1(0x0601AEC2, i);
+    } while (AGAIN(++i < 12));
 }
 
 int f0601B068(int player, int kind)
@@ -1868,6 +2363,12 @@ int f0601BB68(void)
     return GJUMP1(0x0601BF0C, 2);
 }
 
+void f0601BB8E(void)
+{
+    ST8(LD32(CURRENT) + 6, LD8(LD32(0x060D8310) + 6));
+    ST16(LD32(CURRENT) + 18, LD16(LD32(0x060D8310) + 18));
+}
+
 void f0601BBA4(void)
 {
     gaddr t = LD32(CURRENT);
@@ -1894,6 +2395,24 @@ void f0601BBC2(void)
     } else if (LDU16(t + 76) < 120) {
         ST16(t + 76, LD16(t + 76) + 1);
     }
+}
+
+int f0601BC58(void)
+{
+    int a, b;
+
+    GCALL2(0x06008A6A, 1, 0);
+    a = LD16(LD32(0x060D7B3C) + 46);
+    b = LD16(LD32(CURRENT) + 64);
+    return GJUMP2(0x06008ECA, b + 15, a & 0x7FF);
+}
+
+void f0601BF0C(int dir)
+{
+    GCALL2(0x06069462, LD16(LD32(CURRENT) + 22), LD16(LD32(0x060D8314) + 4));
+    if (LD16(LD32(CURRENT) + 88))
+        return;
+    GJUMP3(0x060693DC, LDU16(LD32(CURRENT) + 22), LDU16(LD32(0x060D8310) + 22), LD8(0x060B4700 + dir - 1));
 }
 
 void f0601BF94(int arg)
@@ -1924,10 +2443,113 @@ void f0601C0C8(void)
     ST16(cur + 30, LD16(LD32(MOVER_PTR) + 14));
 }
 
+int f0601C150(void)
+{
+    gaddr mover = LD32(0x060D7B3C);
+    gaddr other = LD32(0x060D8314);
+
+    if (LD16(mover + 16) != LD16(other + 16))
+        return 1;
+    if (LD16(other + 12))
+        return 1;
+    if (LD16(mover + 18) != LD16(other + 18))
+        return 1;
+    return LD16(other + 14) != 0;
+}
+
 int f0601C21C(void)
 {
     GCALL1(0x0600A2B0, LD32(0x060B4704 + (LD8(LD32(0x060D8310) + 6) & 255) * 4));
     return GJUMP1(0x0600A32A, LD32(0x060B4718 + (LD8(LD32(0x060D8310) + 6) & 255) * 4));
+}
+
+void f0601C244(int forward)
+{
+    gaddr obj = OBJ(LDU16(0x060C1AAA));
+
+    if (forward) {
+        ST16(obj + 16, LD16(obj + 16) + LD16(0x060B4740 + LDU8(LD32(0x060D8310) + 6) * 2));
+        ST16(obj + 18, LD16(obj + 18) + LD16(0x060B474A + LDU8(LD32(0x060D8310) + 6) * 2));
+    } else {
+        ST16(obj + 16, LD16(obj + 16) + LD16(0x060B472C + LDU8(LD32(0x060D8310) + 6) * 2));
+        ST16(obj + 18, LD16(obj + 18) + LD16(0x060B4736 + LDU8(LD32(0x060D8310) + 6) * 2));
+    }
+}
+
+void f0601C2C2(int id)
+{
+    int dir = LDU8(LD32(0x060D8310) + 6);
+    gaddr other = LD32(0x060D8314);
+    int target;
+
+    if (dir == 1 || dir == 3)
+        target = LD16(other + 4) + 8;
+    else if (dir == 4)
+        target = LD16(other + 4) - 1;
+    else
+        target = 228;
+    if (id)
+        GJUMP2(0x06069462, id, target);
+}
+
+void f0601C534(void)
+{
+    int i = 0;
+
+    do {
+        GCALL1(0x0601C510, i);
+    } while (AGAIN(++i < 12));
+}
+
+void f0601C620(gaddr out_a, gaddr out_b)
+{
+    gaddr rec = REC(LDU16(LD32(CURRENT) + 36));
+    unsigned int v;
+
+    ST32(0x060D8310, rec);
+    ST32(out_a, (LDU16(rec + 52) << 1) + 2);
+    v = (LDU16(LD32(0x060D8310) + 76) >> 2) + 2;
+    ST32(out_b, v);
+    if (v > 6)
+        ST32(out_b, 6);
+}
+
+void f0601CF8C(void)
+{
+    gaddr rec = LD32(0x060D8318);
+    int id = LDU16(rec);
+    int n = LDU8(rec + 24);
+    gaddr box;
+    int a, b;
+
+    if (!(LDU8(LD32(0x060D8310) + 6) & 1)) {
+        box = 0x060B47B8 + LDU16(LD32(CURRENT) + 52) * 8;
+        a = n - LD8(box);
+        if ((short)a >= 0)
+            a = 0;
+        b = n * 2 - LD8(box + 1);
+        GCALL4(0x0600A3FA, id, box, b, a);
+    } else {
+        box = 0x060B47B8 + LDU16(LD32(CURRENT) + 52) * 8 + 4;
+        a = n * 2 - LD8(box);
+        b = n - LD8(box + 1);
+        if ((short)b >= 0)
+            b = 0;
+        GCALL4(0x0600A3FA, id, box, b, a);
+    }
+    GCALL1(0x0601C2C2, id);
+}
+
+void f0601D5EC(int unused, int dx, gaddr obj)
+{
+    gaddr step;
+
+    GCALL1(0x0601D668, dx);
+    step = ((LDU8(LD32(CURRENT) + 6) - 1) << 2) + 0x060B47E0;
+    if (LDU16(obj + 68) < 0x140)
+        return;
+    GCALL1(0x0601D668, LD16(step) + dx);
+    GJUMP1(0x0601D668, LD16(step + 2) + dx);
 }
 
 void f0601DAD0(void)
@@ -2065,6 +2687,38 @@ int f0601E2A4(unsigned short set, unsigned short n, int tag)
     return current;
 }
 
+void f0601E300(short x, short y, int tag)
+{
+    ST32(0x060D7E98, LD32(0x060DF988));
+    ST32(0x060D7EA0, LD32(0x060DF98C));
+    GCALL2(0x0600C7BE, x, y);
+    GCALL3(0x0601E2A4, x, y, tag);
+}
+
+void f0601E336(unsigned short set, unsigned short n, unsigned short flags)
+{
+    int a, c;
+
+    if (set) {
+        if (!(flags & 16)) {
+            if (LDU8(ACTB(18)) == 255) {
+                a = set;
+                c = 0;
+            } else {
+                a = flags;
+                c = 1;
+            }
+        } else {
+            a = flags & 16;
+            c = 2;
+            set = 1;
+        }
+        GCALL3(0x0601E13C, a & 0xFFFF, n, c);
+    }
+    GCALL3(0x0601E300, set, n, LDU8(ACTB(19)));
+    ST16(FLAGS_AT(n), (LD16(FLAGS_AT(n)) & 0xFFF8) | flags);
+}
+
 void f0601E3B2(void)
 {
     REF(Node14) n;
@@ -2191,6 +2845,21 @@ int f0601F500(void)
     if (LDU16(0x060EC8B0 + cell) & 0x42B0)
         return 1;
     return (LDU16(0x060EE8B0 + cell) & 0x7000) != 0;
+}
+
+int f0601F578(void)
+{
+    int flags;
+    int cell;
+
+    ST8(ACTB(14), ((LD8(ACTB(14)) + 255) ^ 2) + 1);
+    POLL();
+    GCALL1(0x0601F4B6, LD8(ACTB(14)));
+    cell = LDU16(0x060D7E8C);
+    flags = LDU16(FLAGS_AT(cell));
+    if (flags & 0x42B0)
+        return 1;
+    return (LDU16(0x060EE8B0 + cell * 2) & 0x7000) != 0;
 }
 
 int f0601F58E(void)

@@ -242,7 +242,7 @@ case("f0605FBF0", [span(0, 20), pick(0, 1, 2, 3, 4, 5, 0x10000, 0x10001, 0x20003
     [plant(0x060EE8B0 + 2 * i, 2, [0, 1, 2, 3, 4, 5, 0x101, 0x201, 0x300, 0x1004], 0.9) for i in range(21)])
 case("f06062168", [], True, [plant(0x060D7C94, 2, [255, 0, 0x100, 0xFF])])
 case("f060622A4", [], True, [plant(0x060D7B98, 2, [3, 0, 7, 0x1003]), plant(obj(3) + 60, 2, [0xFF00, 0xFFFF, 0, 0xFEFF, 0xFF01]),
-                            plant(obj(7) + 60, 2, [0xFF00, 0xFEFF]), plant(obj(0) + 60, 2, [0xFF00, 0xFEFF]), plant(obj(0x1003) + 60, 2, [0xFF00, 0])])
+                            plant(obj(7) + 60, 2, [0xFF00, 0xFEFF]), plant(obj(0) + 60, 2, [0xFF00, 0xFEFF])])
 case("f06065F18", [], True, [plant(0x060D7B78, 4, [0x0603DDA6, 0, 0x0603DDA7])])
 case("f0606B060", [pick(49, 50, 51, 52, 146, 147, 148, 0, -50, 0x132)], True)
 case("f0606B300", [], False, [plant(bomber(k) + 22, 2, [0, 1, 0xFFFF], 0.8) for k in range(10, 50)]

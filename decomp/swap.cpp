@@ -10,10 +10,12 @@
 
 static SH2Context* g_cur;       // the context of the swapped function that is running
 
+// Also puts back r15, which FRAME lowers.
 struct InSwap {
     SH2Context* outer;
-    explicit InSwap(SH2Context& c) : outer(g_cur) { g_cur = &c; }
-    ~InSwap() { g_cur = outer; }
+    uint32_t sp;
+    explicit InSwap(SH2Context& c) : outer(g_cur), sp(c.r[15]) { g_cur = &c; }
+    ~InSwap() { g_cur->r[15] = sp; g_cur = outer; }
 };
 
 extern "C" {
@@ -32,6 +34,18 @@ void g_wr(uint32_t addr, int size, uint32_t value)
 void g_poll(void)
 {
     SH2_POLL(*g_cur);
+}
+
+uint32_t g_frame(int size)
+{
+    const uint32_t top = g_cur->r[15];
+    g_cur->r[15] -= (size + 3) & ~3;
+    return top;
+}
+
+void g_unframe(uint32_t top)
+{
+    g_cur->r[15] = top;
 }
 
 // Arguments beyond the fourth go on the stack, lowest first, as SHC passes them. The callee may use

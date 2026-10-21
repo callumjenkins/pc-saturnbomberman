@@ -77,6 +77,23 @@ def test_a_call_through_a_register_loaded_well_before_it_reads_what_its_callee_r
     assert registers.reads(image, BASE, code) == set()
 
 
+@pytest.mark.parametrize("function, needs", [
+    pytest.param((encode("mov Rm,Rn", 0, 14), RTS, NOP), {14}, id="r14 read before it is written"),
+    pytest.param((encode("mov.l Rm,@-Rn", 15, 14), encode("mov #imm,Rn", 14, low=1), encode("mov Rm,Rn", 0, 14),
+                  encode("mov.l @Rm+,Rn", 14, 15), RTS, NOP), set(), id="r14 saved for the caller, then used"),
+])
+def test_code_that_reads_a_register_its_caller_keeps_is_the_middle_of_a_function(function, needs):
+    image, code = program(function)
+    assert registers.saved(image, BASE, code) == needs
+
+
+def test_a_branch_into_the_middle_of_a_function_is_refused():
+    # caller: bra piece ; nop                piece: mov r14,r0 ; rts ; nop
+    image, code = program((0xA000, NOP), (encode("mov Rm,Rn", 0, 14), RTS, NOP))
+    with pytest.raises(lift.Unsupported, match="middle of a function that reads r14"):
+        lift.lift(image, BASE, code[BASE], code)
+
+
 def test_a_call_to_a_helper_that_takes_r0_is_refused():
     # caller: bsr helper ; mov r4,r0 ; rts ; nop                   helper: shar r0 ; rts ; nop
     image, code = program((0xB002, encode("mov Rm,Rn", 0, 4), RTS, NOP), (encode("shar Rn", 0), RTS, NOP))

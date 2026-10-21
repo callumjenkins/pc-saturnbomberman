@@ -52,6 +52,21 @@ def test_a_plant_goes_over_a_dump(dumped):
     assert cpu.mem.read(0x060C0000, 2) == 0x1234
 
 
+@pytest.mark.parametrize("address, at", [
+    pytest.param(0x05D00010, 0x05D00010, id="a device register"),
+    pytest.param(0x260C0000, 0x060C0000, id="the cache-through mirror of work RAM"),
+    pytest.param(0x00200010, 0x00200010, id="work RAM-L"),
+])
+def test_a_plant_lands_in_the_region_its_address_names(address, at):
+    cpu = filled(1, [(address, 2, [0x1234], 1.0)])
+    assert cpu.mem.read(at, 2) == 0x1234 and len(cpu.mem.regions[0][2]) == machine.RAM
+
+
+def test_a_plant_outside_every_region_is_refused():
+    with pytest.raises(sh2emu.MemoryError_):
+        filled(1, [(0x06100000, 4, [0], 1.0)])
+
+
 def test_with_nothing_dumped_every_trial_is_random(monkeypatch):
     monkeypatch.setattr(snapshots, "paths", lambda: [])
     machine._dumps.cache_clear()

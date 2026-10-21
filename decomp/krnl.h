@@ -112,4 +112,42 @@ typedef struct { signed char col, row; short x, y; char pad6[4]; short id, id2, 
 #define DEV 0x060FC084
 #define IN_BOX(x, y) ((x) >= 0x1C0 && (x) <= 0x220 && (y) >= 0x1C0 && (y) <= 0x200)
 
+/* The state record of a walking bomber's brain; fn is the code the scheduler runs next. */
+typedef struct {
+    int fn, next;
+    char pad8[4];
+    unsigned short w12, w14, w16, w18;
+    char pad20[3];
+    unsigned char b23, b24, b25, pad26, b27, b28, b29, b30;
+} Brain;
+
+#define BR(b, f)     GET(Brain, b, f)
+#define BR_SET(b, f, v) SET(Brain, b, f, v)
+
+#define ACTOR_PTR  0x060D8C08
+#define ACTB(off)  (LD32(ACTOR_PTR) + (off))
+/* The decoder's stream: a cursor into the input, a cursor into the output, a ring buffer with its mask and
+ * write position, and the value the next put writes. */
+typedef struct { gaddr in, out, ring; char pad12[4]; int mask; int value; int pos; } Stream;
+
+#define ST_GET(s, f) GET(Stream, s, f)
+#define ST_SET(s, f, v) SET(Stream, s, f, v)
+
+/* The record 060C164C points at, which one of the code addresses 06034FC4 to 0603541C steps. */
+typedef struct { unsigned char state, b1; short count; unsigned short obj; unsigned char b6, b7; unsigned short w8; } Spin;
+
+#define SPIN_PTR     0x060C164C
+#define SP(f)        GET(Spin, LD32(SPIN_PTR), f)
+#define SP_SET(f, v) SET(Spin, LD32(SPIN_PTR), f, v)
+/* Keeps the high nibble of the state and sets the low one. */
+#define SP_STATE(n)  SP_SET(state, (SP(state) & 240) | (n))
+
+#define PATH_PTR 0x060C2658
+#define PATH_ENTRY(i) (LD32(PATH_PTR) + 12 + (i) * 8)
+#define LAYOUT 0x060FBFC0
+#define LAYOUT_A 0x060FBFDC
+#define LAYOUT_B 0x060FBFEC
+#define VIDEO_MODE 0x25F80004
+#define VIDEO_DIV(tv) (((((tv) & 1 ? ((tv) & 0xC0 ? 0x320000 : 0x31EB8B) : ((tv) & 0xC0 ? 0x3BF0A3 : 0x3BD374)) >> 9) + 1) >> 1)
+
 #endif

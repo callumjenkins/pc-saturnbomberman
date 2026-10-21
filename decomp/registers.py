@@ -3,7 +3,8 @@ the runtime routines SHC calls for an operator, which take r0 and r1.
 
 A backward liveness over the function's own instructions, the recompiler's code for it. A call or a
 tail branch reads what its callee reads, found the same way, and a call leaves r0 to r7 written. A push
-of r0 to r3 is a routine saving a scratch register, not a read.
+of r0 to r3 is a routine saving a scratch register, and a push of r8 to r14 a function saving its
+caller's: neither is a read.
 """
 import re
 
@@ -30,6 +31,16 @@ _SHIFTS = {"shar": (">>", 1), "shll": ("<<", 1), "shll2": ("<<", 2), "shll8": ("
 def reads(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> frozenset[int]:
     """r0 to r7 the function at address reads before writing them. A function without code in
     `functions`, or one reached again while it is being read, is taken to read ARGUMENTS."""
+    return frozenset(r for r in _live(image, address, functions) if r < 8)
+
+
+def saved(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> frozenset[int]:
+    """r8 to r14 the code at address reads before writing them, which a function's entry never does:
+    code there is the middle of a larger function, and needs its caller's registers."""
+    return frozenset(r for r in _live(image, address, functions) if 8 <= r <= 14)
+
+
+def _live(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> frozenset[int]:
     cache = _CACHES.setdefault(id(functions), {})
     if address in cache:
         return cache[address] if cache[address] is not None else ARGUMENTS
@@ -55,7 +66,7 @@ def reads(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> fro
             if new != live[pc]:
                 live[pc] = new
                 changed = True
-    cache[address] = frozenset(r for r in live.get(address, frozenset()) if r < 8)
+    cache[address] = frozenset(r for r in live.get(address, frozenset()) if r < 15)
     return cache[address]
 
 
@@ -77,7 +88,7 @@ def _node(image: sh2.Image, ins: sh2.Insn, code: set[int], functions: dict[int, 
         return uses, defs, islands
     leaves = ins.op in _TAILS and (target is None or target not in code)
     if ins.op in _CALLS or leaves:
-        callee = reads(image, target, functions) if target is not None else ARGUMENTS
+        callee = _live(image, target, functions) if target is not None else ARGUMENTS
         uses = uses | (callee - defs)
         if leaves:
             return uses, defs, []
@@ -142,5 +153,5 @@ def _operands(ins: sh2.Insn) -> tuple[frozenset[int], frozenset[int]]:
         if (last and bare and ins.op not in _KEEPS) or "+" in operand or "@-" in operand:
             defs |= regs
     if ins.op == "mov.l" and len(operands) == 2 and operands[1].strip() == "@-r15":
-        uses -= {r for r in map(int, _REG.findall(operands[0])) if r < 4}
+        uses -= {r for r in map(int, _REG.findall(operands[0])) if r < 4 or 8 <= r <= 14}
     return frozenset(uses), frozenset(defs)

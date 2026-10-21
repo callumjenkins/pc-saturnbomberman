@@ -12,6 +12,7 @@ uint8_t *g_region[MAX_REGIONS];
 int g_regions;
 int g_fault;
 int g_polls;                /* g_poll()s and g_call()s, which check.py compares with the game's */
+uint32_t g_sp;              /* the game's r15, which check.py sets before each trial and g_call passes on */
 
 /* Runs the game's function at addr with the arguments; check.py sets it. */
 uint32_t (*g_call_hook)(uint32_t addr, const uint32_t *args, int n);
@@ -19,6 +20,19 @@ uint32_t (*g_call_hook)(uint32_t addr, const uint32_t *args, int n);
 void g_poll(void)
 {
     g_polls++;
+}
+
+uint32_t g_frame(int size)
+{
+    uint32_t top = g_sp;
+
+    g_sp -= (size + 3) & ~3;
+    return top;
+}
+
+void g_unframe(uint32_t top)
+{
+    g_sp = top;
 }
 
 uint32_t g_jump(uint32_t addr, const uint32_t *args, int n)

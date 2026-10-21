@@ -112,11 +112,12 @@ def branches(entry: int) -> list[int]:
 
 
 def build(sources: list[str] | None = None) -> ctypes.CDLL:
-    out = os.path.join(tempfile.mkdtemp(prefix="decomp-"), "libdecomp.so")
-    subprocess.check_call(["clang", "-std=gnu11", "-O1", "-Wall", "-shared", "-fPIC", "-fwrapv", "-DDECOMP_HOST",
-                           "-I", HERE, "-o", out, *(sources or status.sources()), os.path.join(HERE, "host_mem.c"),
-                           os.path.join(HERE, "divide.c")])
-    return ctypes.CDLL(out)
+    with tempfile.TemporaryDirectory(prefix="decomp-") as where:
+        out = os.path.join(where, "libdecomp.so")
+        subprocess.check_call(["clang", "-std=gnu11", "-O1", "-Wall", "-shared", "-fPIC", "-fwrapv", "-DDECOMP_HOST",
+                               "-I", HERE, "-o", out, *(sources or status.sources()), os.path.join(HERE, "host_mem.c"),
+                               os.path.join(HERE, "divide.c")])
+        return ctypes.CDLL(out)
 
 
 def code_runs() -> list[list[int]]:
@@ -175,7 +176,7 @@ def default_spec(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
     return [cases.ptr(0x060C0000, 0x400) if t == "uint32_t" else ("any",) for t in sig.params], sig.returns != "void", []
 
 
-def hook_for(cpu, state, junk: list[int]):
+def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
     """What the host build's g_call runs: the game's function on the interpreter that holds the host
     build's memory. Registers r8 to r15 and pr come back unchanged, as the runtime's swap does. r0 to r7
     that the call does not pass hold junk, so a callee that reads one the C did not pass disagrees with
@@ -183,13 +184,13 @@ def hook_for(cpu, state, junk: list[int]):
     @CALL_HOOK
     def hook(addr, args, n):
         keep = (cpu.r[8:], cpu.pr)
-        sp = cpu.r[15]
+        sp = ctypes.c_uint32.in_dll(lib, "g_sp").value
         try:
             if n > 4:
                 sp -= 4 * (n - 4)
                 for i in range(4, n):
                     cpu.mem.write(sp + 4 * (i - 4), 4, args[i])
-                cpu.r[15] = sp
+            cpu.r[15] = sp
             cpu.r[:8] = junk
             return cpu.call(addr, **{"r%d" % (4 + i): args[i] for i in range(min(n, 4))})
         except Exception as e:                      # an access outside the mapped memory, or no return
@@ -235,7 +236,8 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
 
     state = {"calls": []}
     keep = machine.point(lib, host)
-    hook = hook_for(host, state, [value(("any",), r) & 0xFFFFFFFF for _ in range(8)])
+    hook = hook_for(host, state, [value(("any",), r) & 0xFFFFFFFF for _ in range(8)], lib)
+    ctypes.c_uint32.in_dll(lib, "g_sp").value = host.r[15]
     ctypes.c_void_p.in_dll(lib, "g_call_hook").value = ctypes.cast(hook, ctypes.c_void_p).value
     ctypes.c_int.in_dll(lib, "g_fault").value = 0
     ctypes.c_int.in_dll(lib, "g_polls").value = 0

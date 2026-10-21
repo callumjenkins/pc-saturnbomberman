@@ -1,5 +1,54 @@
 #include "krnl.h"
 
+/* The pose an actor takes once its distance (+20) is set. */
+static void settle(void)
+{
+    int step = DIVS(LD16(ACTB(20)) + 8, 16);
+
+    if ((unsigned int)step >= 8)
+        step = 8;
+    ST8(ACTB(27), 0);
+    ST8(ACTB(24), 0);
+    ST8(ACTB(25), LD16(0x060B4856 + step * 2));
+    ST8(ACTB(26), 4);
+    ST16(ACTB(22), -((short)(LD16(ACTB(20)) >> 1) * (short)LD8(ACTB(25))));
+    ST16(ACTB(28), 0);
+    ST16(ACTB(10), (LD16(ACTB(10)) & 0xFFDF) | 64);
+}
+
+void f06020174(int distance, int unused, char dir)
+{
+    ST32(0x060C0900, OBJ(LDU16(ACTB(0))));
+    ST8(ACTB(14), dir);
+    ST16(ACTB(20), distance << 4);
+    POLL();
+    settle();
+}
+
+void f060201A0(unsigned short scale)
+{
+    int dir;
+
+    ST32(0x060C0900, OBJ(LDU16(ACTB(0))));
+    ST8(ACTB(14), LD8(LD32(CURRENT) + 6));
+    GCALL1(0x0600C9AA, LDU16(LD32(CURRENT) + 20));
+    dir = LDU8(ACTB(14));
+    ST16(0x060D7EB4, (LDU16(0x060D7EB4) << 4) + LDU16(0x060B484C + dir * 2) * scale);
+    dir = LDU8(ACTB(14));
+    ST16(0x060D7EB6, (LDU16(0x060D7EB6) << 4) + LDU16(0x060B484A + dir * 2) * scale);
+    dir = LDU8(ACTB(14));
+    if (dir == 1)
+        ST16(ACTB(20), LD16(0x060D7EB4) - LD16(LD32(CURRENT) + 24));
+    else if (dir == 2)
+        ST16(ACTB(20), LD16(0x060D7EB6) - LD16(LD32(CURRENT) + 28));
+    else if (dir == 3)
+        ST16(ACTB(20), LD16(LD32(CURRENT) + 24) - LD16(0x060D7EB4));
+    else
+        ST16(ACTB(20), LD16(LD32(CURRENT) + 28) - LD16(0x060D7EB6));
+    POLL();
+    settle();
+}
+
 int f06020F50(int n)
 {
     if ((LDU16(0x060EC8B0 + n * 2) & 7) == 5)
@@ -37,6 +86,26 @@ int f06020FE8(int cell)
     if (v >= 0 && (LD8(0x060D5F34 + v * 124) & 8))
         v |= 128;
     return v;
+}
+
+void f0602109C(int bits)
+{
+    if (AGET(b15) < LDU8(0x060C063D))
+        ASET(b35, AGET(b35) | bits);
+}
+
+void f060210B6(void)
+{
+    int cell = AGET(w4);
+
+    ST16(FLAGS_AT(cell), LD16(FLAGS_AT(cell)) | 32);
+}
+
+void f060210E8(void)
+{
+    int cell = AGET(w4);
+
+    ST16(FLAGS_AT(cell), LD16(FLAGS_AT(cell)) & 0xFFDF);
 }
 
 void f06021102(void)
@@ -102,6 +171,11 @@ int f06021562(void)
     ST8(0x060DFA14, id);
     ST8(0x060DF994 + id, 1);
     return id;
+}
+
+int f06021588(int i)
+{
+    return GJUMP1(0x060215A2, LDU8(0x060DFA15 + i));
 }
 
 unsigned char f060215A2(int code)
@@ -170,6 +244,16 @@ void f060217FC(void)
     } while (AGAIN(i <= 75));
     ST16(0x060DFDFE, 0);
     ST16(0x060DFDF6, 0);
+}
+
+int f06021980(signed char kind, int x, int y, int bits)
+{
+    int cell = GCALL2(0x0600C950, x, y) * 2;
+
+    ST16(0x060EC8B0 + cell, LD16(0x060EC8B0 + cell) | 16);
+    ST16(0x060F08B0 + cell, LD16(0x060F08B0 + cell) | bits);
+    ST8(0x060DFB9B + bits * 8, kind);
+    return kind;
 }
 
 void f060219C6(gaddr p)
@@ -245,6 +329,18 @@ void f06021F9A(int n)
     GCALL1(0x060217E4, n);
 }
 
+void f06022044(int cell)
+{
+    int tag;
+
+    GCALL1(0x06022B0A, cell);
+    ST16(0x060EC8B0 + cell * 2, LD16(0x060EC8B0 + cell * 2) & 0xFFBF);
+    tag = LDU16(0x060F08B0 + cell * 2) & 255;
+    if (tag)
+        GCALL1(0x06021F9A, tag);
+    ST16(0x060F08B0 + cell * 2, LD16(0x060F08B0 + cell * 2) & 0xFF00);
+}
+
 void f0602251C(gaddr p)
 {
     gaddr a = OBJ(LDU16(p));
@@ -304,6 +400,12 @@ void f060225D2(gaddr p)
     ST8(p + 7, LD8(p + 7) + 1);
     if (!LD8(p + 7))
         ST8(p + 6, 2);
+}
+
+void f06022B0A(short cell)
+{
+    GCALL0(0x0600C434);
+    GJUMP2(0x0600C7BE, LD16(LD32(0x060D7E94) + (unsigned short)cell * 2), cell);
 }
 
 void f06022DC8(void)
@@ -635,6 +737,25 @@ int f0602561E(short a, short b, short c, short d)
     return 0x060C02C8;
 }
 
+void f0602566C(int shift)
+{
+    int i;
+    gaddr cell;
+
+    GCALL0(0x0600C434);
+    GCALL2(0x0600C7BE, TGET(h14) + shift, TGET(h12));
+    if (!shift)
+        return;
+    if (LD16(0x060C02C2)) {
+        i = 0;
+        do {
+            cell = 0x060EE8B0 + LDU16(0x060C02C2 + i * 2) * 2;
+            ST16(cell, ((i - (LDU8(0x060C02C0) >> 1)) & 3) + 5 | (LD16(cell) & 0xFF00));
+        } while (AGAIN(++i < 4));
+    }
+    GJUMP1(0x0600996A, 250);
+}
+
 int f060256EC(void)
 {
     int cell = TGET(h12) * 2;
@@ -674,6 +795,12 @@ int f06025E3E(void)
     GCALL1(0x0600AC90, 32);
     GCALL2(0x0600A8F4, 32, 0x2000);
     return GJUMP0(0x06022F14);
+}
+
+void f06025FC0(int shift)
+{
+    GCALL0(0x0600C434);
+    GJUMP2(0x0600C7BE, LD16(0x060B4DCC + TGET(h12) * 2) + shift, TGET(h14));
 }
 
 int f06025FEE(void)
@@ -731,6 +858,15 @@ void f06026542(int n)
 
     ST32(0x060D7E60, rec);
     ST32(0x060D7E64, OBJ(LDU16(rec + 8)));
+}
+
+void f060269A4(void)
+{
+    GCALL1(0x0601755E, LDU16(LD32(CURRENT) + 44) << 2);
+    GCALL0(0x06026AD4);
+    if (LD16(LD32(CURRENT) + 66))
+        return;
+    GJUMP1(0x060144F4, 0x060269D4);
 }
 
 int f06026C08(int pad)
@@ -982,6 +1118,26 @@ void f0602769A(void)
     } while (AGAIN(++i < 19));
     ST32(0x060C0A18, (unsigned char)LD8(0x060D5F37));
     ST32(0x060C0A98, 0);
+}
+
+/* Takes the share of `total` that *slot is, as a percentage, and replaces it with the second word of the
+ * first pair in the table whose first word is above it. */
+void f0602781C(gaddr slot, gaddr table, int total)
+{
+    int percent;
+
+    if (!total)
+        total = 1;
+    if (!LD32(slot)) {
+        ST32(slot, 0);
+        return;
+    }
+    percent = DIVS(LD32(slot) * 100, total);
+    while (percent >= LD32(table)) {
+        POLL();
+        table += 8;
+    }
+    ST32(slot, LD32(table + 4));
 }
 
 void f06027874(void)

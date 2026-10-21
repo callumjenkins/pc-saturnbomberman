@@ -41,9 +41,13 @@ functions changed the sound in `normal`.
 The lifter reads straight from the instructions: registers become locals, stack slots become `v`
 locals, and calls go through `GCALL`, passing the registers the callee reads (`registers.py`). A call to
 one of SHC's runtime routines becomes its operator: `DIVS`, `DIVU`, `MODS` or `MODU` for a division, or a
-shift in `HELPER()`. It refuses a jump table, a pointer to a local, a stack argument, a control-register
-access, a register read after a call overwrote it, and code that reads a register it never set (a piece
-of a larger function or a task's entry). Its drafts are for reading and rewriting, and the cosim decides
+shift in `HELPER()`. A function that passes a local's address on, or reads an argument from the stack,
+keeps its locals in a frame on the game's own stack: `FRAME(sp, n)` declares `sp`, r15 on entry, and
+the locals are loads and stores below it. A loop that leaves for several places gets its main exit after
+it and the others written out where it leaves for them. The lifter refuses a jump table, a
+control-register access, a register read after a call overwrote it, a call into the middle of a function
+(code that reads r8 to r14 from its caller), and code that reads a register it never set (a piece of a
+larger function or a task's entry). Its drafts are for reading and rewriting, and the cosim decides
 whether they are right.
 
 ## Checks
@@ -77,7 +81,8 @@ matters.
 Random data often stops a function at its first guard, so a wrong arm can pass. After each function
 `check.py` says how many of its branch outcomes no trial reached ("5 of 14 branch outcomes never
 reached"). A case in `cases.py` reaches them: the function's arguments drawn from narrower forms, and
-plants, values written over the memory at given addresses in a share of the trials.
+plants, values written over the memory at given addresses in a share of the trials. A plant can go in
+any region the trial maps, through the cache-through mirror too, and one anywhere else fails the trial.
 `check.py --cases FILE` adds a file of `case()` calls to those.
 
 `shc_compare.py` is a second, separate measure. The game was built with Hitachi SHC, and these
@@ -92,6 +97,8 @@ plain call. On the host, `check.py` runs the callee on the interpreter, and in t
 `swap.cpp` runs it through `sh2_call`, so the callee may be generated or another swap. The first four
 arguments go in r4 to r7 and later ones on the stack, lowest first. r8 to r15 and pr come back
 unchanged. Calls between functions of `src/` are ordinary C calls (`f0600942E` calls `f0600940A`).
+`FRAME` lowers r15 while its function runs, so a callee's frame sits below it, and the swap's wrapper puts
+r15 back on return. Before a `GJUMP`, `UNFRAME(sp)` gives the callee the stack its caller left.
 Untested: more than four arguments. A callee that switches tasks is why `yields` functions are left alone.
 
 In the cosim, r0 to r7 that a call does not pass hold different values on the two sides, so C that
@@ -101,7 +108,7 @@ same way, with random values in the registers its parameters do not cover.
 SHC compiles a division, and a shift it has no instruction for, into a call to a runtime routine that
 takes r0 and r1, which `GCALL` cannot pass. The C writes the operator instead, in `HELPER(expr)` so that
 time advances once, as for the call: `HELPER(x >> 13)`, or `DIVS(a, b)` and its kin, which also give
-SHC's result for a zero divisor (0).
+SHC's result for a zero divisor: 0, with 0x44E stored at 060FA8B4.
 
 ## Advancing the game's time
 

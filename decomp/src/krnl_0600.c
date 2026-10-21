@@ -91,6 +91,11 @@ void f060066A4(void)
     } while (AGAIN(i < 96));
 }
 
+void f060066D8(void)
+{
+    ST32(0x060B2D24, GCALL3(0x0600663C, LD32(0x060B2D24), 0, 0x0001FFFC));
+}
+
 void f060066EC(void)
 {
     ST32(0x060B2D28, GCALL3(0x06006626, LD32(0x060B2D28), 0, 0x1FE));
@@ -295,6 +300,14 @@ int f0600794E(gaddr p, unsigned char c)
     return 0;
 }
 
+int f060079B6(gaddr cursor, char c)
+{
+    ST8(LD32(cursor), c);
+    ST8(LD32(cursor) + 1, 0);
+    ST32(cursor, LD32(cursor) + 1);
+    return 0;
+}
+
 void f06007A14(void)
 {
     ST8(0x060BD4AF, 0);
@@ -351,6 +364,11 @@ void f06008A96(int n)
     } while (AGAIN(++i < 12));
 }
 
+int f06008ABA(unsigned short id, unsigned short bank)
+{
+    return LD32(LD32(0x060BD8E4 + bank * 4) + (id - 1) * 4);
+}
+
 int f06008ACC(unsigned short n)
 {
     return LD32(LD32(LD32(0x060BD904)) + (n - 1) * 4);
@@ -402,6 +420,53 @@ void f06008DB6(void)
     ST32(CNT + 4, -1);
     ST8(CNT + 1, 0);
     ST32(0x26006168, 0x060090D8);
+}
+
+/* Copies a run of colours from the table GCALL2(0x06008ABA, id, 1) names into both palette copies,
+ * marks each row of 16 as dirty, then uploads them unless an upload is already pending. */
+static int load_colors(unsigned short id, unsigned short first)
+{
+    gaddr src = GCALL2(0x06008ABA, id, 1);
+    gaddr colors, copy;
+    unsigned short count;
+    int v;
+
+    if (first >= 0x8000)
+        first = LDU16(src) >> 1;
+    src += 2;
+    colors = 0x060CBC60 + first * 2;
+    copy = 0x060CCC60 + first * 2;
+    count = LDU16(src);
+    src += 2;
+    ST16(0x26006048, 0);
+    while (count) {
+        POLL();
+        v = LD16(src);
+        src += 2;
+        ST16(colors, v);
+        count--;
+        ST16(copy, v);
+        colors += 2;
+        copy += 2;
+        ST16(0x060CBB60 + (first >> 4) * 2, 1);
+        first++;
+    }
+    ST16(0x26006048, 1);
+    if (LD32(0x26006168))
+        return LD32(0x26006168);
+    return GJUMP0(0x060090D8);
+}
+
+int f06008ECA(unsigned short id, unsigned short first)
+{
+    POLL();
+    return load_colors(id, first);
+}
+
+int f06008ECE(unsigned short id)
+{
+    POLL();
+    return load_colors(id, 0x8000);
 }
 
 int f06008F28(int a, int k)
@@ -937,6 +1002,68 @@ int f0600A76E(int mode, unsigned int value)
     return out;
 }
 
+int f0600A8F4(int mode, int value)
+{
+    gaddr dst = GCALL1(0x0600A63E, mode);
+    unsigned int a = LDU16(0x060FA9C8);
+    unsigned int b = LDU16(0x060FA9CA);
+    unsigned int c = LDU16(0x060FA9DA);
+    unsigned int bit = a << 4 & 16;
+    unsigned int sel = b;
+    unsigned int field = 0x060FA9C8;
+    unsigned int count;
+    int color;
+
+    switch (mode) {
+    case 1:
+        bit = b >> 4 & 16;
+        sel = LDU16(0x060FA9D8) & 0x8000;
+        field = HELPER(c >> 8) & 3;
+        break;
+    case 2:
+        sel = LDU16(0x060FA9D0) & 0x8000;
+        field = HELPER(c >> 12) & 3;
+        break;
+    case 4:
+        sel = LDU16(0x060FA9D0) & 0x8000;
+        field = c & 3;
+        break;
+    case 8:
+        bit = a >> 4 & 16;
+        sel = LDU16(0x060FA9D2) & 0x8000;
+        field = c >> 2 & 3;
+        break;
+    case 16:
+        bit = b << 4 & 16;
+        sel = LDU16(0x060FA9D4) & 0x8000;
+        field = c >> 4 & 3;
+        break;
+    case 32:
+        bit = b & 16;
+        sel = LDU16(0x060FA9D6) & 0x8000;
+        field = c >> 6 & 3;
+        break;
+    }
+    count = ((field & 0xFFFF) + 1) << (bit ? 10 : 12);
+    color = GCALL2(0x0600A76E, mode, value);
+    if (sel & 0xFFFF) {
+        do {
+            ST16(dst, color);
+            count--;
+            dst += 2;
+        } while (AGAIN(count != 0));
+    } else {
+        do {
+            count--;
+            ST16(dst, (unsigned int)color >> 16);
+            dst += 2;
+            ST16(dst, color);
+            dst += 2;
+        } while (AGAIN(count != 0));
+    }
+    return color;
+}
+
 int f0600AA8A(int n)
 {
     switch (n) {
@@ -1063,6 +1190,20 @@ int f0600B950(int n, int m)
     return (10 * n + m) * 16 + 0x060B30C4;
 }
 
+int f0600BC34(void)
+{
+    int left = GCALL1(0x0600A0EC, LDU8(0x060C063C)) + 1;
+    int i = 0;
+
+    while (i < LDU8(0x060C063D)) {
+        POLL();
+        if (LD8(0x060C0654 + i) && --left == 0)
+            break;
+        i++;
+    }
+    return i;
+}
+
 void f0600BCC8(void)
 {
     int i;
@@ -1177,6 +1318,62 @@ void f0600C4E0(int n)
     ST32(0x060D7EA0, LD32(src));
 }
 
+/* Copies the 16 bytes of tile `tile` (as two pairs of words, 0x100 apart) to dst. */
+static int copy_tile(unsigned short tile, gaddr dst)
+{
+    gaddr src = LD32(0x060D7E98) + tile * 16;
+
+    ST32(dst, LD32(src));
+    ST32(dst + 4, LD32(src + 4));
+    ST32(dst + 0x100, LD32(src + 8));
+    ST32(dst + 0x104, LD32(src + 12));
+    return 0x104;
+}
+
+void f0600C796(unsigned short tile, short col, short row)
+{
+    gaddr dst = GCALL2(0x0600C962, col, row);
+
+    dst += LD32(0x060D7EA0);
+    POLL();
+    copy_tile(tile, dst);
+}
+
+void f0600C7BE(unsigned short tile, short cell)
+{
+    gaddr dst = GCALL1(0x0600CA20, cell);
+
+    dst += LD32(0x060D7EA0);
+    POLL();
+    copy_tile(tile, dst);
+}
+
+void f0600C876(void)
+{
+    int x, y;
+    gaddr tiles;
+    int saved;
+
+    if (!LD16(0x060D7E6C))
+        return;
+    GCALL0(0x0600C434);
+    POLL();
+    y = 0;
+    do {
+        tiles = LD32(0x060D7E94) + y * 128;
+        x = 0;
+        do {
+            if (LDU16(FLAGS_AT(y * 64 + x)) & 16) {
+                saved = LD32(0x060D7EA0);
+                ST32(0x060D7EA0, LD32(0x060DF98C));
+                GCALL3(0x0600C796, 1, x, y);
+                ST32(0x060D7EA0, saved);
+            }
+            GCALL3(0x0600C796, LD16(tiles + x * 2), x, y);
+        } while (AGAIN(++x < 64));
+    } while (AGAIN(++y < 64));
+}
+
 void f0600C8AC(void)
 {
     gaddr src;
@@ -1236,6 +1433,14 @@ void f0600C8E0(void)
                 GCALL3(0x0600C796, LD16(row + x * 2), x, y);
         } while (AGAIN(++x < 64));
     } while (AGAIN(++y < 64));
+}
+
+void f0600C8FA(void)
+{
+    GCALL0(0x0600C876);
+    GCALL0(0x0600C8AC);
+    GCALL0(0x0600C8C6);
+    GJUMP0(0x0600C8E0);
 }
 
 void f0600C90C(unsigned short i)
@@ -1711,6 +1916,13 @@ int f0600E096(void)
     v = LD16(0x060D7E68) | 66;
     ST16(0x060D7E68, v);
     return v;
+}
+
+void f0600E3D6(gaddr dst, int n)
+{
+    ST16(dst + 16, LD16(0x060B3632 + n * 2));
+    ST16(dst + 18, LD16(0x060B3632 + n * 2 + 2));
+    ST16(dst + 44, 1);
 }
 
 void f0600E5CC(unsigned short a, unsigned short b)
