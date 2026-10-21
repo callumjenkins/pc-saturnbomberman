@@ -73,7 +73,7 @@ class Counting(sh2emu.CPU):
             self.code = self.outer.pop() if self.outer else self.code
         elif op in ("ldc", "ldc.l") and ins.fmt.endswith("sr"):
             self.polls += 1
-        elif op in ("bt", "bf", "bt/s", "bf/s", "bra", "braf", "jmp") and self.pc != pc + (4 if ins.delay else 2):
+        elif op in ("bra", "braf", "jmp") or op in ("bt", "bf", "bt/s", "bf/s") and self.pc != pc + (4 if ins.delay else 2):
             if self.pc not in self.code:
                 self.code = self._body(self.pc)
             elif self.pc <= pc:

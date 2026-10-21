@@ -16,17 +16,29 @@ typedef struct { unsigned char tag, prev, next, pad; int saved; } Link;
 typedef struct { unsigned short x, y, z; char pad[6]; int link; char pad2[8]; } Point24;
 typedef struct { char pad[8]; unsigned short a, b; } Pair12;
 typedef struct { char pad[6]; unsigned short prev, next; } ObjLink;
+typedef struct { char pad0; unsigned char next; char pad2[2]; int key; char pad8[8]; } Node16;
+/* A list of 2000 nodes, linked through the halfwords at 2 and 4. */
+typedef struct { short h0, h2, h4; char b6, b7, b8, b9, b10, b11, b12, pad13; } Node14;
+/* A byte stream at src, taken apart in groups of bits. */
+typedef struct { int src; char pad4[24]; int bit; int byte; char pad36[8]; int count; } BitReader;
+typedef struct { int src; char pad4[24]; int out, w32, w36, w40, phase; } Unpack;
 
-#define RECS   0x060BC190
-#define ENTS   0x060CE060
-#define CNT    0x060BF4A0
-#define OBJS   0x060C381C
-#define OBJIDX 0x060C1AA8
-#define SLOTS  0x060D7B48
-#define CURSOR 0x060DF96C
-#define LINKS  0x060D776C
+#define RECS         0x060BC190
+#define ENTS         0x060CE060
+#define CNT          0x060BF4A0
+#define OBJS         0x060C381C
+#define OBJECTS      0x060D5F00     /* the stage's objects, 0x7C bytes each */
+#define BOMBER_COUNT 0x060C063D     /* how many of OBJECTS are in use */
+#define CURRENT      0x060D7768     /* a pointer into OBJECTS */
+#define OBJIDX       0x060C1AA8
+#define SLOTS        0x060D7B48
+#define CURSOR       0x060DF96C
+#define LINKS        0x060D776C
+#define POINTS       0x060EC478     /* 30 entries of 24 bytes; a word of -1 at 12 marks a free one */
 
 /* The 84-byte object numbered i; the game keeps the product to 16 bits. */
-#define OBJ(i) (OBJS + (unsigned short)((i) * 84))
+#define OBJ(i)  (OBJS + (unsigned short)((i) * 84))
+#define NODE    ((REF(Node14))LD32(CURSOR))
+#define WRAP(v) ((v) < 0 ? (v) + 0x8000 : (v))
 
 #endif

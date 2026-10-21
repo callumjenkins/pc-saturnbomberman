@@ -50,3 +50,16 @@ def test_a_loop_must_advance_time_as_often_as_the_games_branch_back(tmp_path, co
     sig = gen.signatures([str(path)])[0x0608AAD8]
     fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 20, 1, sig)
     assert ran == 20 and (not fails) == agrees
+
+
+def test_a_tail_branch_to_the_next_instruction_but_one_still_leaves_the_function(tmp_path):
+    # f06027684 ends its first loop with `bra 0602769A ; nop`, into a function of its own whose loop
+    # advances time too: 18 times in each loop.
+    path = tmp_path / "f.c"
+    path.write_text('#include "krnl.h"\nvoid f06027684(void)\n{\n    int i = 0;\n\n'
+                    '    do { ST32(0x060C0A4C + i * 4, 0); } while (AGAIN(++i < 19));\n    i = 0;\n'
+                    '    do { ST32(0x060C0A00 + i * 4, 0); } while (AGAIN(++i < 19));\n'
+                    '    ST32(0x060C0A18, (unsigned char)LD8(0x060D5F37));\n    ST32(0x060C0A98, 0);\n}\n')
+    sig = gen.signatures([str(path)])[0x06027684]
+    fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 20, 1, sig)
+    assert ran == 20 and not fails
