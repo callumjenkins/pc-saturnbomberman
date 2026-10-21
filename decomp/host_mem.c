@@ -1,6 +1,6 @@
 /* The emulated address space the decompiled functions run on in check.py: work RAM-H, work RAM-L
  * and VDP1 VRAM, big-endian, with the cache-through mirror folded onto the cached address. check.py points
- * g_wram and g_vdp1 at the buffers of the SH-2 interpreter it runs the callees on, so a function
+ * g_wram, g_wraml and g_vdp1 at the buffers of the SH-2 interpreter it runs the callees on, so a function
  * and the code it calls see the same bytes. An access outside them sets g_fault and reads zero. */
 #include <stdint.h>
 
@@ -8,7 +8,7 @@ uint8_t *g_wram;            /* 06000000, 0x100000 bytes */
 uint8_t *g_wraml;           /* 00200000, 0x100000 bytes */
 uint8_t *g_vdp1;            /* 05D00000, 0x80000 bytes */
 int g_fault;
-int g_polls;                /* the times the C advanced the game's time: POLL(), AGAIN() and each call */
+int g_polls;                /* g_poll()s and g_call()s, which check.py compares with the game's */
 
 /* Runs the game's function at addr with the arguments; check.py sets it. */
 uint32_t (*g_call_hook)(uint32_t addr, const uint32_t *args, int n);

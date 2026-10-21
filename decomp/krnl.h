@@ -19,8 +19,8 @@ typedef struct { char pad[6]; unsigned short prev, next; } ObjLink;
 typedef struct { char pad0; unsigned char next; char pad2[2]; int key; char pad8[8]; } Node16;
 /* A list of 2000 nodes, linked through the halfwords at 2 and 4. */
 typedef struct { short h0, h2, h4; char b6, b7, b8, b9, b10, b11, b12, pad13; } Node14;
-/* A byte stream at src, taken apart in groups of bits. */
 typedef struct { int src; char pad4[24]; int bit; int byte; char pad36[8]; int count; } BitReader;
+/* A byte stream at src, taken apart in groups of bits. */
 typedef struct { int src; char pad4[24]; int out, w32, w36, w40, phase; } Unpack;
 
 #define RECS         0x060BC190

@@ -24,46 +24,45 @@ import gen  # noqa: E402
 import status  # noqa: E402
 from saturnrecomp import sh2emu  # noqa: E402
 
-KRNL = os.path.join(ROOT, "build", "extract", "BOMSS", "0KRNL.BIN")
 BASE = 0x06006000
-WRAM, WRAML, VDP1 = 0x06000000, 0x00200000, 0x05D00000
-# The game's functions spill registers onto the stack, which the host build has no counterpart for.
-STACK = 0x06100000 - 0x1000
-# Random data covers the tables the functions read, up to the stack. Half the trials also randomise the
-# variables inside the image, around the code.
-DATA = (0x060B0000, STACK)
-VDP1_DATA = 0x100
-
-
+CALL_HOOK = ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32), ctypes.c_int)
+# The game's code a function calls, in order. Memory alone cannot tell two calls apart when their
+# stores do not overlap.
+CALLS = {
+    "f060A5EEC": [0x060A5F2E, 0x060A5F22],
+}
+CONDITIONAL = ("bt", "bf", "bt/s", "bf/s")
 # How a parameter or result of each type crosses into the host build: at its own width, so a narrow
 # parameter drops the upper bits of the register as the swap's wrapper does.
 C_TYPES = {"int": ctypes.c_int32, "unsigned int": ctypes.c_uint32, "uint32_t": ctypes.c_uint32,
            "short": ctypes.c_int16, "unsigned short": ctypes.c_uint16, "char": ctypes.c_int8,
            "signed char": ctypes.c_int8, "unsigned char": ctypes.c_uint8}
-CONDITIONAL = ("bt", "bf", "bt/s", "bf/s")
-CALL_HOOK = ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32), ctypes.c_int)
-
-
 # Values where a comparison, a width or a sign changes, which random numbers rarely land on.
-EDGES = [0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF,
-         0xFFFFFFFE, 0xFFFFFF80, 0xFFFF8000]
+EDGES = (0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF,
+         0xFFFFFFFE, 0xFFFFFF80, 0xFFFF8000)
+KRNL = os.path.join(ROOT, "build", "extract", "BOMSS", "0KRNL.BIN")
+# The game's functions spill registers onto the stack, which the host build has no counterpart for.
+STACK = 0x06100000 - 0x1000
+# Random data covers the tables the functions read, up to the stack.
+DATA = (0x060B0000, STACK)
+VDP1_DATA = 0x100
+WRAM, WRAML, VDP1 = 0x06000000, 0x00200000, 0x05D00000
 
 
 class Counting(sh2emu.CPU):
-    """The interpreter, also counting the places the recompiled game advances time: a call, a branch back
-    within the function that is running, and an ldc to sr. A branch out of the function is a tail call
-    and counts nothing. Those are the generator's rules for SH2_POLL, over its own function boundaries."""
+    """The interpreter, also counting the SH2_POLLs the generated code would make, over the recompiler's
+    own function boundaries."""
     _image = None
-    _bodies: dict = {}
-    _code: dict | None = None
-    seen: set | None = None     # (pc, taken) for each conditional branch of the called function's own code
+    _bodies: dict[int, set[int]] = {}
+    _code: dict[int, set[int]] | None = None
+    seen: set[tuple[int, bool]] | None = None     # (pc, taken) for each conditional branch of the called function's own code
 
-    def call(self, entry, max_steps=10_000_000, **regs):
+    def call(self, entry: int, max_steps: int = 10_000_000, **regs: int) -> int:
         self.code, self.outer = self._body(entry), []
         self.own = self.code
         return super().call(entry, max_steps, **regs)
 
-    def step(self):
+    def step(self) -> None:
         pc = self.pc
         ins = self.fetch(pc)
         super().step()
@@ -85,7 +84,7 @@ class Counting(sh2emu.CPU):
                 self.polls += 1
 
     @classmethod
-    def _body(cls, entry):
+    def _body(cls, entry: int) -> set[int]:
         if cls._code is None:
             cls._code = status.function_code()
         if entry in cls._code:
@@ -97,64 +96,22 @@ class Counting(sh2emu.CPU):
         return cls._bodies[entry]
 
 
-
-
-def branches(entry):
+def branches(entry: int) -> list[int]:
     """The conditional branches of the function's own code."""
     image = status.krnl_image()
     return [at for at in Counting._body(entry) if image.contains(at) and image.insn(at).op in CONDITIONAL]
 
 
-def counting(cpu):
-    cpu.__class__ = Counting
-    cpu.polls = 0
-    return cpu
+def build(sources: list[str] | None = None) -> ctypes.CDLL:
+    out = os.path.join(tempfile.mkdtemp(prefix="decomp-"), "libdecomp.so")
+    subprocess.check_call(["clang", "-std=gnu11", "-O1", "-Wall", "-shared", "-fPIC", "-fwrapv", "-DDECOMP_HOST",
+                           "-I", HERE, "-o", out, *(sources or status.sources()), os.path.join(HERE, "host_mem.c")])
+    return ctypes.CDLL(out)
 
 
-def ptr(lo, span, align=4):
-    return ("ptr", lo, span, align)
-
-
-def rng_int(lo, hi):
-    return ("int", lo, hi)
-
-
-# Arguments a function needs narrower than its type allows: name: (arguments, returns a value).
-# Any other function is given random arguments of the types it declares.
-SPEC = {
-    "f0600665C": ([], False),
-    "f06006B38": ([rng_int(0, 200)], False),
-    "f0600940A": ([rng_int(0, 200)], False),
-    "f0600942E": ([], False),
-    "f0600A3E0": ([ptr(0x060C0000, 0x100), ptr(0x060C1000, 0x100, 1), rng_int(-40000, 40000)], False),
-    "f0600A4B0": ([("int", 0, 0xFFFF)], True),
-    "f0600B934": ([rng_int(0, 1000), rng_int(0, 1000)], True),
-    "f0600A25E": ([rng_int(-(1 << 31), (1 << 31) - 1)], False),
-    "f0600A2D8": ([rng_int(-(1 << 31), (1 << 31) - 1)], False),
-    "f060A5EEC": ([ptr(0x060C0000, 0x400)], True),
-}
-
-
-# The game's code a function calls, in order. Memory alone cannot tell two calls apart when their
-# stores do not overlap.
-CALLS = {
-    "f060A5EEC": [0x060A5F2E, 0x060A5F22],
-}
-
-
-def default_spec(sig):
-    """Random arguments for each parameter of a definition: a pointer for a reference, and for a number
-    anything a register can hold, whatever the declared width, since a caller may leave the upper bits set."""
-    unknown = [t for t in sig.params + [sig.returns] if t not in C_TYPES and t != "void"]
-    if unknown:
-        raise SystemExit("%s: no default argument for %s; add it to SPEC" % (sig.name, ", ".join(unknown)))
-    return [ptr(0x060C0000, 0x400) if t == "uint32_t" else ("any",) for t in sig.params], sig.returns != "void"
-
-
-def code_runs():
+def code_runs() -> list[list[int]]:
     """The (start, end) offsets into 0KRNL.BIN of every function's instructions and the literals they load,
-    which randomising the image must leave alone. Cached beside the extracted disc, as walking every
-    function takes a few seconds."""
+    which randomising the image must leave alone. Cached in build/decomp, as walking every function is slow."""
     cache = os.path.join(ROOT, "build", "decomp", "code-runs.json")
     stamp = [os.path.getmtime(KRNL), os.path.getmtime(status.TABLE)]
     try:
@@ -185,24 +142,19 @@ def code_runs():
     return runs
 
 
-def build(sources=None):
-    out = os.path.join(tempfile.mkdtemp(prefix="decomp-"), "libdecomp.so")
-    subprocess.check_call(["clang", "-std=gnu11", "-O1", "-Wall", "-shared", "-fPIC", "-fwrapv", "-DDECOMP_HOST",
-                           "-I", HERE, "-o", out, *(sources or status.sources()), os.path.join(HERE, "host_mem.c")])
-    return ctypes.CDLL(out)
+def counting(cpu: sh2emu.CPU) -> Counting:
+    cpu.__class__ = Counting
+    cpu.polls = 0
+    return cpu
 
 
-def value(kind, r):
-    if kind[0] == "any":
-        # whatever a parameter might hold: a small count, a negative, a pointer into the data, anything
-        return value(r.choice([("int", 0, 40), ("int", -40, 0), ptr(0x060C0000, 0x400), ptr(0x060B0000, 0x40000),
-                               ("int", -(1 << 31), (1 << 31) - 1), ("pick", EDGES)]), r)
-    if kind[0] == "pick":
-        return r.choice(kind[1])
-    if kind[0] == "int":
-        return r.randint(kind[1], kind[2])
-    lo, span, align = kind[1:]
-    return lo + r.randrange(0, span // align) * align
+def default_spec(sig: gen.Signature) -> tuple[list[tuple], bool]:
+    """Random arguments for each parameter of a definition: a pointer for a reference (uint32_t on the host),
+    and for a number anything a register can hold, whatever the declared width, since a caller may leave the upper bits set."""
+    unknown = [t for t in sig.params + [sig.returns] if t not in C_TYPES and t != "void"]
+    if unknown:
+        raise SystemExit("%s: no host type for %s; add it to C_TYPES" % (sig.name, ", ".join(unknown)))
+    return [ptr(0x060C0000, 0x400) if t == "uint32_t" else ("any",) for t in sig.params], sig.returns != "void"
 
 
 def hook_for(cpu, state):
@@ -228,7 +180,33 @@ def hook_for(cpu, state):
     return hook
 
 
-def trial(lib, name, args, returns, r, sig=None, seen=None):
+def ptr(lo, span, align=4):
+    return ("ptr", lo, span, align)
+
+
+def rng_int(lo, hi):
+    return ("int", lo, hi)
+
+
+def run(lib: ctypes.CDLL, name: str, spec: tuple[list[tuple], bool], trials: int, seed: int,
+        sig: gen.Signature | None = None, seen: set[tuple[int, bool]] | None = None) -> tuple[list, int]:
+    """The trials that differ, as (arguments, problems), and how many ran to the end, for one function.
+    Without its signature, every parameter and the result pass as an int. `seen` becomes Counting.seen
+    in every trial."""
+    args, returns = spec
+    r = random.Random("%s:%d" % (name, seed))
+    fails = []
+    ran = 0
+    for _ in range(trials):
+        vals, problems, skipped = trial(lib, name, args, returns, r, sig, seen)
+        ran += not skipped
+        if problems:
+            fails.append((vals, problems))
+    return fails, ran
+
+
+def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: random.Random,
+          sig: gen.Signature | None = None, seen: set[tuple[int, bool]] | None = None) -> tuple[list[int], list[str], bool]:
     cpu = counting(sh2emu.load(KRNL, BASE))     # the game's own function
     cpu.seen = seen
     host = counting(sh2emu.load(KRNL, BASE))    # the memory the host build runs on, and its callees
@@ -237,7 +215,7 @@ def trial(lib, name, args, returns, r, sig=None, seen=None):
     hwram, hwraml = host.mem.regions[0][2], host.mem.regions[1][2]
     hvdp1 = host.mem.add(VDP1, 0x80000)
     lo, hi = DATA[0] - WRAM, DATA[1] - WRAM
-    if r.random() < 0.5:
+    if r.random() < 0.5:                        # the image's own variables too
         lo = BASE - WRAM
     image = bytes(wram[BASE - WRAM:BASE - WRAM + os.path.getsize(KRNL)])
     wram[lo:hi] = r.randbytes(hi - lo)
@@ -297,23 +275,36 @@ def trial(lib, name, args, returns, r, sig=None, seen=None):
     return vals, problems, False
 
 
-def run(lib, name, spec, trials, seed, sig=None, seen=None):
-    """The trials that differ, as (arguments, problems), and how many ran to the end, for one function.
-    Without its signature, every parameter and the result pass as an int. `seen` collects which way each
-    of the game's conditional branches went."""
-    args, returns = spec
-    r = random.Random("%s:%d" % (name, seed))
-    fails = []
-    ran = 0
-    for _ in range(trials):
-        vals, problems, skipped = trial(lib, name, args, returns, r, sig, seen)
-        ran += not skipped
-        if problems:
-            fails.append((vals, problems))
-    return fails, ran
+def value(kind, r):
+    if kind[0] == "any":
+        # whatever a parameter might hold: a small count, a negative, a pointer into the data, anything
+        return value(r.choice([("int", 0, 40), ("int", -40, 0), ptr(0x060C0000, 0x400), ptr(0x060B0000, 0x40000),
+                               ("int", -(1 << 31), (1 << 31) - 1), ("pick", EDGES)]), r)
+    if kind[0] == "pick":
+        return r.choice(kind[1])
+    if kind[0] == "int":
+        return r.randint(kind[1], kind[2])
+    lo, span, align = kind[1:]
+    return lo + r.randrange(0, span // align) * align
 
 
-def main():
+# Arguments a function needs narrower than its type allows: name: (arguments, returns a value).
+# Any other function gets default_spec's.
+SPEC = {
+    "f0600665C": ([], False),
+    "f06006B38": ([rng_int(0, 200)], False),
+    "f0600940A": ([rng_int(0, 200)], False),
+    "f0600942E": ([], False),
+    "f0600A3E0": ([ptr(0x060C0000, 0x100), ptr(0x060C1000, 0x100, 1), rng_int(-40000, 40000)], False),
+    "f0600A4B0": ([("int", 0, 0xFFFF)], True),
+    "f0600B934": ([rng_int(0, 1000), rng_int(0, 1000)], True),
+    "f0600A25E": ([rng_int(-(1 << 31), (1 << 31) - 1)], False),
+    "f0600A2D8": ([rng_int(-(1 << 31), (1 << 31) - 1)], False),
+    "f060A5EEC": ([ptr(0x060C0000, 0x400)], True),
+}
+
+
+def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--trials", type=int, default=300)
     ap.add_argument("--seed", type=int, default=1)

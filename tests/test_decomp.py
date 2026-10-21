@@ -192,7 +192,7 @@ def krnl(tmp_path):
     return str(path)
 
 
-def test_only_definitions_count_as_functions_krnl_c_has(krnl):
+def test_only_definitions_count_as_functions(krnl):
     assert status.drafted([krnl]) == {0x06006B38, 0x060A5EEC, 0x0600A4B0, 0x0600940A, 0x0600A3E0}
 
 

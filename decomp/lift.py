@@ -60,8 +60,7 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
 
 
 def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None) -> dict[int, int]:
-    """Entry plus every branch target and instruction that follows a branch, with r15's offset at each.
-    With the function's `code`, a branch outside it leaves the function."""
+    """Entry plus every branch target and instruction that follows a branch, with r15's offset at each."""
     found = {entry: 0}
     seen: set[int] = set()
     work = [(entry, 0)]
@@ -99,8 +98,9 @@ def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None) -> dic
 
 
 def lift(image: "sh2.Image", entry: int, code: set[int] | None = None) -> str:
-    """A draft of the function at entry. With its `code`, the recompiler's boundary, a branch outside
-    that code is a tail call; without, the draft follows every branch."""
+    """A draft of the function at entry. With its `code`, the recompiler's boundary, a `bra` outside
+    that code is a tail call and a conditional branch outside it is refused; without, the draft follows
+    every branch."""
     stops = leaders(image, entry, code)
     params: set[int] = set()
     for attempt in range(2):

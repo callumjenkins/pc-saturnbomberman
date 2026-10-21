@@ -98,8 +98,7 @@ def loops(blocks: dict[int, Block], order: list[int]) -> dict[int, set[int]]:
     return bodies
 
 
-# A jump back to the header of the loop being written, until loop() turns it into C. The game's code
-# advances time on that branch, so each one that survives becomes POLL() and a continue.
+# A jump back to the header of the loop being written, until loop() turns it into POLL() and a continue.
 BACK = "<back>;"
 
 

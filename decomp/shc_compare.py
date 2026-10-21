@@ -23,7 +23,7 @@ def norm(ins):
     if op in("jsr","jmp"): return op+" "+args
     args=re.sub(r"\(0,(r\d+)\)",r"@\1",args)
     return op+(" "+args if args else "")
-def game_func(image,address,code=None):
+def game_func(image: "status.sh2.Image", address: int, code: set[int] | None = None) -> list[str]:
     return [n for n in (norm(ins.text) for ins in status.own(image,address,code)) if n]
 def shc_funcs(src):
     out={};cur=None

@@ -13,8 +13,8 @@
  *   GCALLn(a, ...)  call the function at guest address a with n arguments, 0 to 8, as GCALL2(a, x, y);
  *                   the result is an int. The host build runs it on the runtime (g_call), SHC
  *                   compiles a plain call. SHC has no variadic macros, hence one per count.
- *   GJUMPn(a, ...)  the same for a tail call, where the game branches to a and never comes back.
- *   POLL()          where the game's code branches back to an earlier instruction, as a loop does.
+ *   GJUMPn(a, ...)  the same for a tail call, where the game's code branches to a instead of calling it.
+ *   POLL()          where the game's code branches to the same or an earlier instruction, as a loop does.
  *   AGAIN(cond)     cond, with a POLL() when it holds: a do-while's condition.
  *                   The recompiled game advances time at each of those branches and at each call, so the C
  *                   has to reach the same number, and check.py counts both sides.

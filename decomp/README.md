@@ -6,7 +6,7 @@ agrees with the game's own code.
 
 | File | What it does |
 |---|---|
-| `src/krnl_06XX.c` | The decompiled functions, one file per 64 KiB of the module so two people never edit the same file |
+| `src/krnl_06XX.c` | The decompiled functions, one file per 0x10000 of address (`krnl_0600.c` holds 06006000 to 0600FFFF), so workers given different ranges edit different files |
 | `krnl.h` | Types and tables the files share |
 | `status.tsv` | A row per function the recompile found: size, calls, whether a route runs it, whether a task can park in it, and its state |
 | `status.py` | Rewrites `status.tsv` from the build, the coverage files and `src/` |
@@ -57,7 +57,7 @@ Memory outside work RAM and VDP1 VRAM is not modelled. A trial where both sides 
 `run.py` wants at least 100 of 300 to run to the end. So a function's hardware accesses are not compared:
 the frame hashes and the Beetle comparison are the evidence for those. A number parameter gets any 32-bit
 value whatever its declared width, passed at that width as the swap's wrapper does, so a type narrower than
-what the game reads fails. A `gaddr` or `REF(T)` gets a pointer into the data. `SPEC` in `check.py`
+what the game reads fails. A `gaddr`, `REF(T)` or `uint32_t` gets a pointer into the data. `SPEC` in `check.py`
 narrows one that needs it. The random data runs from 060B0000 to the stack, and covers work RAM-L; half
 the trials also randomise the image's own variables. Every function's instructions and the literals they
 load keep their bytes. `CALLS` lists the calls a function makes, in order, where the order matters.
@@ -82,15 +82,15 @@ Untested: more than four arguments. A callee that switches tasks is why `yields`
 
 ## Advancing the game's time
 
-The recompiled game advances its time (`SH2_POLL`) at each call, at each branch back to an earlier
-instruction of the function that is running, and at each `ldc` to sr. A branch out of the function is a
-tail call and advances nothing. C that stands in for a function has to do the same, or the game's
-timing shifts: 98 functions that agreed in memory moved the sound in `normal` until it did. So the C says
-where: `GCALLn` advances once, as a `bsr` does, and `GJUMPn` is the tail call that does not. `POLL()`
+The recompiled game advances its time (`SH2_POLL`) at each call, at each branch to the same or an
+earlier instruction of the function that is running, before a jump table that can go back, and at each
+`ldc` to sr. A branch out of the function is a tail call and advances nothing. C that stands in for a
+function has to do the same, or the game's timing shifts and its sound moves while its frames still
+match. So the C says where: `GCALLn` advances once, as a `bsr` does, and `GJUMPn` is the tail call that does not. `POLL()`
 goes where the game's code branches back, and `AGAIN(cond)` is a do-while's condition with a `POLL()`
 when it holds. A direct call to another function of `src/` needs a `POLL()` of its own. `check.py`
 counts both sides, using the recompiler's own function boundaries, and a different count fails the
-trial. Under SHC the three macros are nothing or a plain call.
+trial. Under SHC the four macros are nothing or a plain call.
 
 ## Running them in the game
 

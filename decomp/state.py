@@ -1,7 +1,4 @@
-"""What one SH-2 instruction does to the registers, flags and stack slots of a block being lifted.
-
-lift.py reads a function block by block; step() turns each instruction into statements on a State.
-"""
+"""What one SH-2 instruction does to the registers, flags and stack slots of a block being lifted."""
 import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
