@@ -10,7 +10,7 @@ agrees with the game's own code.
 | `krnl.h` | Types and tables the files share |
 | `status.tsv` | A row per function the recompile found: size, calls, whether a route runs it, whether a task can park in it, and its state |
 | `status.py` | Rewrites `status.tsv` from the build, the coverage files and `src/` |
-| `lift.py` | A first draft of a function's C from its instructions (`structure.py` rebuilds the if and while) |
+| `lift.py` | A first draft of a function's C from its instructions (`state.py` turns each instruction into statements, `structure.py` rebuilds the if and while) |
 | `batch.py` | Lifts many functions and runs the cosim on each draft |
 | `run.py` | Runs the cosim on functions of `src/` and swaps those that agree |
 | `gen.py` | Writes `swap_gen.inc` and the `[[replace]]` block in `game.toml` from `status.tsv` |
