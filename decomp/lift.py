@@ -366,8 +366,9 @@ def strip(expr: str) -> str:
     return expr
 
 
-def leaders(image: "sh2.Image", entry: int) -> dict[int, int]:
-    """Entry plus every branch target and instruction that follows a branch, with r15's offset at each."""
+def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None) -> dict[int, int]:
+    """Entry plus every branch target and instruction that follows a branch, with r15's offset at each.
+    With the function's `code`, a branch outside it leaves the function."""
     found = {entry: 0}
     seen: set[int] = set()
     work = [(entry, 0)]
@@ -388,11 +389,14 @@ def leaders(image: "sh2.Image", entry: int) -> dict[int, int]:
             if ins.op in ("braf", "bsrf", "rte", "trapa", "sleep") or ins.op == ".word":
                 raise Unsupported("%s at %08X" % (ins.text, at))
             sp += sp_change(ins) + (sp_change(slot) if slot else 0)
-            if ins.op in ("bt", "bf", "bt/s", "bf/s", "bra"):
+            leaves = code is not None and ins.target is not None and ins.target not in code
+            if leaves and ins.op != "bra" and ins.op in ("bt", "bf", "bt/s", "bf/s"):
+                raise Unsupported("a conditional branch out of the function at %08X" % at)
+            if ins.op in ("bt", "bf", "bt/s", "bf/s", "bra") and not leaves:
                 for target in ([ins.target] if ins.op == "bra" else [ins.target, nxt]):
                     reach(target, sp)
                 break
-            if ins.op in ("rts", "jmp"):
+            if ins.op in ("rts", "jmp") or leaves and ins.op == "bra":
                 if sp:
                     raise Unsupported("returns with the stack %d bytes off at %08X: a piece of a larger function"
                                       % (sp, at))
@@ -403,27 +407,28 @@ def leaders(image: "sh2.Image", entry: int) -> dict[int, int]:
 
 def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: "sh2.Image") -> bool:
     """Writes the call as a statement. A tail call hands on r4 to r7 as they stand, so they all go in."""
-    where = const(ins.target) if ins.op == "bsr" else st.get(ins.n)
+    tail = ins.op in ("jmp", "bra")
+    where = const(ins.target) if ins.op in ("bsr", "bra") else st.get(ins.n)
     if ins.op == "jmp" and number(where) is None:
         raise Unsupported("a tail call through a register at %08X" % ins.pc)
     step(slot, st, image)
     args: list[str] = []
     for r in range(4, 8):
-        if r not in st.fresh and r not in params and ins.op != "jmp":
+        if r not in st.fresh and r not in params and not tail:
             break
         args.append(st.get(r))
-    text = "%s%d(%s%s)" % ("GJUMP" if ins.op == "jmp" else "GCALL", len(args), where, "".join(", " + a for a in args))
+    text = "%s%d(%s%s)" % ("GJUMP" if tail else "GCALL", len(args), where, "".join(", " + a for a in args))
     st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in range(1, 8)}))
     st.clobbered |= set(range(1, 8))
     st.clobbered.discard(0)
     st.fresh.clear()
     for r in range(8):
         st.known.pop(r, None)
-    return ins.op == "jmp"
+    return tail
 
 
 def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: set[int], flags: int,
-               slots: dict[int, int], fresh: set[int]) -> tuple[Read, int]:
+               slots: dict[int, int], fresh: set[int], code: set[int] | None) -> tuple[Read, int]:
     st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh))
     block = structure.Block(start)
     term = ""
@@ -441,6 +446,10 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
                 step(slot, st, image)
             term = test if ins.op.startswith("bt") else "!" + test
             block.kind, block.targets = "branch", [ins.target, nxt]
+            break
+        if ins.op == "bra" and code is not None and ins.target not in code:
+            tail = call(ins, slot, st, params, image)
+            block.kind = "return"
             break
         if ins.op == "bra":
             step(slot, st, image)
@@ -540,8 +549,8 @@ def simplify(read: Read, live_out: set[str], returns: bool) -> None:
                 break
 
 
-def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int],
-                params: set[int]) -> tuple[dict[int, Read], dict[int, int]]:
+def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: set[int],
+                code: set[int] | None) -> tuple[dict[int, Read], dict[int, int]]:
     """Every block, read until the registers a call may pass settle: those written since the last call
     on every path into a block, so an argument set before a branch reaches the call after it."""
     fresh = {at: set() if at == entry else set(range(16)) for at in stops}
@@ -550,7 +559,7 @@ def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int],
         reads: dict[int, Read] = {}
         slots: dict[int, int] = {}
         for at in sorted(stops):
-            reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at])
+            reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code)
         into: dict[int, list[set[int]]] = {at: [] for at in stops}
         for read in reads.values():
             for target in read.block.targets:
@@ -561,11 +570,13 @@ def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int],
         fresh = settled
 
 
-def lift(image: "sh2.Image", entry: int) -> str:
-    stops = leaders(image, entry)
+def lift(image: "sh2.Image", entry: int, code: set[int] | None = None) -> str:
+    """A draft of the function at entry. With its `code`, the recompiler's boundary, a branch outside
+    that code is a tail call; without, the draft follows every branch."""
+    stops = leaders(image, entry, code)
     params: set[int] = set()
     for attempt in range(2):
-        reads, slots = read_blocks(image, entry, stops, params)
+        reads, slots = read_blocks(image, entry, stops, params, code)
         returns = any(s.var == "r0" for r in reads.values() for s in r.stmts)
         live_in, live_out = liveness(reads, returns)
         if returns and "r0" in live_in[entry]:
@@ -610,7 +621,7 @@ def main() -> None:
     with open(os.path.join(ROOT, path), "rb") as f:
         image = sh2.Image(f.read(), base)
     try:
-        draft = lift(image, int(args.address, 16))
+        draft = lift(image, int(args.address, 16), status.function_code().get(int(args.address, 16)) if args.module == "KRNL" else None)
     except (Unsupported, structure.Unstructured) as error:
         sys.exit("%s: %s" % (args.address, error))
     if not args.append:

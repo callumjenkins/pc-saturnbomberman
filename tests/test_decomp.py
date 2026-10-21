@@ -290,6 +290,13 @@ def test_a_tail_call_is_a_jump_that_hands_on_all_four_argument_registers():
     assert "GJUMP4(32, r4, r5, r6, r7)" in code
 
 
+def test_a_branch_out_of_the_function_is_a_tail_jump_not_a_copy_of_the_code_it_reaches():
+    # mov #1,r4 ; bra other ; nop ; other: mov #2,r0 ; rts ; nop, where `other` is a function of its own
+    words = (encode("mov #imm,Rn", 4, low=1), 0xA000, NOP, encode("mov #imm,Rn", 0, low=2), RTS, NOP)
+    code = lift.lift(image(*words), BASE, {BASE, BASE + 2, BASE + 4})
+    assert body(code)[-2:] == ["r0 = GJUMP4(0x06006006, 1, r5, r6, r7);", "return r0;"]
+
+
 def test_leaving_a_loop_early_is_a_break():
     blocks = {1: block(1, "branch", [2, 4], "n"), 2: block(2, "branch", [4, 3], "done", stmts=["a;"]),
               3: block(3, "goto", [1], stmts=["b;"]), 4: block(4, "return")}
