@@ -18,6 +18,8 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(ROOT, "saturn-recomp", "src"))
+sys.path.insert(0, HERE)
+import gen  # noqa: E402
 from saturnrecomp import sh2emu  # noqa: E402
 
 KRNL = os.path.join(ROOT, "build", "extract", "BOMSS", "0KRNL.BIN")
@@ -33,6 +35,11 @@ STACK = 0x06100000 - 0x1000
 CALL_HOOK = ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32), ctypes.c_int)
 
 
+# Values where a comparison, a width or a sign changes, which random numbers rarely land on.
+EDGES = [0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF,
+         0xFFFFFFFE, 0xFFFFFF80, 0xFFFF8000]
+
+
 def ptr(lo, span, align=4):
     return ("ptr", lo, span, align)
 
@@ -41,7 +48,8 @@ def rng_int(lo, hi):
     return ("int", lo, hi)
 
 
-# name: (arguments, returns a value)
+# Arguments a function needs narrower than its type allows: name: (arguments, returns a value).
+# Any other function in krnl.c is given random arguments of the types it declares.
 SPEC = {
     "f0600665C": ([], False),
     "f06006B38": ([rng_int(0, 200)], False),
@@ -63,14 +71,30 @@ CALLS = {
 }
 
 
-def build():
+def default_spec(sig):
+    """Random arguments for each parameter of a definition in krnl.c, from its type."""
+    kinds = {"uint32_t": ptr(0x060C0000, 0x400), "short": rng_int(-(1 << 15), (1 << 15) - 1),
+             "int": ("any",), "unsigned int": rng_int(0, (1 << 32) - 1)}
+    unknown = [t for t in sig.params if t not in kinds]
+    if unknown:
+        raise SystemExit("%s: no default argument for %s; add it to SPEC" % (sig.name, ", ".join(unknown)))
+    return [kinds[t] for t in sig.params], sig.returns != "void"
+
+
+def build(source=os.path.join(HERE, "krnl.c")):
     out = os.path.join(tempfile.mkdtemp(prefix="decomp-"), "libdecomp.so")
-    subprocess.check_call(["clang", "-std=gnu11", "-O1", "-Wall", "-shared", "-fPIC", "-DDECOMP_HOST",
-                           "-o", out, os.path.join(HERE, "krnl.c"), os.path.join(HERE, "host_mem.c")])
+    subprocess.check_call(["clang", "-std=gnu11", "-O1", "-Wall", "-shared", "-fPIC", "-fwrapv", "-DDECOMP_HOST",
+                           "-I", HERE, "-o", out, source, os.path.join(HERE, "host_mem.c")])
     return ctypes.CDLL(out)
 
 
 def value(kind, r):
+    if kind[0] == "any":
+        # whatever a parameter might hold: a small count, a negative, a pointer into the data, anything
+        return value(r.choice([("int", 0, 40), ("int", -40, 0), ptr(0x060C0000, 0x400), ptr(0x060B0000, 0x40000),
+                               ("int", -(1 << 31), (1 << 31) - 1), ("pick", EDGES)]), r)
+    if kind[0] == "pick":
+        return r.choice(kind[1])
     if kind[0] == "int":
         return r.randint(kind[1], kind[2])
     lo, span, align = kind[1:]
@@ -126,18 +150,24 @@ def trial(lib, name, args, returns, r):
     fn.argtypes = [ctypes.c_int32] * len(vals)
     signed = [v - (1 << 32) if v >= 1 << 31 else v for v in vals]
     got = fn(*signed)
-    fault = ctypes.c_int.in_dll(lib, "g_fault").value
+    fault = ctypes.c_int.in_dll(lib, "g_fault").value or "error" in state
 
     regs = {"r%d" % (4 + i): v for i, v in enumerate(vals)}
-    want = cpu.call(int(name[1:], 16), **regs)
+    original_fault = False
+    want = 0
+    try:
+        want = cpu.call(int(name[1:], 16), **regs)
+    except (sh2emu.MemoryError_, RuntimeError):         # touched memory this check does not model, or ran on
+        original_fault = True
     del keep
 
+    if fault and original_fault:
+        return vals, [], True
     problems = []
-    if fault:
-        problems.append("the host build touched unmapped memory")
-    if "error" in state:
-        problems.append("a call into the game failed: " + state["error"])
-    if state["calls"] != CALLS.get(name, []):
+    if fault != original_fault:
+        problems.append("%s touched memory the check does not model; %s did not"
+                        % (("the host build", "the game's code") if fault else ("the game's code", "the host build")))
+    if name in CALLS and state["calls"] != CALLS[name]:
         problems.append("called %s, expected %s" % ([hex(a) for a in state["calls"]],
                                                   [hex(a) for a in CALLS.get(name, [])]))
     if returns and (got & 0xFFFFFFFF) != want:
@@ -148,27 +178,38 @@ def trial(lib, name, args, returns, r):
         if mine != theirs:
             i = next(i for i in range(len(mine)) if mine[i] != theirs[i])
             problems.append("%s differs first at %08X: host %02X, game %02X" % (label, base + i, mine[i], theirs[i]))
-    return vals, problems
+    return vals, problems, False
+
+
+def run(lib, name, spec, trials, seed):
+    """The trials that differ, as (arguments, problems), and how many ran to the end, for one function."""
+    args, returns = spec
+    r = random.Random("%s:%d" % (name, seed))
+    fails = []
+    ran = 0
+    for _ in range(trials):
+        vals, problems, skipped = trial(lib, name, args, returns, r)
+        ran += not skipped
+        if problems:
+            fails.append((vals, problems))
+    return fails, ran
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--trials", type=int, default=300)
     ap.add_argument("--seed", type=int, default=1)
+    ap.add_argument("--source", default=os.path.join(HERE, "krnl.c"), help="a C file to check in place of krnl.c")
     ap.add_argument("names", nargs="*")
     a = ap.parse_args()
-    lib = build()
+    lib = build(a.source)
+    sigs = gen.signatures(a.source)
     bad = 0
-    for name, (args, returns) in SPEC.items():
-        if a.names and name not in a.names:
-            continue
-        r = random.Random("%s:%d" % (name, a.seed))
-        fails = []
-        for _ in range(a.trials):
-            vals, problems = trial(lib, name, args, returns, r)
-            if problems:
-                fails.append((vals, problems))
-        status = "ok" if not fails else "%d of %d trials differ" % (len(fails), a.trials)
+    for name in [n for n in (a.names or ["f%08X" % x for x in sorted(sigs)])]:
+        spec = SPEC.get(name) or default_spec(sigs[int(name[1:], 16)])
+        fails, ran = run(lib, name, spec, a.trials, a.seed)
+        status = ("ok" if ran == a.trials else "ok, %d of %d trials ran" % (ran, a.trials)) if not fails \
+            else "%d of %d trials differ" % (len(fails), a.trials)
         print("%s  %s" % (name, status))
         for vals, problems in fails[:2]:
             print("   args %s: %s" % ([hex(v) for v in vals], "; ".join(problems)))
@@ -176,4 +217,5 @@ def main():
     sys.exit(1 if bad else 0)
 
 
-main()
+if __name__ == "__main__":
+    main()

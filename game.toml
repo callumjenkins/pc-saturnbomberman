@@ -240,6 +240,8 @@ module = "KRNL"
 at = "bomber_touched"
 
 # Functions the decomp has rewritten and checked (decomp/README.md): the recompile calls these instead.
+
+# BEGIN decomp replaces (python decomp/gen.py)
 [[replace]]
 module = "KRNL"
 at = 0x0600665C
@@ -252,6 +254,11 @@ symbol = "swap_f06006B38"
 
 [[replace]]
 module = "KRNL"
+at = 0x060086EA
+symbol = "swap_f060086EA"
+
+[[replace]]
+module = "KRNL"
 at = 0x0600940A
 symbol = "swap_f0600940A"
 
@@ -259,6 +266,16 @@ symbol = "swap_f0600940A"
 module = "KRNL"
 at = 0x0600942E
 symbol = "swap_f0600942E"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600A25E
+symbol = "swap_f0600A25E"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600A2D8
+symbol = "swap_f0600A2D8"
 
 [[replace]]
 module = "KRNL"
@@ -277,15 +294,41 @@ symbol = "swap_f0600B934"
 
 [[replace]]
 module = "KRNL"
-at = 0x0600A25E
-symbol = "swap_f0600A25E"
+at = 0x060143D8
+symbol = "swap_f060143D8"
 
 [[replace]]
 module = "KRNL"
-at = 0x0600A2D8
-symbol = "swap_f0600A2D8"
+at = 0x0602F666
+symbol = "swap_f0602F666"
+
+[[replace]]
+module = "KRNL"
+at = 0x06038174
+symbol = "swap_f06038174"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603AF08
+symbol = "swap_f0603AF08"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603C7EE
+symbol = "swap_f0603C7EE"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603DDA6
+symbol = "swap_f0603DDA6"
+
+[[replace]]
+module = "KRNL"
+at = 0x06068FF0
+symbol = "swap_f06068FF0"
 
 [[replace]]
 module = "KRNL"
 at = 0x060A5EEC
 symbol = "swap_f060A5EEC"
+# END decomp replaces

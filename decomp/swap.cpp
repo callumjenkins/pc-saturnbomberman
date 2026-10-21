@@ -1,5 +1,5 @@
 // The decompiled kernel functions as the recompiled game's own: each [[replace]] in game.toml
-// calls one of these in place of the generated body. They run krnl.c, built with DECOMP_HOST, on the
+// calls one of the wrappers in swap_gen.inc (decomp/gen.py writes both) in place of the generated body. They run krnl.c, built with DECOMP_HOST, on the
 // runtime's address space, and pass arguments and the result the way the SH-2 does (r4 to r7, r0).
 // A call from that C into the game (GCALL in guest.h) comes back here as g_call, and runs the
 // generated function, or another swap, on the context of the function that made it.
@@ -49,26 +49,6 @@ uint32_t g_call(uint32_t addr, const uint32_t* args, int n)
     c.pr = ret;
     return result;
 }
-
-uint32_t f060A5EEC(uint32_t t);
-void f0600665C(void);
-void f06006B38(short n);
-void f0600940A(int n);
-void f0600942E(void);
-void f0600A3E0(uint32_t p, uint32_t b, int c);
-int f0600A4B0(unsigned int x);
-int f0600B934(int n, int m);
-void f0600A25E(int d);
-void f0600A2D8(int d);
 }
 
-void swap_f0600665C(SH2Context& c) { InSwap in(c); f0600665C(); }
-void swap_f06006B38(SH2Context& c) { InSwap in(c); f06006B38((short)c.r[4]); }
-void swap_f0600940A(SH2Context& c) { InSwap in(c); f0600940A((int)c.r[4]); }
-void swap_f0600942E(SH2Context& c) { InSwap in(c); f0600942E(); }
-void swap_f0600A3E0(SH2Context& c) { InSwap in(c); f0600A3E0(c.r[4], c.r[5], (int)c.r[6]); }
-void swap_f0600A4B0(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f0600A4B0(c.r[4]); }
-void swap_f0600B934(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f0600B934((int)c.r[4], (int)c.r[5]); }
-void swap_f0600A25E(SH2Context& c) { InSwap in(c); f0600A25E((int)c.r[4]); }
-void swap_f0600A2D8(SH2Context& c) { InSwap in(c); f0600A2D8((int)c.r[4]); }
-void swap_f060A5EEC(SH2Context& c) { InSwap in(c); c.r[0] = f060A5EEC(c.r[4]); }
+#include "swap_gen.inc"

@@ -125,3 +125,45 @@ REF(Thing) f060A5EEC(REF(Thing) t)
     GCALL(0x060A5F22, t, 3);
     return t;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060086EA(void)
+{
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060143D8(void)
+{
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0602F666(void)
+{
+    return 0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06038174(void)
+{
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f0603AF08(void)
+{
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f0603C7EE(void)
+{
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f0603DDA6(void)
+{
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06068FF0(void)
+{
+    return 0;
+}

@@ -3,4 +3,4 @@
 enable_language(C)
 target_sources(recomp PRIVATE ${CMAKE_CURRENT_LIST_DIR}/krnl.c ${CMAKE_CURRENT_LIST_DIR}/swap.cpp)
 set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/krnl.c PROPERTIES
-    COMPILE_DEFINITIONS DECOMP_HOST COMPILE_OPTIONS -std=gnu11)
+    COMPILE_DEFINITIONS DECOMP_HOST COMPILE_OPTIONS "-std=gnu11;-fwrapv")

@@ -8,7 +8,7 @@
  *   REF(T)          pointer to a T
  *   GET(T,p,f)      p->f             SET(T,p,f,v)   p->f = v
  *   ELEM(T,base,i)  &((T *)base)[i]  BYTEOFF(T,base,n)  (T *)((char *)base + n)
- *   LD8/LD16/...    a scalar at an address, ST8/ST16/ST32 store one
+ *   LD8/LD16/LD32   a scalar at an address, ST8/ST16/ST32 store one
  *   GETB(b,i)       b[i] for a signed byte pointer
  *   GCALL0(a)       call the function at guest address a, GCALL(a, x, y...) with arguments;
  *                   the result is an int. The host build runs it on the runtime (g_call), SHC
@@ -32,10 +32,12 @@ void g_wr(uint32_t addr, int size, uint32_t value);
 #define ELEM(T, base, i)   ((gaddr)(base) + (i) * sizeof(T))
 #define BYTEOFF(T, base, n) ((gaddr)(base) + (n))
 #define LD8(a)             ((int8_t)g_rd((a), 1))
+#define LD32(a)            ((int)g_rd((a), 4))
 #define LDU16(a)           ((uint16_t)g_rd((a), 2))
 #define LD16(a)            ((int16_t)g_rd((a), 2))
 #define ST8(a, v)          g_wr((a), 1, (uint32_t)(v))
 #define ST16(a, v)         g_wr((a), 2, (uint32_t)(v))
+#define ST32(a, v)         g_wr((a), 4, (uint32_t)(v))
 #define GETB(b, i)         ((int8_t)g_rd((b) + (i), 1))
 /* `*p++ = v` through a halfword pointer, and `*p = v` */
 #define PUT16(p, v)        (g_wr((p), 2, (uint32_t)(v)), (p) += 2)
@@ -59,10 +61,12 @@ typedef char *gaddr;
 #define ELEM(T, base, i)   (&((T *)(base))[i])
 #define BYTEOFF(T, base, n) ((T *)((char *)(base) + (n)))
 #define LD8(a)             (*(signed char *)(a))
+#define LD32(a)            (*(int *)(a))
 #define LDU16(a)           (*(unsigned short *)(a))
 #define LD16(a)            (*(short *)(a))
 #define ST8(a, v)          (*(char *)(a) = (v))
 #define ST16(a, v)         (*(short *)(a) = (v))
+#define ST32(a, v)         (*(int *)(a) = (v))
 #define GETB(b, i)         ((b)[i])
 #define PUT16(p, v)        (*(p)++ = (v))
 #define STORE16(p, v)      (*(p) = (v))
