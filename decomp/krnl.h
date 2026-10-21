@@ -40,5 +40,12 @@ typedef struct { int src; char pad4[24]; int out, w32, w36, w40, phase; } Unpack
 #define OBJ(i)  (OBJS + (unsigned short)((i) * 84))
 #define NODE    ((REF(Node14))LD32(CURSOR))
 #define WRAP(v) ((v) < 0 ? (v) + 0x8000 : (v))
+#define SLOT(n)    (SLOTS + (short)((n) * 24))
+#define REC(n)     ((OBJECTS + 0x30) + (n) * 124)
+#define CELL(n)    (0x060C1F42 + (signed char)((n) * 12))
+#define ABS_DIFF(a, b) ((a) > (b) ? (a) - (b) : (b) - (a))
+
+#define PAD_SHADOW 0x260060CA
+#define TICK       0x26006038
 
 #endif

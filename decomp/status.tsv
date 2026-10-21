@@ -4498,7 +4498,7 @@ KRNL	06029C6E	9	0	yes	yes	no	no	todo
 KRNL	06029CA4	159	22	no	yes	yes	no	todo	
 KRNL	06029D56	59	6	no	yes	yes	no	todo	
 KRNL	06029DA2	58	6	no	yes	yes	no	todo	
-KRNL	06029E0C	17	0	yes	yes	no	no	todo	
+KRNL	06029E0C	17	0	yes	yes	no	no	swapped	scroll_pos_wrap
 KRNL	06029E2E	28	2	no	yes	no	no	todo	
 KRNL	06029E66	32	6	no	yes	no	no	todo	
 KRNL	06029EB8	59	6	no	no	no	no	todo	
@@ -6088,7 +6088,7 @@ KRNL	0603DDAA	87	16	no	yes	yes	no	todo
 KRNL	0603DDE4	58	10	no	no	no	no	todo	
 KRNL	0603DE06	41	8	no	no	no	no	todo	
 KRNL	0603DE58	21	8	no	no	no	no	todo	
-KRNL	0603DEEC	11	0	yes	yes	no	no	todo	
+KRNL	0603DEEC	11	0	yes	yes	no	no	swapped	set_handler_if_even
 KRNL	0603DF02	106	6	no	yes	no	no	todo	
 KRNL	0603E008	138	28	no	yes	yes	no	todo	
 KRNL	0603E046	107	20	no	no	no	no	todo	
@@ -6113,10 +6113,10 @@ KRNL	0603E3EA	38	8	no	no	no	no	todo
 KRNL	0603E436	22	8	no	no	no	no	todo	
 KRNL	0603E462	6	0	yes	no	yes	no	todo	
 KRNL	0603E46E	6	0	yes	no	yes	no	todo	
-KRNL	0603E4CC	3	0	yes	no	no	no	todo	
-KRNL	0603E4D2	3	0	yes	no	no	no	todo	
+KRNL	0603E4CC	3	0	yes	no	no	no	swapped	add_70
+KRNL	0603E4D2	3	0	yes	no	no	no	swapped	offset_82
 KRNL	0603E4D8	15	2	no	no	no	no	todo	
-KRNL	0603E4F6	3	0	yes	no	no	no	todo	
+KRNL	0603E4F6	3	0	yes	no	no	no	swapped	add_78
 KRNL	0603E4FC	86	18	no	no	yes	no	todo	
 KRNL	0603E524	66	10	no	no	no	no	todo	
 KRNL	0603E548	48	8	no	no	no	no	todo	
@@ -6124,11 +6124,11 @@ KRNL	0603E5A8	12	4	no	no	no	no	todo
 KRNL	0603E604	179	16	no	no	no	no	todo	
 KRNL	0603E786	19	0	yes	no	no	no	todo	
 KRNL	0603E7AC	100	6	no	no	no	no	todo	
-KRNL	0603E888	34	0	yes	no	no	no	todo	
+KRNL	0603E888	34	0	yes	no	no	no	swapped	table_lookup
 KRNL	0603E8CC	50	10	no	no	yes	no	todo	
 KRNL	0603E918	11	2	no	no	no	no	todo	
 KRNL	0603E930	46	0	yes	no	no	no	todo	
-KRNL	0603E9B6	9	0	yes	no	no	no	todo	
+KRNL	0603E9B6	9	0	yes	no	no	no	swapped	word_nonzero
 KRNL	0603E9C8	64	18	no	no	yes	no	todo	
 KRNL	0603E9F4	42	12	no	no	no	no	todo	
 KRNL	0603EA10	28	6	no	no	no	no	todo	
@@ -6160,7 +6160,7 @@ KRNL	0603ED7E	20	0	yes	yes	yes	no	todo
 KRNL	0603EDA6	20	0	yes	yes	yes	no	todo	
 KRNL	0603EDCE	20	0	yes	yes	yes	no	todo	
 KRNL	0603EDF6	20	0	yes	yes	yes	no	todo	
-KRNL	0603EE1E	41	0	yes	yes	no	no	todo	
+KRNL	0603EE1E	41	0	yes	yes	no	no	swapped	
 KRNL	0603EE70	7	0	yes	yes	yes	no	todo	
 KRNL	0603EE82	11	4	no	yes	no	no	todo	
 KRNL	0603EEB0	71	18	no	yes	yes	no	todo	
@@ -6189,7 +6189,7 @@ KRNL	0603F1BE	108	10	no	no	no	no	todo
 KRNL	0603F2D4	86	8	no	yes	yes	no	todo	
 KRNL	0603F34A	50	8	no	no	no	no	todo	
 KRNL	0603F368	50	8	no	yes	yes	no	todo	
-KRNL	0603F380	25	0	yes	yes	no	no	todo	
+KRNL	0603F380	25	0	yes	yes	no	no	swapped	clear_obj_38_tail
 KRNL	0603F3B2	53	6	no	no	yes	no	todo	
 KRNL	0603F3FE	15	2	no	no	no	no	todo	
 KRNL	0603F40E	7	0	yes	no	no	no	todo	
@@ -6202,7 +6202,7 @@ KRNL	0603F59E	99	14	no	no	no	no	todo
 KRNL	0603F5B6	99	14	no	no	no	no	todo	
 KRNL	0603F5CC	99	14	no	no	no	no	todo	
 KRNL	0603F618	99	14	no	no	no	no	todo	
-KRNL	0603F642	54	0	yes	no	no	no	todo	
+KRNL	0603F642	54	0	yes	no	no	no	swapped	flag_four_objs
 KRNL	0603F6AE	201	14	no	no	yes	no	todo	
 KRNL	0603F6C2	41	8	no	no	no	no	todo	
 KRNL	0603F6CA	37	6	no	no	no	no	todo	
@@ -6331,12 +6331,12 @@ KRNL	0604073E	8	2	no	no	no	no	todo
 KRNL	0604074C	2	0	yes	no	no	no	todo	
 KRNL	06040760	8	2	no	no	no	no	todo	
 KRNL	06040778	160	14	no	no	no	no	todo	
-KRNL	060407F2	17	0	yes	yes	no	no	todo	
+KRNL	060407F2	17	0	yes	yes	no	no	swapped	obj_set_bits_46
 KRNL	06040814	62	4	no	yes	yes	no	todo	
 KRNL	06040890	17	0	yes	yes	no	no	swapped	table_entry8
 KRNL	060408B2	323	16	no	yes	yes	no	todo	
 KRNL	060408F4	18	0	yes	no	no	no	swapped	slot_w18_not_ff
-KRNL	06040918	10	0	yes	yes	no	no	todo	
+KRNL	06040918	10	0	yes	yes	no	no	swapped	slot_word_20
 KRNL	0604092C	22	0	yes	yes	yes	no	todo	
 KRNL	06040958	73	42	no	no	yes	no	todo	
 KRNL	06040962	68	40	no	no	no	no	todo	
@@ -6678,7 +6678,7 @@ KRNL	060436E8	39	14	no	no	no	no	todo
 KRNL	06043736	56	4	no	no	yes	no	todo	
 KRNL	06043748	47	2	no	no	no	no	todo	
 KRNL	06043752	42	0	yes	no	no	no	todo	
-KRNL	060437A6	51	0	yes	no	no	no	todo	
+KRNL	060437A6	51	0	yes	no	no	no	swapped	
 KRNL	0604380C	15	0	yes	no	yes	no	todo	
 KRNL	06043854	125	16	no	yes	yes	no	todo	
 KRNL	0604388E	96	10	no	no	no	no	todo	
@@ -6692,7 +6692,7 @@ KRNL	06043B06	34	2	no	no	yes	no	todo
 KRNL	06043B34	11	0	yes	no	no	no	todo	
 KRNL	06043B78	37	6	no	no	no	no	todo	
 KRNL	06043BC2	188	10	no	no	yes	no	todo	
-KRNL	06043BFC	15	0	yes	no	no	no	todo	
+KRNL	06043BFC	15	0	yes	no	no	no	swapped	slot_flag
 KRNL	06043C1A	14	4	no	no	yes	no	todo	
 KRNL	06043C30	3	0	yes	no	no	no	todo	
 KRNL	06043C3A	10	4	no	no	no	no	todo	
@@ -6840,7 +6840,7 @@ KRNL	06045B46	22	0	yes	no	yes	no	todo
 KRNL	06045B98	78	6	no	no	no	no	todo	
 KRNL	06045C34	30	2	no	no	yes	no	todo	
 KRNL	06045C4E	19	2	no	no	no	no	todo	
-KRNL	06045C70	15	0	yes	no	no	no	todo	
+KRNL	06045C70	15	0	yes	no	no	no	swapped	clear_flag_80_pair
 KRNL	06045CBC	31	4	no	no	no	no	todo	
 KRNL	06045CFA	38	4	no	no	yes	no	todo	
 KRNL	06045D34	19	2	no	no	no	no	todo	
@@ -6896,7 +6896,7 @@ KRNL	06046C12	51	10	no	no	yes	no	todo
 KRNL	06046C28	40	6	no	no	no	no	todo	
 KRNL	06046C68	8	0	yes	no	no	no	todo	
 KRNL	06046C7E	45	10	no	yes	no	no	todo	
-KRNL	06046CD8	4	0	yes	yes	no	no	todo	
+KRNL	06046CD8	4	0	yes	yes	no	no	swapped	set_slot0_w12
 KRNL	06046D50	27	4	no	yes	no	no	todo	
 KRNL	06046D98	186	60	no	no	yes	no	todo	
 KRNL	06046DB2	173	58	no	no	no	no	todo	
@@ -7088,7 +7088,7 @@ KRNL	06048228	63	6	no	no	no	no	todo
 KRNL	06048244	49	4	no	no	no	no	todo	
 KRNL	06048270	27	2	no	no	no	no	todo	
 KRNL	0604828E	12	0	yes	no	no	no	todo	
-KRNL	060482A6	15	0	yes	no	no	no	todo	
+KRNL	060482A6	15	0	yes	no	no	no	swapped	pick_by_counts
 KRNL	060482C4	13	2	no	no	no	no	todo	
 KRNL	060482FC	88	20	no	no	yes	no	todo	
 KRNL	06048334	5	0	yes	no	no	no	todo	
@@ -7181,7 +7181,7 @@ KRNL	06049418	67	4	no	no	no	no	todo
 KRNL	06049478	67	4	no	no	no	no	todo	
 KRNL	06049516	80	4	no	no	no	no	todo	
 KRNL	060495B6	100	4	no	no	no	no	todo	
-KRNL	06049694	21	0	yes	no	no	no	todo	
+KRNL	06049694	21	0	yes	no	no	no	swapped	set_byte_from_point
 KRNL	060496E4	24	0	yes	yes	no	no	swapped	table_pointer
 KRNL	06049730	191	76	no	yes	yes	no	todo	
 KRNL	06049748	179	74	no	no	no	no	todo	
@@ -7218,7 +7218,7 @@ KRNL	0604997C	188	10	no	no	no	no	todo
 KRNL	060499B8	158	8	no	no	no	no	todo	
 KRNL	06049A14	112	6	no	no	no	no	todo	
 KRNL	06049A54	80	4	no	no	no	no	todo	
-KRNL	06049B38	28	0	yes	yes	no	no	todo	
+KRNL	06049B38	28	0	yes	yes	no	no	swapped	obj_blink_4
 KRNL	06049B70	78	2	no	yes	yes	no	todo	
 KRNL	06049BE6	61	2	no	no	no	no	todo	
 KRNL	06049C24	280	14	no	yes	yes	no	todo	
@@ -7288,7 +7288,7 @@ KRNL	0604B40C	96	10	no	no	no	no	todo
 KRNL	0604B47A	41	4	no	no	no	no	todo	
 KRNL	0604B480	38	2	no	no	no	no	todo	
 KRNL	0604B4B8	10	0	yes	no	no	no	todo	
-KRNL	0604B4CC	37	0	yes	yes	no	no	todo	
+KRNL	0604B4CC	37	0	yes	yes	no	no	swapped	
 KRNL	0604B53A	37	2	no	no	no	no	todo	
 KRNL	0604B594	352	88	no	no	yes	no	todo	
 KRNL	0604B5AE	195	66	no	no	no	no	todo	
@@ -7447,7 +7447,7 @@ KRNL	0604CBAC	2	0	yes	no	no	no	todo
 KRNL	0604CBB6	14	2	no	no	no	no	todo	
 KRNL	0604CBBC	11	0	yes	no	no	no	todo	
 KRNL	0604CBD2	23	2	no	no	no	no	todo	
-KRNL	0604CC00	21	0	yes	no	no	no	todo	
+KRNL	0604CC00	21	0	yes	no	no	no	swapped	sum_row
 KRNL	0604CC38	23	2	no	no	yes	no	todo	
 KRNL	0604CC5A	6	0	yes	no	no	no	todo	
 KRNL	0604CC66	115	4	no	no	yes	no	todo	
@@ -7480,29 +7480,29 @@ KRNL	0604D35E	115	10	no	no	yes	no	todo
 KRNL	0604D39C	84	8	no	no	no	no	todo	
 KRNL	0604D3D2	57	6	no	no	no	no	todo	
 KRNL	0604D43E	51	6	no	no	no	no	todo	
-KRNL	0604D47C	22	0	yes	yes	no	no	todo	
+KRNL	0604D47C	22	0	yes	yes	no	no	swapped	pair_index
 KRNL	0604D4D4	41	4	no	yes	no	no	todo	
 KRNL	0604D526	28	2	no	no	no	no	todo	
-KRNL	0604D55E	5	0	yes	yes	no	no	todo	
+KRNL	0604D55E	5	0	yes	yes	no	no	swapped	table_half
 KRNL	0604D568	14	0	yes	yes	no	no	swapped	clear_pairs
-KRNL	0604D584	6	0	yes	yes	no	no	todo	
-KRNL	0604D590	34	0	yes	yes	no	no	todo	
-KRNL	0604D5D4	50	0	yes	no	no	no	todo	
+KRNL	0604D584	6	0	yes	yes	no	no	swapped	clear_pair_179c
+KRNL	0604D590	34	0	yes	yes	no	no	swapped	pair_gt
+KRNL	0604D5D4	50	0	yes	no	no	no	swapped	
 KRNL	0604D602	33	4	no	yes	no	no	todo	
-KRNL	0604D644	20	0	yes	yes	no	no	todo	
-KRNL	0604D66C	9	0	yes	yes	no	no	todo	
+KRNL	0604D644	20	0	yes	yes	no	no	swapped	byte_pair_greater
+KRNL	0604D66C	9	0	yes	yes	no	no	swapped	set_pair_029e
 KRNL	0604D6AC	48	2	no	yes	no	no	todo	
 KRNL	0604D736	17	2	no	yes	no	no	todo	
 KRNL	0604D758	41	2	no	yes	no	no	todo	
 KRNL	0604D780	19	0	yes	yes	no	no	swapped	update_best_pair_b
-KRNL	0604D7A6	8	0	yes	yes	no	no	todo	
-KRNL	0604D7BE	4	0	yes	yes	no	no	todo	
-KRNL	0604D7C6	4	0	yes	yes	no	no	todo	
+KRNL	0604D7A6	8	0	yes	yes	no	no	swapped	set_pair_17a0
+KRNL	0604D7BE	4	0	yes	yes	no	no	swapped	clear_byte
+KRNL	0604D7C6	4	0	yes	yes	no	no	swapped	get_flag_179f
 KRNL	0604D7F4	82	4	no	no	no	no	todo	
-KRNL	0604D898	13	0	yes	yes	no	no	todo	
+KRNL	0604D898	13	0	yes	yes	no	no	swapped	pair_179a_nonzero
 KRNL	0604D8B2	13	0	yes	no	no	no	swapped	latch_pair
 KRNL	0604D8C4	18	2	no	yes	no	no	todo	
-KRNL	0604D922	11	0	yes	yes	no	no	todo	
+KRNL	0604D922	11	0	yes	yes	no	no	swapped	byte_179a_gt
 KRNL	0604D94E	41	2	no	yes	no	no	todo	
 KRNL	0604D9A0	24	10	no	yes	yes	no	todo	
 KRNL	0604D9D0	73	0	yes	yes	no	no	todo	
@@ -7607,7 +7607,7 @@ KRNL	0604E876	15	4	no	no	no	no	todo
 KRNL	0604E87A	13	2	no	no	no	no	todo	
 KRNL	0604E8D8	130	6	no	no	yes	no	todo	
 KRNL	0604E946	109	4	no	no	no	no	todo	
-KRNL	0604EA00	102	0	yes	no	no	no	todo	
+KRNL	0604EA00	102	0	yes	no	no	no	swapped	
 KRNL	0604EAD8	84	4	no	no	yes	no	todo	
 KRNL	0604EB48	66	4	no	no	no	no	todo	
 KRNL	0604EB80	2	0	yes	no	no	no	swapped	nop
@@ -7649,7 +7649,7 @@ KRNL	0604F036	28	6	no	yes	no	no	todo
 KRNL	0604F03C	25	4	no	yes	no	no	todo	
 KRNL	0604F044	21	2	no	yes	no	no	todo	
 KRNL	0604F07C	21	0	yes	yes	no	no	swapped	copy_six_halfwords
-KRNL	0604F0A6	27	0	yes	yes	no	no	todo	
+KRNL	0604F0A6	27	0	yes	yes	no	no	swapped	copy_view_regs
 KRNL	0604F104	74	10	no	yes	yes	no	todo	
 KRNL	0604F16E	10	4	no	yes	no	no	todo	
 KRNL	0604F188	8	0	yes	yes	no	no	todo	
@@ -7737,8 +7737,8 @@ KRNL	0604FBFE	14	2	no	yes	yes	no	todo
 KRNL	0604FC12	4	0	yes	no	no	no	todo	
 KRNL	0604FC44	41	0	yes	yes	no	no	swapped	fold_six_bytes
 KRNL	0604FC96	31	2	no	yes	no	no	todo	
-KRNL	0604FCD4	16	0	yes	yes	no	no	todo	
-KRNL	0604FD0C	8	0	yes	yes	no	no	todo	
+KRNL	0604FCD4	16	0	yes	yes	no	no	swapped	fill_ff_pairs
+KRNL	0604FD0C	8	0	yes	yes	no	no	swapped	store_byte_pair
 KRNL	0604FD1C	31	2	no	yes	yes	no	todo	
 KRNL	0604FD26	26	0	yes	no	no	no	todo	
 KRNL	0604FD64	57	12	no	yes	yes	no	todo	
@@ -7754,7 +7754,7 @@ KRNL	0604FE42	9	2	no	no	no	no	todo
 KRNL	0604FE4C	4	0	yes	no	no	no	todo	
 KRNL	0604FE7C	171	0	yes	no	no	no	todo	
 KRNL	06050036	175	0	yes	no	no	no	todo	
-KRNL	060501F4	55	0	yes	no	no	no	todo	
+KRNL	060501F4	55	0	yes	no	no	no	swapped	copy_row_ten
 KRNL	06050262	40	6	no	no	yes	no	todo	
 KRNL	06050290	16	4	no	no	no	no	todo	
 KRNL	060502A2	7	0	yes	no	no	no	todo	
@@ -7766,9 +7766,9 @@ KRNL	0605034A	109	10	no	no	no	no	todo
 KRNL	06050358	102	8	no	no	no	no	todo	
 KRNL	06050366	99	8	no	no	no	no	todo	
 KRNL	06050370	99	8	no	no	no	no	todo	
-KRNL	06050474	34	0	yes	yes	no	no	todo	
-KRNL	060504B8	21	0	yes	yes	no	no	todo	
-KRNL	060504E2	30	0	yes	no	no	no	todo	
+KRNL	06050474	34	0	yes	yes	no	no	swapped	clear_row_ten
+KRNL	060504B8	21	0	yes	yes	no	no	swapped	count_sixes
+KRNL	060504E2	30	0	yes	no	no	no	swapped	count_fives_sixes
 KRNL	0605051E	21	14	no	yes	yes	no	todo	
 KRNL	06050526	17	12	no	no	no	no	todo	
 KRNL	0605052C	14	10	no	no	no	no	todo	
@@ -7779,7 +7779,7 @@ KRNL	0605053E	5	2	no	no	no	no	todo
 KRNL	06050542	3	0	yes	no	no	no	todo	
 KRNL	06050574	16	2	no	no	yes	no	todo	
 KRNL	0605057C	12	0	yes	no	no	no	todo	
-KRNL	06050594	11	0	yes	no	no	no	todo	
+KRNL	06050594	11	0	yes	no	no	no	swapped	byte_not_ff
 KRNL	060505AA	34	4	no	yes	yes	no	todo	
 KRNL	060505CC	24	4	no	no	no	no	todo	
 KRNL	060505DA	24	4	no	no	no	no	todo	
@@ -7788,7 +7788,7 @@ KRNL	06050626	14	0	yes	no	no	no	todo
 KRNL	0605065C	44	6	no	yes	yes	no	todo	
 KRNL	0605067E	29	6	no	no	no	no	todo	
 KRNL	0605069A	13	0	yes	no	no	no	todo	
-KRNL	060506B4	14	0	yes	yes	no	no	todo	
+KRNL	060506B4	14	0	yes	yes	no	no	swapped	map_0_1_other
 KRNL	060506D0	21	2	no	no	no	no	todo	
 KRNL	06050704	93	26	no	no	yes	no	todo	
 KRNL	06050744	61	16	no	no	no	no	todo	
@@ -7837,9 +7837,9 @@ KRNL	06050C42	37	12	no	no	no	no	todo
 KRNL	06050C4C	32	8	no	no	no	no	todo	
 KRNL	06050C60	24	4	no	no	no	no	todo	
 KRNL	06050C6C	16	0	yes	no	no	no	todo	
-KRNL	06050C8C	11	0	yes	yes	no	no	todo	
+KRNL	06050C8C	11	0	yes	yes	no	no	swapped	b6_not_ff
 KRNL	06050CA2	7	0	yes	no	yes	no	todo	
-KRNL	06050CB0	21	0	yes	no	no	no	todo	
+KRNL	06050CB0	21	0	yes	no	no	no	swapped	count_fives
 KRNL	06050D08	92	28	no	no	yes	no	todo	
 KRNL	06050D26	77	26	no	no	no	no	todo	
 KRNL	06050D54	54	18	no	no	no	no	todo	
@@ -7903,9 +7903,9 @@ KRNL	06051C34	47	6	no	no	no	no	todo
 KRNL	06051C44	47	6	no	no	no	no	todo	
 KRNL	06051CB8	104	14	no	no	yes	no	todo	
 KRNL	06051D38	91	14	no	no	no	no	todo	
-KRNL	06051D88	48	0	yes	no	no	no	todo	
-KRNL	06051E1C	24	0	yes	no	no	no	todo	
-KRNL	06051E4C	57	0	yes	no	no	no	todo	
+KRNL	06051D88	48	0	yes	no	no	no	swapped	
+KRNL	06051E1C	24	0	yes	no	no	no	swapped	
+KRNL	06051E4C	57	0	yes	no	no	no	swapped	
 KRNL	06051EBE	100	2	no	no	yes	no	todo	
 KRNL	06051F4E	43	0	yes	no	no	no	todo	
 KRNL	06051FBC	52	4	no	no	yes	no	todo	
@@ -7954,7 +7954,7 @@ KRNL	060522A4	13	6	no	no	no	no	todo
 KRNL	060522AA	10	4	no	no	no	no	todo	
 KRNL	060522B0	7	2	no	no	no	no	todo	
 KRNL	0605232C	6	0	yes	yes	no	no	swapped	
-KRNL	06052338	24	0	yes	yes	no	no	todo	
+KRNL	06052338	24	0	yes	yes	no	no	swapped	reset_state
 KRNL	06052368	261	52	no	no	yes	no	todo	
 KRNL	06052398	237	44	no	no	no	no	todo	
 KRNL	060523A0	233	42	no	no	no	no	todo	
@@ -8094,7 +8094,7 @@ KRNL	06053BF0	52	8	no	yes	yes	no	todo
 KRNL	06053C1C	30	4	no	no	no	no	todo	
 KRNL	06053C34	18	2	no	no	no	no	todo	
 KRNL	06053C4A	7	0	yes	no	no	no	todo	
-KRNL	06053C58	4	0	yes	no	no	no	todo	
+KRNL	06053C58	4	0	yes	no	no	no	swapped	jump_with_list
 KRNL	06053C60	78	38	no	yes	yes	no	todo	
 KRNL	06053C70	70	36	no	no	no	no	todo	
 KRNL	06053C7A	65	32	no	no	no	no	todo	
@@ -8124,17 +8124,17 @@ KRNL	06053F5C	27	0	yes	yes	no	no	todo
 KRNL	06053F92	69	6	no	yes	yes	no	todo	
 KRNL	06054002	13	0	yes	no	no	no	todo	
 KRNL	0605401C	21	0	yes	yes	no	no	todo	
-KRNL	06054046	3	0	yes	yes	no	no	todo	
+KRNL	06054046	3	0	yes	yes	no	no	swapped	get_half
 KRNL	0605404C	29	2	no	yes	no	no	todo	
 KRNL	06054086	122	2	no	yes	no	no	todo	
-KRNL	0605417A	6	0	yes	yes	no	no	todo	
+KRNL	0605417A	6	0	yes	yes	no	no	swapped	set_slot1_handler
 KRNL	060541E0	41	6	no	yes	yes	no	todo	
 KRNL	06054210	17	2	no	no	no	no	todo	
 KRNL	06054232	78	8	no	yes	yes	no	todo	
 KRNL	06054264	53	6	no	no	no	no	todo	
 KRNL	060542BA	10	0	yes	no	no	no	todo	
 KRNL	060542CE	28	2	no	yes	no	no	todo	
-KRNL	06054306	3	0	yes	yes	no	no	todo	
+KRNL	06054306	3	0	yes	yes	no	no	swapped	tail_22eda
 KRNL	06054350	8	2	no	yes	no	no	todo	
 KRNL	06054360	64	6	no	no	yes	no	todo	
 KRNL	06054374	54	4	no	no	no	no	todo	
@@ -8248,7 +8248,7 @@ KRNL	06054FA8	8	2	no	no	yes	no	todo
 KRNL	06054FAE	5	0	yes	no	yes	no	todo	
 KRNL	06054FB8	44	0	yes	no	no	no	todo	
 KRNL	06055060	44	0	yes	no	no	no	todo	
-KRNL	060550D8	5	0	yes	no	no	no	todo	
+KRNL	060550D8	5	0	yes	no	no	no	swapped	set_pair_0ab4
 KRNL	060550E8	295	12	no	no	yes	no	todo	
 KRNL	06055114	10	0	yes	no	no	no	todo	
 KRNL	06055134	257	4	no	no	no	no	todo	
@@ -8283,7 +8283,7 @@ KRNL	0605548C	101	32	no	no	no	no	todo
 KRNL	06055556	69	10	no	no	yes	no	todo	
 KRNL	0605557A	51	2	no	no	no	no	todo	
 KRNL	06055582	47	0	yes	no	no	no	todo	
-KRNL	06055616	23	0	yes	no	no	no	todo	
+KRNL	06055616	23	0	yes	no	no	no	swapped	mark_point
 KRNL	06055644	86	0	yes	no	no	no	todo	
 KRNL	06055718	172	54	no	no	yes	no	todo	
 KRNL	06055750	144	46	no	no	no	no	todo	
@@ -8410,7 +8410,7 @@ KRNL	06056322	50	16	no	no	no	no	todo
 KRNL	06056328	50	16	no	no	no	no	todo	
 KRNL	0605635C	50	10	no	yes	no	no	todo	
 KRNL	060563EC	124	18	no	no	no	no	todo	
-KRNL	0605650C	68	0	yes	no	no	no	todo	
+KRNL	0605650C	68	0	yes	no	no	no	swapped	point_handler
 KRNL	06056594	15	4	no	no	yes	no	todo	
 KRNL	060565EC	336	96	no	yes	yes	no	todo	
 KRNL	06056612	317	92	no	no	no	no	todo	
@@ -8468,11 +8468,11 @@ KRNL	06056E2A	178	22	no	no	yes	no	todo
 KRNL	06056EC2	157	22	no	no	no	no	todo	
 KRNL	06056F0C	76	8	no	no	no	no	todo	
 KRNL	06056F82	73	8	no	no	no	no	todo	
-KRNL	06056FA4	39	0	yes	yes	no	no	todo	
+KRNL	06056FA4	39	0	yes	yes	no	no	swapped	pick_by_count
 KRNL	06057012	13	2	no	yes	no	no	todo	
 KRNL	0605702C	6	2	no	yes	no	no	todo	
 KRNL	06057038	6	2	no	yes	no	no	todo	
-KRNL	06057044	2	0	yes	no	no	no	todo	
+KRNL	06057044	2	0	yes	no	no	no	swapped	const_12
 KRNL	06057048	37	2	no	no	no	no	todo	
 KRNL	06057092	91	8	no	no	no	no	todo	
 KRNL	06057148	39	6	no	no	no	no	todo	
@@ -8509,9 +8509,9 @@ KRNL	06057808	65	14	no	yes	yes	no	todo
 KRNL	06057822	52	12	no	yes	no	no	todo	
 KRNL	06057842	36	4	no	no	no	no	todo	
 KRNL	0605784A	32	2	no	no	no	no	todo	
-KRNL	0605788A	30	0	yes	yes	no	no	todo	
+KRNL	0605788A	30	0	yes	yes	no	no	swapped	
 KRNL	06057930	249	4	no	yes	no	no	todo	
-KRNL	06057B40	32	0	yes	yes	no	no	todo	
+KRNL	06057B40	32	0	yes	yes	no	no	swapped	
 KRNL	06057B9C	81	2	no	yes	yes	no	todo	
 KRNL	06057C3E	172	22	no	yes	yes	no	todo	
 KRNL	06057C8C	15	0	yes	no	no	no	todo	
@@ -8534,7 +8534,7 @@ KRNL	0605821E	407	28	no	no	no	no	todo
 KRNL	06058226	407	28	no	no	no	no	todo	
 KRNL	0605822E	407	28	no	no	no	no	todo	
 KRNL	0605823C	407	28	no	no	no	no	todo	
-KRNL	06058274	52	0	yes	yes	no	no	todo	
+KRNL	06058274	52	0	yes	yes	no	no	swapped	build_cell_map
 KRNL	060582F4	537	36	no	yes	yes	no	todo	
 KRNL	060583F0	81	14	no	no	yes	no	todo	
 KRNL	06058464	29	6	no	no	no	no	todo	
@@ -8607,7 +8607,7 @@ KRNL	06058E28	20	10	no	no	no	no	todo
 KRNL	06058E34	14	6	no	no	no	no	todo	
 KRNL	06058E46	5	0	yes	no	no	no	todo	
 KRNL	06058EA0	252	6	no	no	no	no	todo	
-KRNL	06059040	18	0	yes	no	no	no	todo	
+KRNL	06059040	18	0	yes	no	no	no	swapped	mode_value
 KRNL	06059064	63	20	no	no	yes	no	todo	
 KRNL	0605906C	59	18	no	no	no	no	todo	
 KRNL	06059078	53	14	no	no	no	no	todo	
@@ -8707,16 +8707,16 @@ KRNL	06059BA4	46	16	no	no	no	no	todo
 KRNL	06059BAA	46	16	no	no	no	no	todo	
 KRNL	06059BC2	24	6	no	no	no	no	todo	
 KRNL	06059BD2	16	2	no	no	no	no	todo	
-KRNL	06059BF2	12	0	yes	no	no	no	todo	
+KRNL	06059BF2	12	0	yes	no	no	no	swapped	init_flags
 KRNL	06059C0A	55	8	no	no	yes	no	todo	
 KRNL	06059C38	32	2	no	no	no	no	todo	
 KRNL	06059CC8	86	2	no	no	yes	no	todo	
 KRNL	06059D56	66	2	no	no	no	no	todo	
 KRNL	06059D9C	99	14	no	no	no	no	todo	
-KRNL	06059E62	18	0	yes	no	no	no	todo	
-KRNL	06059EAC	25	0	yes	no	no	no	todo	
-KRNL	06059EDE	24	0	yes	no	no	no	todo	
-KRNL	06059F0E	18	0	yes	no	no	no	todo	
+KRNL	06059E62	18	0	yes	no	no	no	swapped	
+KRNL	06059EAC	25	0	yes	no	no	no	swapped	any_flag_129
+KRNL	06059EDE	24	0	yes	no	no	no	swapped	obj_scale_100
+KRNL	06059F0E	18	0	yes	no	no	no	swapped	both_128
 KRNL	06059F32	51	12	no	no	yes	no	todo	
 KRNL	06059F4E	10	2	no	no	no	no	todo	
 KRNL	06059F56	6	0	yes	no	no	no	todo	
@@ -8752,7 +8752,7 @@ KRNL	0605A2C2	148	12	no	yes	yes	no	todo
 KRNL	0605A30E	129	10	no	no	no	no	todo	
 KRNL	0605A390	143	36	no	yes	no	no	todo	
 KRNL	0605A4E4	57	8	no	yes	no	no	todo	
-KRNL	0605A556	46	0	yes	yes	no	no	todo	
+KRNL	0605A556	46	0	yes	yes	no	no	swapped	unpack_bits
 KRNL	0605A5E8	188	14	no	yes	no	no	todo	
 KRNL	0605A798	64	14	no	yes	no	no	todo	
 KRNL	0605A85C	76	10	no	yes	no	no	todo	
@@ -8774,13 +8774,13 @@ KRNL	0605AD18	12	6	no	no	no	no	todo
 KRNL	0605AD24	6	2	no	no	no	no	todo	
 KRNL	0605AD30	128	12	no	no	no	no	todo	
 KRNL	0605AE92	43	10	no	no	no	no	todo	
-KRNL	0605AEE8	13	0	yes	no	no	no	todo	
-KRNL	0605AF02	47	0	yes	no	no	no	todo	
-KRNL	0605AF60	26	0	yes	no	no	no	todo	
+KRNL	0605AEE8	13	0	yes	no	no	no	swapped	clear_and_flag
+KRNL	0605AF02	47	0	yes	no	no	no	swapped	
+KRNL	0605AF60	26	0	yes	no	no	no	swapped	
 KRNL	0605AFD8	45	2	no	no	no	no	todo	
 KRNL	0605B032	42	2	no	no	no	no	todo	
-KRNL	0605B094	50	0	yes	no	no	no	todo	
-KRNL	0605B0F8	33	0	yes	no	no	no	todo	
+KRNL	0605B094	50	0	yes	no	no	no	swapped	
+KRNL	0605B0F8	33	0	yes	no	no	no	swapped	
 KRNL	0605B14C	87	4	no	no	no	no	todo	
 KRNL	0605B1FA	35	2	no	no	no	no	todo	
 KRNL	0605B240	13	2	no	no	no	no	todo	
@@ -8795,9 +8795,9 @@ KRNL	0605B30E	12	6	no	no	no	no	todo
 KRNL	0605B31A	6	2	no	yes	no	no	todo	
 KRNL	0605B326	112	8	no	yes	no	no	todo	
 KRNL	0605B458	90	20	no	yes	no	no	todo	
-KRNL	0605B50C	13	0	yes	yes	no	no	todo	
-KRNL	0605B570	43	0	yes	yes	no	no	todo	
-KRNL	0605B5C6	17	0	yes	yes	no	no	todo	
+KRNL	0605B50C	13	0	yes	yes	no	no	swapped	
+KRNL	0605B570	43	0	yes	yes	no	no	swapped	save_restore_a
+KRNL	0605B5C6	17	0	yes	yes	no	no	swapped	save_restore_b
 KRNL	0605B614	181	4	no	yes	no	no	todo	
 KRNL	0605B7A6	127	8	no	yes	no	no	todo	
 KRNL	0605B8C6	54	6	no	yes	yes	no	todo	
@@ -9026,7 +9026,7 @@ KRNL	0605D60C	40	2	no	no	yes	no	todo
 KRNL	0605D62E	23	0	yes	no	no	no	todo	
 KRNL	0605D694	72	10	no	no	yes	no	todo	
 KRNL	0605D6D2	43	6	no	no	no	no	todo	
-KRNL	0605D724	4	0	yes	no	no	no	todo	
+KRNL	0605D724	4	0	yes	no	no	no	swapped	set_slot_fn
 KRNL	0605D72C	43	2	no	no	yes	no	todo	
 KRNL	0605D754	10	0	yes	no	no	no	todo	
 KRNL	0605D7B4	53	14	no	no	yes	no	todo	
@@ -9043,7 +9043,7 @@ KRNL	0605DA58	62	8	no	no	no	no	todo
 KRNL	0605DAE8	210	30	no	yes	yes	no	todo	
 KRNL	0605DB08	196	28	no	no	no	no	todo	
 KRNL	0605DB62	149	20	no	no	no	no	todo	
-KRNL	0605DBAE	4	0	yes	no	no	no	todo	
+KRNL	0605DBAE	4	0	yes	no	no	no	swapped	set_handler
 KRNL	0605DBB6	115	10	no	no	yes	no	todo	
 KRNL	0605DBDE	14	0	yes	no	no	no	todo	
 KRNL	0605DC56	59	6	no	no	no	no	todo	
@@ -9077,7 +9077,7 @@ KRNL	0605E544	39	6	no	no	yes	no	todo
 KRNL	0605E552	32	4	no	no	no	no	todo	
 KRNL	0605E572	12	2	no	no	no	no	todo	
 KRNL	0605E57C	7	0	yes	no	no	no	todo	
-KRNL	0605E592	21	0	yes	no	no	no	todo	
+KRNL	0605E592	21	0	yes	no	no	no	swapped	mask_tile
 KRNL	0605E5D8	99	6	no	no	no	no	todo	
 KRNL	0605E69E	123	14	no	no	yes	no	todo	
 KRNL	0605E6EA	2	0	yes	no	no	no	todo	
@@ -9093,7 +9093,7 @@ KRNL	0605E95C	184	20	no	no	yes	no	todo
 KRNL	0605E9DE	54	10	no	no	no	no	todo	
 KRNL	0605EA92	163	18	no	no	no	no	todo	
 KRNL	0605EAF6	148	14	no	yes	no	no	todo	
-KRNL	0605EC1E	78	0	yes	yes	no	no	todo	
+KRNL	0605EC1E	78	0	yes	yes	no	no	swapped	copy_halves
 KRNL	0605ECD8	105	24	no	yes	yes	no	todo	
 KRNL	0605ED00	85	18	no	no	no	no	todo	
 KRNL	0605ED0E	78	14	no	no	no	no	todo	
@@ -9138,10 +9138,10 @@ KRNL	0605F752	44	10	no	no	no	no	todo
 KRNL	0605F778	44	10	no	no	no	no	todo	
 KRNL	0605F794	51	2	no	no	no	no	todo	
 KRNL	0605F834	27	8	no	no	no	no	todo	
-KRNL	0605F86A	4	0	yes	no	no	no	todo	
+KRNL	0605F86A	4	0	yes	no	no	no	swapped	read_02a6
 KRNL	0605F872	45	14	no	no	yes	no	todo	
 KRNL	0605F87A	41	12	no	no	no	no	todo	
-KRNL	0605F88A	2	0	yes	no	no	no	todo	
+KRNL	0605F88A	2	0	yes	no	no	no	swapped	empty
 KRNL	0605F88E	45	8	no	no	no	no	todo	
 KRNL	0605F92C	132	6	no	no	no	no	todo	
 KRNL	0605FA70	93	16	no	yes	yes	no	todo	
@@ -9149,7 +9149,7 @@ KRNL	0605FA9C	71	10	no	no	no	no	todo
 KRNL	0605FAD0	45	4	no	no	no	no	todo	
 KRNL	0605FB2A	72	12	no	yes	yes	no	todo	
 KRNL	0605FBAE	6	0	yes	no	no	no	todo	
-KRNL	0605FBF0	32	0	yes	yes	no	no	todo	
+KRNL	0605FBF0	32	0	yes	yes	no	no	swapped	mirror_index
 KRNL	0605FC30	86	6	no	yes	yes	no	todo	
 KRNL	0605FCCC	7	0	yes	no	no	no	todo	
 KRNL	0605FD0C	150	20	no	no	yes	no	todo	
@@ -9417,7 +9417,7 @@ KRNL	06061374	36	2	no	yes	no	no	todo
 KRNL	0606137A	33	0	yes	yes	no	no	todo	
 KRNL	06061390	65	12	no	yes	yes	no	todo	
 KRNL	060613B2	43	8	no	no	no	no	todo	
-KRNL	06061412	34	0	yes	yes	no	no	todo	
+KRNL	06061412	34	0	yes	yes	no	no	swapped	
 KRNL	060614A4	42	0	yes	yes	no	no	todo	
 KRNL	060614F8	15	0	yes	yes	no	no	swapped	slot15_set_fn
 KRNL	06061516	116	28	no	no	yes	no	todo	
@@ -9445,7 +9445,7 @@ KRNL	06061A84	28	4	no	no	no	no	todo
 KRNL	06061ABC	25	10	no	no	no	no	todo	
 KRNL	06061AEE	20	2	no	no	no	no	todo	
 KRNL	06061B64	56	4	no	no	no	no	todo	
-KRNL	06061BD4	6	0	yes	no	no	no	todo	
+KRNL	06061BD4	6	0	yes	no	no	no	swapped	set_pair_7b86
 KRNL	06061BE0	41	6	no	no	yes	no	todo	
 KRNL	06061C2A	4	0	yes	no	no	no	todo	
 KRNL	06061C32	87	10	no	no	yes	no	todo	
@@ -9474,13 +9474,13 @@ KRNL	0606203C	28	2	no	no	no	no	todo
 KRNL	0606205A	13	0	yes	no	no	no	todo	
 KRNL	06062130	28	6	no	yes	yes	no	todo	
 KRNL	0606215C	6	0	yes	no	no	no	todo	
-KRNL	06062168	11	0	yes	yes	no	no	todo	
+KRNL	06062168	11	0	yes	yes	no	no	swapped	is_ff
 KRNL	0606217E	25	6	no	no	yes	no	todo	
 KRNL	06062198	12	2	no	no	no	no	todo	
 KRNL	060621B0	63	10	no	no	no	no	todo	
 KRNL	0606222E	46	4	no	no	yes	no	todo	
 KRNL	06062248	30	2	no	no	no	no	todo	
-KRNL	060622A4	22	0	yes	no	no	no	todo	
+KRNL	060622A4	22	0	yes	no	no	no	swapped	obj_dead_check
 KRNL	060622D0	17	2	no	no	no	no	todo	
 KRNL	0606231C	33	2	no	no	yes	no	todo	
 KRNL	06062330	23	0	yes	no	no	no	todo	
@@ -9490,10 +9490,10 @@ KRNL	060624F6	54	4	no	no	no	no	todo
 KRNL	06062562	71	6	no	no	no	no	todo	
 KRNL	060625F0	14	4	no	no	yes	no	todo	
 KRNL	06062602	11	4	no	no	no	no	todo	
-KRNL	0606261C	15	0	yes	no	no	no	todo	
+KRNL	0606261C	15	0	yes	no	no	no	swapped	
 KRNL	06062660	15	0	yes	no	yes	no	todo	
-KRNL	0606267E	6	0	yes	no	no	no	todo	
-KRNL	0606268A	27	0	yes	no	no	no	todo	
+KRNL	0606267E	6	0	yes	no	no	no	swapped	set_pair
+KRNL	0606268A	27	0	yes	no	no	no	swapped	
 KRNL	060626C0	8	2	no	no	no	no	todo	
 KRNL	060626D0	15	2	no	no	no	no	todo	
 KRNL	060626EE	6	0	yes	no	yes	no	todo	
@@ -9505,7 +9505,7 @@ KRNL	0606281E	22	0	yes	yes	no	no	todo
 KRNL	06062880	74	14	no	yes	yes	no	todo	
 KRNL	060628AC	52	8	no	no	no	no	todo	
 KRNL	060628FE	11	0	yes	no	no	no	todo	
-KRNL	06062914	8	0	yes	yes	no	no	todo	
+KRNL	06062914	8	0	yes	yes	no	no	swapped	
 KRNL	06062958	166	18	no	yes	yes	no	todo	
 KRNL	06062A72	18	0	yes	no	no	no	todo	
 KRNL	06062AF0	94	8	no	yes	no	no	todo	
@@ -9599,7 +9599,7 @@ KRNL	06064674	17	0	yes	no	no	no	todo
 KRNL	06064696	115	8	no	no	yes	no	todo	
 KRNL	0606473A	18	0	yes	no	no	no	todo	
 KRNL	06064798	17	0	yes	no	no	no	todo	
-KRNL	060647BA	25	0	yes	yes	no	no	todo	
+KRNL	060647BA	25	0	yes	yes	no	no	swapped	
 KRNL	060647EC	44	2	no	no	yes	no	todo	
 KRNL	06064820	18	0	yes	no	no	no	todo	
 KRNL	06064874	13	2	no	no	no	no	todo	
@@ -9640,7 +9640,7 @@ KRNL	06064B6C	18	2	no	no	no	no	todo
 KRNL	06064B86	5	0	yes	no	no	no	todo	
 KRNL	06064C36	90	6	no	no	yes	no	todo	
 KRNL	06064CC2	38	4	no	no	no	no	todo	
-KRNL	06064D12	18	0	yes	no	no	no	todo	
+KRNL	06064D12	18	0	yes	no	no	no	swapped	
 KRNL	06064D36	50	8	no	no	yes	no	todo	
 KRNL	06064D82	12	2	no	no	no	no	todo	
 KRNL	06064D92	4	0	yes	no	no	no	todo	
@@ -9667,7 +9667,7 @@ KRNL	06065146	10	0	yes	no	no	no	todo
 KRNL	06065170	16	2	no	no	yes	no	todo	
 KRNL	0606519A	27	4	no	no	no	no	todo	
 KRNL	060651B4	14	2	no	no	no	no	todo	
-KRNL	060651D0	4	0	yes	no	no	no	todo	
+KRNL	060651D0	4	0	yes	no	no	no	swapped	set_handler
 KRNL	060651D8	49	4	no	no	yes	no	todo	
 KRNL	0606521A	11	0	yes	no	no	no	todo	
 KRNL	06065222	12	0	yes	no	no	no	todo	
@@ -9687,8 +9687,8 @@ KRNL	06065400	20	4	no	no	yes	no	todo
 KRNL	06065410	12	2	no	no	no	no	todo	
 KRNL	06065428	12	2	no	no	no	no	todo	
 KRNL	06065460	4	0	yes	yes	no	no	swapped	
-KRNL	06065468	4	0	yes	yes	no	no	todo	
-KRNL	06065470	4	0	yes	yes	no	no	todo	
+KRNL	06065468	4	0	yes	yes	no	no	swapped	set_02a1
+KRNL	06065470	4	0	yes	yes	no	no	swapped	clear_byte
 KRNL	06065478	90	28	no	no	yes	no	todo	
 KRNL	06065496	75	26	no	no	no	no	todo	
 KRNL	060654B8	58	22	no	no	no	no	todo	
@@ -9766,7 +9766,7 @@ KRNL	06065862	45	4	no	no	no	no	todo
 KRNL	0606587E	31	0	yes	no	no	no	todo	
 KRNL	06065890	74	10	no	yes	yes	no	todo	
 KRNL	060658AC	36	6	no	no	no	no	todo	
-KRNL	06065924	4	0	yes	yes	no	no	todo	
+KRNL	06065924	4	0	yes	yes	no	no	swapped	tail_22f1c
 KRNL	06065964	87	22	no	yes	yes	no	todo	
 KRNL	060659E4	18	6	no	no	no	no	todo	
 KRNL	06065A12	51	4	no	yes	no	no	todo	
@@ -9782,7 +9782,7 @@ KRNL	06065E18	77	10	no	yes	yes	no	todo
 KRNL	06065E5C	40	6	no	no	no	no	todo	
 KRNL	06065E64	36	4	no	no	no	no	todo	
 KRNL	06065EF2	19	0	yes	yes	no	no	todo	
-KRNL	06065F18	10	0	yes	yes	no	no	todo	
+KRNL	06065F18	10	0	yes	yes	no	no	swapped	slot2_is_handler
 KRNL	06065F2C	10	2	no	yes	no	no	todo	
 KRNL	06065F40	115	16	no	yes	yes	no	todo	
 KRNL	06066048	17	2	no	no	no	no	todo	
@@ -9818,7 +9818,7 @@ KRNL	0606694E	34	2	no	no	no	no	todo
 KRNL	0606697C	86	8	no	yes	yes	no	todo	
 KRNL	060669C2	63	6	no	no	no	no	todo	
 KRNL	06066A48	60	10	no	yes	yes	no	todo	
-KRNL	06066AC0	4	0	yes	yes	no	no	todo	
+KRNL	06066AC0	4	0	yes	yes	no	no	swapped	set_flag
 KRNL	06066AC8	75	12	no	yes	yes	no	todo	
 KRNL	06066B00	47	8	no	no	no	no	todo	
 KRNL	06066B5E	4	0	yes	yes	no	no	swapped	set_flag
@@ -9830,22 +9830,22 @@ KRNL	06066D22	94	18	no	yes	yes	no	todo
 KRNL	06066DB0	23	6	no	no	no	no	todo	
 KRNL	06066DDE	22	2	no	yes	no	no	todo	
 KRNL	06066E5C	29	4	no	yes	no	no	todo	
-KRNL	06066E96	12	0	yes	yes	no	no	todo	
+KRNL	06066E96	12	0	yes	yes	no	no	swapped	set_slot_fns
 KRNL	06066EAE	24	2	no	yes	no	no	todo	
 KRNL	06066EDE	11	2	no	yes	no	no	todo	
-KRNL	06066EF4	10	0	yes	yes	no	no	todo	
+KRNL	06066EF4	10	0	yes	yes	no	no	swapped	
 KRNL	06066F08	24	2	no	yes	no	no	todo	
-KRNL	06066F38	4	0	yes	yes	no	no	todo	
-KRNL	06066F40	5	0	yes	yes	no	no	todo	
-KRNL	06066F4A	9	0	yes	yes	no	no	todo	
+KRNL	06066F38	4	0	yes	yes	no	no	swapped	set_slot_fn
+KRNL	06066F40	5	0	yes	yes	no	no	swapped	dec_half
+KRNL	06066F4A	9	0	yes	yes	no	no	swapped	set_and_jump
 KRNL	06066FAC	45	10	no	yes	yes	no	todo	
 KRNL	06066FD8	23	4	no	no	no	no	todo	
 KRNL	06066FE4	17	2	no	no	no	no	todo	
 KRNL	06067006	59	4	no	yes	yes	no	todo	
 KRNL	0606703A	29	0	yes	no	no	no	todo	
-KRNL	0606707C	4	0	yes	yes	no	no	todo	
+KRNL	0606707C	4	0	yes	yes	no	no	swapped	set_half
 KRNL	060670AC	78	10	no	yes	yes	no	todo	
-KRNL	06067148	3	0	yes	yes	no	no	todo	
+KRNL	06067148	3	0	yes	yes	no	no	swapped	set_half
 KRNL	0606714E	80	14	no	yes	no	no	todo	
 KRNL	0606725C	96	10	no	yes	no	no	todo	
 KRNL	06067340	125	36	no	yes	yes	no	todo	
@@ -9995,7 +9995,7 @@ KRNL	06068920	70	10	no	no	no	no	todo
 KRNL	0606894C	48	8	no	no	no	no	todo	
 KRNL	060689B2	24	2	no	no	no	no	todo	
 KRNL	060689CA	15	2	no	no	no	no	todo	
-KRNL	060689EC	6	0	yes	no	no	no	todo	
+KRNL	060689EC	6	0	yes	no	no	no	swapped	clear_pair_1980
 KRNL	060689F8	24	2	no	yes	yes	no	todo	
 KRNL	060689FC	22	2	no	yes	yes	no	todo	
 KRNL	06068A16	13	2	no	no	no	no	todo	
@@ -10018,29 +10018,29 @@ KRNL	06068C4E	128	8	no	no	no	no	todo
 KRNL	06068CC4	104	8	no	yes	no	no	todo	
 KRNL	06068D60	46	0	yes	yes	no	no	todo	
 KRNL	06068DBC	18	0	yes	yes	no	no	todo	
-KRNL	06068DE0	11	0	yes	yes	no	no	todo	
+KRNL	06068DE0	11	0	yes	yes	no	no	swapped	clear_words_24
 KRNL	06068E10	82	6	no	yes	no	no	todo	
 KRNL	06068EC8	38	2	no	yes	no	no	todo	
 KRNL	06068F14	23	2	no	yes	no	no	todo	
 KRNL	06068F5A	69	0	yes	yes	no	no	todo	
 KRNL	06068FF0	2	0	yes	yes	no	no	swapped	
-KRNL	06068FF4	91	0	yes	yes	no	no	todo	
+KRNL	06068FF4	91	0	yes	yes	no	no	swapped	init_object
 KRNL	060690AA	79	12	no	yes	no	no	todo	
 KRNL	06069194	41	6	no	yes	no	no	todo	
 KRNL	060691DA	99	6	no	yes	no	no	todo	
 KRNL	060692DC	63	8	no	yes	no	no	todo	
-KRNL	0606935A	28	0	yes	yes	no	no	todo	
+KRNL	0606935A	28	0	yes	yes	no	no	swapped	swap_links
 KRNL	06069392	25	0	yes	yes	no	no	swapped	unlink_object
 KRNL	060693DC	67	4	no	yes	no	no	todo	
-KRNL	06069462	13	0	yes	yes	no	no	todo	
-KRNL	0606947C	7	0	yes	yes	no	no	todo	
+KRNL	06069462	13	0	yes	yes	no	no	swapped	set_obj_half
+KRNL	0606947C	7	0	yes	yes	no	no	swapped	set_cur_obj_half
 KRNL	0606948A	23	0	yes	yes	no	no	swapped	obj_clamp_w18
-KRNL	060694B8	39	0	yes	yes	no	no	todo	
+KRNL	060694B8	39	0	yes	yes	no	no	swapped	
 KRNL	0606950C	29	2	no	yes	no	no	todo	
 KRNL	06069546	43	2	no	yes	no	no	todo	
 KRNL	06069562	25	2	no	yes	no	no	todo	
 KRNL	060695B0	29	2	no	yes	no	no	todo	
-KRNL	060695EA	14	0	yes	yes	no	no	todo	
+KRNL	060695EA	14	0	yes	yes	no	no	swapped	tail_695b0
 KRNL	06069606	20	0	yes	no	no	no	swapped	mask_lookup
 KRNL	06069646	289	28	no	yes	yes	no	todo	
 KRNL	060696C2	287	20	no	no	no	no	todo	
@@ -10054,7 +10054,7 @@ KRNL	0606A400	91	2	no	yes	no	no	todo
 KRNL	0606A4D4	249	2	no	yes	no	no	todo	
 KRNL	0606A6E8	249	2	no	yes	no	no	todo	
 KRNL	0606A8FC	77	2	no	yes	no	no	todo	
-KRNL	0606A996	3	0	yes	yes	no	no	todo	
+KRNL	0606A996	3	0	yes	yes	no	no	swapped	set_1b24
 KRNL	0606A9A2	33	4	no	no	no	no	todo	
 KRNL	0606A9E4	17	2	no	yes	no	no	todo	
 KRNL	0606AA06	6	0	yes	no	no	no	swapped	clear_pair
@@ -10062,13 +10062,13 @@ KRNL	0606AA58	28	0	yes	yes	no	no	todo
 KRNL	0606AA90	28	0	yes	yes	no	no	todo	
 KRNL	0606AAC8	32	4	no	yes	no	no	todo	
 KRNL	0606AB08	14	0	yes	yes	no	no	todo	
-KRNL	0606AB24	7	0	yes	yes	no	no	todo	
-KRNL	0606AB32	12	0	yes	yes	no	no	todo	
+KRNL	0606AB24	7	0	yes	yes	no	no	swapped	clear_obj_flag_80
+KRNL	0606AB32	12	0	yes	yes	no	no	swapped	obj_clear_flags
 KRNL	0606AB4A	8	0	yes	yes	no	no	swapped	set_bit7_w42
-KRNL	0606AB5A	12	0	yes	yes	no	no	todo	
-KRNL	0606AB72	4	0	yes	yes	no	no	todo	
-KRNL	0606AB92	29	0	yes	yes	no	no	todo	
-KRNL	0606ABCC	41	0	yes	yes	no	no	todo	
+KRNL	0606AB5A	12	0	yes	yes	no	no	swapped	tail_6ab4a
+KRNL	0606AB72	4	0	yes	yes	no	no	swapped	clear_w50
+KRNL	0606AB92	29	0	yes	yes	no	no	swapped	obj_set_flags
+KRNL	0606ABCC	41	0	yes	yes	no	no	swapped	obj_set_flags_by_index
 KRNL	0606AC10	63	12	no	yes	no	no	todo	
 KRNL	0606AC8E	122	4	no	yes	yes	no	todo	
 KRNL	0606ADD4	63	2	no	no	no	no	todo	
@@ -10077,19 +10077,19 @@ KRNL	0606AE0A	49	2	no	no	no	no	todo
 KRNL	0606AE52	42	2	no	no	no	no	todo	
 KRNL	0606AE6C	197	22	no	yes	yes	no	todo	
 KRNL	0606AFC0	27	2	no	no	no	no	todo	
-KRNL	0606B060	15	0	yes	yes	no	no	todo	
+KRNL	0606B060	15	0	yes	yes	no	no	swapped	not_special_id
 KRNL	0606B07E	48	0	yes	yes	no	no	todo	
 KRNL	0606B0DE	75	6	no	yes	yes	no	todo	
 KRNL	0606B10A	53	4	no	no	no	no	todo	
 KRNL	0606B130	30	2	no	no	no	no	todo	
 KRNL	0606B194	44	6	no	yes	yes	no	todo	
 KRNL	0606B1C8	18	2	no	no	no	no	todo	
-KRNL	0606B1EC	2	0	yes	yes	no	no	todo	
+KRNL	0606B1EC	2	0	yes	yes	no	no	swapped	const_0
 KRNL	0606B1F0	22	0	yes	yes	no	no	todo	
 KRNL	0606B21C	46	2	no	yes	no	no	todo	
 KRNL	0606B29C	50	2	no	yes	no	no	todo	
-KRNL	0606B300	35	0	yes	yes	no	no	todo	
-KRNL	0606B346	2	0	yes	yes	no	no	todo	
+KRNL	0606B300	35	0	yes	yes	no	no	swapped	mark_bombers
+KRNL	0606B346	2	0	yes	yes	no	no	swapped	empty
 KRNL	0606B34A	2	0	yes	yes	no	no	swapped	nop
 KRNL	0606B36C	48	4	no	yes	no	no	todo	
 KRNL	0606B3CC	115	4	no	yes	yes	no	todo	
@@ -10114,10 +10114,10 @@ KRNL	0606B8BE	75	6	no	yes	no	no	todo
 KRNL	0606B8CA	69	4	no	yes	no	no	todo	
 KRNL	0606B970	55	6	no	yes	yes	no	todo	
 KRNL	0606B9C8	24	4	no	no	no	no	todo	
-KRNL	0606B9DE	32	0	yes	yes	no	no	todo	
+KRNL	0606B9DE	32	0	yes	yes	no	no	swapped	
 KRNL	0606BA1E	95	4	no	yes	yes	no	todo	
 KRNL	0606BADA	55	2	no	no	no	no	todo	
-KRNL	0606BAF6	43	0	yes	yes	no	no	todo	
+KRNL	0606BAF6	43	0	yes	yes	no	no	swapped	
 KRNL	0606BB4C	60	6	no	yes	no	no	todo	
 KRNL	0606BBB0	33	0	yes	yes	no	no	todo	
 KRNL	0606BBDA	12	4	no	yes	no	no	todo	
@@ -10127,17 +10127,17 @@ KRNL	0606BC2E	12	0	yes	yes	no	no	todo
 KRNL	0606BC4A	26	2	no	yes	no	no	todo	
 KRNL	0606BC7E	39	2	no	yes	no	no	todo	
 KRNL	0606BCD2	3	0	yes	yes	no	no	swapped	both_small
-KRNL	0606BCD8	24	0	yes	yes	no	no	todo	
-KRNL	0606BCDE	21	0	yes	yes	no	no	todo	
-KRNL	0606BD32	23	0	yes	no	no	no	todo	
+KRNL	0606BCD8	24	0	yes	yes	no	no	swapped	pair_small
+KRNL	0606BCDE	21	0	yes	yes	no	no	swapped	
+KRNL	0606BD32	23	0	yes	no	no	no	swapped	
 KRNL	0606BD74	52	2	no	yes	no	no	todo	
 KRNL	0606BDDC	52	2	no	no	no	no	todo	
 KRNL	0606BE44	52	2	no	yes	no	no	todo	
 KRNL	0606BEBC	30	2	no	yes	no	no	todo	
-KRNL	0606BEE2	15	0	yes	yes	no	no	todo	
-KRNL	0606BF00	15	0	yes	yes	no	no	todo	
+KRNL	0606BEE2	15	0	yes	yes	no	no	swapped	
+KRNL	0606BF00	15	0	yes	yes	no	no	swapped	pair_zero
 KRNL	0606BF22	37	2	no	yes	no	no	todo	
-KRNL	0606BF6C	16	0	yes	yes	no	no	todo	
+KRNL	0606BF6C	16	0	yes	yes	no	no	swapped	half_gt_15
 KRNL	0606BF8C	37	2	no	yes	no	no	todo	
 KRNL	0606BFE8	15	0	yes	yes	no	no	swapped	is_negative
 KRNL	0606C006	43	2	no	yes	no	no	todo	
@@ -10145,7 +10145,7 @@ KRNL	0606C05C	82	0	yes	yes	no	no	todo
 KRNL	0606C114	42	2	no	yes	no	no	todo	
 KRNL	0606C168	21	0	yes	yes	no	no	swapped	entry_sum_above
 KRNL	0606C192	100	0	yes	yes	no	no	todo	
-KRNL	0606C268	17	0	yes	yes	no	no	todo	
+KRNL	0606C268	17	0	yes	yes	no	no	swapped	
 KRNL	0606C28A	21	4	no	yes	no	no	todo	
 KRNL	0606C292	19	4	no	yes	no	no	todo	
 KRNL	0606C2B8	94	8	no	yes	no	no	todo	
@@ -10168,7 +10168,7 @@ KRNL	0606C7CE	8	0	yes	yes	no	no	todo
 KRNL	0606C7DE	8	0	yes	yes	no	no	todo	
 KRNL	0606C7EE	8	0	yes	yes	no	no	todo	
 KRNL	0606C7FE	11	2	no	yes	no	no	todo	
-KRNL	0606C82C	25	0	yes	yes	no	no	todo	
+KRNL	0606C82C	25	0	yes	yes	no	no	swapped	or_into_table
 KRNL	0606C850	34	2	no	yes	no	no	todo	
 KRNL	0606C894	18	2	no	yes	no	no	todo	
 KRNL	0606C8C0	77	8	no	yes	yes	no	todo	
@@ -10203,7 +10203,7 @@ KRNL	0606D0F0	19	4	no	no	no	no	todo
 KRNL	0606D18C	62	4	no	yes	yes	no	todo	
 KRNL	0606D1CE	2	0	yes	no	no	no	todo	
 KRNL	0606D1FC	6	0	yes	no	no	no	todo	
-KRNL	0606D208	26	0	yes	yes	no	no	todo	
+KRNL	0606D208	26	0	yes	yes	no	no	swapped	tick_timers
 KRNL	0606D23C	46	6	no	yes	no	no	todo	
 KRNL	0606D2C8	16	6	no	yes	yes	no	todo	
 KRNL	0606D2D6	9	2	no	no	no	no	todo	
@@ -10237,7 +10237,7 @@ KRNL	0606D9EC	20	2	no	yes	no	no	todo
 KRNL	0606DA14	20	2	no	yes	no	no	todo	
 KRNL	0606DA3C	16	2	no	yes	no	no	todo	
 KRNL	0606DA5C	22	2	no	yes	no	no	todo	
-KRNL	0606DA88	11	0	yes	yes	no	no	todo	
+KRNL	0606DA88	11	0	yes	yes	no	no	swapped	clear_halves
 KRNL	0606DA9E	10	2	no	yes	no	no	todo	
 KRNL	0606DAB2	28	4	no	no	no	no	todo	
 KRNL	0606DAEA	28	6	no	yes	yes	no	todo	
@@ -10528,7 +10528,7 @@ KRNL	06071142	30	4	no	yes	yes	no	todo
 KRNL	0607114E	24	2	no	no	no	no	todo	
 KRNL	060711DC	47	8	no	yes	yes	no	todo	
 KRNL	060711E6	42	6	no	no	no	no	todo	
-KRNL	0607123A	3	0	yes	no	no	no	todo	
+KRNL	0607123A	3	0	yes	no	no	no	swapped	call_wrapper
 KRNL	06071240	30	4	no	yes	yes	no	todo	
 KRNL	0607124C	24	2	no	no	no	no	todo	
 KRNL	0607127C	139	28	no	yes	yes	no	todo	
@@ -10749,9 +10749,9 @@ KRNL	0607469A	9	0	yes	no	no	no	todo
 KRNL	060746AC	34	6	no	yes	yes	no	todo	
 KRNL	060746BA	27	4	no	no	no	no	todo	
 KRNL	060746EA	3	0	yes	no	no	no	todo	
-KRNL	06074754	14	0	yes	yes	no	no	todo	
+KRNL	06074754	14	0	yes	yes	no	no	swapped	clear_stride_220
 KRNL	06074770	27	0	yes	yes	no	no	todo	
-KRNL	060747A6	13	0	yes	yes	no	no	todo	
+KRNL	060747A6	13	0	yes	yes	no	no	swapped	clear_w_1f78
 KRNL	060747C0	75	10	no	yes	yes	no	todo	
 KRNL	06074806	40	6	no	no	no	no	todo	
 KRNL	0607484C	5	0	yes	no	no	no	todo	
@@ -10834,7 +10834,7 @@ KRNL	06075B76	54	10	no	yes	yes	no	todo
 KRNL	06075B82	48	8	no	no	no	no	todo	
 KRNL	06075C38	16	4	no	yes	yes	no	todo	
 KRNL	06075C40	12	2	no	no	no	no	todo	
-KRNL	06075C58	11	0	yes	yes	no	no	todo	
+KRNL	06075C58	11	0	yes	yes	no	no	swapped	clear_words_32
 KRNL	06075C6E	64	2	no	yes	no	no	todo	
 KRNL	06075CEE	71	4	no	no	no	no	todo	
 KRNL	06075D98	236	12	no	yes	yes	no	todo	
@@ -11007,10 +11007,10 @@ KRNL	06077EA4	26	8	no	yes	yes	no	todo
 KRNL	06077EAC	22	6	no	no	no	no	todo	
 KRNL	06077ED8	97	4	no	yes	yes	no	todo	
 KRNL	06077F70	13	0	yes	no	no	no	todo	
-KRNL	06077F9A	11	0	yes	yes	no	no	todo	
+KRNL	06077F9A	11	0	yes	yes	no	no	swapped	clear_halves
 KRNL	06077FB0	56	4	no	yes	yes	no	todo	
 KRNL	06077FE8	36	2	no	no	no	no	todo	
-KRNL	060780A4	14	0	yes	yes	no	no	todo	
+KRNL	060780A4	14	0	yes	yes	no	no	swapped	or_words
 KRNL	060780C0	82	10	no	yes	yes	no	todo	
 KRNL	060780D0	74	8	no	no	no	no	todo	
 KRNL	06078164	61	12	no	yes	yes	no	todo	
@@ -11060,7 +11060,7 @@ KRNL	06078CA0	59	4	no	yes	yes	no	todo
 KRNL	06078CFE	12	0	yes	no	no	no	todo	
 KRNL	06078D16	17	2	no	yes	yes	no	todo	
 KRNL	06078D38	60	6	no	yes	no	no	todo	
-KRNL	06078DB0	4	0	yes	yes	no	no	todo	
+KRNL	06078DB0	4	0	yes	yes	no	no	swapped	set_half
 KRNL	06078DEC	10	2	no	yes	no	no	todo	
 KRNL	06078E00	152	22	no	yes	yes	no	todo	
 KRNL	06078E30	128	18	no	no	no	no	todo	
@@ -11170,7 +11170,7 @@ KRNL	0607A55C	87	16	no	yes	yes	no	todo
 KRNL	0607A568	81	14	no	no	no	no	todo	
 KRNL	0607A5EA	5	0	yes	no	no	no	todo	
 KRNL	0607A5F8	5	0	yes	no	no	no	todo	
-KRNL	0607A60A	11	0	yes	yes	no	no	todo	
+KRNL	0607A60A	11	0	yes	yes	no	no	swapped	clear_words_20
 KRNL	0607A620	34	2	no	yes	no	no	todo	
 KRNL	0607A6C4	116	2	no	yes	yes	no	todo	
 KRNL	0607A774	298	42	no	no	no	no	todo	
@@ -11415,7 +11415,7 @@ KRNL	0607DA04	9	2	no	no	no	no	todo
 KRNL	0607DA1E	30	8	no	yes	yes	no	todo	
 KRNL	0607DA26	26	6	no	no	no	no	todo	
 KRNL	0607DA46	7	2	no	no	no	no	todo	
-KRNL	0607DA5A	6	0	yes	no	no	no	todo	
+KRNL	0607DA5A	6	0	yes	no	no	no	swapped	clear_pair
 KRNL	0607DABC	36	2	no	yes	yes	no	todo	
 KRNL	0607DADC	20	0	yes	no	no	no	todo	
 KRNL	0607DB04	80	12	no	yes	yes	no	todo	
@@ -11773,7 +11773,7 @@ KRNL	06082F82	47	10	no	no	no	no	todo
 KRNL	06082FE0	54	14	no	yes	yes	no	todo	
 KRNL	06082FEE	47	12	no	no	no	no	todo	
 KRNL	06083036	6	0	yes	no	no	no	todo	
-KRNL	0608304C	2	0	yes	yes	no	no	todo	
+KRNL	0608304C	2	0	yes	yes	no	no	swapped	const_0
 KRNL	060830B8	109	16	no	yes	yes	no	todo	
 KRNL	06083104	137	14	no	no	no	no	todo	
 KRNL	06083164	89	6	no	no	no	no	todo	
@@ -12217,9 +12217,9 @@ KRNL	06088B2C	72	4	no	no	no	no	todo
 KRNL	06088BAA	9	0	yes	no	no	no	todo	
 KRNL	06088BBE	65	4	no	yes	yes	no	todo	
 KRNL	06088C70	7	0	yes	no	no	no	todo	
-KRNL	06088C7E	40	0	yes	yes	no	no	todo	
+KRNL	06088C7E	40	0	yes	yes	no	no	swapped	compare_pairs
 KRNL	06088DA4	17	0	yes	yes	no	no	todo	
-KRNL	06088DC6	16	0	yes	yes	no	no	todo	
+KRNL	06088DC6	16	0	yes	yes	no	no	swapped	
 KRNL	06088E20	47	2	no	yes	no	no	todo	
 KRNL	06088E80	12	4	no	yes	no	no	todo	
 KRNL	06088E98	65	6	no	yes	yes	no	todo	
@@ -12347,7 +12347,7 @@ KRNL	0608A72A	154	2	no	yes	no	no	todo
 KRNL	0608A8B2	15	2	no	yes	no	no	todo	
 KRNL	0608A8E4	48	4	no	yes	no	no	todo	
 KRNL	0608A944	72	2	no	yes	no	no	todo	
-KRNL	0608A9D4	9	0	yes	yes	no	no	todo	
+KRNL	0608A9D4	9	0	yes	yes	no	no	swapped	
 KRNL	0608AA18	82	2	no	yes	no	no	todo	
 KRNL	0608AAD8	11	0	yes	yes	no	no	swapped	clear_records
 KRNL	0608AAEE	77	0	yes	yes	no	no	todo	
@@ -12358,11 +12358,11 @@ KRNL	0608AD00	27	6	no	yes	no	no	todo
 KRNL	0608AD36	19	2	no	yes	no	no	todo	
 KRNL	0608AD5C	19	2	no	yes	no	no	todo	
 KRNL	0608AD82	66	14	no	yes	no	no	todo	
-KRNL	0608ADDE	19	0	yes	yes	no	no	todo	
-KRNL	0608AE64	20	0	yes	yes	no	no	todo	
+KRNL	0608ADDE	19	0	yes	yes	no	no	swapped	copy_bomber_field
+KRNL	0608AE64	20	0	yes	yes	no	no	swapped	copy_obj_w66
 KRNL	0608AE8C	58	14	no	yes	no	no	todo	
 KRNL	0608AEE6	33	2	no	yes	no	no	todo	
-KRNL	0608AF28	13	0	yes	yes	no	no	todo	
+KRNL	0608AF28	13	0	yes	yes	no	no	swapped	obj_add_half
 KRNL	0608AF42	47	10	no	yes	no	no	todo	
 KRNL	0608AFA0	154	16	no	yes	yes	no	todo	
 KRNL	0608B016	149	14	no	no	no	no	todo	
@@ -12396,7 +12396,7 @@ KRNL	0608B896	30	4	no	yes	yes	no	todo
 KRNL	0608B89E	26	2	no	no	no	no	todo	
 KRNL	0608B8D2	25	6	no	yes	yes	no	todo	
 KRNL	0608B8DA	21	4	no	no	no	no	todo	
-KRNL	0608B904	2	0	yes	yes	no	no	todo	
+KRNL	0608B904	2	0	yes	yes	no	no	swapped	empty
 KRNL	0608B908	57	2	no	yes	yes	no	todo	
 KRNL	0608B91E	46	0	yes	no	no	no	todo	
 KRNL	0608B9BE	63	10	no	yes	yes	no	todo	
@@ -12751,7 +12751,7 @@ KRNL	06090130	25	4	no	no	no	no	todo
 KRNL	060901CC	77	10	no	yes	yes	no	todo	
 KRNL	060901DC	69	8	no	no	no	no	todo	
 KRNL	0609023C	15	4	no	no	no	no	todo	
-KRNL	06090266	2	0	yes	yes	no	no	todo	
+KRNL	06090266	2	0	yes	yes	no	no	swapped	empty
 KRNL	0609026A	123	4	no	yes	yes	no	todo	
 KRNL	0609033A	81	2	no	no	no	no	todo	
 KRNL	060903A2	64	10	no	yes	yes	no	todo	
@@ -13051,12 +13051,12 @@ KRNL	0609497A	11	0	yes	yes	no	no	todo
 KRNL	0609497C	10	0	yes	yes	no	no	todo	
 KRNL	0609497E	9	0	yes	yes	no	no	todo	
 KRNL	06094980	8	0	yes	yes	no	no	todo	
-KRNL	060949D0	7	0	yes	yes	no	no	todo	
+KRNL	060949D0	7	0	yes	yes	no	no	swapped	abs
 KRNL	060949E0	33	0	yes	yes	no	no	todo	
 KRNL	06094A24	15	0	yes	no	no	no	todo	
 KRNL	06094A44	8	2	no	no	no	no	todo	
 KRNL	06094A58	8	2	no	yes	no	no	todo	
-KRNL	06094A6C	8	0	yes	yes	no	no	todo	
+KRNL	06094A6C	8	0	yes	yes	no	no	swapped	strlen
 KRNL	06094A7C	65	2	no	no	no	no	todo	
 KRNL	06094B08	52	0	yes	yes	no	no	todo	
 KRNL	06094B70	36	0	yes	yes	no	no	todo	
@@ -13091,12 +13091,12 @@ KRNL	0609580A	22	4	no	yes	no	no	todo
 KRNL	06095836	21	2	no	no	no	no	todo	
 KRNL	06095868	9	2	no	no	no	no	todo	
 KRNL	0609587E	44	4	no	no	no	no	todo	
-KRNL	060958E4	3	0	yes	yes	no	no	todo	
+KRNL	060958E4	3	0	yes	yes	no	no	swapped	const_25818000
 KRNL	060958EA	4	0	yes	yes	no	no	todo	
 KRNL	060958F2	9	0	yes	yes	no	no	todo	
 KRNL	06095904	3	0	yes	yes	no	no	todo	
 KRNL	0609590A	9	2	no	no	no	no	todo	
-KRNL	0609591C	5	0	yes	yes	no	no	todo	
+KRNL	0609591C	5	0	yes	yes	no	no	swapped	or_fa8b8
 KRNL	0609593A	44	4	no	yes	no	no	todo	
 KRNL	06095992	28	2	no	yes	no	no	todo	
 KRNL	060959CA	75	8	no	yes	no	no	todo	
@@ -13239,12 +13239,12 @@ KRNL	06096A4C	18	4	no	no	no	no	todo
 KRNL	06096A5A	17	4	no	no	no	no	todo	
 KRNL	06096A6E	7	2	no	no	no	no	todo	
 KRNL	06096A72	5	0	yes	no	no	no	todo	
-KRNL	06096A7C	2	0	yes	no	no	no	todo	
+KRNL	06096A7C	2	0	yes	no	no	no	swapped	zero
 KRNL	06096A80	12	0	yes	yes	no	no	todo	
 KRNL	06096AC0	62	2	no	yes	no	no	todo	
 KRNL	06096B3C	48	4	no	yes	no	no	todo	
 KRNL	06096B9C	25	0	yes	yes	no	no	todo	
-KRNL	06096BCE	3	0	yes	yes	no	no	todo	
+KRNL	06096BCE	3	0	yes	yes	no	no	swapped	clear_word
 KRNL	06096BEC	58	4	no	yes	yes	no	todo	
 KRNL	06096C1A	35	2	no	no	no	no	todo	
 KRNL	06096C4A	11	0	yes	no	no	no	todo	
@@ -13277,7 +13277,7 @@ KRNL	0609713C	23	2	no	yes	yes	no	todo
 KRNL	06097150	8	0	yes	no	no	no	todo	
 KRNL	06097184	42	0	yes	yes	no	no	todo	
 KRNL	060971D8	61	6	no	yes	yes	no	todo	
-KRNL	0609720A	4	0	yes	yes	no	no	todo	
+KRNL	0609720A	4	0	yes	yes	no	no	swapped	get_word_88
 KRNL	06097212	39	4	no	yes	yes	no	todo	
 KRNL	06097230	24	2	no	no	no	no	todo	
 KRNL	060972D8	41	2	no	yes	no	no	todo	
@@ -13299,8 +13299,8 @@ KRNL	0609799C	32	4	no	yes	no	no	todo
 KRNL	060979DC	54	10	no	no	no	no	todo	
 KRNL	06097A4C	47	6	no	no	no	no	todo	
 KRNL	06097AB0	98	16	no	no	no	no	todo	
-KRNL	06097B7C	11	0	yes	yes	no	no	todo	
-KRNL	06097B92	35	0	yes	yes	no	no	todo	
+KRNL	06097B7C	11	0	yes	yes	no	no	swapped	
+KRNL	06097B92	35	0	yes	yes	no	no	swapped	
 KRNL	06097BFC	116	14	no	yes	yes	no	todo	
 KRNL	06097C8A	54	8	no	no	no	no	todo	
 KRNL	06097D04	127	14	no	no	yes	no	todo	
@@ -13309,8 +13309,8 @@ KRNL	06097E20	139	14	no	no	no	no	todo
 KRNL	06097F5C	153	14	no	no	no	no	todo	
 KRNL	060980B4	9	0	yes	yes	no	no	todo	
 KRNL	060980C8	9	0	yes	yes	no	no	todo	
-KRNL	060980DC	3	0	yes	yes	no	no	todo	
-KRNL	060980E4	4	0	yes	yes	no	no	todo	
+KRNL	060980DC	3	0	yes	yes	no	no	swapped	shl16
+KRNL	060980E4	4	0	yes	yes	no	no	swapped	high_half
 KRNL	0609812C	26	2	no	yes	no	no	todo	
 KRNL	0609816C	28	2	no	yes	no	no	todo	
 KRNL	060981B0	19	0	yes	yes	no	no	todo	
@@ -13351,26 +13351,26 @@ KRNL	06099E9A	23	0	yes	no	no	no	todo
 KRNL	06099EB4	22	0	yes	no	no	no	todo	
 KRNL	06099F0C	18	0	yes	yes	no	no	swapped	clear_record
 KRNL	06099F30	584	6	no	yes	no	no	todo	
-KRNL	0609A464	36	0	yes	yes	no	no	todo	
+KRNL	0609A464	36	0	yes	yes	no	no	swapped	clear_record
 KRNL	0609A4AC	1278	14	no	yes	no	no	todo	
-KRNL	0609AFCC	18	0	yes	yes	no	no	todo	
+KRNL	0609AFCC	18	0	yes	yes	no	no	swapped	copy_eight_halves
 KRNL	0609AFF4	223	4	no	yes	no	no	todo	
 KRNL	0609B336	142	0	yes	no	yes	no	todo	
 KRNL	0609B488	129	4	no	no	yes	no	todo	
 KRNL	0609B5B4	92	18	no	yes	no	no	todo	
 KRNL	0609B69A	146	34	no	yes	no	no	todo	
 KRNL	0609B734	14	0	yes	yes	no	no	todo	
-KRNL	0609B750	42	0	yes	yes	no	no	todo	
-KRNL	0609B8C0	66	0	yes	yes	no	no	todo	
+KRNL	0609B750	42	0	yes	yes	no	no	swapped	
+KRNL	0609B8C0	66	0	yes	yes	no	no	swapped	copy_to_vdp2
 KRNL	0609B960	51	6	no	yes	no	no	todo	
 KRNL	0609B9E0	85	6	no	yes	no	no	todo	
-KRNL	0609BA80	18	0	yes	yes	no	no	todo	
+KRNL	0609BA80	18	0	yes	yes	no	no	swapped	clear_mask_bits
 KRNL	0609BAA4	123	8	no	yes	no	no	todo	
 KRNL	0609BBC0	285	30	no	yes	no	no	todo	
-KRNL	0609BE40	30	0	yes	yes	no	no	todo	
+KRNL	0609BE40	30	0	yes	yes	no	no	swapped	set_vdp_bits
 KRNL	0609BE8C	160	6	no	yes	no	no	todo	
 KRNL	0609C010	41	12	no	yes	no	no	todo	
-KRNL	0609C062	18	0	yes	yes	no	no	todo	
+KRNL	0609C062	18	0	yes	yes	no	no	swapped	vdp_mode_bits
 KRNL	0609C0B4	641	82	no	yes	no	no	todo	
 KRNL	0609C634	648	48	no	yes	no	no	todo	
 KRNL	0609CBF8	98	12	no	yes	no	no	todo	
@@ -13383,9 +13383,9 @@ KRNL	0609D3B8	99	18	no	yes	no	no	todo
 KRNL	0609D494	84	16	no	yes	no	no	todo	
 KRNL	0609D550	210	42	no	yes	no	no	todo	
 KRNL	0609D730	252	32	no	yes	no	no	todo	
-KRNL	0609D96C	83	0	yes	yes	no	no	todo	
+KRNL	0609D96C	83	0	yes	yes	no	no	swapped	
 KRNL	0609DA34	16	0	yes	yes	no	no	todo	
-KRNL	0609DA54	19	0	yes	yes	no	no	todo	
+KRNL	0609DA54	19	0	yes	yes	no	no	swapped	reset_bb91c
 KRNL	0609DA9C	95	8	no	yes	no	no	todo	
 KRNL	0609DB80	72	0	yes	yes	no	no	todo	
 KRNL	0609DC4C	148	6	no	yes	no	no	todo	
@@ -13423,19 +13423,19 @@ KRNL	0609EE2A	54	6	no	no	no	no	todo
 KRNL	0609EEA8	16	0	yes	yes	no	no	todo	
 KRNL	0609EF42	7	0	yes	yes	no	no	todo	
 KRNL	0609EF5C	60	2	no	yes	no	no	todo	
-KRNL	0609EFD4	9	0	yes	yes	no	no	todo	
+KRNL	0609EFD4	9	0	yes	yes	no	no	swapped	fold_signed
 KRNL	0609F004	3	0	yes	yes	no	no	todo	
 KRNL	0609F00A	60	0	yes	yes	no	no	todo	
 KRNL	0609F090	44	2	no	no	no	no	todo	
 KRNL	0609F0F4	51	2	no	no	no	no	todo	
 KRNL	0609F15A	30	2	no	no	no	no	todo	
 KRNL	0609F1A8	75	6	no	yes	no	no	todo	
-KRNL	0609F274	61	0	yes	yes	no	no	todo	
+KRNL	0609F274	61	0	yes	yes	no	no	swapped	set_screen_mode
 KRNL	0609F354	78	0	yes	yes	no	no	todo	
-KRNL	0609F448	12	0	yes	yes	no	no	todo	
+KRNL	0609F448	12	0	yes	yes	no	no	swapped	set_flag_half
 KRNL	0609F464	200	8	no	yes	no	no	todo	
-KRNL	0609F61E	64	0	yes	yes	no	no	todo	
-KRNL	0609F624	93	0	yes	yes	no	no	todo	
+KRNL	0609F61E	64	0	yes	yes	no	no	swapped	tail_9f274
+KRNL	0609F624	93	0	yes	yes	no	no	swapped	
 KRNL	0609F66C	25	2	no	yes	no	no	todo	
 KRNL	0609F6CC	13	0	yes	no	no	no	todo	
 KRNL	0609F708	145	4	no	yes	no	no	todo	
@@ -13465,13 +13465,13 @@ KRNL	060A05C4	32	0	yes	no	no	no	todo
 KRNL	060A0604	126	16	no	yes	yes	no	todo	
 KRNL	060A0636	107	14	no	no	no	no	todo	
 KRNL	060A06C6	32	2	no	no	no	no	todo	
-KRNL	060A0706	22	0	yes	yes	no	no	todo	
+KRNL	060A0706	22	0	yes	yes	no	no	swapped	valid_mask
 KRNL	060A0732	17	2	no	yes	no	no	todo	
 KRNL	060A0764	157	22	no	yes	yes	no	todo	
 KRNL	060A0816	68	12	no	no	no	no	todo	
 KRNL	060A082C	57	8	no	no	no	no	todo	
 KRNL	060A0836	52	6	no	no	no	no	todo	
-KRNL	060A08BA	6	0	yes	yes	no	no	todo	
+KRNL	060A08BA	6	0	yes	yes	no	no	swapped	clear_node
 KRNL	060A08C6	70	8	no	yes	yes	no	todo	
 KRNL	060A0936	14	2	no	no	no	no	todo	
 KRNL	060A096C	40	2	no	yes	yes	no	todo	
@@ -13683,7 +13683,7 @@ KRNL	060A2E2A	74	10	no	no	yes	no	todo
 KRNL	060A2E4C	5	0	yes	no	no	no	todo	
 KRNL	060A2EC6	13	0	yes	no	no	no	todo	
 KRNL	060A2EE0	9	0	yes	yes	no	no	todo	
-KRNL	060A2F10	8	0	yes	yes	no	no	todo	
+KRNL	060A2F10	8	0	yes	yes	no	no	swapped	clear_fc018
 KRNL	060A2F20	149	14	no	yes	yes	no	todo	
 KRNL	060A303C	19	2	no	no	no	no	todo	
 KRNL	060A3052	8	0	yes	no	no	no	todo	
@@ -13729,7 +13729,7 @@ KRNL	060A3B7E	28	2	no	no	no	no	todo
 KRNL	060A3BB6	28	2	no	no	no	no	todo	
 KRNL	060A3BFC	15	0	yes	no	no	no	todo	
 KRNL	060A3C1A	189	10	no	yes	no	no	todo	
-KRNL	060A3C38	4	0	yes	no	no	no	todo	
+KRNL	060A3C38	4	0	yes	no	no	no	swapped	tail_abcaa
 KRNL	060A3C58	67	6	no	no	no	no	todo	
 KRNL	060A3CDE	4	0	yes	no	no	no	todo	
 KRNL	060A3D00	31	2	no	yes	no	no	todo	
@@ -13744,7 +13744,7 @@ KRNL	060A3EBC	9	0	yes	yes	no	no	swapped	set_pair_bb994
 KRNL	060A3ED4	25	4	no	no	no	no	todo	
 KRNL	060A3F06	22	0	yes	no	no	no	todo	
 KRNL	060A3F32	30	4	no	no	no	no	todo	
-KRNL	060A3F84	6	0	yes	no	no	no	todo	
+KRNL	060A3F84	6	0	yes	no	no	no	swapped	return_zero_stub
 KRNL	060A3F90	5	0	yes	no	no	no	swapped	unused_args
 KRNL	060A3FA4	56	10	no	yes	yes	no	todo	
 KRNL	060A3FCC	36	6	no	no	no	no	todo	
@@ -13754,7 +13754,7 @@ KRNL	060A404C	10	0	yes	no	yes	no	todo
 KRNL	060A4060	10	0	yes	no	no	no	todo	
 KRNL	060A4074	10	0	yes	no	no	no	todo	
 KRNL	060A4088	17	0	yes	no	no	no	todo	
-KRNL	060A40C0	5	0	yes	no	no	no	todo	
+KRNL	060A40C0	5	0	yes	no	no	no	swapped	empty
 KRNL	060A40CC	136	14	no	yes	yes	no	todo	
 KRNL	060A417E	50	4	no	no	no	no	todo	
 KRNL	060A41B6	22	2	no	no	no	no	todo	
@@ -13798,15 +13798,15 @@ KRNL	060A4940	28	2	no	no	no	no	todo
 KRNL	060A4984	16	0	yes	no	no	no	todo	
 KRNL	060A499C	16	0	yes	yes	no	no	todo	
 KRNL	060A49B4	161	10	no	no	no	no	todo	
-KRNL	060A49F0	32	0	yes	no	no	no	todo	
+KRNL	060A49F0	32	0	yes	no	no	no	swapped	tail_call
 KRNL	060A4A02	72	6	no	no	no	no	todo	
 KRNL	060A4ABA	20	0	yes	no	no	no	todo	
 KRNL	060A4AF4	18	4	no	yes	no	no	todo	
 KRNL	060A4B24	24	4	no	no	no	no	todo	
 KRNL	060A4B86	30	4	no	no	no	no	todo	
-KRNL	060A4BDE	2	0	yes	no	no	no	todo	
+KRNL	060A4BDE	2	0	yes	no	no	no	swapped	empty
 KRNL	060A4BE2	14	0	yes	yes	no	no	todo	
-KRNL	060A4C08	2	0	yes	no	no	no	todo	
+KRNL	060A4C08	2	0	yes	no	no	no	swapped	empty
 KRNL	060A4C0C	40	6	no	no	no	no	todo	
 KRNL	060A4C6C	41	6	no	no	yes	no	todo	
 KRNL	060A4C86	28	4	no	no	no	no	todo	
@@ -13864,8 +13864,8 @@ KRNL	060A5646	24	4	no	no	no	no	todo
 KRNL	060A565E	2	0	yes	no	no	no	todo	
 KRNL	060A566A	6	0	yes	no	no	no	todo	
 KRNL	060A5676	42	2	no	yes	no	no	todo	
-KRNL	060A56CA	7	0	yes	no	no	no	todo	
-KRNL	060A56D8	8	0	yes	yes	no	no	todo	
+KRNL	060A56CA	7	0	yes	no	no	no	swapped	n12_plus
+KRNL	060A56D8	8	0	yes	yes	no	no	swapped	index_24
 KRNL	060A56E8	9	0	yes	no	no	no	todo	
 KRNL	060A56FA	10	0	yes	yes	no	no	todo	
 KRNL	060A570E	2	0	yes	yes	yes	no	todo	
@@ -13926,13 +13926,13 @@ KRNL	060A5E7C	15	0	yes	yes	no	no	todo
 KRNL	060A5E9A	14	0	yes	yes	no	no	todo	
 KRNL	060A5EB6	15	0	yes	yes	no	no	todo	
 KRNL	060A5EEC	27	2	no	yes	no	no	swapped	
-KRNL	060A5F22	6	0	yes	yes	no	no	todo	
-KRNL	060A5F2E	2	0	yes	yes	no	no	todo	
+KRNL	060A5F22	6	0	yes	yes	no	no	swapped	swap_w56
+KRNL	060A5F2E	2	0	yes	yes	no	no	swapped	set_w44
 KRNL	060A5F32	33	2	no	yes	no	no	todo	
-KRNL	060A5F74	2	0	yes	no	no	no	todo	
+KRNL	060A5F74	2	0	yes	no	no	no	swapped	get_field_24
 KRNL	060A5F7C	3	0	yes	yes	no	no	swapped	swap_field20
-KRNL	060A5F82	3	0	yes	yes	no	no	todo	
-KRNL	060A5F88	3	0	yes	no	no	no	todo	
+KRNL	060A5F82	3	0	yes	yes	no	no	swapped	set_field_48
+KRNL	060A5F88	3	0	yes	no	no	no	swapped	clear_w48
 KRNL	060A5F8E	68	6	no	yes	yes	no	todo	
 KRNL	060A5FB8	50	6	no	no	no	no	todo	
 KRNL	060A6028	57	2	no	yes	yes	no	todo	
@@ -13947,28 +13947,28 @@ KRNL	060A62A0	63	6	no	yes	yes	no	todo
 KRNL	060A6324	9	2	no	no	no	no	todo	
 KRNL	060A6336	21	2	no	yes	no	no	todo	
 KRNL	060A6364	114	10	no	no	no	no	todo	
-KRNL	060A6496	4	0	yes	no	no	no	todo	
+KRNL	060A6496	4	0	yes	no	no	no	swapped	return_one
 KRNL	060A649A	19	2	no	no	no	no	todo	
 KRNL	060A64C0	26	4	no	no	no	no	todo	
-KRNL	060A64C4	4	0	yes	no	no	no	todo	
+KRNL	060A64C4	4	0	yes	no	no	no	swapped	const_1
 KRNL	060A64C8	19	2	no	no	no	no	todo	
 KRNL	060A64EE	26	4	no	no	no	no	todo	
-KRNL	060A64F2	2	0	yes	yes	no	no	todo	
+KRNL	060A64F2	2	0	yes	yes	no	no	swapped	const_1
 KRNL	060A64F6	50	0	yes	yes	no	no	todo	
-KRNL	060A6534	2	0	yes	yes	no	no	todo	
+KRNL	060A6534	2	0	yes	yes	no	no	swapped	return_zero
 KRNL	060A6554	39	0	yes	yes	no	no	todo	
 KRNL	060A65A6	97	6	no	yes	yes	no	todo	
 KRNL	060A65CC	23	0	yes	no	no	no	todo	
 KRNL	060A6650	12	0	yes	no	no	no	todo	
 KRNL	060A6668	46	0	yes	yes	no	no	todo	
 KRNL	060A66C8	19	0	yes	no	no	no	todo	
-KRNL	060A66EE	2	0	yes	no	no	no	todo	
-KRNL	060A66F2	7	0	yes	yes	no	no	todo	
+KRNL	060A66EE	2	0	yes	no	no	no	swapped	get_w8
+KRNL	060A66F2	7	0	yes	yes	no	no	swapped	mul_sub
 KRNL	060A6724	20	0	yes	yes	no	no	todo	
 KRNL	060A674C	11	0	yes	yes	no	no	todo	
 KRNL	060A6762	7	0	yes	no	no	no	todo	
 KRNL	060A6770	6	0	yes	yes	no	no	swapped	init_fields
-KRNL	060A677C	6	0	yes	yes	no	no	todo	
+KRNL	060A677C	6	0	yes	yes	no	no	swapped	set_fields
 KRNL	060A6790	69	2	no	yes	no	no	todo	
 KRNL	060A681A	103	12	no	yes	yes	no	todo	
 KRNL	060A68D2	24	0	yes	no	no	no	todo	
@@ -13982,12 +13982,12 @@ KRNL	060A6A10	63	2	no	no	no	no	todo
 KRNL	060A6B08	61	12	no	no	yes	no	todo	
 KRNL	060A6B4A	28	6	no	no	no	no	todo	
 KRNL	060A6BA0	41	4	no	no	no	no	todo	
-KRNL	060A6BF2	6	0	yes	yes	no	no	todo	
+KRNL	060A6BF2	6	0	yes	yes	no	no	swapped	tail_a71e4
 KRNL	060A6BFE	117	16	no	yes	yes	no	todo	
 KRNL	060A6C04	69	10	no	no	no	no	todo	
 KRNL	060A6C8E	28	4	no	yes	no	no	todo	
 KRNL	060A6CE6	96	2	no	yes	no	no	todo	
-KRNL	060A6DA6	23	0	yes	yes	no	no	todo	
+KRNL	060A6DA6	23	0	yes	yes	no	no	swapped	flags_to_offset
 KRNL	060A6DE6	84	4	no	yes	yes	no	todo	
 KRNL	060A6E6A	18	0	yes	no	no	no	todo	
 KRNL	060A6EA0	149	10	no	yes	yes	no	todo	
@@ -14002,7 +14002,7 @@ KRNL	060A70D4	75	8	no	yes	yes	no	todo
 KRNL	060A7132	48	4	no	no	no	no	todo	
 KRNL	060A7196	27	4	no	no	yes	no	todo	
 KRNL	060A71CC	28	8	no	yes	yes	no	todo	
-KRNL	060A71E4	4	0	yes	yes	no	no	todo	
+KRNL	060A71E4	4	0	yes	yes	no	no	swapped	sum_fields
 KRNL	060A71EC	40	4	no	yes	yes	no	todo	
 KRNL	060A721C	16	0	yes	no	no	no	todo	
 KRNL	060A723C	114	16	no	yes	yes	no	todo	
@@ -14053,7 +14053,7 @@ KRNL	060A802C	24	4	no	yes	no	no	todo
 KRNL	060A805C	92	14	no	yes	yes	no	todo	
 KRNL	060A80C8	38	4	no	no	no	no	todo	
 KRNL	060A80DE	34	4	no	no	no	no	todo	
-KRNL	060A8128	50	0	yes	yes	no	no	todo	
+KRNL	060A8128	50	0	yes	yes	no	no	swapped	slot_empty
 KRNL	060A81A0	1019	82	no	no	yes	no	todo	
 KRNL	060A81FE	4	0	yes	yes	no	no	todo	
 KRNL	060A8206	16	6	no	yes	yes	no	todo	
@@ -14078,7 +14078,7 @@ KRNL	060A8C58	14	2	no	no	no	no	todo
 KRNL	060A8C74	4	0	yes	no	no	no	todo	
 KRNL	060A8C7C	21	4	no	no	no	no	todo	
 KRNL	060A8CA6	37	2	no	yes	no	no	todo	
-KRNL	060A8D0C	85	0	yes	yes	no	no	todo	
+KRNL	060A8D0C	85	0	yes	yes	no	no	swapped	reg_field
 KRNL	060A8DCC	217	12	no	yes	no	no	todo	
 KRNL	060A8FCC	58	8	no	no	no	no	todo	
 KRNL	060A9068	59	10	no	no	no	no	todo	
@@ -14158,11 +14158,11 @@ KRNL	060AAD1E	63	2	no	no	no	no	todo
 KRNL	060AAD4E	18	2	no	no	no	no	todo	
 KRNL	060AAD72	19	2	no	no	no	no	todo	
 KRNL	060AAD98	26	4	no	yes	no	no	todo	
-KRNL	060AADF8	8	0	yes	yes	no	no	todo	
+KRNL	060AADF8	8	0	yes	yes	no	no	swapped	clear_bb990
 KRNL	060AAE08	20	0	yes	no	no	no	todo	
-KRNL	060AAE30	3	0	yes	no	no	no	todo	
-KRNL	060AAE44	5	0	yes	yes	no	no	todo	
-KRNL	060AAE4E	2	0	yes	yes	no	no	todo	
+KRNL	060AAE30	3	0	yes	no	no	no	swapped	get_word
+KRNL	060AAE44	5	0	yes	yes	no	no	swapped	set_pair_bb994
+KRNL	060AAE4E	2	0	yes	yes	no	no	swapped	empty
 KRNL	060AAE52	19	2	no	no	no	no	todo	
 KRNL	060AAE84	31	10	no	yes	no	no	todo	
 KRNL	060AAEC2	35	4	no	no	no	no	todo	
@@ -14175,8 +14175,8 @@ KRNL	060AB228	32	0	yes	yes	no	no	todo
 KRNL	060AB268	52	0	yes	yes	no	no	todo	
 KRNL	060AB2BC	27	0	yes	yes	no	no	todo	
 KRNL	060AB2F2	16	0	yes	yes	no	no	todo	
-KRNL	060AB316	3	0	yes	yes	no	no	todo	
-KRNL	060AB31C	4	0	yes	yes	no	no	todo	
+KRNL	060AB316	3	0	yes	yes	no	no	swapped	deref
+KRNL	060AB31C	4	0	yes	yes	no	no	swapped	deref_plus_52
 KRNL	060AB324	4	0	yes	yes	no	no	todo	
 KRNL	060AB32C	5	0	yes	yes	no	no	todo	
 KRNL	060AB338	189	16	no	yes	no	no	todo	
@@ -14193,11 +14193,11 @@ KRNL	060ABB48	174	10	no	no	no	no	todo
 KRNL	060ABB6C	5	0	yes	no	no	no	todo	
 KRNL	060ABB80	143	10	no	no	no	no	todo	
 KRNL	060ABCAA	3	0	yes	no	no	no	swapped	set_word
-KRNL	060ABCB0	3	0	yes	no	no	no	todo	
+KRNL	060ABCB0	3	0	yes	no	no	no	swapped	get_word
 KRNL	060ABCCC	49	0	yes	no	no	no	todo	
 KRNL	060ABD34	13	4	no	no	no	no	todo	
-KRNL	060ABD4E	18	0	yes	yes	no	no	todo	
-KRNL	060ABD84	27	0	yes	yes	no	no	todo	
+KRNL	060ABD4E	18	0	yes	yes	no	no	swapped	
+KRNL	060ABD84	27	0	yes	yes	no	no	swapped	reset_timing
 KRNL	060ABDBA	157	18	no	no	yes	no	todo	
 KRNL	060ABEDE	20	2	no	no	no	no	todo	
 KRNL	060ABF1C	195	18	no	no	yes	no	todo	
@@ -14225,14 +14225,14 @@ KRNL	060AD564	50	2	no	no	no	no	todo
 KRNL	060AD5C8	41	2	no	yes	no	no	todo	
 KRNL	060AD61C	8	0	yes	yes	no	no	swapped	clear_three_words
 KRNL	060AD62C	18	0	yes	no	no	no	todo	
-KRNL	060AD650	3	0	yes	no	no	no	todo	
-KRNL	060AD664	5	0	yes	no	no	no	todo	
+KRNL	060AD650	3	0	yes	no	no	no	swapped	get_fc224
+KRNL	060AD664	5	0	yes	no	no	no	swapped	set_pair
 KRNL	060AD66E	2	0	yes	yes	no	no	swapped	nop
 KRNL	060AD672	31	2	no	yes	no	no	todo	
 KRNL	060AD6C4	3	0	yes	no	no	no	todo	
 KRNL	060AD6CA	3	0	yes	no	no	no	todo	
 KRNL	060AD6D0	3	0	yes	no	no	no	todo	
-KRNL	060AD6D6	29	0	yes	no	no	no	todo	
+KRNL	060AD6D6	29	0	yes	no	no	no	swapped	
 KRNL	060AD718	32	6	no	yes	no	no	todo	
 KRNL	060AD790	33	2	no	no	no	no	todo	
 KRNL	060AD7D2	40	4	no	no	yes	no	todo	
@@ -14240,7 +14240,7 @@ KRNL	060AD808	13	0	yes	no	no	no	todo
 KRNL	060AD848	34	0	yes	no	no	no	todo	
 KRNL	060AD88C	27	0	yes	yes	no	no	todo	
 KRNL	060AD8F0	171	20	no	yes	no	no	todo	
-KRNL	060ADA80	21	0	yes	no	no	no	todo	
+KRNL	060ADA80	21	0	yes	no	no	no	swapped	bit_set_for_address
 KRNL	060ADAAA	53	2	no	yes	no	no	todo	
 KRNL	060ADB2C	3	0	yes	no	no	no	todo	
 KRNL	060ADB32	46	4	no	no	yes	no	todo	
@@ -14249,8 +14249,8 @@ KRNL	060ADBA0	4	0	yes	no	no	no	todo
 KRNL	060ADBA8	39	0	yes	yes	no	no	todo	
 KRNL	060ADBF6	26	0	yes	yes	no	no	todo	
 KRNL	060ADC2A	23	0	yes	yes	no	no	todo	
-KRNL	060ADC76	3	0	yes	no	no	no	todo	
-KRNL	060ADC7C	3	0	yes	yes	no	no	todo	
+KRNL	060ADC76	3	0	yes	no	no	no	swapped	word_plus_4
+KRNL	060ADC7C	3	0	yes	yes	no	no	swapped	deref_plus_48
 KRNL	060ADC82	5	0	yes	yes	no	no	todo	
 KRNL	060ADC8C	18	2	no	yes	no	no	todo	
 KRNL	060ADE9E	238	18	no	no	no	no	todo	
@@ -14264,7 +14264,7 @@ KRNL	060AE110	105	8	no	no	yes	no	todo
 KRNL	060AE14A	76	2	no	no	no	no	todo	
 KRNL	060AE1E6	4	0	yes	no	no	no	todo	
 KRNL	060AE1EE	3	0	yes	no	no	no	swapped	
-KRNL	060AE200	3	0	yes	no	no	no	todo	
+KRNL	060AE200	3	0	yes	no	no	no	swapped	get_word
 KRNL	060AE206	21	0	yes	no	no	no	todo	
 KRNL	060AE234	19	6	no	no	no	no	todo	
 KRNL	060AE25A	18	0	yes	yes	no	no	swapped	mask_entry_addr
@@ -14306,11 +14306,11 @@ KRNL	060AE9C2	26	2	no	no	no	no	todo
 KRNL	060AE9F6	29	2	no	no	no	no	todo	
 KRNL	060AEA3C	54	8	no	yes	no	no	todo	
 KRNL	060AEAC4	33	6	no	yes	no	no	todo	
-KRNL	060AEB1C	47	0	yes	yes	no	no	todo	
+KRNL	060AEB1C	47	0	yes	yes	no	no	swapped	init_tables
 KRNL	060AEB7A	306	2	no	no	no	no	todo	
 KRNL	060AEE04	432	2	no	yes	no	no	todo	
-KRNL	060AF17C	83	0	yes	no	no	no	todo	
-KRNL	060AF22C	94	0	yes	no	no	no	todo	
+KRNL	060AF17C	83	0	yes	no	no	no	swapped	clear_matching_colors_32
+KRNL	060AF22C	94	0	yes	no	no	no	swapped	clear_matching_colors_16
 KRNL	060AF2EA	231	0	yes	no	no	no	todo	
 KRNL	060AF4BE	257	0	yes	no	no	no	todo	
 KRNL	060AF6C0	333	14	no	yes	yes	no	todo	
@@ -14332,10 +14332,10 @@ KRNL	060AFEA8	44	0	yes	no	no	no	todo
 KRNL	060AFF04	70	4	no	no	no	no	todo	
 KRNL	060AFF98	76	0	yes	yes	no	no	todo	
 KRNL	060B0030	43	0	yes	yes	no	no	todo	
-KRNL	060B0090	11	0	yes	no	no	no	todo	
-KRNL	060B00BC	13	0	yes	no	no	no	todo	
-KRNL	060B00D6	26	0	yes	no	no	no	todo	
-KRNL	060B010A	28	0	yes	no	no	no	todo	
+KRNL	060B0090	11	0	yes	no	no	no	swapped	fill_halfwords
+KRNL	060B00BC	13	0	yes	no	no	no	swapped	copy_words_back
+KRNL	060B00D6	26	0	yes	no	no	no	swapped	move_bytes
+KRNL	060B010A	28	0	yes	no	no	no	swapped	move_words
 KRNL	060B0142	31	6	no	no	no	no	todo	
 KRNL	060B0180	33	6	no	no	no	no	todo	
 KRNL	060B0212	26	0	yes	no	no	no	todo	

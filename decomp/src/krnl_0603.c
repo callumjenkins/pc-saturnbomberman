@@ -1081,6 +1081,17 @@ void f0603DDA6(void)
 {
 }
 
+int f0603DEEC(void)
+{
+    int w = LDU16(0x060D7E68);
+
+    if (!(w & 1)) {
+        w = 0x0603DF02;
+        SET(Slot24, (REF(Slot24))LD32(0x060D7E60), fn, 0x0603DF02);
+    }
+    return w;
+}
+
 int f0603E212(void)
 {
     REF(Slot24) s = ELEM(Slot24, SLOTS, 4);
@@ -1091,7 +1102,64 @@ int f0603E212(void)
     return 0;
 }
 
+int f0603E4CC(int base)
+{
+    return base + 70;
+}
+
+int f0603E4D2(int p)
+{
+    return p + 82;
+}
+
+int f0603E4F6(int base)
+{
+    return base + 78;
+}
+
+int f0603E888(unsigned short x, unsigned short y)
+{
+    if (x < 32 || x > 40 || y < 19 || y > 25)
+        return 0;
+    return LD8(0x060B5E0A + (y - 19) * 9 + (x - 32)) & 255;
+}
+
+int f0603E9B6(void)
+{
+    return LD16(0x060DF97A) != 0;
+}
+
 void f0603ED78(int n)
 {
     GJUMP1(0x06022EDA, n);
+}
+
+int f0603EE1E(short slot)
+{
+    int obj = OBJ(LD16(SLOT(slot) + 8));
+
+    if (!LD16(obj + 10))
+        return -1;
+    return LDU16(obj + 60) >= 0xFF00 ? -1 : 0;
+}
+
+int f0603F380(short slot)
+{
+    unsigned short obj = LD16(SLOT(slot) + 8);
+
+    ST16(OBJ(obj) + 38, 0);
+    return GJUMP2(0x06069546, obj, 0);
+}
+
+int f0603F642(void)
+{
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        int obj = OBJ(LDU16(0x060D7BF8 + i * 2));
+
+        ST16(obj + 42, LDU16(obj + 42) | 0x400);
+    }
+    ST16(OBJ(LDU16(0x060D7C00)) + 4, 9);
+    return 9;
 }

@@ -365,6 +365,17 @@ void f060298F4(int pad)
     ST16(0x060FB8CC, v);
 }
 
+/* Clamps pos to 0..0x1FF, subtracts 256 and wraps to 9 bits. */
+void f06029E0C(int flags, int pos)
+{
+    if (pos < 0)
+        pos = 0;
+    else if (pos > 0x1FF)
+        pos = 0x1FF;
+    pos = (pos - 256) & 0x1FF;
+    GJUMP4(0x06029E2E, flags, pos, pos, pos);
+}
+
 void f06029FB8(void)
 {
     ST16(0x060EC450, 0);
