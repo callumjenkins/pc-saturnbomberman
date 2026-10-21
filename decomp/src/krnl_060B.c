@@ -76,5 +76,5 @@ void f060B0246(gaddr dst, gaddr src, int n)
 
 int f060B087E(int a, int b, int c, int d)
 {
-    return GCALL4(0x060AD62C, 0x308, b, c, d);
+    return GJUMP4(0x060AD62C, 0x308, b, c, d);
 }

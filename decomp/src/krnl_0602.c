@@ -550,6 +550,7 @@ void f0602E2C6(void)
             set++;
     } while (AGAIN(++i < 8));
     if (set == 0) {
+        POLL();
         i = 0;
         do {
             ST8(0x060E1C4E + i, 1);

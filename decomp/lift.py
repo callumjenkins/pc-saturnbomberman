@@ -38,7 +38,9 @@ class Read:
 
 
 def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: "sh2.Image") -> bool:
-    """Writes the call as a statement. A tail call hands on r4 to r7 as they stand, so they all go in."""
+    """Writes the call as a statement. A tail call hands on r4 to r7 as they stand, so they all go in,
+    except those an earlier call overwrote: those at the end are left out, and one before a register
+    that does go in passes 0."""
     tail = ins.op in ("jmp", "bra")
     where = const(ins.target) if ins.op in ("bsr", "bra") else st.get(ins.n)
     if ins.op == "jmp" and number(where) is None:
@@ -48,7 +50,10 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
     for r in range(4, 8):
         if r not in st.fresh and r not in params and not tail:
             break
-        args.append(st.get(r))
+        args.append("" if r in st.clobbered else st.get(r))
+    while args and not args[-1]:
+        args.pop()
+    args = [a or "0" for a in args]
     text = "%s%d(%s%s)" % ("GJUMP" if tail else "GCALL", len(args), where, "".join(", " + a for a in args))
     st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in range(1, 8)}))
     st.clobbered |= set(range(1, 8))

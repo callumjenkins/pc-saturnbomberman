@@ -4,14 +4,15 @@
 
 The original is 0KRNL.BIN, run by the SH-2 interpreter in saturn-recomp. The decompiled C is built
 for the host with DECOMP_HOST and run on a copy of the same memory. Each trial gives both the same
-random arguments and the same random data, then compares the return value, if the function has one,
-and every byte of work RAM and VDP1 VRAM afterwards.
+random arguments and the same memory, random or dumped from a route, with the values cases.py plants.
+It then compares the return value, if the function has one, and every byte of memory afterwards.
 """
 import argparse
 import ctypes
 import json
 import os
 import random
+import runpy
 import subprocess
 import sys
 import tempfile
@@ -20,7 +21,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(ROOT, "saturn-recomp", "src"))
 sys.path.insert(0, HERE)
+import cases  # noqa: E402
 import gen  # noqa: E402
+import machine  # noqa: E402
 import status  # noqa: E402
 from saturnrecomp import sh2emu  # noqa: E402
 
@@ -41,12 +44,6 @@ C_TYPES = {"int": ctypes.c_int32, "unsigned int": ctypes.c_uint32, "uint32_t": c
 EDGES = (0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF,
          0xFFFFFFFE, 0xFFFFFF80, 0xFFFF8000)
 KRNL = os.path.join(ROOT, "build", "extract", "BOMSS", "0KRNL.BIN")
-# The game's functions spill registers onto the stack, which the host build has no counterpart for.
-STACK = 0x06100000 - 0x1000
-# Random data covers the tables the functions read, up to the stack.
-DATA = (0x060B0000, STACK)
-VDP1_DATA = 0x100
-WRAM, WRAML, VDP1 = 0x06000000, 0x00200000, 0x05D00000
 
 
 class Counting(sh2emu.CPU):
@@ -159,13 +156,13 @@ def counting(cpu: sh2emu.CPU) -> Counting:
     return cpu
 
 
-def default_spec(sig: gen.Signature) -> tuple[list[tuple], bool]:
+def default_spec(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
     """Random arguments for each parameter of a definition: a pointer for a reference (uint32_t on the host),
     and for a number anything a register can hold, whatever the declared width, since a caller may leave the upper bits set."""
     unknown = [t for t in sig.params + [sig.returns] if t not in C_TYPES and t != "void"]
     if unknown:
         raise SystemExit("%s: no host type for %s; add it to C_TYPES" % (sig.name, ", ".join(unknown)))
-    return [ptr(0x060C0000, 0x400) if t == "uint32_t" else ("any",) for t in sig.params], sig.returns != "void"
+    return [cases.ptr(0x060C0000, 0x400) if t == "uint32_t" else ("any",) for t in sig.params], sig.returns != "void", []
 
 
 def hook_for(cpu, state):
@@ -191,58 +188,39 @@ def hook_for(cpu, state):
     return hook
 
 
-def ptr(lo, span, align=4):
-    return ("ptr", lo, span, align)
-
-
-def rng_int(lo, hi):
-    return ("int", lo, hi)
-
-
-def run(lib: ctypes.CDLL, name: str, spec: tuple[list[tuple], bool], trials: int, seed: int,
+def run(lib: ctypes.CDLL, name: str, spec: tuple[list[tuple], bool, list[tuple]], trials: int, seed: int,
         sig: gen.Signature | None = None, seen: set[tuple[int, bool]] | None = None) -> tuple[list, int]:
     """The trials that differ, as (arguments, problems), and how many ran to the end, for one function.
     Without its signature, every parameter and the result pass as an int. `seen` becomes Counting.seen
     in every trial."""
-    args, returns = spec
+    args, returns, plants = spec
     r = random.Random("%s:%d" % (name, seed))
     fails = []
     ran = 0
     for _ in range(trials):
-        vals, problems, skipped = trial(lib, name, args, returns, r, sig, seen)
+        vals, problems, skipped = trial(lib, name, args, returns, r, sig, seen, plants)
         ran += not skipped
         if problems:
             fails.append((vals, problems))
     return fails, ran
 
 
+def spec_for(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
+    return cases.SPEC.get(sig.name) or default_spec(sig)
+
+
 def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: random.Random,
-          sig: gen.Signature | None = None, seen: set[tuple[int, bool]] | None = None) -> tuple[list[int], list[str], bool]:
+          sig: gen.Signature | None = None, seen: set[tuple[int, bool]] | None = None,
+          plants: list[tuple] = ()) -> tuple[list[int], list[str], bool]:
     cpu = counting(sh2emu.load(KRNL, BASE))     # the game's own function
     cpu.seen = seen
     host = counting(sh2emu.load(KRNL, BASE))    # the memory the host build runs on, and its callees
-    wram, wraml = cpu.mem.regions[0][2], cpu.mem.regions[1][2]
-    vdp1 = cpu.mem.add(VDP1, 0x80000)
-    hwram, hwraml = host.mem.regions[0][2], host.mem.regions[1][2]
-    hvdp1 = host.mem.add(VDP1, 0x80000)
-    lo, hi = DATA[0] - WRAM, DATA[1] - WRAM
-    if r.random() < 0.5:                        # the image's own variables too
-        lo = BASE - WRAM
-    image = bytes(wram[BASE - WRAM:BASE - WRAM + os.path.getsize(KRNL)])
-    wram[lo:hi] = r.randbytes(hi - lo)
-    for start, end in code_runs():
-        wram[BASE - WRAM + start:BASE - WRAM + end] = image[start:end]
-    wraml[:] = r.randbytes(len(wraml))
-    vdp1[:VDP1_DATA] = r.randbytes(VDP1_DATA)
-    hwram[:] = wram
-    hwraml[:] = wraml
-    hvdp1[:] = vdp1
+    machine.fill(cpu, r, BASE, code_runs(), plants)
+    machine.copy(cpu, host)
     vals = [value(a, r) for a in args]
 
     state = {"calls": []}
-    keep = [(ctypes.c_char * len(b)).from_buffer(b) for b in (hwram, hwraml, hvdp1)]
-    for symbol, buf in zip(("g_wram", "g_wraml", "g_vdp1"), keep):
-        ctypes.c_void_p.in_dll(lib, symbol).value = ctypes.addressof(buf)
+    keep = machine.point(lib, host)
     hook = hook_for(host, state)
     ctypes.c_void_p.in_dll(lib, "g_call_hook").value = ctypes.cast(hook, ctypes.c_void_p).value
     ctypes.c_int.in_dll(lib, "g_fault").value = 0
@@ -276,20 +254,14 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
                                                   [hex(a) for a in CALLS.get(name, [])]))
     if returns and (got & 0xFFFFFFFF) != want:
         problems.append("returned %08X, the game's code %08X" % (got & 0xFFFFFFFF, want))
-    keep_to = STACK - WRAM
-    for label, mine, theirs, base in (("work RAM", bytes(hwram[:keep_to]), bytes(wram[:keep_to]), WRAM),
-                                      ("work RAM-L", bytes(hwraml), bytes(wraml), WRAML),
-                                      ("VDP1", bytes(hvdp1), bytes(vdp1), VDP1)):
-        if mine != theirs:
-            i = next(i for i in range(len(mine)) if mine[i] != theirs[i])
-            problems.append("%s differs first at %08X: host %02X, game %02X" % (label, base + i, mine[i], theirs[i]))
+    problems += machine.differences(host, cpu)
     return vals, problems, False
 
 
 def value(kind, r):
     if kind[0] == "any":
         # whatever a parameter might hold: a small count, a negative, a pointer into the data, anything
-        return value(r.choice([("int", 0, 40), ("int", -40, 0), ptr(0x060C0000, 0x400), ptr(0x060B0000, 0x40000),
+        return value(r.choice([("int", 0, 40), ("int", -40, 0), cases.ptr(0x060C0000, 0x400), cases.ptr(0x060B0000, 0x40000),
                                ("int", -(1 << 31), (1 << 31) - 1), ("pick", EDGES)]), r)
     if kind[0] == "pick":
         return r.choice(kind[1])
@@ -299,34 +271,21 @@ def value(kind, r):
     return lo + r.randrange(0, span // align) * align
 
 
-# Arguments a function needs narrower than its type allows: name: (arguments, returns a value).
-# Any other function gets default_spec's.
-SPEC = {
-    "f0600665C": ([], False),
-    "f06006B38": ([rng_int(0, 200)], False),
-    "f0600940A": ([rng_int(0, 200)], False),
-    "f0600942E": ([], False),
-    "f0600A3E0": ([ptr(0x060C0000, 0x100), ptr(0x060C1000, 0x100, 1), rng_int(-40000, 40000)], False),
-    "f0600A4B0": ([("int", 0, 0xFFFF)], True),
-    "f0600B934": ([rng_int(0, 1000), rng_int(0, 1000)], True),
-    "f0600A25E": ([rng_int(-(1 << 31), (1 << 31) - 1)], False),
-    "f0600A2D8": ([rng_int(-(1 << 31), (1 << 31) - 1)], False),
-    "f060A5EEC": ([ptr(0x060C0000, 0x400)], True),
-}
-
-
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--trials", type=int, default=300)
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--source", nargs="+", help="C files to check in place of src/")
+    ap.add_argument("--cases", nargs="+", default=[], help="files of case() calls to use as well as cases.py's")
     ap.add_argument("names", nargs="*")
     a = ap.parse_args()
+    for path in a.cases:
+        runpy.run_path(path)
     lib = build(a.source)
     sigs = gen.signatures(a.source)
     bad = 0
     for name in [n for n in (a.names or ["f%08X" % x for x in sorted(sigs)])]:
-        spec = SPEC.get(name) or default_spec(sigs[int(name[1:], 16)])
+        spec = spec_for(sigs[int(name[1:], 16)])
         seen = set()
         fails, ran = run(lib, name, spec, a.trials, a.seed, sigs[int(name[1:], 16)], seen)
         status = ("ok" if ran == a.trials else "ok, %d of %d trials ran" % (ran, a.trials)) if not fails \

@@ -6,6 +6,7 @@ import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "decomp"))
+import cases  # noqa: E402
 import check  # noqa: E402
 import gen  # noqa: E402
 import status  # noqa: E402
@@ -140,3 +141,34 @@ def test_a_jump_advances_time_as_the_generated_code_does_wherever_it_goes(monkey
     monkeypatch.setattr(check.Counting, "_jumps", polling)
     words = [sh2.encode("jmp @Rn", 4), NOP, RTS, NOP]
     assert polls(monkeypatch, words, {BASE: {BASE + 2 * i for i in range(4)}}, r4=BASE + 4) == expected
+
+
+FLAG = '#include "krnl.h"\nint f06062168(void)\n{\n    if (LDU16(0x060D7C94) == 255)\n        return %s;\n    return 0;\n}\n'
+
+
+@pytest.mark.parametrize("planted, caught", [
+    pytest.param(False, False, id="random data never holds the one value the branch tests"),
+    pytest.param(True, True, id="the case plants it"),
+])
+def test_a_wrong_arm_shows_only_when_a_plant_reaches_it(tmp_path, planted, caught):
+    path = tmp_path / "f.c"
+    path.write_text(FLAG % "-2")
+    sig = gen.signatures([str(path)])[0x06062168]
+    spec = cases.SPEC[sig.name] if planted else check.default_spec(sig)
+    fails, ran = check.run(check.build([str(path)]), sig.name, spec, 40, 1, sig)
+    assert ran == 40 and bool(fails) == caught
+
+
+def test_a_plant_lands_in_both_copies_of_memory(tmp_path):
+    path = tmp_path / "f.c"
+    path.write_text(FLAG % "-1")
+    sig = gen.signatures([str(path)])[0x06062168]
+    seen: set[tuple[int, bool]] = set()
+    fails, ran = check.run(check.build([str(path)]), sig.name, cases.SPEC[sig.name], 40, 1, sig, seen)
+    assert ran == 40 and not fails and len(seen) == 2
+
+
+def test_every_case_names_a_decompiled_function_with_its_parameter_count():
+    sigs = {s.name: s for s in gen.signatures().values()}
+    assert [name for name, (args, returns, plants) in cases.SPEC.items()
+            if name not in sigs or len(args) != len(sigs[name].params) or returns != (sigs[name].returns != "void")] == []

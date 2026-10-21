@@ -18,9 +18,13 @@ def mem(tmp_path):
     lib.g_rd.restype = ctypes.c_uint32
     lib.g_rd.argtypes = [ctypes.c_uint32, ctypes.c_int]
     lib.g_wr.argtypes = [ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32]
-    buffers = [ctypes.create_string_buffer(size) for size in (0x100000, 0x100000, 0x80000)]
-    for symbol, buf in zip(("g_wram", "g_wraml", "g_vdp1"), buffers):
-        ctypes.c_void_p.in_dll(lib, symbol).value = ctypes.addressof(buf)
+    regions = ((0x06000000, 0x100000), (0x00200000, 0x100000), (0x05D00000, 0x80000), (0xFFFFFE00, 0x200))
+    buffers = [ctypes.create_string_buffer(size) for base, size in regions]
+    for i, ((base, size), buf) in enumerate(zip(regions, buffers)):
+        (ctypes.c_uint32 * 16).in_dll(lib, "g_region_base")[i] = base
+        (ctypes.c_uint32 * 16).in_dll(lib, "g_region_size")[i] = size
+        (ctypes.c_void_p * 16).in_dll(lib, "g_region")[i] = ctypes.addressof(buf)
+    ctypes.c_int.in_dll(lib, "g_regions").value = len(regions)
     lib.buffers = buffers
     return lib
 
@@ -34,6 +38,7 @@ def fault(lib) -> int:
     pytest.param(0x060FFFFF, id="runs off the end of work RAM"),
     pytest.param(0x002FFFFF, id="runs off the end of work RAM-L"),
     pytest.param(0x05D7FFFF, id="runs off the end of VDP1"),
+    pytest.param(0x05CFFFFE, id="falls between two regions"),
 ])
 def test_an_access_that_does_not_fit_faults_and_writes_nothing(mem, address):
     mem.g_wr(address, 2, 0xABCD)
@@ -45,7 +50,8 @@ def test_an_access_that_does_not_fit_faults_and_writes_nothing(mem, address):
     pytest.param(0x06001234, 0, 0x1234, id="work RAM-H"),
     pytest.param(0x26001234, 0, 0x1234, id="its cache-through mirror"),
     pytest.param(0x00201234, 1, 0x1234, id="work RAM-L"),
-    pytest.param(0x05D01234, 2, 0x1234, id="VDP1 VRAM"),
+    pytest.param(0x05D01234, 2, 0x1234, id="VDP1's registers"),
+    pytest.param(0xFFFFFF00, 3, 0x100, id="the on-chip registers, at the top of the address space"),
 ])
 def test_a_store_lands_big_endian_in_its_region(mem, address, buffer, offset):
     mem.g_wr(address, 4, 0x11223344)
@@ -56,7 +62,8 @@ def test_a_store_lands_big_endian_in_its_region(mem, address, buffer, offset):
 @pytest.mark.parametrize("address", [
     pytest.param(0x060FFFFC, id="work RAM-H"),
     pytest.param(0x002FFFFC, id="work RAM-L"),
-    pytest.param(0x05D7FFFC, id="VDP1 VRAM"),
+    pytest.param(0x05D7FFFC, id="VDP1's registers"),
+    pytest.param(0xFFFFFFFC, id="the on-chip registers"),
 ])
 def test_the_last_word_that_fits_does_not_fault(mem, address):
     mem.g_wr(address, 4, 0x11223344)

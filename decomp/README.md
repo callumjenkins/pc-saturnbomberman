@@ -43,28 +43,35 @@ task's entry). Its drafts are for reading and rewriting, and the cosim decides w
 
 ```sh
 python decomp/check.py                # needs build/extract from `bomberman prepare`, and clang
+python decomp/snapshots.py            # dumps work RAM along the routes for check.py to start from
 SHC_DIR=/path/to/shc python decomp/shc_compare.py -v   # needs Hitachi SHC and Wine
 ```
 
-`check.py` gives the game's function and the host build the same random arguments and the same
-random data, then compares the return value and every byte of work RAM (high and low) and VDP1 VRAM. The host build's
-memory is the buffer of a second interpreter, so a call the C makes into the game (`GCALL`) runs the
-game's own code on the same bytes. The game's function runs on saturn-recomp's SH-2 interpreter, not on
-the recompiled output. The top 4 KiB of work RAM is left out because the game spills registers onto its
-stack.
+`check.py` gives the game's function and the host build the same arguments and the same memory, then
+compares the return value and every byte of memory afterwards. The host build's memory is the buffer of
+a second interpreter, so a call the C makes into the game (`GCALL`) runs the game's own code on the same
+bytes. The game's function runs on saturn-recomp's SH-2 interpreter, not on the recompiled output. The
+top 4 KiB of work RAM is left out because the game spills registers onto its stack.
 
-Memory outside work RAM and VDP1 VRAM is not modelled. A trial where both sides touch it is skipped, and
-`run.py` wants at least 100 of 300 to run to the end. So a function's hardware accesses are not compared:
-the frame hashes and the Beetle comparison are the evidence for those. A number parameter gets any 32-bit
-value whatever its declared width, passed at that width as the swap's wrapper does, so a type narrower than
-what the game reads fails. A `gaddr`, `REF(T)` or `uint32_t` gets a pointer into the data. `SPEC` in `check.py`
-narrows one that needs it. The random data runs from 060B0000 to the stack, and covers work RAM-L; half
-the trials also randomise the image's own variables. Every function's instructions and the literals they
-load keep their bytes. `CALLS` lists the calls a function makes, in order, where the order matters.
+`machine.py` sets up that memory. Half the trials start from the game's own work RAM, dumped along six
+routes by `python decomp/snapshots.py` into `build/decomp/ram/`, so the pointers a function follows lead
+somewhere real. The other half get random data from 060B0000 to the stack and over work RAM-L, and half
+of those also randomise the image's own variables. Either way, every function's instructions and the
+literals they load keep their bytes. Sound RAM, VDP1 and VDP2 memory and registers, the SCU's registers
+and the SH-2's on-chip registers are plain random memory on both sides: a trial compares what a function
+writes to a device, not what the device would do with it. The CD block is not modelled. A trial where both
+sides touch unmodelled memory is skipped, and `run.py` wants at least 100 of 300 to run to the end.
+
+A number parameter gets any 32-bit value whatever its declared width, passed at that width as the swap's
+wrapper does, so a type narrower than what the game reads fails. A `gaddr`, `REF(T)` or `uint32_t` gets a
+pointer into the data. `CALLS` in `check.py` lists the calls a function makes, in order, where the order
+matters.
 
 Random data often stops a function at its first guard, so a wrong arm can pass. After each function
 `check.py` says how many of its branch outcomes no trial reached ("5 of 14 branch outcomes never
-reached"). Those arms are unchecked until a `SPEC` entry or planted data reaches them.
+reached"). A case in `cases.py` reaches them: the function's arguments drawn from narrower forms, and
+plants, values written over the memory at given addresses in a share of the trials.
+`check.py --cases FILE` adds a file of `case()` calls to those.
 
 `shc_compare.py` is a second, separate measure. The game was built with Hitachi SHC, and these
 functions are the ones whose SHC 5.0 output has the same instructions as the game's, some in another

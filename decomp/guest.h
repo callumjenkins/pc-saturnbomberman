@@ -3,9 +3,9 @@
  * One source serves two compilers. Hitachi SHC reads it as plain C on the Saturn's own address
  * space, which is how a function is compared with the original's instructions. A host compiler
  * defines DECOMP_HOST, and the same macros read and write the emulated address space through g_rd
- * and g_wr. A guest address is a gaddr there, so a pointer into a struct is REF(T) in both.
+ * and g_wr. A guest address is a 32-bit gaddr in both, and REF(T) names one that points at a T.
  *
- *   REF(T)          pointer to a T
+ *   REF(T)          the address of a T
  *   GET(T,p,f)      p->f             SET(T,p,f,v)   p->f = v
  *   ELEM(T,base,i)  &((T *)base)[i]  BYTEOFF(T,base,n)  (T *)((char *)base + n)
  *   LD8/LD16/LD32   a scalar at an address, ST8/ST16/ST32 store one
@@ -79,13 +79,13 @@ void g_poll(void);
 
 #else
 
-typedef char *gaddr;
+typedef unsigned int gaddr;
 
-#define REF(T)             T *
-#define GET(T, p, f)       ((p)->f)
-#define SET(T, p, f, v)    ((p)->f = (v))
-#define ELEM(T, base, i)   (&((T *)(base))[i])
-#define BYTEOFF(T, base, n) ((T *)((char *)(base) + (n)))
+#define REF(T)             gaddr
+#define GET(T, p, f)       (((T *)(p))->f)
+#define SET(T, p, f, v)    (((T *)(p))->f = (v))
+#define ELEM(T, base, i)   ((gaddr)&((T *)(base))[i])
+#define BYTEOFF(T, base, n) ((gaddr)(base) + (n))
 #define LD8(a)             (*(signed char *)(a))
 #define LD32(a)            (*(int *)(a))
 #define LDU16(a)           (*(unsigned short *)(a))
@@ -93,7 +93,7 @@ typedef char *gaddr;
 #define ST8(a, v)          (*(char *)(a) = (v))
 #define ST16(a, v)         (*(short *)(a) = (v))
 #define ST32(a, v)         (*(int *)(a) = (v))
-#define GETB(b, i)         ((b)[i])
+#define GETB(b, i)         (((signed char *)(b))[i])
 #define PUT16(p, v)        (*(p)++ = (v))
 #define STORE16(p, v)      (*(p) = (v))
 typedef volatile unsigned short *H16PTR;

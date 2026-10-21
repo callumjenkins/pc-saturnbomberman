@@ -1,12 +1,15 @@
-/* The emulated address space the decompiled functions run on in check.py: work RAM-H, work RAM-L
- * and VDP1 VRAM, big-endian, with the cache-through mirror folded onto the cached address. check.py points
- * g_wram, g_wraml and g_vdp1 at the buffers of the SH-2 interpreter it runs the callees on, so a function
- * and the code it calls see the same bytes. An access outside them sets g_fault and reads zero. */
+/* The emulated address space the decompiled functions run on in check.py: the regions it lists in
+ * g_region_base, g_region_size and g_region, big-endian, with the cache-through mirror folded onto the
+ * cached address. check.py points them at the buffers of the SH-2 interpreter it runs the callees on, so
+ * a function and the code it calls see the same bytes. An access outside them sets g_fault and reads zero. */
 #include <stdint.h>
 
-uint8_t *g_wram;            /* 06000000, 0x100000 bytes */
-uint8_t *g_wraml;           /* 00200000, 0x100000 bytes */
-uint8_t *g_vdp1;            /* 05D00000, 0x80000 bytes */
+#define MAX_REGIONS 16
+
+uint32_t g_region_base[MAX_REGIONS];
+uint32_t g_region_size[MAX_REGIONS];
+uint8_t *g_region[MAX_REGIONS];
+int g_regions;
 int g_fault;
 int g_polls;                /* g_poll()s and g_call()s, which check.py compares with the game's */
 
@@ -39,14 +42,13 @@ uint32_t g_call(uint32_t addr, const uint32_t *args, int n)
 
 static uint8_t *locate(uint32_t addr, int size)
 {
+    int i;
+
     if (addr >> 28 == 2)
         addr &= 0x1FFFFFFF;
-    if (addr >= 0x06000000u && addr <= 0x06100000u - size)
-        return g_wram + (addr - 0x06000000u);
-    if (addr >= 0x00200000u && addr <= 0x00300000u - size)
-        return g_wraml + (addr - 0x00200000u);
-    if (addr >= 0x05D00000u && addr <= 0x05D80000u - size)
-        return g_vdp1 + (addr - 0x05D00000u);
+    for (i = 0; i < g_regions; i++)
+        if (addr >= g_region_base[i] && addr - g_region_base[i] <= g_region_size[i] - size)
+            return g_region[i] + (addr - g_region_base[i]);
     g_fault = 1;
     return 0;
 }

@@ -17,7 +17,7 @@ from collections import Counter
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "saturn-recomp", "src"))
-import lift, structure, check
+import lift, structure, check, machine
 from saturnrecomp import sh2, sh2emu
 E = sh2.encode
 BASE = 0x06006000
@@ -181,8 +181,7 @@ def run_one(seed, trials=40):
         data=bytes(rr.choice([0,0xff,0x7f,0x80,b]) for b in data)
         w[KR-0x06000000:KR-0x06000000+0x400]=data; hw[:]=w
         vals=[0x060B0000+rr.randrange(0,0x80,4)]+[rr.choice([0,1,2,3,0x7f,0x80,0xff,0x7fff,0x8000,0xffff,0x7fffffff,0x80000000,0xffffffff,0xfffffffe,rr.getrandbits(32)]) for _ in range(3)]
-        keep=(ctypes.c_char*len(hw)).from_buffer(hw)
-        ctypes.c_void_p.in_dll(lib,'g_wram').value=ctypes.addressof(keep)
+        keep=machine.point(lib,host)
         ctypes.c_int.in_dll(lib,'g_fault').value=0
         sv=[v-(1<<32) if v>=1<<31 else v for v in vals[:nparams]]
         got=fn(*sv)

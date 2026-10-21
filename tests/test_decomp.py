@@ -316,6 +316,16 @@ def test_a_tail_call_is_a_jump_that_hands_on_all_four_argument_registers():
     assert "GJUMP4(32, r4, r5, r6, r7)" in code
 
 
+@pytest.mark.parametrize("words, jump", [
+    pytest.param((encode("mov #imm,Rn", 5, low=2),), "GJUMP2(32, 0, 2)", id="one set after the call, behind one it overwrote"),
+    pytest.param((), "GJUMP0(32)", id="none set after the call"),
+])
+def test_a_tail_call_after_a_call_hands_on_only_the_registers_set_since(words, jump):
+    # bsr 0x06006024 ; nop ; ... ; mov #0x20,r1 ; jmp @r1 ; nop
+    code = lifted(0xB010, NOP, *words, encode("mov #imm,Rn", 1, low=0x20), encode("jmp @Rn", 1), NOP)
+    assert jump in code
+
+
 def test_a_branch_out_of_the_function_is_a_tail_jump_not_a_copy_of_the_code_it_reaches():
     # mov #1,r4 ; bra other ; nop ; other: mov #2,r0 ; rts ; nop, where `other` is a function of its own
     words = (encode("mov #imm,Rn", 4, low=1), 0xA000, NOP, encode("mov #imm,Rn", 0, low=2), RTS, NOP)
