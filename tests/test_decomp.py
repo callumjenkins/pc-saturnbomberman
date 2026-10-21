@@ -384,3 +384,13 @@ def test_a_loop_inside_a_loop_is_a_nested_while():
               5: block(5, "goto", [1], stmts=["y;"]), 6: block(6, "return")}
     assert structure.Structurer(blocks, 1).run() == [
         "while (outer) {", "    while (inner) {", "        x;", "        POLL();", "    }", "    y;", "    POLL();", "}", "return;"]
+
+
+@pytest.mark.parametrize("stmts", [pytest.param([], id="a test alone"), pytest.param(["load;"], id="a test after a load")])
+def test_a_loop_entered_at_its_test_advances_time_where_the_test_branches_back_into_the_body(stmts):
+    # entry: bra test ; body: work ; test: bt body
+    blocks = {1: block(1, "goto", [3]), 2: block(2, "goto", [3], stmts=["work;"]),
+              3: block(3, "branch", [2, 4], "n", stmts=stmts), 4: block(4, "return")}
+    blocks[3].polls = [2]
+    lines = [line.strip() for line in structure.Structurer(blocks, 1).run()]
+    assert lines.count("POLL();") == 1 and lines.index("POLL();") == lines.index("work;") - 1

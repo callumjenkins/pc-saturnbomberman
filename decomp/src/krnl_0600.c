@@ -24,6 +24,19 @@ void f06006368(void)
     ST32(0x26006038, LD32(0x26006038) + 1);
 }
 
+void f060065FC(gaddr dst, int value, int size)
+{
+    int i = 0;
+
+    if (size > 0) {
+        do {
+            i += 2;
+            ST16(dst, value);
+            dst += 2;
+        } while (AGAIN(i < size));
+    }
+}
+
 int f06006626(gaddr dst, int value, int end)
 {
     int n = dst & end;
@@ -55,6 +68,27 @@ void f0600665C(void)
     PUT16(p, 0);
     PUT16(p, 0);
     STORE16(p, LD16(0x060BC12E));
+}
+
+void f060066A4(void)
+{
+    gaddr src = 0x060BC130;
+    gaddr dst = 0x25C00000;
+    int i = 0;
+
+    GCALL3(0x060065FC, 0x060BC130, 0, 96);
+    ST16(0x060BC130, 9);
+    ST16(0x060BC144, 0x13F);
+    ST16(0x060BC146, LD16(0x060BC12C));
+    ST16(0x060BC150, 10);
+    ST16(0x060BC170, -32768);
+    POLL();
+    do {
+        i += 2;
+        ST16(dst, LD16(src));
+        src += 2;
+        dst += 2;
+    } while (AGAIN(i < 96));
 }
 
 void f060066EC(void)
@@ -562,6 +596,32 @@ int f0600A08C(void)
     return LD32(0x060BF4F8 + i * 4);
 }
 
+void f0600A0B4(void)
+{
+    int prev = 1;
+    int i = 21;
+    int slot;
+    int value;
+
+    POLL();
+    ST32(0x060BF5D8, 0x4D2);
+    ST32(0x060BF5D4, 0x4D2);
+    do {
+        slot = MODS(i, 55);
+        ST32(0x060BF4F8 + slot * 4, prev);
+        value = prev;
+        prev = LD32(0x060BF5D8) - prev;
+        if (prev < 0)
+            prev += 0x8000;
+        ST32(0x060BF5D8, value);
+        i += 21;
+    } while (AGAIN(i <= 0x46E));
+    GCALL0(0x06009FA8);
+    GCALL0(0x06009FA8);
+    GCALL0(0x06009FA8);
+    ST32(0x060BF4F4, 55);
+}
+
 unsigned char f0600A0B8(void)
 {
     return GCALL0(0x0600A08C);
@@ -822,6 +882,61 @@ int f0600A63E(int mode)
     return (0x000FFFFF & (offset * GCALL1(0x0600A570, mode))) + 0x25E00000;
 }
 
+int f0600A76E(int mode, unsigned int value)
+{
+    unsigned int a = LDU16(0x060FA9C8);
+    unsigned int b = LDU16(0x060FA9CA);
+    unsigned int bits = mode;
+    unsigned int sel = a;
+    unsigned int out;
+
+    switch (mode) {
+    case 1:
+        bits = (b >> 4 & 16) | (HELPER(b >> 12) & 7);
+        sel = LDU16(0x060FA9D8) & 0xC000;
+        break;
+    case 2:
+    case 4:
+        bits = (a << 4 & 16) | (a >> 4 & 7);
+        sel = LDU16(0x060FA9D0) & 0xC000;
+        break;
+    case 8:
+        bits = (a >> 4 & 16) | (HELPER(a >> 12) & 3);
+        sel = LDU16(0x060FA9D2) & 0xC000;
+        break;
+    case 16:
+        bits = (b << 4 & 16) | (b >> 1 & 1);
+        sel = LDU16(0x060FA9D4) & 0xC000;
+        break;
+    case 32:
+        bits = (b & 16) | (b >> 5 & 1);
+        sel = LDU16(0x060FA9D6) & 0xC000;
+        break;
+    }
+    if (!(sel & 0x8000))
+        return value;
+    out = bits;
+    switch ((bits & 16) | sel) {
+    case 0x8000:
+        out = (value & 0x3FF) | (value >> 12 & 0xC00);
+        break;
+    case 0x8010:
+        out = (value >> 2 & 0x3FF) | (value >> 12 & 0xC00);
+        break;
+    case 0xC000:
+        out = value & 0xFFF;
+        break;
+    case 0xC010:
+        out = value >> 2 & 0xFFF;
+        break;
+    }
+    if ((bits & 15) == 0)
+        out |= value >> 4 & 0xF000;
+    else
+        out |= value >> 8 & 0x7000;
+    return out;
+}
+
 int f0600AA8A(int n)
 {
     switch (n) {
@@ -1062,6 +1177,28 @@ void f0600C4E0(int n)
     ST32(0x060D7EA0, LD32(src));
 }
 
+void f0600C8AC(void)
+{
+    gaddr src;
+    int row, col;
+
+    if (LD16(0x060D7E6E) == 0)
+        return;
+    GCALL0(0x0600C44C);
+    POLL();
+    row = 0;
+    do {
+        src = LD32(0x060D7E94) + row * 128;
+        col = 0;
+        do {
+            GCALL3(0x0600C796, LD16(src), col, row);
+            src += 2;
+            col++;
+        } while (AGAIN(col < 64));
+        row++;
+    } while (AGAIN(row < 64));
+}
+
 void f0600C8C6(void)
 {
     int x, y;
@@ -1150,6 +1287,17 @@ int f0600C9C0(unsigned short pos)
         col = col_b - 1;
     }
     return row * 64 + col;
+}
+
+int f0600CA20(int cell)
+{
+    unsigned int x, y;
+
+    GCALL1(0x0600C9AA, cell);
+    y = LDU16(0x060D7EB6);
+    x = LDU16(0x060D7EB4);
+    POLL();
+    return ((y >> 5) << 15) + ((x >> 5) << 14) + ((y & 31) << 9) + ((x & 31) << 3);
 }
 
 void f0600CA32(int x, int y)
@@ -1386,6 +1534,21 @@ void f0600D0E4(unsigned short i, unsigned short x, unsigned short y)
     GCALL2(0x0600C950, x, y);
 }
 
+void f0600D148(short index, short cell)
+{
+    unsigned short x = GCALL1(0x0600C9AA, cell);
+    unsigned short y = LDU16(0x060D7EB6);
+    gaddr obj;
+    int py;
+
+    POLL();
+    obj = OBJ(index);
+    ST16(obj + 16, (x << 4) - LD16(0x060D82BA));
+    py = (y << 4) - LDU16(0x060D82BC);
+    ST16(obj + 18, GCALL0(0x0600D0D0) + py);
+    GCALL2(0x0600C950, x, y);
+}
+
 void f0600D16A(unsigned short i)
 {
     REF(Obj84) o = BYTEOFF(Obj84, OBJS, (unsigned short)(i * 84));
@@ -1448,6 +1611,12 @@ void f0600D2BE(int mask, unsigned short amt)
         ST16(base + 32, (LD16(base + 32) + amt) & 0x3FFF);
     if (mask & 32)
         ST16(base + 36, (LD16(base + 36) + amt) & 0x3FFF);
+}
+
+void f0600D38A(int a, short amount)
+{
+    GCALL2(0x0600D2BE, a, amount);
+    ST16(0x060C1AAE, LD16(0x060C1AAE) - amount);
 }
 
 void f0600D3D4(int mask, unsigned short n)

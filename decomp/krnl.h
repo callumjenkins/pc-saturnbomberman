@@ -101,4 +101,15 @@ typedef struct { short until, ya, x, yb, z; } RampKey;
 #define AGET(f)     GET(Actor, ACTOR, f)
 #define ASET(f, v)  SET(Actor, ACTOR, f, v)
 
+typedef struct { short count, rate, limit, pos; char pad8[6]; signed char accel; char pad15[3]; } Slide;
+/* The record 060C1658 points at. */
+typedef struct { signed char col, row; short x, y; char pad6[4]; short id, id2, count, v, dv; int fn; } Fall;
+
+#define FALL_PTR    ((REF(Fall))LD32(0x060C1658))
+
+/* The flag halfword of a cell. */
+#define FLAGS_AT(cell) (0x060EC8B0 + (cell) * 2)
+#define DEV 0x060FC084
+#define IN_BOX(x, y) ((x) >= 0x1C0 && (x) <= 0x220 && (y) >= 0x1C0 && (y) <= 0x200)
+
 #endif

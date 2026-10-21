@@ -108,6 +108,25 @@ int f060413E2(void)
     return v;
 }
 
+int f0604142A(short arg)
+{
+    int rnd = GCALL1(0x0600A0EC, 8) + 18;
+    int flag;
+    int kind;
+
+    GCALL3(0x0600D0E4, (short)TGET(h8), rnd, arg);
+    POLL();
+    flag = (short)TGET(h12);
+    kind = GCALL1(0x0600CA6A, TGET(h8)) & 63;
+    if (kind == 26)
+        flag = 0;
+    else if (kind == 18)
+        flag = 1;
+    else if ((unsigned int)GCALL0(0x0600A0B8) < 16)
+        flag ^= 1;
+    return flag;
+}
+
 void f0604144E(void)
 {
     int mode = TGET(h14);
@@ -126,6 +145,16 @@ void f0604144E(void)
 void f060429A8(void)
 {
     SET(Slot24, ELEM(Slot24, SLOTS, 1), fn, 0x06042864);
+}
+
+int f06042A9C(void)
+{
+    int y;
+
+    ST16(LD32(TASK_OBJ) + 36, HELPER(((short)TGET(h10) - LD32(0x060C02D8)) >> 8));
+    y = HELPER(((short)TGET(h12) - LD32(0x060C02DC)) >> 8);
+    ST16(LD32(TASK_OBJ) + 38, y);
+    return y;
 }
 
 int f06042C8C(void)
@@ -388,6 +417,24 @@ int f0604D47C(short a, short b)
     return LD16(p) < 0 ? 0 : n;
 }
 
+int f0604D4D4(int a, short limit)
+{
+    int count = 0;
+    int i;
+
+    if ((short)GCALL2(0x0604D47C, a, limit) != 0)
+        return 0;
+    if (limit >= 0) {
+        i = 0;
+        do {
+            if ((short)GCALL2(0x0604D47C, a, i) == 0)
+                count++;
+            i++;
+        } while (AGAIN((short)i <= limit));
+    }
+    return count;
+}
+
 int f0604D55E(short i)
 {
     return LD16(0x060B6A00 + i * 2);
@@ -427,6 +474,21 @@ int f0604D5D4(unsigned short x, unsigned short y, unsigned short x2, unsigned sh
     return (LD8(0x060C179C) & 255) * 16 + (LD8(0x060C179D) & 255) > x * 16 + y2;
 }
 
+void f0604D602(void)
+{
+    int next;
+
+    if ((GCALL0(0x0604D590) & 0xFFFF) != 0)
+        return;
+    if (LD16(0x060BF5EA) != 0)
+        return;
+    next = GCALL2(0x0604D736, LD8(0x060C029C) & 255, LD8(0x060C029D) & 255) & 255;
+    ST8(0x060C179C, LD8(0x060C029C));
+    if (next == 0)
+        ST8(0x060C179C, LD8(0x060C179C) + 1);
+    ST8(0x060C179D, next);
+}
+
 int f0604D644(unsigned short a, unsigned short b)
 {
     unsigned int hi = LD8(0x060C029E) & 255;
@@ -444,6 +506,61 @@ void f0604D66C(unsigned char a, unsigned char b)
     ST8(0x060C179C, a);
     ST8(0x060C029F, b);
     ST8(0x060C179D, b);
+}
+
+int f0604D6AC(void)
+{
+    int a = LD8(0x060C029C);
+    int b = LD8(0x060C029D);
+    int c, d, best;
+    int result = 0;
+
+    if (b != (short)GCALL1(0x0604D55E, a)) {
+        c = a;
+        d = b + 1;
+    } else {
+        c = a + 1;
+        d = 0;
+    }
+    best = LD8(0x060C179A) & 255;
+    if (best >= c) {
+        if (best == c && (LD8(0x060C179B) & 255) < d) {
+            result = 1;
+            ST8(0x060C179B, d);
+        }
+    } else {
+        ST8(0x060C179A, c);
+        ST8(0x060C179B, d);
+        result = a == c ? 1 : 2;
+    }
+    return result;
+}
+
+int f0604D736(int a, unsigned int n)
+{
+    if (n < (unsigned int)(short)GCALL1(0x0604D55E, a))
+        return n + 1;
+    return 0;
+}
+
+void f0604D758(void)
+{
+    int a = LD8(0x060C029C);
+    int b = LD8(0x060C029D);
+    int best;
+
+    GCALL2(0x0604D780, a, b);
+    b = LD8(0x060C029D) & 255;
+    a = LD8(0x060C029C) & 255;
+    POLL();
+    best = LD8(0x060C029E) & 255;
+    if (best >= a) {
+        if (best == a && (LD8(0x060C029F) & 255) < b)
+            ST8(0x060C029F, b);
+    } else {
+        ST8(0x060C029E, a);
+        ST8(0x060C029F, b);
+    }
 }
 
 /* The same greater-pair rule as f060236DE, on 179A and 179B. */
@@ -491,9 +608,39 @@ void f0604D8B2(void)
     ST8(0x060C179F, 1);
 }
 
+int f0604D8C4(int n)
+{
+    int best;
+
+    if ((short)n >= (LD8(0x060C179A) & 255))
+        best = LD8(0x060C179B) & 255;
+    else
+        best = GCALL1(0x0604D55E, n);
+    return best + 1;
+}
+
 int f0604D922(short n)
 {
     return n >= (unsigned char)LD8(0x060C179A) ? 0 : -1;
+}
+
+int f0604D9D0(int kind, int row, int col, gaddr out)
+{
+    int last = row == 4;
+    short base = LD16(0x060B6A2A + row * 4);
+    int x = kind;
+
+    if (kind == 0) {
+        x = !last ? col * 2 + base - 1 : (LD8(0x060B6A3E + col) + base) + 1;
+    } else if (kind == 1) {
+        x = !last ? col * 2 + base - 3 : (LD8(0x060B6A3E + col - 1) + base) + 1;
+    } else if (kind == 2) {
+        x = LD16(0x060B6A2A + (row * 2 + 1) * 2) + base;
+    }
+    if (row == 0)
+        x--;
+    ST16(out, (short)x >= base ? 1 : 0);
+    return x;
 }
 
 void f0604DFFE(gaddr p)

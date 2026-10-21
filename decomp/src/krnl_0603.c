@@ -163,6 +163,13 @@ int f06031B94(int arg)
     return LD16((GCALL1(0x06031AE2, arg) & 0xFFFF) * 16 + 0x060C105A) & 48;
 }
 
+void f06031BAA(int n, short bits)
+{
+    gaddr p = 0x060C105A + ((unsigned short)GCALL1(0x06031AE2, n) << 4);
+
+    ST16(p, (LD16(p) & 0xFFCF) | bits);
+}
+
 int f06032EF2(void)
 {
     int mode = LD32(0x060C1048);
@@ -1201,6 +1208,31 @@ void f060389E2(void)
         GCALL1(0x0600940A, LD16(p));
 }
 
+void f06038E1E(gaddr first, gaddr second)
+{
+    int n = 0;
+
+    while (LD8(first) != 0) {
+        ST8(0x060C1706 + n, LD8(first));
+        n++;
+        first++;
+        if (n >= 11)
+            break;
+        POLL();
+    }
+    ST8(0x060C1706 + n, 0);
+    n = 0;
+    while (LD8(second) != 0) {
+        ST8(0x060C1712 + n, LD8(second));
+        n++;
+        second++;
+        if (n >= 10)
+            break;
+        POLL();
+    }
+    ST8(0x060C1712 + n, 0);
+}
+
 void f06039374(void)
 {
 }
@@ -1418,6 +1450,24 @@ void f0603A614(unsigned short obj, short dir, short amount)
     }
 }
 
+int f0603A64C(void)
+{
+    int left;
+
+    GCALL1(0x0606948A, GET(Fall, FALL_PTR, id));
+    if (GET(Fall, FALL_PTR, count) == 0) {
+        SET(Fall, FALL_PTR, fn, 0x0603A45A);
+    } else {
+        GCALL3(0x0603A614, GET(Fall, FALL_PTR, id), GET(Fall, FALL_PTR, y), GET(Fall, FALL_PTR, x));
+        GCALL3(0x0603A614, GET(Fall, FALL_PTR, id2), GET(Fall, FALL_PTR, y), GET(Fall, FALL_PTR, x));
+        ST16(OBJ(GET(Fall, FALL_PTR, id)) + 38, LD16(OBJ(GET(Fall, FALL_PTR, id)) + 38) + HELPER(GET(Fall, FALL_PTR, v) >> 8));
+        SET(Fall, FALL_PTR, v, GET(Fall, FALL_PTR, v) + GET(Fall, FALL_PTR, dv));
+    }
+    left = GET(Fall, FALL_PTR, count) - 1;
+    SET(Fall, FALL_PTR, count, left);
+    return left;
+}
+
 void f0603A82E(void)
 {
     int i = 0;
@@ -1491,6 +1541,26 @@ void f0603B258(short v)
     ST16(0x060C1736, v);
 }
 
+void f0603B25E(short from, short to)
+{
+    gaddr src, dst;
+    short drop, w68, w70;
+    int mag, scale;
+
+    GCALL2(0x0600A3D8, from, to);
+    src = OBJ(from);
+    drop = LD16(src + 38);
+    w68 = LD16(src + 68);
+    w70 = LD16(src + 70);
+    dst = OBJ(to);
+    ST16(dst + 36, -drop);
+    ST16(dst + 38, 0);
+    mag = drop >= -128 ? drop * 2 + 0x100 : 0;
+    scale = HELPER((LDU16(0x060C1736) * (short)mag) >> 8);
+    ST16(dst + 68, HELPER((w68 * (short)scale) >> 8));
+    ST16(dst + 70, HELPER((w70 * (short)scale) >> 8));
+}
+
 void f0603B32E(void)
 {
     int base;
@@ -1515,6 +1585,39 @@ void f0603B650(void)
 void f0603B658(void)
 {
     ST32(0x060D7E30, 0x0603B56C);
+}
+
+static int clamp(int d, int limit)
+{
+    int mag = (short)d >= 0 ? (short)d : -(short)d;
+
+    if (mag > limit)
+        return (short)DIVS((short)d, mag) * (short)limit;
+    return d;
+}
+
+void f0603B660(void)
+{
+    gaddr obj;
+    int dx, dy, dz, limit;
+
+    GCALL1(0x0600C9AA, (short)TGET(h18));
+    GCALL2(0x0600CA32, LDU16(0x060D7EB4), LDU16(0x060D7EB6));
+    obj = LD32(TASK_OBJ);
+    dx = LD16(0x060D7E88) - LD16(obj + 16);
+    dy = LD16(0x060D7E8A) - LD16(obj + 18);
+    limit = LD8(0x060C1734) & 255;
+    dz = (short)TGET(h20) - LD16(obj + 38);
+    dx = clamp(dx, limit);
+    dy = clamp(dy, limit);
+    dz = clamp(dz, limit);
+    ST16(obj + 16, LD16(obj + 16) + dx);
+    ST16(obj + 18, LD16(obj + 18) + dy);
+    ST16(obj + 38, LD16(obj + 38) + DIVS((short)dz, (LD32(TICK) & 1) ? 1 : 2));
+    GCALL0(0x0603B32E);
+    obj = LD32(TASK_OBJ);
+    if (LD16(obj + 16) == LD16(0x060D7E88) && LD16(obj + 18) == LD16(0x060D7E8A) && LD16(obj + 38) == (short)TGET(h20))
+        TSET(fn, 0x0603DDA6);
 }
 
 void f0603B7EA(short a, short b, short c)

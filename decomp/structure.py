@@ -117,13 +117,13 @@ def drop_tail_continue(lines: list[str]) -> list[str]:
     return lines
 
 
-def polled(lines: list[str]) -> list[str]:
-    """The lines with each jump back to this loop's header written as POLL() and a continue."""
+def polled(lines: list[str], advance: bool = True) -> list[str]:
+    """The lines with each jump back to this loop's header written as a continue, after POLL() if `advance`."""
     out = []
     for line in lines:
         if line.strip() == BACK:
             indent = line[:len(line) - len(line.lstrip())]
-            out += [indent + "POLL();", indent + "continue;"]
+            out += ([indent + "POLL();"] if advance else []) + [indent + "continue;"]
         else:
             out.append(line)
     return out
@@ -208,17 +208,23 @@ class Structurer:
         block = self.blocks[header]
         body = self.bodies[header]
         self.active.append((header, leave))
+        # A loop entered by a jump to its test goes back where the test branches into the body, and only there.
+        enters = any(target in body and target != header for target in block.polls)
+        if enters and any(header in self.blocks[at].polls for at in body):
+            raise Unstructured("the loop at %08X goes back in two places" % header)
         tests_only = block.kind == "branch" and not block.stmts and (block.targets[0] in body) != (block.targets[1] in body)
         if tests_only:
-            stay = block.targets[0] in body
-            condition = block.value if stay else negate(block.value)
-            inner = self.sequence(block.targets[0] if stay else block.targets[1], header)
+            stay = block.targets[0] if block.targets[0] in body else block.targets[1]
+            condition = block.value if stay == block.targets[0] else negate(block.value)
+            inner = self.poll(block, stay) + self.sequence(stay, header)
             head = "while (%s) {" % condition
         else:
             inner = self.sequence(header, header, first=True)
             head = "while (1) {"
         self.active.pop()
         inner = drop_tail_continue(inner)
+        if enters:
+            return [head] + ["    " + line for line in polled(inner, advance=False)] + ["}"]
         if len(inner) >= 5 and inner[-5].startswith("if (") and inner[-4:] == ["    " + BACK, "} else {", "    break;", "}"]:
             condition = inner[-5][4:-3]
             return ["do {"] + ["    " + line for line in polled(inner[:-5])] + ["} while (AGAIN(%s));" % condition]

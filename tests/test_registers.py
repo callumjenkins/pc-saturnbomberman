@@ -55,6 +55,28 @@ def test_a_callee_with_no_code_is_taken_to_read_the_four_argument_registers():
     assert registers.reads(image, BASE, code) == registers.ARGUMENTS
 
 
+@pytest.mark.parametrize("island, read", [
+    pytest.param(True, {4, 5}, id="the code past the table is where it goes"),
+    pytest.param(False, registers.ARGUMENTS, id="no code past it, so it leaves the function"),
+])
+def test_a_jump_through_a_register_goes_to_the_code_after_the_functions_table(island, read):
+    # mov r4,r3 ; jmp @r3 ; nop ; .word table ; island: mov r5,r0 ; rts ; nop
+    words = (encode("mov Rm,Rn", 3, 4), encode("jmp @Rn", 3), NOP, 0x1234, encode("mov Rm,Rn", 0, 5), RTS, NOP)
+    image = sh2.Image(b"".join(struct.pack(">H", w) for w in words), BASE)
+    code = {BASE, BASE + 2, BASE + 4} | ({BASE + 8, BASE + 10, BASE + 12} if island else set())
+    assert registers.reads(image, BASE, {BASE: code}) == read
+
+
+def test_a_call_through_a_register_loaded_well_before_it_reads_what_its_callee_reads():
+    # mov.l pool,r2 ; ten pushes ; jsr @r2 ; mov #0,r4 ; rts ; nop ; .align ; pool: .long callee
+    # callee: mov r4,r0 ; rts ; nop
+    caller = (0xD207,) + (encode("mov.l Rm,@-Rn", 15, 8),) * 10 + (encode("jsr @Rn", 2), encode("mov #imm,Rn", 4),
+                                                                   RTS, NOP, NOP, 0x0600, 0x6024)
+    image, code = program(caller, (encode("mov Rm,Rn", 0, 4), RTS, NOP))
+    code[BASE] -= {BASE + 30, BASE + 32, BASE + 34}
+    assert registers.reads(image, BASE, code) == set()
+
+
 def test_a_call_to_a_helper_that_takes_r0_is_refused():
     # caller: bsr helper ; mov r4,r0 ; rts ; nop                   helper: shar r0 ; rts ; nop
     image, code = program((0xB002, encode("mov Rm,Rn", 0, 4), RTS, NOP), (encode("shar Rn", 0), RTS, NOP))

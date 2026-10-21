@@ -38,11 +38,12 @@ def reads(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> fro
         return ARGUMENTS
     cache[address] = None
     nodes = {}
+    islands = [pc for pc in sorted(code) if pc - 2 not in code and pc != address]
     for pc in sorted(code):
         ins = image.insn(pc)
         if pc - 2 in code and image.insn(pc - 2).delay:
             continue                                    # a delay slot, part of its branch's node
-        nodes[pc] = _node(image, ins, code, functions)
+        nodes[pc] = _node(image, ins, code, functions, islands)
     live: dict[int, frozenset[int]] = {pc: frozenset() for pc in nodes}
     changed = True
     while changed:
@@ -58,10 +59,11 @@ def reads(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> fro
     return cache[address]
 
 
-def _node(image: sh2.Image, ins: sh2.Insn, code: set[int],
-          functions: dict[int, set[int]]) -> tuple[frozenset[int], frozenset[int], list[int]]:
+def _node(image: sh2.Image, ins: sh2.Insn, code: set[int], functions: dict[int, set[int]],
+          islands: list[int]) -> tuple[frozenset[int], frozenset[int], list[int]]:
     """(registers read, registers written, the instructions that can come next) for one instruction,
-    with its delay slot, which runs before the branch takes effect."""
+    with its delay slot, which runs before the branch takes effect. A jmp through a table goes to any of
+    the islands, the function's code that follows data, where the recompiler found the table's targets."""
     uses, defs = _operands(ins)
     after = [ins.pc + 2]
     if ins.delay:
@@ -71,6 +73,8 @@ def _node(image: sh2.Image, ins: sh2.Insn, code: set[int],
     if ins.op in ("rts", "rte"):
         return uses, defs, []
     target = ins.target if ins.op in ("bsr", "bra") else _loaded(image, ins, code) if ins.op in ("jsr", "jmp") else None
+    if ins.op == "jmp" and target is None and islands:
+        return uses, defs, islands
     leaves = ins.op in _TAILS and (target is None or target not in code)
     if ins.op in _CALLS or leaves:
         callee = reads(image, target, functions) if target is not None else ARGUMENTS
@@ -108,9 +112,9 @@ def routine(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> t
 
 
 def _loaded(image: sh2.Image, ins: sh2.Insn, code: set[int]) -> int | None:
-    """The address a jsr or jmp goes to, where an instruction a few before it loads the register from a
+    """The address a jsr or jmp goes to, where one of the 32 instructions before it loads the register from a
     literal and nothing between writes it again."""
-    for pc in range(ins.pc - 2, ins.pc - 18, -2):
+    for pc in range(ins.pc - 2, ins.pc - 66, -2):
         if pc not in code:
             return None
         prior = image.insn(pc)

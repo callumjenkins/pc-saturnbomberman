@@ -19,6 +19,7 @@ agrees with the game's own code.
 | `cases.py`, `planted/` | Arguments and planted values that reach the branches default trials miss; one file in `planted/` per batch of workers |
 | `registers.py` | Which registers a function reads before writing them, and the runtime routines SHC calls for an operator |
 | `guest.h`, `host_mem.c` | Macros and memory that let one source compile for SHC and for the host |
+| `divide.c` | SHC's division routines in C, for the cosim and the game |
 | `swap.cpp`, `swap.cmake` | The runtime side: `g_rd`, `g_wr`, `g_call` and the build option |
 | `shc_compare.py` | Compiles `src/` with SHC and compares its instructions with the game's |
 

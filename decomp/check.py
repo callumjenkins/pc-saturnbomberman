@@ -114,7 +114,8 @@ def branches(entry: int) -> list[int]:
 def build(sources: list[str] | None = None) -> ctypes.CDLL:
     out = os.path.join(tempfile.mkdtemp(prefix="decomp-"), "libdecomp.so")
     subprocess.check_call(["clang", "-std=gnu11", "-O1", "-Wall", "-shared", "-fPIC", "-fwrapv", "-DDECOMP_HOST",
-                           "-I", HERE, "-o", out, *(sources or status.sources()), os.path.join(HERE, "host_mem.c")])
+                           "-I", HERE, "-o", out, *(sources or status.sources()), os.path.join(HERE, "host_mem.c"),
+                           os.path.join(HERE, "divide.c")])
     return ctypes.CDLL(out)
 
 
