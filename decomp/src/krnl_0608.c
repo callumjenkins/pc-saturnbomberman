@@ -279,10 +279,53 @@ void f06083900(void)
     } while (AGAIN(p < 0x060C28D0));
 }
 
+void f06083BC6(void)
+{
+    ST32(0x060E2160 + (short)(LD16(0x060C062C) * 20), 0x06083C0A);
+    GJUMP1(0x0606D8E6, LDU16(LD32(CURRENT) + 40));
+}
+
 void f06083BE8(void)
 {
     ST32(0x060E2160 + (short)(LD16(0x060C062C) * 20), 0x06083C18);
     GJUMP1(0x0606D8E6, LDU16(LD32(CURRENT) + 40));
+}
+
+void f060840C0(int delta)
+{
+    gaddr cur = LD32(CURRENT);
+    unsigned int angle = (LDU16(cur + 66) << 16) + LDU16(LD32(CURRENT) + 68) + delta;
+
+    ST16(LD32(CURRENT) + 12, angle >> 16);
+    ST16(LD32(CURRENT) + 10, angle);
+}
+
+int f060845BC(void)
+{
+    GCALL0(0x0606E81C);
+    return GCALL3(0x0606BCDE, LDU16(LD32(CURRENT) + 64), 7, 7) != 0;
+}
+
+void f060846D2(void)
+{
+    GJUMP0(0x060846FE);
+}
+
+void f06084794(void)
+{
+    POLL();
+    GJUMP1(0x0606CABE, 0x4000);
+}
+
+void f0608479C(void)
+{
+    GJUMP1(0x0606CABE, -16384);
+}
+
+int f060847A4(void)
+{
+    GCALL0(0x0606E81C);
+    return GCALL1(0x0606C390, 3) != 0;
 }
 
 void f060848D4(void)
@@ -344,6 +387,11 @@ int f06085D9C(void)
     return GCALL2(0x0606C3F4, 3, 3) != 0;
 }
 
+void f06085EC6(void)
+{
+    GJUMP0(0x06085ECE);
+}
+
 void f0608661C(void)
 {
     GCALL3(0x0609B960, 6, 0, 0);
@@ -374,6 +422,44 @@ int f06086CEC(void)
     if (GCALL1(0x0606C390, 0))
         return 0;
     ST8(LD32(CURRENT) + 6, dir);
+    return 1;
+}
+
+void f06086D52(void)
+{
+    ST16(0x060C2E9C, 3);
+    ST16(0x060C2E9E, 0);
+    GJUMP1(0x060144F4, 0x06086D64);
+}
+
+int f06087374(void)
+{
+    gaddr flags = FLAGS_AT(LDU16(LD32(CURRENT) + 20));
+
+    ST16(flags, LDU16(flags) & 0xFFF7);
+    return 0;
+}
+
+void f060873DE(void)
+{
+    if (LDU16(FLAGS_AT(LDU16(LD32(CURRENT) + 20))) & 7)
+        return;
+    GCALL0(0x06087374);
+    GJUMP1(0x060144F4, 0x06087406);
+}
+
+void f06087406(void)
+{
+    GCALL1(0x060144F4, 0x0606D398);
+    GJUMP1(0x06014516, 0x0606D37A);
+}
+
+int f06087662(void)
+{
+    if (!LD16(0x060C2EA6))
+        return 0;
+    GCALL1(0x060144F4, 0x0606D23C);
+    ST16(LD32(CURRENT) + 48, 41);
     return 1;
 }
 
@@ -409,6 +495,24 @@ int f06087AE6(void)
 int f06087C34(void)
 {
     return GCALL0(0x0606BF22) != 0;
+}
+
+void f06087C68(void)
+{
+    GJUMP0(0x06087CAC);
+}
+
+void f06087C82(void)
+{
+    GCALL2(0x06068A8E, LDU16(OBJIDX), LDU16(LD32(CURRENT) + 80) + 6);
+    GCALL1(0x06014516, 0x0606D88C);
+    GJUMP0(0x06087CAC);
+}
+
+void f06087C98(void)
+{
+    GCALL1(0x06014516, 0x0606D88C);
+    GJUMP0(0x06087CAC);
 }
 
 int f06087FAE(void)
@@ -510,9 +614,24 @@ void f06088E80(void)
     GJUMP0(0x0603C7BC);
 }
 
+void f0608905E(void)
+{
+    GJUMP0(0x0608909C);
+}
+
+void f06089080(void)
+{
+    GJUMP0(0x0608909C);
+}
+
 int f060894F2(void)
 {
     return GCALL1(0x0606C390, 0) != 0;
+}
+
+void f06089752(void)
+{
+    GJUMP0(0x0608975A);
 }
 
 int f06089766(void)
@@ -856,6 +975,11 @@ int f0608B80C(void)
 
 void f0608B904(void)
 {
+}
+
+void f0608BE1C(void)
+{
+    GJUMP0(0x0608BE24);
 }
 
 void f0608CE94(int n)

@@ -70,6 +70,18 @@ int f060506B4(unsigned short k)
     return 11;
 }
 
+int f060506D0(void)
+{
+    unsigned int i = 0;
+    int sum = 0;
+
+    do {
+        sum += GCALL1(0x060506B4, i);
+        i++;
+    } while (AGAIN(i < 5));
+    return sum;
+}
+
 int f06050C8C(void)
 {
     return (unsigned char)LD8(0x060C17B6) != 255;
@@ -799,6 +811,11 @@ int f06059F0E(void)
     return (LD8(0x060C18E2) & 255) == 128 && (LD8(0x060C18E3) & 255) == 128;
 }
 
+int f06059F98(int a, int b, int c, int d)
+{
+    return DIVS(0xE0F + GCALL4(0x06058DA6, a, b, c, d), 0xE10);
+}
+
 void f0605A556(short flag)
 {
     unsigned int bits = LD32(0x060C1238);
@@ -1064,6 +1081,14 @@ unsigned char f0605B0F8(void)
     return value;
 }
 
+int f0605B240(void)
+{
+    int result = GCALL1(0x06038004, LD16(LD32(0x060C1658) + 6));
+
+    SET(Fall, FALL_PTR, fn, 0x0605B25A);
+    return result;
+}
+
 void f0605B326(void)
 {
     int link = 3;
@@ -1287,6 +1312,32 @@ int f0605BC9A(void)
     return 40;
 }
 
+int f0605BEA2(void)
+{
+    GCALL1(0x0605D3D4, 0);
+    GCALL1(0x0605CD48, 0);
+    GCALL1(0x0605CD48, 1);
+    return GJUMP0(0x0605BEBA);
+}
+
+int f0605BEA8(void)
+{
+    GCALL1(0x0605CD48, 0);
+    GCALL1(0x0605CD48, 1);
+    return GJUMP0(0x0605BEBA);
+}
+
+int f0605BEAC(void)
+{
+    GCALL1(0x0605CD48, 1);
+    return GJUMP0(0x0605BEBA);
+}
+
+int f0605BEB0(void)
+{
+    return GJUMP0(0x0605BEBA);
+}
+
 void f0605C9B4(int a)
 {
     POLL();
@@ -1382,6 +1433,16 @@ int f0605CCE0(void)
     ST16(obj + 16, (unsigned int)pos >> 16);
     ST16(obj + 12, pos);
     return pos;
+}
+
+int f0605D366(void)
+{
+    int count;
+
+    GCALL1(0x0606948A, LD16(LD32(TASK_PTR) + 14));
+    count = LD16(OBJ(TGET(h14)) + 4) + 1;
+    ST16(OBJ(TGET(h16)) + 4, count);
+    return count;
 }
 
 void f0605D724(void)
@@ -1506,6 +1567,33 @@ int f0605F204(int a)
         return 0;
     TSET(h12, 255);
     return r;
+}
+
+void f0605F4A8(void)
+{
+    ST8(LD32(CURRENT) + 6, LD8(0x060D7B55));
+}
+
+int f0605F4B4(void)
+{
+    if (LDU8(0x060C029C) != 2)
+        return 0;
+    if (!GCALL1(0x06022FFC, 0))
+        return 0;
+    GCALL1(0x0600996A, 102);
+    return 1;
+}
+
+int f0605F834(void)
+{
+    GCALL2(0x06008A6A, 1, 1);
+    GCALL0(0x0605F88E);
+    GCALL3(0x0600D026, 1, 0, 0);
+    ST32(0x060C1914, 0x00010000);
+    GCALL1(0x0609AFCC, 0x060B6790);
+    ST16(0x060FAA38, 0x100);
+    ST16(0x060BB8FC, 1);
+    return 0x060BB8FC;
 }
 
 void f0605F86A(void)

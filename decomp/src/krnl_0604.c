@@ -236,6 +236,52 @@ int f06042C8C(void)
     return GJUMP0(0x06022F14);
 }
 
+int f06042F96(void)
+{
+    FRAME(sp, 16);
+
+    COPYB(sp - 16, 0x060B20CE, 6);
+    GCALL2(0x06008A6A, 8, 1);
+    GCALL1(0x06068A5E, sp - 16);
+    if (LD16(SLOT(1) + 8) == 0)
+        return 0;
+    GCALL1(0x060692DC, LDU16(SLOT(1) + 10));
+    return GCALL1(0x06022EDA, 1);
+}
+
+int f06043194(void)
+{
+    FRAME(sp, 16);
+
+    COPYB(sp - 16, 0x060B20DA, 6);
+    GCALL2(0x06008A6A, 8, 1);
+    GCALL1(0x06068A5E, sp - 16);
+    if (LD16(SLOT(2) + 8) == 0)
+        return 0;
+    GCALL1(0x060692DC, LDU16(SLOT(2) + 10));
+    return GCALL1(0x06022EDA, 2);
+}
+
+int f0604327A(void)
+{
+    FRAME(sp, 12);
+
+    COPYB(sp - 12, 0x060B20E8, 8);
+    GCALL2(0x06008A6A, 8, 1);
+    GCALL1(0x06068A5E, sp - 12);
+    return GCALL1(0x06022EDA, 11);
+}
+
+int f06043454(void)
+{
+    FRAME(sp, 12);
+
+    COPYB(sp - 12, 0x060B20F8, 8);
+    GCALL2(0x06008A6A, 8, 1);
+    GCALL1(0x06068A5E, sp - 12);
+    return GCALL1(0x06022EDA, 10);
+}
+
 int f060437A6(int n)
 {
     int obj = OBJ(LDU16(0x060D7C68 + 12));
@@ -276,6 +322,32 @@ void f06045C70(unsigned short first)
 
         ST16(flags, LDU16(flags) & ~0x80);
     } while (AGAIN(++i < 2));
+}
+
+int f06045CBC(short from, short to, short step)
+{
+    int count = (short)(DIVS(to - from, step) + 1);
+
+    return (unsigned short)GCALL1(0x0600A0EC, count) * (unsigned short)step + from;
+}
+
+void f060460AA(int base)
+{
+    unsigned int i = 0;
+    int p = base + 64;
+
+    do {
+        if ((unsigned short)p < 0x1000)
+            GCALL1(0x06060038, p);
+        i++;
+        p += 64;
+    } while (AGAIN(i < 5));
+}
+
+void f0604655A(void)
+{
+    GCALL1(0x0600996A, 193);
+    ST32(0x060D7BA8, 0x0604656E);
 }
 
 int f060465AC(void)
@@ -505,6 +577,11 @@ int f060482A6(unsigned short a, unsigned short b)
     return a >= 5 ? 30 : 22;
 }
 
+int f060482C4(unsigned short n)
+{
+    return MODS(n, 5) * 3 + 5;
+}
+
 void f06049694(unsigned char flag)
 {
     if (flag)
@@ -679,6 +756,21 @@ int f0604B4CC(short n, gaddr list)
         return n;
     }
     return y;
+}
+
+int f0604CBD2(void)
+{
+    int best = 0;
+    int i = 0;
+
+    do {
+        int v = (short)GCALL1(0x0604CC00, i);
+
+        i++;
+        if (best < v)
+            best = v;
+    } while (AGAIN(i < 10));
+    return best;
 }
 
 int f0604CC00(unsigned char who)

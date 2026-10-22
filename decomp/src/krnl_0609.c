@@ -17,6 +17,16 @@ int f060906E4(void)
     return GJUMP1(0x060144F4, 0x0606D2C8);
 }
 
+int f06090894(int n)
+{
+    return (GCALL1(0x0600A0EC, 17 - (n << 1)) << 4) + (n << 4) + 0x1A0;
+}
+
+int f060908C2(int n)
+{
+    return (GCALL1(0x0600A0EC, 11 - (n << 1)) << 4) + (n << 4) + 0x1C0;
+}
+
 int f06091228(void)
 {
     int pick;
@@ -170,6 +180,11 @@ gaddr f060949E0(gaddr dst, gaddr src, unsigned int n)
     return dst;
 }
 
+int f06094A44(gaddr a, gaddr b)
+{
+    return STRCMP(a, b);
+}
+
 gaddr f06094A58(gaddr dst, gaddr src)
 {
     return STRCPY(dst, src);
@@ -272,6 +287,22 @@ int f060958E4(void)
 void f0609591C(unsigned short bits)
 {
     ST16(0x060FA8B8, LDU16(0x060FA8B8) | bits);
+}
+
+int f06096596(gaddr p)
+{
+    gaddr q = p + 12;
+
+    if (LD32(q + 28) == 0) {
+        if (GCALL1(0x060A6BA0, q) == 2)
+            ST32(p + 8, 1);
+    }
+    return LD32(p + 8);
+}
+
+void f0609697E(gaddr dst)
+{
+    COPYW(0x0609445C, dst, LD32(0x060FA8BC) + 184, 12);
 }
 
 int f06096A7C(void)
@@ -1967,6 +1998,11 @@ int f0609F66C(short x)
     GCALL5(0x0609F354, x, 0, 0, (LD32(0x060FBF68) - 1) & 0xFFFF, (LD32(0x060FBF6C) - 1) & 0xFFFF);
     ST16(0x060FC000, x);
     return x;
+}
+
+int f0609F6CC(unsigned short i, gaddr p)
+{
+    return GJUMP3(0x060949E0, LD32(0x060FBFCC) + i * 32, p, 32);
 }
 
 void f0609F708(unsigned short id, unsigned short kind, int pos, unsigned short w)

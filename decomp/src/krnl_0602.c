@@ -432,6 +432,16 @@ void f060217FC(void)
     ST16(0x060DFDF6, 0);
 }
 
+void f06021822(void)
+{
+    unsigned int i = 0;
+
+    do {
+        GCALL1(0x06021F9A, i);
+        i++;
+    } while (AGAIN(i <= 75));
+}
+
 void f06021888(gaddr ids)
 {
     int i = 1;
@@ -933,6 +943,13 @@ void f060236DE(unsigned int a, unsigned int b)
     ST8(0x060C029D, b);
 }
 
+void f0602370A(int a, int b, int c, int d)
+{
+    GCALL1(0x0600C4E0, d);
+    POLL();
+    GJUMP3(0x0600C796, a, b, c);
+}
+
 void f06023774(void)
 {
     GJUMP4(0x06015012, 5, 6, 0x100, 0x00010000);
@@ -1061,9 +1078,22 @@ void f0602413C(void)
     GJUMP0(0x060266BC);
 }
 
+int f06024154(void)
+{
+    GCALL4(0x06025564, 20, 15, 11, 0);
+    return GJUMP0(0x060266E6);
+}
+
 void f06024168(void)
 {
     GJUMP4(0x06015012, 4, 2, 0x900, 0x00014000);
+}
+
+int f0602439C(gaddr obj, int index)
+{
+    ST8(obj + 4, LD8(obj + 4) | 64);
+    ST8(0x060E1A98 + index, 10);
+    return 0x060E1A98;
 }
 
 int f06024752(unsigned int cell)
@@ -1298,6 +1328,41 @@ void f06026542(int n)
 
     ST32(0x060D7E60, rec);
     ST32(0x060D7E64, OBJ(LDU16(rec + 8)));
+}
+
+void f06026570(void)
+{
+    TSET(h12, 1);
+    ST16(LD32(TASK_OBJ) + 20, 0);
+    ST16(LD32(TASK_OBJ) + 28, 0);
+    ST16(LD32(TASK_OBJ) + 24, 0);
+}
+
+void f0602658A(int a)
+{
+    GCALL1(0x06026542, a);
+    GJUMP0(0x06026570);
+}
+
+int f06026684(void)
+{
+    ST32(0x060C02CC, 0x060B4DF6);
+    ST32(0x060C02D0, 0x060B4E08);
+    return GCALL5(0x060260F8, 2, 24, 2, 4, 0x06026670);
+}
+
+int f060266BC(void)
+{
+    ST32(0x060C02CC, 0x060B4DF6);
+    ST32(0x060C02D0, 0x060B4E08);
+    return GCALL5(0x060260F8, 2, 162, 3, 4, 0x060266A8);
+}
+
+int f060266E6(void)
+{
+    ST32(0x060C02CC, 0x060B4E58);
+    ST32(0x060C02D0, 0x060B4E08);
+    return GCALL5(0x060260F8, 2, 80, 0, 4, 0x060266E0);
 }
 
 void f060269A4(void)
@@ -1769,6 +1834,17 @@ void f0602917C(void)
     ST8(0x26006094, LD8(0x2600606E));
 }
 
+void f060292AE(gaddr flag, gaddr value, unsigned short bits)
+{
+    if (bits & 7) {
+        ST8(flag, 240);
+        ST16(value, 0);
+    } else {
+        ST8(flag, 0);
+        ST16(value, bits & 0xFFF8);
+    }
+}
+
 void f06029718(int pad)
 {
     int out = 0;
@@ -1827,6 +1903,32 @@ void f060298F4(int pad)
     v = pad & 0x00080000 ? v & ~32u : v | 32;
     v = pad & 128 ? v & ~2u : v | 2;
     ST16(0x060FB8CC, v);
+}
+
+void f06029A78(void)
+{
+    gaddr reg = 0x25F80114;
+    int i = 0;
+
+    GCALL1(0x06029718, 0x13C);
+    do {
+        ST16(reg, 0x1A0);
+        i++;
+        reg += 2;
+    } while (AGAIN(i < 3));
+}
+
+void f06029A9A(void)
+{
+    gaddr reg = 0x25F80114;
+    int i = 0;
+
+    GCALL1(0x06029718, 0x13C);
+    do {
+        i++;
+        ST16(reg, 0xA0);
+        reg += 2;
+    } while (AGAIN(i < 3));
 }
 
 void f06029ABC(int x, int y, int z)
@@ -2257,6 +2359,15 @@ int f0602B8FC(int dir)
     return v;
 }
 
+int f0602B916(int index)
+{
+    int result = GCALL1(0x0602B86E, index);
+
+    if ((short)result < 0)
+        result = GCALL1(0x0602B86E, 12);
+    return result;
+}
+
 int f0602B930(int i)
 {
     i++;
@@ -2461,6 +2572,24 @@ int f0602C5BC(short level)
 int f0602C61E(void)
 {
     return GJUMP1(0x0602C5BC, -1);
+}
+
+int f0602C622(int level)
+{
+    int result = GCALL1(0x0602C5BC, level);
+
+    if ((short)result < 0)
+        result = GCALL1(0x0602C5BC, -1);
+    return result;
+}
+
+int f0602C644(int level)
+{
+    int result = GCALL1(0x0602C5EE, level);
+
+    if ((short)result < 0)
+        result = GCALL1(0x0602C5EE, 5);
+    return result;
 }
 
 int f0602C65E(void)
@@ -2697,6 +2826,49 @@ void f0602E39C(void)
     ST8(0x060C0FCF, 3);
 }
 
+int f0602E408(int a)
+{
+    GCALL1(0x0602FD74, a);
+    return GJUMP0(0x0602E44C);
+}
+
+int f0602E40E(void)
+{
+    return GJUMP0(0x0602E44C);
+}
+
+int f0602E420(void)
+{
+    GCALL0(0x06051A78);
+    GCALL0(0x0602F66A);
+    return GJUMP0(0x0602E44C);
+}
+
+int f0602E43C(void)
+{
+    return GJUMP0(0x0602E44C);
+}
+
+void f0602E53E(void)
+{
+    GJUMP0(0x0602E550);
+}
+
+void f0602E5BE(void)
+{
+    GJUMP0(0x0602E5DC);
+}
+
+void f0602E5C8(void)
+{
+    GJUMP0(0x0602E5DC);
+}
+
+void f0602E5D2(void)
+{
+    GJUMP0(0x0602E5DC);
+}
+
 int f0602E656(unsigned int n)
 {
     int count = 0;
@@ -2777,6 +2949,29 @@ void f0602EA24(void)
     GJUMP0(0x06009452);
 }
 
+int f0602EA98(int a)
+{
+    GCALL1(0x06030C80, a);
+    return GJUMP0(0x0602EB44);
+}
+
+int f0602EA9E(void)
+{
+    return GJUMP0(0x0602EB44);
+}
+
+int f0602EAB0(void)
+{
+    GCALL0(0x06051A78);
+    GCALL0(0x0602F66A);
+    return GJUMP0(0x0602EB44);
+}
+
+int f0602EACC(void)
+{
+    return GJUMP0(0x0602EB44);
+}
+
 void f0602ECCE(void)
 {
     gaddr p = 0x060C101C;
@@ -2785,6 +2980,18 @@ void f0602ECCE(void)
         GCALL1(0x060692DC, LDU16(p));
         p += 2;
     } while (AGAIN(p < 0x060C1026));
+}
+
+int f0602ECF6(gaddr text)
+{
+    int mode;
+
+    ST32(0x060C1000, GCALL1(0x0602EE3A, text));
+    mode = LDU8(0x060C1004);
+    if (mode != 1)
+        ST8(0x060C1004, 0);
+    ST8(0x060C101B, 1);
+    return mode;
 }
 
 void f0602ED18(int n)
@@ -2808,6 +3015,15 @@ void f0602ED56(void)
     if ((unsigned char)LD8(0x060C1004) != 1)
         ST8(0x060C1004, 0);
     ST8(0x060C101B, 1);
+}
+
+int f0602EDC8(gaddr text)
+{
+    int result = GCALL1(0x0602EE3A, text);
+
+    ST16(0x060C0FFC, result);
+    ST8(0x060C101B, 1);
+    return result;
 }
 
 void f0602EDFA(void)
@@ -2869,6 +3085,11 @@ int f0602F648(void)
 int f0602F666(void)
 {
     return 0;
+}
+
+int f0602FCC6(void)
+{
+    return GJUMP1(0x06009A3A, 7);
 }
 
 void f0602FF0A(void)

@@ -1,9 +1,25 @@
 #include "krnl.h"
 
+int f06060414(void)
+{
+    return GJUMP1(0x0606948A, LD16(LD32(TASK_PTR) + 8));
+}
+
 int f06060440(void)
 {
     GCALL0(0x06039F54);
     return GJUMP0(0x06063370);
+}
+
+int f06060E78(void)
+{
+    GCALL2(0x06063E90, 0, 10);
+    return GJUMP0(0x06060E8C);
+}
+
+int f06060E80(void)
+{
+    return GJUMP0(0x06060E8C);
 }
 
 void f06061412(void)
@@ -36,6 +52,27 @@ void f060614F8(void)
     SET(Slot24, s, fn, 0x0603DDA6);
 }
 
+int f06061ABC(void)
+{
+    FRAME(sp, 16);
+
+    COPYB(sp - 16, 0x060B26EE, 10);
+    GCALL1(0x06022EDA, 2);
+    GCALL1(0x06008A96, 1);
+    GCALL1(0x06068A5E, sp - 16);
+    return GCALL1(0x06009A3A, 145);
+}
+
+int f06061AEE(void)
+{
+    gaddr slot = SLOT(2);
+
+    if (LDU16(slot + 18) >= 7)
+        return -1;
+    GCALL1(0x06061B64, LD16(slot + 18) + 1);
+    return 0;
+}
+
 void f06061BD4(short a, short b)
 {
     ST16(0x060D7B86, a);
@@ -59,6 +96,18 @@ int f060622A4(void)
     return 0;
 }
 
+int f060622D0(void)
+{
+    int i = 3;
+    int result;
+
+    do {
+        result = GCALL1(0x06022EDA, i);
+        i++;
+    } while (AGAIN(i < 13));
+    return result;
+}
+
 void f0606261C(int n)
 {
     ST16(0x060D7BBA, LD16(0x060B7474 + n * 4));
@@ -77,6 +126,21 @@ int f0606268A(void)
     int obj = OBJ(LDU16(0x060D7BB0));
 
     return LD16(0x060D7BBA) == LD16(obj + 36) && LD16(0x060D7BBC) == LD16(obj + 38) ? -1 : 0;
+}
+
+void f060626C0(void)
+{
+    GCALL0(0x0606267E);
+    ST32(0x060D7B90, 0x060626D0);
+}
+
+int f060626D0(void)
+{
+    if (!GCALL0(0x0606268A))
+        return 0;
+    TSET(fn, 0x060626FA);
+    TSET(h4, 65);
+    return 65;
 }
 
 int f0606281E(void)
@@ -229,11 +293,27 @@ void f06063864(void)
     }
 }
 
+int f06063D78(void)
+{
+    if (LDU16(LD32(TASK_OBJ) + 60) != 0xFF00)
+        return 60;
+    return GJUMP0(0x06022F14);
+}
+
 void f06063F58(void)
 {
     REF(Task) task = TASK;
 
     SET(Task, task, h14, ((GCALL0(0x0600A0B8) & 3) + 1) << 7);
+}
+
+int f06063FA2(void)
+{
+    int flags = LDU16(FLAGS_AT(TGET(h10)));
+
+    if ((flags & 7) == 0)
+        TSET(fn, 0x06064056);
+    return flags;
 }
 
 int f060647BA(short want, short i)
@@ -245,6 +325,20 @@ int f060647BA(short want, short i)
     if (v && (v == want || !want))
         return -1;
     return 0;
+}
+
+int f06064874(short n)
+{
+    return DIVS(n * 60, 60);
+}
+
+int f06064AAC(short n)
+{
+    gaddr slot = SLOT(n);
+
+    GCALL1(0x060692DC, LDU16(slot + 10));
+    ST16(slot + 10, 0);
+    return GJUMP1(0x06022EDA, n);
 }
 
 void f06064D12(void)
@@ -259,6 +353,46 @@ void f06064D12(void)
 void f060651D0(void)
 {
     ST32(0x060D7C08, 0x060651D8);
+}
+
+void f0606523A(void)
+{
+    ST32(0x060D7C08, 0x06065258);
+    ST16(0x060D7C16, 5);
+    ST16(0x060D7C14, GCALL1(0x06064874, 0x139));
+    ST16(0x060D7C18, 0);
+}
+
+void f06065386(void)
+{
+    gaddr task;
+
+    GCALL2(0x06022F1C, 10, 0x060653E0);
+    ST8(0x060C1920, 0);
+    TSET(h6, 0);
+    task = LD32(TASK_PTR);
+    ST16(task + 4, GCALL1(0x06064874, 0x5DC));
+}
+
+int f060653E0(void)
+{
+    gaddr task;
+    int result;
+
+    GCALL0(0x06064D12);
+    TSET(fn, 0x06065400);
+    task = LD32(TASK_PTR);
+    result = GCALL1(0x06064874, 180);
+    ST16(task + 4, result);
+    return result;
+}
+
+int f06065428(void)
+{
+    GCALL0(0x06064D12);
+    TSET(fn, 0x0603DDA6);
+    ST8(0x060C1920, 255);
+    return 0x060C1920;
 }
 
 int f06065460(void)
@@ -2078,6 +2212,15 @@ int f0606C9BE(int west, int east, int north, int south)
     return 0;
 }
 
+void f0606CABE(int delta)
+{
+    gaddr cur = LD32(CURRENT);
+    unsigned int pos = (LDU16(cur + 12) << 16) + LDU16(cur + 10) + delta;
+
+    ST16(LD32(CURRENT) + 12, pos >> 16);
+    ST16(LD32(CURRENT) + 10, pos);
+}
+
 int f0606CB6C(gaddr obj)
 {
     int inv = DIVU(0x10000, LDU16(obj + 68));
@@ -2401,6 +2544,42 @@ void f0606DA9E(void)
     ST16(0x060C1F24, (GCALL0(0x0600A0B8) & 3) + 1);
 }
 
+int f0606DAB2(void)
+{
+    FRAME(sp, 84);
+    int variant;
+
+    COPYW(0x060944F4, sp - 84, 0x060B2858, 80);
+    variant = GCALL0(0x0600A0B8) & 3;
+    ST16(0x060C1F24, LD32(sp - 84 + LDU8(LD32(CURRENT) + 6) * 16 + variant * 4));
+    return 0x060C1F24;
+}
+
+void f0606DCA8(void)
+{
+    GJUMP0(0x0606DCBE);
+}
+
+void f0606DD00(void)
+{
+    GJUMP0(0x0606DD44);
+}
+
+void f0606DE16(void)
+{
+    GJUMP0(0x0606DE26);
+}
+
+void f0606DE9A(void)
+{
+    GJUMP0(0x0606DEB0);
+}
+
+void f0606DED0(void)
+{
+    GJUMP0(0x0606DEE6);
+}
+
 void f0606E00E(void)
 {
     gaddr cur = LD32(0x060D7768);
@@ -2417,6 +2596,31 @@ void f0606E00E(void)
         ST16(0x060C1F38 + 8, 2);
     if (dy > 88)
         ST16(0x060C1F38 + 4, 2);
+}
+
+void f0606E098(void)
+{
+    GJUMP0(0x0606E0D8);
+}
+
+void f0606E19E(void)
+{
+    GJUMP0(0x0606E1B8);
+}
+
+void f0606E228(void)
+{
+    GJUMP0(0x0606E238);
+}
+
+void f0606E38C(void)
+{
+    GJUMP0(0x0606E39C);
+}
+
+void f0606E3C2(void)
+{
+    GJUMP0(0x0606E3D2);
 }
 
 void f0606E81C(void)
@@ -2450,6 +2654,31 @@ void f0606EA3A(int a, int b, int c, int d)
     GCALL1(0x060144F4, 0x0606D398);
     GCALL1(0x06014516, 0x0606E7F4);
     ST32(0x060E2154 + (short)(LD16(0x060C062C) * 20), 0x0606EA6A);
+}
+
+void f0606EE32(int unused1, int unused2, int c, int d)
+{
+    GCALL4(0x0606EE98, 0, 0, c, d);
+    GJUMP0(0x060145A8);
+}
+
+void f0606EE98(int unused1, int unused2, int c, int d)
+{
+    ST16(LD32(CURRENT) + 12, 0);
+    ST16(LD32(CURRENT) + 10, 0x6000);
+    ST16(LD32(MOVER_PTR) + 48, 0);
+    GCALL4(0x0606B6BC, 0, CURRENT, c, d);
+    GJUMP0(0x0606C7C2);
+}
+
+void f0606F1C4(int unused, int b, int c, int d)
+{
+    gaddr mover = LD32(MOVER_PTR);
+
+    ST16(mover + 48, LD16(mover + 48) + 1);
+    if (LDU16(LD32(MOVER_PTR) + 48) >= 8)
+        ST16(LD32(MOVER_PTR) + 48, 0);
+    GJUMP4(0x0606B6BC, MOVER_PTR, b, c, d);
 }
 
 int f0606F2CC(int cur, int target, int step, int limit)
@@ -2505,6 +2734,16 @@ int f0606F38C(void)
     y = LD16(src + 18) + LD16(row + 6) - 24;
     ST16(dst + 26, y);
     return y;
+}
+
+void f0606F458(void)
+{
+    gaddr cur = LD32(CURRENT);
+
+    if (LD16(cur + 74)) {
+        GCALL1(0x060692DC, LDU16(cur + 74));
+        ST16(LD32(CURRENT) + 74, 0);
+    }
 }
 
 int f0606F770(int unused, int b, int c, int d)

@@ -303,6 +303,16 @@ void f060A11E2(int value)
     ST32(LD32(0x060FC00C) + 32, value);
 }
 
+int f060A11EA(int value)
+{
+    gaddr rec = LD32(0x060FC00C);
+
+    if (LD32(rec + 28))
+        return 0;
+    ST32(rec + 28, value);
+    return 1;
+}
+
 int f060A12CC(gaddr list)
 {
     gaddr node;
@@ -400,6 +410,14 @@ int f060A191E(gaddr list, int limit)
             return -1;
     }
     return -1;
+}
+
+int f060A197E(gaddr p)
+{
+    FRAME(sp, 16);
+
+    GCALL3(0x060AAA1C, LD32(LD32(p + 8) + 20), sp - 16, sp - 12);
+    return LD32(sp - 16);
 }
 
 int f060A1B68(gaddr ctx, int n, int limit, int mode)
@@ -555,6 +573,35 @@ void f060A3900(void)
     GCALL0(0x060AAE84);
 }
 
+void f060A3914(int a, int b, int c, int d)
+{
+    GJUMP4(0x060AAEC2, a, b, c, d);
+}
+
+void f060A3AE0(int a, int b, int c, int d)
+{
+    if (a)
+        GJUMP4(0x060AB49C, a, b, c, d);
+    else
+        GJUMP4(0x060AAE08, 0x504, b, c, d);
+}
+
+void f060A3AF4(int a, int b, int c, int d)
+{
+    if (a)
+        GJUMP4(0x060AB6BE, a, b, c, d);
+    else
+        GJUMP4(0x060AAE08, 0x504, b, c, d);
+}
+
+void f060A3BFC(int a, int b, int c, int d)
+{
+    if (a)
+        GJUMP2(0x060ABB28, a, b);
+    else
+        GJUMP4(0x060AAE08, 0x504, b, c, d);
+}
+
 void f060A3C1A(gaddr ctx, int value)
 {
     if (!ctx) {
@@ -567,6 +614,11 @@ void f060A3C1A(gaddr ctx, int value)
 void f060A3C38(int value)
 {
     GJUMP1(0x060ABCAA, value);
+}
+
+int f060A3CDE(void)
+{
+    return GJUMP0(0x060ABCCC);
 }
 
 void f060A3D00(gaddr ctx, int a, int b)
@@ -646,6 +698,18 @@ void f060A3EBC(int a, int b)
     GJUMP2(0x060AAE44, a, b);
 }
 
+int f060A3ED4(int a, int b, int c, int d)
+{
+    FRAME(sp, 16);
+
+    if (a) {
+        GCALL4(0x060AB1B0, a, sp - 16, b, c);
+        return LD32(sp - 16);
+    }
+    GCALL4(0x060AAE08, 0x504, b, c, d);
+    return 0;
+}
+
 int f060A3F84(void)
 {
     return 0;
@@ -662,6 +726,22 @@ void f060A4014(gaddr ctx, int value)
         return;
     }
     GJUMP2(0x060ABB16, ctx, value);
+}
+
+void f060A4060(int a, int b, int c, int d)
+{
+    if (a)
+        GJUMP2(0x060ABB6C, a, b);
+    else
+        GJUMP4(0x060AAE08, 0x504, b, c, d);
+}
+
+void f060A4074(int a, int b, int c, int d)
+{
+    if (a)
+        GJUMP4(0x060AAE52, a, b, c, d);
+    else
+        GJUMP4(0x060AAE08, 0x504, b, c, d);
 }
 
 void f060A40C0(void)
@@ -718,6 +798,26 @@ void f060A47FE(gaddr ctx)
     GJUMP1(0x060ADC8C, ctx);
 }
 
+void f060A4810(int a, int b, int c, int d)
+{
+    if (a)
+        GJUMP4(0x060ADE9E, a, b, c, d);
+    else
+        GJUMP4(0x060AD62C, 0x504, b, c, d);
+}
+
+int f060A4838(int a, int b, int c, int d)
+{
+    FRAME(sp, 8);
+
+    if (a) {
+        GCALL2(0x060AD564, a, sp - 8);
+        return LD32(sp - 8);
+    }
+    GCALL4(0x060AD62C, 0x504, b, c, d);
+    return 0;
+}
+
 void f060A48A8(gaddr ctx, int value)
 {
     if (!ctx) {
@@ -727,10 +827,26 @@ void f060A48A8(gaddr ctx, int value)
     GJUMP2(0x060AD672, ctx, value);
 }
 
+void f060A4984(int a, int b, int c, int d)
+{
+    if (a)
+        GJUMP2(0x060AE0E0, a, b);
+    else
+        GJUMP4(0x060AD62C, 0x504, b, c, d);
+}
+
 void f060A499C(gaddr obj, int b, int c, int d)
 {
     if (obj != 0)
         GJUMP2(0x060AE0E8, obj, b);
+    else
+        GJUMP4(0x060AD62C, 0x504, b, c, d);
+}
+
+void f060A49B4(int a, int b, int c, int d)
+{
+    if (a)
+        GJUMP1(0x060AE0F0, a);
     else
         GJUMP4(0x060AD62C, 0x504, b, c, d);
 }
@@ -757,6 +873,11 @@ void f060A4C08(void)
 {
 }
 
+int f060A4CA2(int a, int b, int c, int d)
+{
+    return GJUMP4(0x060A4CB4, a, b, c, d);
+}
+
 void f060A5058(gaddr src, gaddr dst)
 {
     ST8(dst, LD8(src));
@@ -765,6 +886,14 @@ void f060A5058(gaddr src, gaddr dst)
     ST8(dst + 6, LD8(src + 3));
     ST8(dst + 7, LD8(src + 4));
     ST32(dst + 8, LD32(src + 4) & 0xFFFFFF);
+}
+
+void f060A5076(int n)
+{
+    while (n > 0) {
+        POLL();
+        n--;
+    }
 }
 
 void f060A51AC(gaddr p)
@@ -877,6 +1006,11 @@ int f060A56CA(int n, int base)
 int f060A56D8(int a, int b)
 {
     return a * 24 + b;
+}
+
+unsigned char f060A56E8(int i, gaddr base)
+{
+    return LDU8(base + i * 12 + 11);
 }
 
 unsigned char f060A56FA(int a, int b)
@@ -1116,6 +1250,13 @@ void f060A674C(gaddr dst, gaddr src)
     ST32(src + 16, 0);
 }
 
+void f060A6762(gaddr src, gaddr a, gaddr b, gaddr c)
+{
+    ST32(a, LD32(src));
+    ST32(b, LD32(src + 4));
+    ST32(c, LD32(src + 44));
+}
+
 void f060A6770(REF(Thing) p, int a, int b, int c)
 {
     SET(Thing, p, f0, a);
@@ -1193,6 +1334,11 @@ int f060A6DA6(int flags)
 int f060A71E4(gaddr p)
 {
     return LD32(p + 32) + LD32(p + 36);
+}
+
+int f060A7494(gaddr p, int v)
+{
+    return GJUMP2(0x060A7CC6, v, LD32(p + 28));
 }
 
 int f060A74E2(gaddr p)
@@ -2038,6 +2184,15 @@ void f060AAE4E(void)
 {
 }
 
+void f060AAE52(gaddr p, int mode, int c, int d)
+{
+    gaddr rec = LD32(p) + 52;
+
+    if (mode == 2)
+        GCALL4(0x060AAE08, 0x801, mode, c, d);
+    ST32(rec + 156, mode);
+}
+
 gaddr f060AAE84(void)
 {
     ST32(0x060BB98C, 0);
@@ -2360,6 +2515,15 @@ void f060ABB16(gaddr obj, int mode)
     GJUMP2(0x060AB726, obj, mode);
 }
 
+void f060ABB28(gaddr p, int v)
+{
+    gaddr rec = LD32(p);
+
+    ST32(rec + 40, v);
+    if (LD32(rec + 52 + 4) == 4)
+        GJUMP4(0x060AFB0E, p, -1, -1, rec);
+}
+
 int f060ABB48(gaddr obj, int value)
 {
     gaddr o = LD32(obj);
@@ -2372,6 +2536,11 @@ int f060ABB48(gaddr obj, int value)
     return GJUMP4(0x060AFB0E, obj, -1, -1, o);
 }
 
+void f060ABB6C(gaddr p, int v)
+{
+    ST32(LD32(p) + 52 + 68, v);
+}
+
 void f060ABCAA(int value)
 {
     ST32(0x060FC168, value);
@@ -2380,6 +2549,14 @@ void f060ABCAA(int value)
 int f060ABCB0(void)
 {
     return LD32(0x060FC168);
+}
+
+void f060ABD34(int a, int b, int c, int d)
+{
+    if (a)
+        GCALL4(0x060AB49C, a, b, c, d);
+    GCALL1(0x060AB32C, LD32(0x060FC168));
+    ST32(0x060FC168, 0);
 }
 
 int f060ABD4E(int n)
@@ -2575,6 +2752,21 @@ void f060AD672(gaddr ctx, int value)
     ST32(s + 152, DIVS(LD32(s + 144) + 223, 224));
 }
 
+void f060AD6C4(gaddr p, int v)
+{
+    ST32(LD32(p) + 36, v);
+}
+
+void f060AD6CA(gaddr p, int v)
+{
+    ST32(LD32(p) + 40, v);
+}
+
+void f060AD6D0(gaddr p, int v)
+{
+    ST32(LD32(p) + 44, v);
+}
+
 int f060AD6D6(int start, int size)
 {
     int aligned = (start + 3) & -4;
@@ -2715,6 +2907,16 @@ int f060ADAAA(int rec)
     return mask;
 }
 
+void f060ADB2C(int unused1, int unused2, int c, int d)
+{
+    GJUMP4(0x060AD62C, 0x308, 0, c, d);
+}
+
+int f060ADBA0(gaddr p)
+{
+    return LD32(LD32(p) + 4 + 4);
+}
+
 void f060ADBA8(gaddr ctx, gaddr out_pos, gaddr out_len, gaddr out_avail)
 {
     gaddr data = LD32(ctx);
@@ -2783,6 +2985,27 @@ void f060ADC8C(gaddr ctx)
     ST32(s + 16, 0);
 }
 
+void f060AE0E0(gaddr p, int v)
+{
+    ST32(LD32(p) + 4 + 24, v);
+}
+
+void f060AE0E8(gaddr p, int v)
+{
+    ST32(LD32(p) + 4 + 28, v);
+}
+
+void f060AE0F0(gaddr p)
+{
+    if (LD32(LD32(p) + 48 + 4) == 4)
+        GJUMP3(0x060B047E, p, -1, -1);
+}
+
+void f060AE1E6(gaddr p, int v)
+{
+    ST32(LD32(p) + 48 + 16, v);
+}
+
 void f060AE1EE(int v)
 {
     ST32(0x060FC214, v);
@@ -2791,6 +3014,16 @@ void f060AE1EE(int v)
 int f060AE200(void)
 {
     return LD32(0x060FC214);
+}
+
+void f060AE234(gaddr p)
+{
+    if (p) {
+        GCALL1(0x060ADC8C, p);
+        GCALL2(0x060AE1E6, p, 0);
+    }
+    GCALL1(0x060ADC82, LD32(0x060FC214));
+    ST32(0x060FC214, 0);
 }
 
 int f060AE25A(int n)
@@ -2903,6 +3136,13 @@ void f060AF22C(unsigned int color, int tolerance, gaddr table)
         if (ABS_DIFF(r, er) + ABS_DIFF(g, eg) + ABS_DIFF(b, eb) <= tolerance)
             ST16(table + i * 2, 0);
     } while (AGAIN(++i < 1024));
+}
+
+void f060AF9A8(int n)
+{
+    do {
+        n--;
+    } while (AGAIN(n > 0));
 }
 
 int f060AFA28(int channel)

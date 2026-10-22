@@ -402,6 +402,16 @@ void f06008202(void)
     ST16(0x060BD4B0, 1);
 }
 
+void f06008214(void)
+{
+    ST16(0x060C034C, 8);
+    ST16(0x060FAA34, 8);
+    ST16(0x060C034E, 0xFFF0);
+    ST16(0x060FAA36, 0xFFF0);
+    ST16(0x060BB8FC, 1);
+    GJUMP1(0x0603176E, 50);
+}
+
 void f060086E2(void)
 {
 }
@@ -417,6 +427,16 @@ void f060086EA(void)
 
 void f06008810(void)
 {
+}
+
+int f060088E2(void)
+{
+    GCALL0(0x06008202);
+    GCALL0(0x06007A14);
+    GCALL0(0x060086EA);
+    if (LD16(0x060BD4AC) == 0)
+        return 0;
+    return GJUMP4(0x060069B2, 0x0600890C, 0x060BD4BC, 0x400, 1);
 }
 
 void f060089AC(void)
@@ -501,6 +521,14 @@ void f06008DB6(void)
     ST32(CNT + 4, -1);
     ST8(CNT + 1, 0);
     ST32(0x26006168, 0x060090D8);
+}
+
+int f06008DE8(void)
+{
+    GCALL0(0x06008D5C);
+    GCALL3(0x0600A49C, 0x060CBB60, 1, LDU16(0x060BF4A8));
+    ST16(0x26006048, 1);
+    return 0x060BF4A8;
 }
 
 /* Copies a run of colours from the table GCALL2(0x06008ABA, id, 1) names into both palette copies,
@@ -594,6 +622,13 @@ void f06009078(int first, int last, int mask)
     GCALL6(0x06008F50, first, last, mask, mask, mask, 0);
 }
 
+void f06009092(int a, int b, int c, int d)
+{
+    FRAME(sp, 0);
+
+    GCALL6(0x06008F50, a, b, c, d, LD32(sp), 0);
+}
+
 void f060090A8(int first, int last, int mask)
 {
     GCALL6(0x06008F50, first, last, mask, mask, mask, 1);
@@ -639,6 +674,14 @@ void f06009288(int n, short x, short y, short z)
     ST16(rec + 4, z);
     ST16(rec + 6, LD16(sp + 2));
     ST16(rec + 8, LD16(sp + 6));
+}
+
+void f060092AA(int index)
+{
+    gaddr p = 0x060BF4AA + (signed char)(index * 10);
+
+    GCALL3(0x060090A8, LDU16(p), LDU16(p + 2), 0x100);
+    ST16(p, 0xFFF);
 }
 
 int f060092D4(int id)
@@ -943,6 +986,17 @@ void f06009C2C(void)
     }
 }
 
+void f06009C60(void)
+{
+    FRAME(sp, 12);
+
+    if (LDU8(0x060B2E84) == 1 && LD8(0x060B2E85) == 0) {
+        ST8(0x060B2E85, 1);
+        ST32(sp - 12, 3);
+        GCALL1(0x0609580A, sp - 12);
+    }
+}
+
 void f06009CC8(void)
 {
     FRAME(sp, 24);
@@ -962,6 +1016,11 @@ void f06009D06(unsigned int n)
         ST8(0x060BF4DC, n > 30 ? 30 : n);
         ST8(0x060BF4DD, LD8(0x060BF4DC) * 7);
     }
+}
+
+void f06009E38(int value, int ignored, int c, int d)
+{
+    GJUMP4(0x060A499C, LD32(0x060BF4E4), value, c, d);
 }
 
 void f06009E48(void)
@@ -2264,6 +2323,13 @@ int f0600D1A6(void)
         ST16(o + 18, LD16(o + 18) - (y1 - y0));
     }
     return moved;
+}
+
+void f0600D290(void)
+{
+    int cell = GCALL1(0x0600CA6A, LDU16(OBJIDX));
+
+    GJUMP2(0x06069546, LDU16(OBJIDX), (LDU16(FLAGS_AT(cell)) & 0x1000) != 0);
 }
 
 void f0600D2BE(int mask, unsigned short amt)

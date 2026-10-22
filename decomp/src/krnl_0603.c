@@ -245,6 +245,29 @@ void f06031BAA(int n, short bits)
     ST16(p, (LD16(p) & 0xFFCF) | bits);
 }
 
+int f06031BD2(int key)
+{
+    return LD16(KEYED(GCALL1(0x06031AE2, key) & 0xFFFF) + 14) & 0xF00;
+}
+
+int f06031BEA(int key, short bits)
+{
+    int offset = (GCALL1(0x06031AE2, key) & 0xFFFF) << 4;
+    gaddr flags = 0x060C105A + offset;
+
+    ST16(flags, (LDU16(flags) & 0xF0FF) | bits);
+    return offset;
+}
+
+int f06031C12(int key, short bits)
+{
+    gaddr flags = 0x060C105A + ((GCALL1(0x06031AE2, key) & 0xFFFF) << 4);
+    int old = LD16(flags);
+
+    ST16(flags, (old & 0xFFCF) | bits);
+    return old & 48;
+}
+
 void f0603214E(unsigned char i, unsigned char value)
 {
     gaddr e = KEYED(i);
@@ -410,6 +433,11 @@ void f06033098(void)
         } while (AGAIN(++j < 10));
     } while (AGAIN(++i < 8));
     GJUMP0(0x0603302C);
+}
+
+int f06033148(void)
+{
+    return GJUMP0(0x06033152);
 }
 
 void f06033198(void)
@@ -846,6 +874,11 @@ int f0603400E(REF(Stream) s)
     return ring16(s, 1) + 8;
 }
 
+int f06034022(REF(Stream) s)
+{
+    return LDU16(((ST_GET(s, pos) - 1) & ST_GET(s, mask)) * 2 + ST_GET(s, ring)) + 16;
+}
+
 int f06034036(REF(Stream) s)
 {
     return ring16(s, 1) + 32;
@@ -861,9 +894,24 @@ int f0603405E(REF(Stream) s)
     return ring16(s, 1) - 2;
 }
 
+int f06034072(REF(Stream) s)
+{
+    return LDU16(((ST_GET(s, pos) - 1) & ST_GET(s, mask)) * 2 + ST_GET(s, ring)) - 4;
+}
+
 int f06034086(REF(Stream) s)
 {
     return ring16(s, 1) - 8;
+}
+
+int f0603409A(REF(Stream) s)
+{
+    return LDU16(((ST_GET(s, pos) - 1) & ST_GET(s, mask)) * 2 + ST_GET(s, ring)) - 16;
+}
+
+int f060340AE(REF(Stream) s)
+{
+    return LDU16(((ST_GET(s, pos) - 1) & ST_GET(s, mask)) * 2 + ST_GET(s, ring)) - 32;
 }
 
 int f060340C2(REF(Stream) s)
@@ -960,6 +1008,11 @@ int f06034208(REF(Stream) s)
     return ring32(s, 1) + 16;
 }
 
+int f0603421A(REF(Stream) s)
+{
+    return LD32(((ST_GET(s, pos) - 1) & ST_GET(s, mask)) * 4 + ST_GET(s, ring)) + 32;
+}
+
 int f0603422C(REF(Stream) s)
 {
     return ring32(s, 1) - 1;
@@ -978,6 +1031,16 @@ int f06034250(REF(Stream) s)
 int f06034262(REF(Stream) s)
 {
     return ring32(s, 1) - 8;
+}
+
+int f06034274(REF(Stream) s)
+{
+    return LD32(((ST_GET(s, pos) - 1) & ST_GET(s, mask)) * 4 + ST_GET(s, ring)) - 16;
+}
+
+int f06034286(REF(Stream) s)
+{
+    return LD32(((ST_GET(s, pos) - 1) & ST_GET(s, mask)) * 4 + ST_GET(s, ring)) - 32;
 }
 
 int f06034298(REF(Stream) s)
@@ -2422,6 +2485,18 @@ void f06039DD8(void)
     ST8(0x060C1725, 0);
 }
 
+int f06039EEE(void)
+{
+    GCALL0(0x06039DD8);
+    GCALL5(0x06039DE0, 0, 160, 112, 0x100, 128);
+    GCALL6(0x06039DE0, 1, 160, 112, 128, 128, 128);
+    ST16(0x060FAA70, 0x8E8E);
+    ST16(0x060FAA72, 0x8E8E);
+    ST16(0x060FAA74, 0x8E8E);
+    ST16(0x060FAA76, 0x8E8E);
+    return 0x8E8E;
+}
+
 void f06039F54(void)
 {
     ST16(0x060C1740, (short)GCALL2(0x0604D47C, (unsigned char)LD8(0x060C029C), (unsigned char)LD8(0x060C029D)) ? 1 : 0);
@@ -2486,6 +2561,16 @@ int f0603A02C(short a, short b)
 int f0603A04E(short a, short b)
 {
     return LD16(GCALL2(0x0600B934, a, b) + 134);
+}
+
+void f0603A0A8(void)
+{
+    gaddr rec;
+
+    GCALL0(0x0600D8F8);
+    rec = GCALL2(0x0600B934, LDU8(0x060C029C), LDU8(0x060C029D));
+    POLL();
+    GJUMP2(0x0600CFC6, LDU16(rec + 124), LDU16(rec + 126));
 }
 
 int f0603A1BC(unsigned short who, int n)
@@ -3035,9 +3120,37 @@ void f0603D374(void)
     GJUMP1(0x06022EDA, 29);
 }
 
+int f0603D862(void)
+{
+    GCALL1(0x0603EDA6, 10);
+    GCALL1(0x0603EDA6, 11);
+    return GJUMP0(0x0603D878);
+}
+
+int f0603D868(void)
+{
+    GCALL1(0x0603EDA6, 11);
+    return GJUMP0(0x0603D878);
+}
+
+int f0603D86E(void)
+{
+    return GJUMP0(0x0603D878);
+}
+
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
 void f0603DDA6(void)
 {
+}
+
+int f0603DE58(void)
+{
+    FRAME(sp, 8);
+
+    COPYB(sp - 8, 0x060B1FC8, 4);
+    GCALL1(0x06008A96, 1);
+    GCALL1(0x06068A5E, sp - 8);
+    return GCALL1(0x06022EDA, 0);
 }
 
 int f0603DEEC(void)
@@ -3083,6 +3196,19 @@ int f0603DF02(void)
     return GJUMP0(0x06022F14);
 }
 
+int f0603E11C(void)
+{
+    FRAME(sp, 24);
+
+    COPYB(sp - 24, 0x060B1FDE, 18);
+    if (LD16(0x060D7BB0) == 0)
+        return 0;
+    GCALL2(0x06008A6A, 8, 1);
+    GCALL1(0x06068A5E, sp - 24);
+    GCALL1(0x060692DC, LDU16(0x060D7BB2));
+    return GCALL1(0x06022EDA, 4);
+}
+
 int f0603E212(void)
 {
     REF(Slot24) s = ELEM(Slot24, SLOTS, 4);
@@ -3091,6 +3217,36 @@ int f0603E212(void)
     if (!LD16(o + 10) || LDU16(o + 60) >= 0xFF00)
         return -1;
     return 0;
+}
+
+void f0603E33C(void)
+{
+    FRAME(sp, 8);
+
+    COPYB(sp - 8, 0x060B1FF4, 4);
+    GCALL1(0x06008A96, 1);
+    GCALL1(0x06068A5E, sp - 8);
+    GCALL1(0x06022EDA, 9);
+}
+
+int f0603E366(void)
+{
+    FRAME(sp, 8);
+
+    COPYB(sp - 8, 0x060B1FF8, 4);
+    GCALL1(0x06008A96, 1);
+    GCALL1(0x06068A5E, sp - 8);
+    return GCALL1(0x06022EDA, 9);
+}
+
+int f0603E436(void)
+{
+    FRAME(sp, 12);
+
+    COPYB(sp - 12, 0x060B2002, 6);
+    GCALL2(0x06008A6A, 8, 1);
+    GCALL1(0x06068A5E, sp - 12);
+    return GCALL1(0x06022EDA, 8);
 }
 
 int f0603E4CC(int base)
@@ -3103,9 +3259,36 @@ int f0603E4D2(int p)
     return p + 82;
 }
 
+int f0603E4D8(short index)
+{
+    FRAME(sp, 12);
+
+    COPYB(sp - 12, 0x060B2008, 8);
+    return LD16(sp - 12 + index * 2) + 74;
+}
+
 int f0603E4F6(int base)
 {
     return base + 78;
+}
+
+int f0603E5A8(void)
+{
+    GCALL1(0x06008A96, 1);
+    GCALL1(0x06068A5E, 0x060B5E4A);
+    return GJUMP1(0x06022EDA, 10);
+}
+
+void f0603E786(gaddr dir, unsigned char which)
+{
+    ST8(dir + 3, 0);
+    ST8(dir + 2, 0);
+    ST8(dir + 1, 0);
+    ST8(dir, 0);
+    if (which < 4) {
+        ST8(dir + ((which + 2) & 3), 1);
+        ST8(dir + which, 1);
+    }
 }
 
 int f0603E888(unsigned short x, unsigned short y)
@@ -3157,6 +3340,12 @@ int f0603F380(short slot)
 
     ST16(OBJ(obj) + 38, 0);
     return GJUMP2(0x06069546, obj, 0);
+}
+
+int f0603F47A(short n)
+{
+    GCALL1(0x060692DC, LDU16(SLOT(n) + 10));
+    return GJUMP1(0x06022EDA, n);
 }
 
 int f0603F642(void)

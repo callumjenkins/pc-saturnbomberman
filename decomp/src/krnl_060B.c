@@ -64,6 +64,24 @@ void f060B010A(gaddr dst, gaddr src, int count)
     }
 }
 
+void f060B0142(gaddr a, gaddr b, int c, int d)
+{
+    int rest = c - d;
+
+    GCALL3(0x060B00D6, a, b, d);
+    GCALL3(0x060B00D6, b, d + b, rest);
+    GCALL3(0x060B00D6, rest + b, a, d);
+}
+
+void f060B0180(gaddr a, gaddr b, int c, int d)
+{
+    int rest = c - d;
+
+    GCALL3(0x060B010A, a, b, d);
+    GCALL3(0x060B010A, b, (d << 2) + b, rest);
+    GCALL3(0x060B010A, (rest << 2) + b, a, d);
+}
+
 /* Copies n words from src to dst, backwards when dst is above src, as memmove does. */
 void f060B0246(gaddr dst, gaddr src, int n)
 {
@@ -84,6 +102,13 @@ void f060B0246(gaddr dst, gaddr src, int n)
             ST32(dst, LD32(src));
         }
     }
+}
+
+void f060B02F0(int n)
+{
+    do {
+        n--;
+    } while (AGAIN(n > 0));
 }
 
 int f060B0392(int channel)
