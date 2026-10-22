@@ -22,6 +22,11 @@
  *                   0 for a zero divisor. Each is a HELPER.
  *                   The recompiled game advances time at each of those branches and at each call, so the C
  *                   has to reach the same number, and check.py counts both sides.
+ *   SHL/SHR/SAR(x,n) x shifted left, right or right with its sign by a variable count, DIVS16(a,b) a
+ *                   16-bit division, COPYB(d,s,n) n bytes copied, COPYW(entry,d,s,n) n bytes copied a word at a
+ *                   time by the copy routine at entry, STRCPY(d,s), STRCMP(a,b), and BITSET(p,v,spec) v
+ *                   stored in a bit field of the word at p (spec: width, and offset << 8). Each calls SHC's
+ *                   own routine in KRNL, as the game's code does, on the host through g_routine.
  *   FRAME(sp, n)    declares sp, the game's stack pointer on entry, and reserves n bytes of the game's
  *                   stack below it, for locals whose address the function passes on. sp + 4 and up are
  *                   the arguments a caller passed on the stack. The frame goes when the function returns.
@@ -66,6 +71,17 @@ void g_poll(void);
 #define POLL() g_poll()
 #define AGAIN(cond) ((cond) ? (g_poll(), 1) : 0)
 #define HELPER(expr) (g_poll(), (expr))
+/* Runs SHC's routine at addr with r0, r1 and r2 set, as a call: the routine's own loops advance time. */
+uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2);
+#define SHL(x, n) ((int)g_routine(0x0609460C, (x), (n), 0))
+#define SHR(x, n) ((int)g_routine(0x060947E4, (x), (n), 0))
+#define SAR(x, n) ((int)g_routine(0x060946CC, (x), (n), 0))
+#define DIVS16(a, b) ((int)g_routine(0x06094B70, (b), (a), 0))
+#define COPYB(d, s, n) g_routine(0x060945B4, (n), (d), (s))
+#define COPYW(entry, d, s, n) g_routine((entry), (n), (d), (s))
+#define STRCPY(d, s) ((gaddr)g_routine(0x06094C24, (d), (s), 0))
+#define STRCMP(a, b) ((int)g_routine(0x06094BC0, (a), (b), 0))
+#define BITSET(p, v, spec) g_routine(0x06094B08, (v), (spec), (p))
 uint32_t g_frame(int size);
 void g_unframe(uint32_t top);
 #define FRAME(sp, size) gaddr sp = g_frame(size)
@@ -102,6 +118,10 @@ uint32_t g_modu(uint32_t a, uint32_t b);
 #else
 
 typedef unsigned int gaddr;
+void *memcpy(void *d, const void *s, unsigned int n);
+char *strcpy(char *d, const char *s);
+int strcmp(const char *a, const char *b);
+void _bitset(gaddr p, int v, int spec);
 
 #define REF(T)             gaddr
 #define GET(T, p, f)       (((T *)(p))->f)
@@ -142,7 +162,16 @@ typedef volatile unsigned short *H16PTR;
 #define POLL() ((void)0)
 #define AGAIN(cond) (cond)
 #define HELPER(expr) (expr)
-#define FRAME(sp, size) char sp##_frame[size]; gaddr sp = (gaddr)sp##_frame + (size)
+#define FRAME(sp, size) char sp##_frame[(size) + 1]; gaddr sp = (gaddr)sp##_frame + (size)
+#define SHL(x, n) ((int)(x) << (n))
+#define SHR(x, n) ((int)((unsigned int)(x) >> (n)))
+#define SAR(x, n) ((int)(x) >> (n))
+#define DIVS16(a, b) ((short)(a) / (short)(b))
+#define COPYB(d, s, n) memcpy((void *)(d), (void *)(s), (n))
+#define COPYW(entry, d, s, n) memcpy((void *)(d), (void *)(s), (n))
+#define STRCPY(d, s) ((gaddr)strcpy((char *)(d), (char *)(s)))
+#define STRCMP(a, b) strcmp((char *)(a), (char *)(b))
+#define BITSET(p, v, spec) _bitset((p), (v), (spec))
 #define UNFRAME(sp) ((void)0)
 #define DIVS(a, b) ((int)(a) / (int)(b))
 #define DIVU(a, b) ((unsigned int)(a) / (unsigned int)(b))

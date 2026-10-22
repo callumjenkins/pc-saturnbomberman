@@ -192,6 +192,8 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
                     cpu.mem.write(sp + 4 * (i - 4), 4, args[i])
             cpu.r[15] = sp
             cpu.r[:8] = junk
+            if n < 0:                               # one of SHC's routines, given r0 up
+                return cpu.call(addr, **{"r%d" % i: args[i] for i in range(-n)})
             return cpu.call(addr, **{"r%d" % (4 + i): args[i] for i in range(min(n, 4))})
         except Exception as e:                      # an access outside the mapped memory, or no return
             state["error"] = str(e)

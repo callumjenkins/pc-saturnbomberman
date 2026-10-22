@@ -72,6 +72,24 @@ static uint32_t enter(uint32_t addr, const uint32_t* args, int n, bool poll)
     return result;
 }
 
+uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2)
+{
+    SH2Context& c = *g_cur;
+    const uint32_t ret = c.pr, sp = c.r[15], keep[7] = {c.r[8], c.r[9], c.r[10], c.r[11], c.r[12], c.r[13], c.r[14]};
+
+    c.r[0] = r0;
+    c.r[1] = r1;
+    c.r[2] = r2;
+    SH2_POLL(c);
+    sh2_call(c, addr);
+    SH2_RET(c, ret);
+    const uint32_t result = c.r[0];
+    for (int i = 0; i < 7; i++) c.r[8 + i] = keep[i];
+    c.r[15] = sp;
+    c.pr = ret;
+    return result;
+}
+
 uint32_t g_call(uint32_t addr, const uint32_t* args, int n)
 {
     return enter(addr, args, n, true);

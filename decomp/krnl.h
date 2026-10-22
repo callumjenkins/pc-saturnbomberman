@@ -150,4 +150,26 @@ typedef struct { unsigned char state, b1; short count; unsigned short obj; unsig
 #define VIDEO_MODE 0x25F80004
 #define VIDEO_DIV(tv) (((((tv) & 1 ? ((tv) & 0xC0 ? 0x320000 : 0x31EB8B) : ((tv) & 0xC0 ? 0x3BF0A3 : 0x3BD374)) >> 9) + 1) >> 1)
 
+#define KEYED(n) (0x060C104C + (n) * 16)
+
+#define CD_HIRQ        0x25890008
+#define CD_CR1         0x25890018
+#define CD_CR2         0x2589001C
+#define CD_CR3         0x25890020
+#define CD_CR4         0x25890024
+#define CD_DATA        0x25898000
+#define CD_HIRQ_SHADOW 0x060FA8B8
+#define SMPC_COMREG    0x2010001F
+#define SMPC_SF        0x20100063
+#define SCSP_RAM       0x25A00000
+
+/* Waits for the SMPC to be idle, issues a command and waits for it to finish. */
+#define SMPC_COMMAND(cmd)                      \
+    do {                                       \
+    } while (AGAIN(LD8(SMPC_SF) & 1));         \
+    ST8(SMPC_SF, 1);                           \
+    ST8(SMPC_COMREG, cmd);                     \
+    do {                                       \
+    } while (AGAIN(LD8(SMPC_SF) & 1))
+
 #endif

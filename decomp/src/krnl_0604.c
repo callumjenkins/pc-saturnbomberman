@@ -142,6 +142,51 @@ void f0604144E(void)
     ST16(LD32(TASK_OBJ) + 12, pos);
 }
 
+void f0604271C(void)
+{
+    short ids[5];
+    int phase = TGET(h18) & 1;
+    int delta = LD16(TASK + 20) - LD32(0x060C02DC);
+    int k;
+
+    ids[0] = TGET(h8);
+    ids[1] = TGET(h10);
+    ids[2] = TGET(h12);
+    ids[3] = TGET(h14);
+    ids[4] = TGET(h16);
+    k = 0;
+    do {
+        gaddr obj = OBJ(ids[k]);
+
+        ST16(obj + 38, HELPER((int)((16 - k) * delta) >> 12));
+        switch (k) {
+        case 0:
+            ST16(obj + 36, LD16(obj + 36) - (phase + 2));
+            break;
+        case 1:
+            ST16(obj + 36, LD16(obj + 36) - 2);
+            break;
+        case 2:
+            ST16(obj + 36, LD16(obj + 36) - (phase + 1));
+            break;
+        case 3:
+            ST16(obj + 36, LD16(obj + 36) - 1);
+            break;
+        case 4:
+            ST16(obj + 36, LD16(obj + 36) - phase);
+            break;
+        }
+        if (LD16(obj + 36) < -464) {
+            ST16(obj + 36, 0);
+            GCALL1(0x0600A0EC, 48);
+            ST16(obj + 18, k * 10);
+        }
+    } while (AGAIN(++k < 5));
+    TSET(h18, TGET(h18) + 1);
+    if (TGET(h18) == 6)
+        TSET(h18, 0);
+}
+
 void f060429A8(void)
 {
     SET(Slot24, ELEM(Slot24, SLOTS, 1), fn, 0x06042864);
@@ -303,6 +348,18 @@ void f06046CD8(short value)
     ST16(SLOTS + 12, value);
 }
 
+int f06046D50(void)
+{
+    FRAME(sp, 12);
+    int q;
+
+    ST16(sp - 12, LD16(0x060C0348));
+    ST16(sp - 10, LD16(0x060C034A));
+    q = GCALL2(0x060980C8, 0x10000, LDU16(0x060D7B54) << 8);
+
+    return GCALL4(0x06047884, 8, q, q, sp - 12);
+}
+
 int f06047884(int which, int x, int y, gaddr pos)
 {
     int a = x & 0x0007FF00;
@@ -372,6 +429,57 @@ void f06049E8C(gaddr p, unsigned char kind)
         ST16(OBJ(LDU16(q)) + 38, v);
         q += 2;
     } while (AGAIN(q < p + 38));
+}
+
+void f0604ABAC(short id, short px, short py, unsigned char turn)
+{
+    FRAME(sp, 44);
+    int angle = LDU16(sp + 2) & 255;
+    int x = px << 16;
+    int y = py << 16;
+    int west, east, sx, sy, north, south;
+    int tx, ty;
+    gaddr obj;
+
+    if (angle & 127) {
+        int t = LD32(0x060B9108 + angle * 4);
+        int s = GCALL2(0x060980B4, GCALL1(0x0609812C, t), x);
+        int c = GCALL2(0x060980B4, GCALL1(0x0609816C, t), x);
+
+        sx = s;
+        east = c;
+        west = -c;
+        sy = -s;
+    } else {
+        west = (angle & 128) ? x : -x;
+        east = (angle & 128) ? -x : x;
+        sx = 0;
+        sy = 0;
+    }
+    if (turn & 127) {
+        int t = LD32(0x060B9108 + turn * 4);
+        int s = GCALL1(0x0609812C, t);
+        int lift = -GCALL2(0x060980B4, GCALL1(0x0609816C, t), y);
+
+        north = lift + GCALL2(0x060980B4, s, sx);
+        south = lift + GCALL2(0x060980B4, s, sy);
+    } else {
+        north = (turn & 128) ? y : -y;
+        south = north;
+    }
+    tx = (short)((unsigned)west >> 16);
+    ty = (short)((unsigned)east >> 16);
+    obj = OBJ(id);
+    ST16(obj + 20, tx);
+    ST16(obj + 24, ty - 1);
+    ST16(obj + 28, -1 - tx);
+    ST16(obj + 32, -ty);
+    tx = (short)((unsigned)north >> 16);
+    ty = (short)((unsigned)south >> 16);
+    ST16(obj + 22, tx);
+    ST16(obj + 26, ty);
+    ST16(obj + 30, -1 - tx);
+    ST16(obj + 34, -1 - ty);
 }
 
 void f0604AFE2(unsigned int n, gaddr list)
@@ -665,6 +773,42 @@ void f0604DFFE(gaddr p)
     ST16(obj + 68, 0x100 + (d > 96 ? d - 96 : 0));
 }
 
+int f0604E250(short mode, short cell, short limit, unsigned short buttons)
+{
+    short ids[3];
+    int bits, mask, k;
+    short index;
+    int exact = 0, partial = 0;
+
+    ids[0] = cell;
+    ids[1] = cell - 1;
+    ids[2] = cell + 1;
+    if (mode == 4) {
+        ids[1] = LD8(0x060B6AB8 + (cell + 1) * 2);
+        ids[2] = LD8(0x060B6AB8 + (cell + 1) * 2 + 1);
+    }
+    index = cell >= 0 ? cell + 1 : 0;
+    if (index > 10)
+        index = 10;
+    mask = LDU16(0x060B6A4A + (signed char)(mode * 22) + index * 2);
+    bits = ((buttons & 0x8000) ? 2 : 0) | ((buttons & 0x4000) ? 1 : 0) | ((buttons & 0x1000) ? 4 : 0)
+        | ((buttons & 0x2000) ? 8 : 0);
+    for (k = 1; k < 3; k++) {
+        POLL();
+        if (k == 1 ? ids[1] >= -1 : ids[2] <= limit) {
+            int want = mask & 15;
+            int hit = bits & want;
+
+            if (hit)
+                partial = k;
+            if (hit == want)
+                exact = k;
+        }
+        mask >>= 4;
+    }
+    return ids[exact ? exact : partial];
+}
+
 void f0604EA00(gaddr list, int unused, short hot, short max)
 {
     int i = 0;
@@ -749,6 +893,20 @@ void f0604FC44(gaddr out)
         ST8(out + 2, LD8(out + 2) & ~LD8(0x060C17A4 + i));
         ST8(out + 3, LD8(out + 3) ^ LD8(0x060C17A4 + i));
     } while (AGAIN(++i < 6));
+}
+
+int f0604FC96(void)
+{
+    FRAME(sp, 12);
+    gaddr buf = sp - 12;
+    int i = 4;
+
+    GCALL1(0x0604FC44, buf);
+    do {
+        if (LD8(0x060C17A9 + i) != LD8(buf + i - 1))
+            break;
+    } while (AGAIN(--i > 0));
+    return i != 0 ? 7 : 0;
 }
 
 void f0604FCD4(void)

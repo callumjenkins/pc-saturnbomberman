@@ -130,3 +130,21 @@ def test_a_call_to_a_division_routine_is_lifted_as_the_division(monkeypatch):
     monkeypatch.setitem(registers.DIVISIONS, BASE + 14, "DIVS")
     draft = lift.lift(image, BASE, code[BASE], code)
     assert "DIVS(r4, r5)" in draft and "GCALL" not in draft
+
+
+def test_a_call_to_a_library_routine_is_lifted_as_its_macro_with_operands_from_r0_to_r2(monkeypatch):
+    # caller: sts.l pr,@-r15 ; mov r4,r1 ; mov r5,r2 ; bsr copy ; mov #16,r0 ; lds.l @r15+,pr ; rts ; nop     copy: rts ; nop
+    caller = (encode("sts.l pr,@-Rn", 15), encode("mov Rm,Rn", 1, 4), encode("mov Rm,Rn", 2, 5), 0xB003,
+              encode("mov #imm,Rn", 0, low=16), encode("lds.l @Rm+,pr", 0, 15), RTS, NOP)
+    image, code = program(caller, (RTS, NOP))
+    monkeypatch.setitem(registers.LIBRARY, BASE + 16, ("COPYB({r1}, {r2}, {r0})", {1}))
+    draft = lift.lift(image, BASE, code[BASE], code)
+    assert "COPYB(r4, r5, 16)" in draft and "GCALL" not in draft
+
+
+def test_a_register_read_after_a_call_to_a_runtime_routine_is_still_the_callers():
+    # caller: sts.l pr,@-r15 ; bsr shift ; mov r4,r0 ; mov r6,r0 ; lds.l @r15+,pr ; rts ; nop     shift: shar r0 ; rts ; shar r0
+    caller = (encode("sts.l pr,@-Rn", 15), 0xB004, encode("mov Rm,Rn", 0, 4), encode("mov Rm,Rn", 0, 6),
+              encode("lds.l @Rm+,pr", 0, 15), RTS, NOP)
+    image, code = program(caller, (encode("shar Rn", 0), RTS, encode("shar Rn", 0)))
+    assert registers.reads(image, BASE, code) == {4, 6}

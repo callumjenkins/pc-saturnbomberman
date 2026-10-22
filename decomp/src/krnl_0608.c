@@ -437,6 +437,74 @@ int f0608A718(void)
     return GJUMP2(0x06069462, LD16(OBJIDX), LD16(LD32(MOVER_PTR) + 4) + 28);
 }
 
+int f0608A72A(void)
+{
+    int open[8];
+    int i, k, tries, x, y, left, top, angle;
+
+    i = 0;
+    while (i < 8) {
+        POLL();
+        open[i] = 1;
+        i++;
+    }
+    x = LD16(LD32(MOVER_PTR) + 16);
+    if (x >= 160) {
+        open[7] = 0;
+        open[0] = 0;
+        open[1] = 0;
+    } else {
+        open[3] = 0;
+        open[4] = 0;
+        open[5] = 0;
+    }
+    x = LD16(LD32(MOVER_PTR) + 16);
+    if (x < 16 || x >= 0x130) {
+        open[2] = 0;
+        open[6] = 0;
+    }
+    y = LD16(LD32(MOVER_PTR) + 18);
+    if (y >= 112) {
+        open[1] = 0;
+        open[2] = 0;
+        open[3] = 0;
+    } else {
+        open[5] = 0;
+        open[6] = 0;
+        open[7] = 0;
+    }
+    y = LD16(LD32(MOVER_PTR) + 18);
+    if (y < 32 || y >= 208) {
+        open[0] = 0;
+        open[4] = 0;
+    }
+    k = GCALL0(0x0600A0B8) & 7;
+    tries = 0;
+    do {
+        if (open[k] != 0)
+            break;
+        k = (k + 1) & 7;
+    } while (AGAIN(++tries < 8));
+    angle = k * 32;
+    ST16(LD32(CURRENT) + 86, angle);
+    angle &= 0xFFFF;
+    if (((angle + 64) & 128) == 0)
+        left = 0x160 - LD16(LD32(MOVER_PTR) + 16);
+    else
+        left = LD16(LD32(MOVER_PTR) + 16) + 32;
+    if (left < 0)
+        left = 0;
+    if ((angle & 128) == 0)
+        top = 0x110 - LD16(LD32(MOVER_PTR) + 18);
+    else
+        top = LD16(LD32(MOVER_PTR) + 18) + 32;
+    if (top < 0)
+        top = 0;
+    if (LDU16(LD32(CURRENT) + 86) & 32)
+        return left < top ? left : top;
+    return (LDU16(LD32(CURRENT) + 86) & 64) ? top : left;
+}
+
 int f0608A8B2(void)
 {
     if (LDU16(0x060C1E3C) <= 2)
@@ -476,6 +544,36 @@ int f0608A9D4(unsigned int id, int b)
     if (id == LDU16(0x060C2EFE))
         return 0;
     return GJUMP2(0x0608AA18, id, b);
+}
+
+int f0608AA18(unsigned int id, int dir, int unused, int arg)
+{
+    gaddr p;
+    int state, skip, k;
+
+    if (id >= 0x1000)
+        return 0;
+    p = LD32(0x060C2F00) + id * 2;
+    state = LD16(p);
+    if (state & 0x50B0)
+        return 0;
+    if (state & 0x8000)
+        return 1;
+    skip = LDU16(0x060B90B4 + dir * 2);
+    for (k = 1; k < 5; k++) {
+        POLL();
+        if (k == skip)
+            continue;
+        ST16(p, LD16(p) | 0x1000);
+        if (GCALL4(0x0608A9D4, LD16(0x060B90A0 + k * 2) + id, k, state, arg) != 0) {
+            ST16(p, LD16(p) & 0xEFFF);
+            ST16(p, LD16(p) | 0x8000);
+            return 1;
+        }
+        ST16(p, LD16(p) & 0xEFFF);
+    }
+    ST16(p, LD16(p) | 0x4000);
+    return 0;
 }
 
 void f0608AAD8(void)

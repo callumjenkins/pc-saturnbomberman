@@ -15,6 +15,7 @@ _NUMBER = re.compile(r"^-?(?:0x[0-9A-Fa-f]+|\d+)$")
 _SIZES = {"b": 1, "w": 2, "l": 4}
 _STORE = {1: "ST8", 2: "ST16", 4: "ST32"}
 _FRAMED = re.compile(r"sp|\(sp ([-+]) (\d+)\)")
+_SP_SUM = re.compile(r"\(\(sp ([-+]) (\d+)\) ([-+]) (\d+)\)")
 
 
 @dataclass
@@ -95,6 +96,16 @@ def address(base: str, offset: int | str) -> str:
     if at and isinstance(offset, int):
         return framed(int(at.group(2) or 0) * (-1 if at.group(1) == "-" else 1) + offset)
     return base if offset == 0 else op2(base, "+", str(offset))
+
+
+def fold_frame(text: str) -> str:
+    """text with each `(sp - a) + b` an address next to sp could have been, as one offset from sp."""
+    while True:
+        new = _SP_SUM.sub(lambda m: framed(int(m.group(2)) * (-1 if m.group(1) == "-" else 1)
+                                           + int(m.group(4)) * (-1 if m.group(3) == "-" else 1)), text)
+        if new == text:
+            return text
+        text = new
 
 
 def framed(offset: int) -> str:

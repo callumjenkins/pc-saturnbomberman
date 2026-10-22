@@ -44,6 +44,19 @@ uint32_t g_jump(uint32_t addr, const uint32_t *args, int n)
     return g_call_hook(addr, args, n);
 }
 
+/* A routine's registers go to the hook as a negative count: -3 for r0, r1 and r2. */
+uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2)
+{
+    const uint32_t regs[3] = {r0, r1, r2};
+
+    g_polls++;
+    if (!g_call_hook) {
+        g_fault = 1;
+        return 0;
+    }
+    return g_call_hook(addr, regs, -3);
+}
+
 uint32_t g_call(uint32_t addr, const uint32_t *args, int n)
 {
     g_polls++;

@@ -13,6 +13,21 @@ from saturnrecomp import sh2
 ARGUMENTS = frozenset({4, 5, 6, 7})          # what a callee nobody can read is taken to read
 # KRNL's division routines, r1 by r0: each leaves the result in r0 and changes r1.
 DIVISIONS = {0x0609410C: "DIVS", 0x060941C0: "DIVU", 0x06094268: "MODS", 0x06094330: "MODU"}
+# SHC's other runtime routines in KRNL, which loop, so the C calls them through guest.h's macros: the C
+# for a call, with {rN} for what the register holds, and the registers the routine changes.
+LIBRARY = {
+    0x0609460C: ("SHL({r0}, {r1})", {1}),
+    0x060947E4: ("SHR({r0}, {r1})", {1}),
+    0x060946CC: ("SAR({r0}, {r1})", {1}),
+    0x06094B70: ("DIVS16({r1}, {r0})", {1}),
+    0x060945B4: ("COPYB({r1}, {r2}, {r0})", {1}),
+    0x06094450: ("COPYW(0x06094450, {r1}, {r2}, {r0})", {1}),
+    0x0609445C: ("COPYW(0x0609445C, {r1}, {r2}, {r0})", {1}),
+    0x060944F4: ("COPYW(0x060944F4, {r1}, {r2}, {r0})", {1}),
+    0x06094C24: ("STRCPY({r0}, {r1})", {1}),
+    0x06094BC0: ("STRCMP({r0}, {r1})", {1}),
+    0x06094B08: ("BITSET({r2}, {r0}, {r1})", set()),
+}
 # Ops whose last operand, a register, is only written.
 _MOVES = frozenset({"mov", "mov.b", "mov.w", "mov.l", "mova", "movt", "sts", "stc", "exts.b", "exts.w",
                     "extu.b", "extu.w", "neg", "negc", "not", "swap.b", "swap.w"})
@@ -92,7 +107,9 @@ def _node(image: sh2.Image, ins: sh2.Insn, code: set[int], functions: dict[int, 
         uses = uses | (callee - defs)
         if leaves:
             return uses, defs, []
-        return uses, defs | frozenset(range(8)), after
+        helper = routine(image, target, functions) if target is not None else None
+        written = {0} | helper[1] if helper else set(range(8))      # SHC's routines keep r4 to r7
+        return uses, defs | frozenset(written), after
     if ins.op in _TAILS:
         return uses, defs, [target]
     if ins.op in ("bt", "bf", "bt/s", "bf/s"):
@@ -100,11 +117,14 @@ def _node(image: sh2.Image, ins: sh2.Insn, code: set[int], functions: dict[int, 
     return uses, defs, after
 
 
-def routine(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> tuple[str, bool] | None:
-    """The C for a call to a runtime routine, with {r0} and {r1} for what they hold, and whether it changes r1: a division,
-    or a run of shifts of r0 to its rts. None for any other function."""
+def routine(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> tuple[str, set[int]] | None:
+    """The C for a call to a runtime routine, with {r0} to {r2} for what they hold, and the registers other
+    than r0 it changes: a division, one of LIBRARY, or a run of shifts of r0 to its rts. None for any other
+    function."""
     if address in DIVISIONS:
-        return "%s({r1}, {r0})" % DIVISIONS[address], True
+        return "%s({r1}, {r0})" % DIVISIONS[address], {1}
+    if address in LIBRARY:
+        return LIBRARY[address]
     code = functions.get(address)
     kinds, count = set(), 0
     for pc in sorted(code or ()):
@@ -119,7 +139,7 @@ def routine(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> t
         return None
     kind = kinds.pop()
     value = {"shar": "(int){r0}", "shlr": "(unsigned int){r0}", "shll": "{r0}"}[kind]
-    return "HELPER(%s %s %d)" % (value, _SHIFTS[kind][0], count), False
+    return "HELPER(%s %s %d)" % (value, _SHIFTS[kind][0], count), set()
 
 
 def _loaded(image: sh2.Image, ins: sh2.Insn, code: set[int]) -> int | None:

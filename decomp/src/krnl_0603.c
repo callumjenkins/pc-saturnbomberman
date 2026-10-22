@@ -139,6 +139,55 @@ void f0603198C(void)
     ST16(0x060C124A, 0);
 }
 
+int f060319AC(unsigned int key, int a, int b, int c)
+{
+    FRAME(sp, 32);
+    int n = 1, cur = 0, seen = 0;
+
+    if (key == 0)
+        return 0xFFFF;
+    do {
+        if (LD32(KEYED(n) + 4) == 0)
+            break;
+    } while (AGAIN(++n < 30));
+    if (n == 30)
+        return 0xFFFF;
+    while (seen < LDU8(0x060C1244)) {
+        POLL();
+        if (key == LD32(KEYED(cur) + 4))
+            break;
+        if (key >= (unsigned int)LD32(KEYED(cur) + 4)) {
+            cur = LDU8(KEYED(cur) + 1);
+            seen++;
+            continue;
+        }
+        ST8(KEYED(LDU8(KEYED(cur))) + 1, n);
+        ST8(KEYED(n), LDU8(KEYED(cur)));
+        ST8(KEYED(cur), n);
+        ST8(KEYED(n) + 1, cur);
+        ST32(KEYED(n) + 4, key);
+        cur = n;
+        ST8(0x060C1244, LD8(0x060C1244) + 1);
+        break;
+    }
+    if (seen == LDU8(0x060C1244)) {
+        int tail = LDU8(KEYED(0));
+
+        ST8(KEYED(tail) + 1, n);
+        ST8(KEYED(0), n);
+        ST8(KEYED(n), tail);
+        ST8(KEYED(n) + 1, 0);
+        ST32(KEYED(n) + 4, key);
+        cur = n;
+        ST8(0x060C1244, LD8(0x060C1244) + 1);
+    }
+    ST8(KEYED(cur) + 2, a);
+    ST8(KEYED(cur) + 3, b);
+    ST32(KEYED(cur) + 8, c);
+    ST16(KEYED(cur) + 14, LD16(sp + 2) | 0x1000);
+    return cur;
+}
+
 /* Follows the chain of 16-byte nodes from 0 for the one whose key at 4 is key. */
 int f06031AE2(int key)
 {
@@ -995,6 +1044,65 @@ void f06034B24(gaddr out)
     } while (AGAIN(i < 10));
 }
 
+void f06034D90(unsigned char count, gaddr rank, gaddr key, gaddr tie)
+{
+    FRAME(sp, 68);
+    gaddr order = sp - 40;
+    int i, j, place;
+    unsigned short last_key;
+    short last_tie;
+
+    if (count > 0) {
+        i = 0;
+        do {
+            ST8(order + i, i);
+        } while (AGAIN(++i < count));
+    }
+    for (i = 0; i < count; i++) {
+        POLL();
+        j = i + 1;
+        if (j < count) {
+            do {
+                int swap;
+
+                if (LDU16(key + i * 2) == LDU16(key + j * 2))
+                    swap = LD16(tie + i * 2) < LD16(tie + j * 2);
+                else
+                    swap = LDU16(key + i * 2) < LDU16(key + j * 2);
+                if (swap) {
+                    unsigned short k = LDU16(key + i * 2);
+                    short t;
+                    unsigned char o;
+
+                    ST16(key + i * 2, LDU16(key + j * 2));
+                    ST16(key + j * 2, k);
+                    t = LD16(tie + i * 2);
+                    ST16(tie + i * 2, LD16(tie + j * 2));
+                    ST16(tie + j * 2, t);
+                    o = LDU8(order + i);
+                    ST8(order + i, LDU8(order + j));
+                    ST8(order + j, o);
+                }
+            } while (AGAIN(++j < count));
+        }
+    }
+    place = 1;
+    last_key = 0;
+    last_tie = -30000;
+    if (count > 0) {
+        i = 0;
+        do {
+            if (last_key != LDU16(key + i * 2))
+                place = i + 1;
+            else if (last_tie != LD16(tie + i * 2))
+                place = i + 1;
+            last_key = LDU16(key + i * 2);
+            last_tie = LD16(tie + i * 2);
+            ST8(rank + LDU8(order + i), place);
+        } while (AGAIN(++i < count));
+    }
+}
+
 void f06034F80(void)
 {
     gaddr p;
@@ -1191,6 +1299,98 @@ void f06035A0A(unsigned short id)
     ST8(0x060C1662, right & 63);
     ST8(0x060C1661, top & 63);
     ST8(0x060C1663, (bottom + 2) & 63);
+}
+
+void f06035ACA(int tile, unsigned char x, unsigned char y, unsigned char width)
+{
+    FRAME(sp, 32);
+    gaddr p;
+    int step, mask, bits, rows;
+
+    ST16(sp + 6, LDU16(sp + 6) >> 4);
+    p = GCALL3(0x0600ABA4, tile, x, y);
+    step = (GCALL1(0x0600AA8A, tile) & 0xFFFF) == 1 ? 2 : 4;
+    if ((GCALL1(0x0600AA8A, tile) & 0xFFFF) == 1) {
+        mask = -61441;
+        bits = LDU16(sp + 6) << 12;
+    } else {
+        mask = -128;
+        bits = LDU16(sp + 6) & 127;
+    }
+    rows = LDU8(sp + 3);
+    while (rows > 0) {
+        gaddr q = p;
+        int cols = width;
+
+        POLL();
+        if (cols > 0) {
+            do {
+                cols--;
+                ST16(q, (LDU16(q) & mask) | bits);
+                q += step;
+            } while (AGAIN(cols > 0));
+        }
+        p += step * 64;
+        rows--;
+    }
+}
+
+int f06035C38(int id)
+{
+    unsigned short key = LDU16(POINTS + (short)(id * 24));
+    int found = 255;
+    int i;
+
+    for (i = (id + 1) & 0xFFFF; i < 30; i++) {
+        POLL();
+        if (LD32(POINTS + (short)(i * 24) + 12) >= 0 && LDU16(POINTS + (short)(i * 24)) == key) {
+            found = i;
+            break;
+        }
+    }
+    if ((found & 0xFFFF) == 255) {
+        for (i = 0; i < 30; i++) {
+            POLL();
+            if (LD32(POINTS + i * 24 + 12) >= 0 && LDU16(POINTS + i * 24) == key) {
+                found = i;
+                break;
+            }
+        }
+    }
+    return found;
+}
+
+int f06035CDA(int a, int b, int c, int d)
+{
+    FRAME(sp, 24);
+    gaddr p = POINTS;
+    int i = 0;
+
+    do {
+        if (LD32(p + 12) == -1) {
+            ST16(p, a);
+            ST16(p + 2, b);
+            ST16(p + 4, c);
+            ST32(p + 8, LD32(sp + 4));
+            ST8(p + 20, d);
+            ST8(p + 21, LD16(sp + 2));
+            ST32(p + 12, 0);
+            GCALL4(0x0603847E, i, b, c, d);
+            return i & 255;
+        }
+        p += 24;
+    } while (AGAIN(++i < 30));
+    return 255;
+}
+
+int f06035D36(int a, int b, int c, int d)
+{
+    FRAME(sp, 12);
+    int i = GCALL6(0x06035CDA, a, b, c, d, LD16(sp + 2), LD32(sp + 4));
+    gaddr p = POINTS + (short)(i * 24);
+
+    ST32(p + 12, LD32(p + 12) | 0x800);
+    return i;
 }
 
 void f06035DC4(unsigned short i, int mode)
@@ -1585,6 +1785,44 @@ void f06037C80(void)
     ST8(0x060C1668, 0);
 }
 
+int f06037D02(short cell, int link, short row, short col)
+{
+    FRAME(sp, 28);
+    int id = GCALL3(0x0603666E, row, col, LD16(sp + 2)) & 0xFFFF;
+    int slot;
+
+    if (id == 255) {
+        slot = -1;
+    } else {
+        slot = 0x060EC748;
+        if (cell >= 0) {
+            if (cell < 15) {
+                ST32(0x060C1658, 0x060EC748 + (short)(cell * 24));
+                slot = GET(Fall, FALL_PTR, fn) != 0 ? -1 : cell;
+            }
+        } else {
+            ST32(0x060C1658, 0x060EC748);
+            slot = 0;
+            while (GET(Fall, FALL_PTR, fn) != 0) {
+                slot++;
+                ST32(0x060C1658, LD32(0x060C1658) + 24);
+                if (slot >= 15)
+                    break;
+                POLL();
+            }
+            if (slot >= 15)
+                slot = -1;
+        }
+    }
+    if (slot >= 0) {
+        SET(Fall, FALL_PTR, fn, link);
+        SET(Fall, FALL_PTR, x, id);
+        ST32(0x060C165C, POINTS + (short)(id * 24));
+        ST8(0x060C1668, LD8(0x060C1668) + 1);
+    }
+    return slot;
+}
+
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
 void f06038174(void)
 {
@@ -1786,6 +2024,92 @@ int f06039BE6(int x)
     if (ABS(x) > 0x00010000)
         return 0;
     return GCALL1(0x060972D8, 0x00010000 - GCALL2(0x060980B4, x, x));
+}
+
+void f06039C28(int a, short tail, int c, short head)
+{
+    FRAME(sp, 68);
+    int ax = (short)(a << 1);
+    int cx = (short)(c << 1);
+    int mid, rows, acc, step, last, diff;
+    gaddr out = LD32(sp + 8);
+    int i = 0;
+
+    ST16(sp + 2, LD16(sp + 2) << 1);
+    mid = LD16(sp + 2);
+    rows = LD16(sp + 6);
+    if (rows > 0) {
+        diff = rows - head;
+        step = DIVS(0x10000, head);
+        acc = 0x10000;
+        if (diff < 0) {
+            acc = step * diff + 0x10000;
+        } else if (diff > 0) {
+            do {
+                ST16(out, 0x3FE);
+                i++;
+                out += 2;
+                ST16(out, 0x3FE);
+                out += 2;
+            } while (AGAIN(i < diff));
+        }
+        if (rows > 224) {
+            rows = 224;
+            ST16(sp + 6, 224);
+        }
+        if (i < rows) {
+            do {
+                int t = GCALL1(0x06039BE6, acc);
+                int top, bottom;
+
+                acc -= step;
+                top = mid - GCALL2(0x060980B4, t, cx);
+                bottom = mid + GCALL2(0x060980B4, t, ax);
+                if (top < 0)
+                    top = 0;
+                if (bottom > 0x280)
+                    bottom = 0x280;
+                ST16(out, top & 0x3FE);
+                ST16(out + 2, bottom & 0x3FE);
+                i++;
+                out += 4;
+            } while (AGAIN(i < rows));
+        }
+    }
+    if (LD16(sp + 6) < 224) {
+        acc = 0;
+        step = DIVS(0x10000, tail);
+        last = LD16(sp + 6) + tail;
+        if (last > 224)
+            last = 224;
+        if (i < last) {
+            do {
+                int t = GCALL1(0x06039BE6, acc);
+                int top, bottom;
+
+                acc += step;
+                top = mid - GCALL2(0x060980B4, t, cx);
+                bottom = mid + GCALL2(0x060980B4, t, ax);
+                if (top < 0)
+                    top = 0;
+                if (bottom > 0x280)
+                    bottom = 0x280;
+                ST16(out, top & 0x3FE);
+                ST16(out + 2, bottom & 0x3FE);
+                i++;
+                out += 4;
+            } while (AGAIN(i < last));
+        }
+    }
+    if (i < 224) {
+        do {
+            ST16(out, 0x3FE);
+            i++;
+            out += 2;
+            ST16(out, 0x3FE);
+            out += 2;
+        } while (AGAIN(i < 224));
+    }
 }
 
 void f06039DD8(void)
@@ -2114,6 +2438,39 @@ void f0603B368(short x, short y, short value)
     ST16(OBJ(TGET(h12)) + 4, base + 5);
     ST16(OBJ(TGET(h14)) + 4, base + 7);
     ST16(OBJ(TGET(h16)) + 4, 10);
+}
+
+void f0603B4B2(void)
+{
+    FRAME(sp, 40);
+    gaddr ids = sp - 40;
+    int v, k;
+    gaddr obj;
+
+    GCALL2(0x0605EC1E, ids, 5);
+    v = LD16(LD32(TASK_OBJ) + 68);
+    if (v > 0) {
+        v -= 2;
+    } else {
+        v = 0;
+        TSET(fn, 0x0603DDA6);
+    }
+    k = 0;
+    do {
+        obj = OBJ(LDU16(ids + k * 2));
+        ST16(obj + 70, v);
+        ST16(obj + 68, v);
+        ST16(obj + 74, -32);
+    } while (AGAIN(++k < 4));
+    obj = OBJ(LDU16(ids + 8));
+    ST16(obj + 18, LD16(obj + 18) - 3);
+    k = 0;
+    do {
+        obj = OBJ(LDU16(0x060C1728 + k * 2));
+        ST16(obj + 70, v);
+        ST16(obj + 68, v);
+        ST16(obj + 74, -24);
+    } while (AGAIN(++k < 2));
 }
 
 void f0603B650(void)

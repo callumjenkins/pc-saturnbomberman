@@ -40,8 +40,8 @@ functions changed the sound in `normal`.
 
 The lifter reads straight from the instructions: registers become locals, stack slots become `v`
 locals, and calls go through `GCALL`, passing the registers the callee reads (`registers.py`). A call to
-one of SHC's runtime routines becomes its operator: `DIVS`, `DIVU`, `MODS` or `MODU` for a division, or a
-shift in `HELPER()`. A function that passes a local's address on, or reads an argument from the stack,
+one of SHC's runtime routines becomes its operator: `DIVS`, `DIVU`, `MODS` or `MODU` for a division, a
+shift in `HELPER()`, or one of the library macros below. A function that passes a local's address on, or reads an argument from the stack,
 keeps its locals in a frame on the game's own stack: `FRAME(sp, n)` declares `sp`, r15 on entry, and
 the locals are loads and stores below it. A loop that leaves for several places gets its main exit after
 it and the others written out where it leaves for them. The lifter refuses a jump table, a
@@ -109,6 +109,12 @@ SHC compiles a division, and a shift it has no instruction for, into a call to a
 takes r0 and r1, which `GCALL` cannot pass. The C writes the operator instead, in `HELPER(expr)` so that
 time advances once, as for the call: `HELPER(x >> 13)`, or `DIVS(a, b)` and its kin, which also give
 SHC's result for a zero divisor: 0, with 0x44E stored at 060FA8B4.
+
+SHC's other routines loop: a shift by a variable count, a byte or word copy, a string copy or compare,
+a 16-bit division and a bit-field store. For those the C names the operation, `SHL(x, n)`,
+`COPYB(dst, src, n)`, `STRCMP(a, b)` and the rest in `guest.h`, and on the host the macro calls the
+game's own routine with r0 to r2 set (`g_routine`), so its loops advance time as the original's do.
+Under SHC they are the plain operator or library call.
 
 ## Advancing the game's time
 

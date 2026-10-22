@@ -174,6 +174,52 @@ int f06052BB6(unsigned char which)
     return result;
 }
 
+void f06052DBA(gaddr obj, unsigned short flag)
+{
+    short ids[5];
+    int level = LD16(obj + 6);
+    int k;
+
+    for (k = 0; k < 5; k++)
+        ids[k] = LD16(obj + 10 + k * 2);
+    if (flag != 0) {
+        int stage = LDU8(0x060C17F0);
+
+        if (stage < 9) {
+            level += 16;
+            if (stage >= 3 && stage < 6)
+                level += 16;
+        }
+    }
+    k = 0;
+    do {
+        if (ids[k] != 0)
+            ST16(OBJ(ids[k]) + 46, level);
+    } while (AGAIN(++k < 5));
+}
+
+void f06052F3C(void)
+{
+    unsigned int key = LDU16(0x26006096);
+    gaddr p = 0x060B6BFC;
+    int i = 0;
+    int found = 255;
+
+    while (LD32(p) != 0) {
+        POLL();
+        if (key == LD32(p)) {
+            found = i;
+            break;
+        }
+        i++;
+        p += 4;
+    }
+    if (found != 255 && found != ((LD32(0x060C1040) >> 4) & 7)) {
+        GCALL1(0x0600996A, found == 0 ? 6 : 5);
+        ST32(0x060C1040, (LD32(0x060C1040) & 0xFF0F) | (found << 4));
+    }
+}
+
 void f06053934(gaddr dst, int a, int b, int c)
 {
     int i = 0;
@@ -1049,6 +1095,28 @@ void f0605EC1E(gaddr dst, short n)
         if (i <= 6)
             ST16(dst + i * 2, LD16(LD32(0x060D7E60) + 8 + i * 2));
     } while (AGAIN(++i < n));
+}
+
+int f0605F0A6(int n)
+{
+    int i = 1;
+
+    ST32(TASK_PTR, 0x060D7B60);
+    do {
+        if (LD16(TASK + 8) != 0) {
+            int cell = GCALL1(0x0600CA6A, LDU16(TASK + 8));
+            int tag;
+
+            ST32(TASK_OBJ, OBJ(LDU16(TASK + 8)));
+            if (LDU16(REC(n) + 20) == cell) {
+                tag = LDU16(LD32(TASK_OBJ) + 50);
+                if (tag >= 88 && tag <= 95)
+                    return i;
+            }
+        }
+        ST32(TASK_PTR, LD32(TASK_PTR) + 24);
+    } while (AGAIN(++i < 5));
+    return 0;
 }
 
 int f0605F136(int a)

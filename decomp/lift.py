@@ -22,7 +22,7 @@ import registers  # noqa: E402
 import status  # noqa: E402
 import structure  # noqa: E402
 from saturnrecomp import sh2  # noqa: E402
-from state import LOCAL_TYPES, VAR, State, Stmt, Unsupported, const, number, sp_change, step, strip  # noqa: E402
+from state import LOCAL_TYPES, VAR, State, Stmt, Unsupported, const, fold_frame, number, sp_change, step, strip  # noqa: E402
 
 IMAGES = {"KRNL": ("build/extract/BOMSS/0KRNL.BIN", 0x06006000)}
 _CALLS = ("bsr", "jsr")
@@ -55,11 +55,11 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         raise Unsupported("goes to %s, the middle of a function that reads r%d from its caller" % (where, needs[0]))
     helper = registers.routine(image, number(where), functions) if known and not tail else None
     if helper:
-        text, changes_r1 = helper
-        st.put(0, text.format(r0=st.get(0), r1=st.get(1) if "{r1}" in text else ""), False)
-        if changes_r1:
-            st.clobbered.add(1)
-            st.known.pop(1, None)
+        text, changes = helper
+        st.put(0, text.format(**{"r%d" % r: st.get(r) for r in range(3) if "{r%d}" % r in text}), False)
+        for r in changes:
+            st.clobbered.add(r)
+            st.known.pop(r, None)
         return False
     reads = registers.reads(image, number(where), functions) if known else None
     args: list[str] = []
@@ -164,7 +164,7 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
         elif block.kind == "return":
             block.value = strip(read.term) or ("r0" if returns else "")
         blocks[at] = block
-    lines = structure.Structurer(blocks, entry).run()
+    lines = [fold_frame(line) for line in structure.Structurer(blocks, entry).run()]
     if lines and lines[-1] == "return;":
         lines.pop()
     body = "\n".join(lines)
