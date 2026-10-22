@@ -101,7 +101,7 @@ def address(base: str, offset: int | str) -> str:
 
 
 def fold_frame(text: str) -> str:
-    """text with each `(sp - a) + b` an address next to sp could have been, as one offset from sp."""
+    """text with each `(sp - a) + b` or `(sp + a) - b` folded to one offset from sp."""
     while True:
         new = _SP_SUM.sub(lambda m: framed(int(m.group(2)) * (-1 if m.group(1) == "-" else 1)
                                            + int(m.group(4)) * (-1 if m.group(3) == "-" else 1)), text)

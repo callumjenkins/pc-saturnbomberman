@@ -174,7 +174,7 @@ class Structurer:
     def goes_round(self, at: int) -> bool:
         """Whether going to `at` is a jump back to the header of a loop being written."""
         for header, leave in reversed(self.active):
-            if at in (header, leave) or at in self.sides[header]:
+            if at in (header, leave):
                 return at == header
         return False
 

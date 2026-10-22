@@ -10,7 +10,7 @@
 
 static SH2Context* g_cur;       // the context of the swapped function that is running
 
-// Also puts back r15, which FRAME lowers.
+// Puts r15 back on return, which FRAME lowers.
 struct InSwap {
     SH2Context* outer;
     uint32_t sp;

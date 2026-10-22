@@ -28,8 +28,8 @@
  *                   stored in a bit field of the word at p (spec: width, and offset << 8). Each calls SHC's
  *                   own routine in KRNL, as the game's code does, on the host through g_routine.
  *   FRAME(sp, n)    declares sp, the game's stack pointer on entry, and reserves n bytes of the game's
- *                   stack below it, for locals whose address the function passes on. sp + 4 and up are
- *                   the arguments a caller passed on the stack. The frame goes when the function returns.
+ *                   stack below it, for locals whose address the function passes on. The arguments a
+ *                   caller passed on the stack start at sp. The swap's wrapper and SHC free the frame on return.
  *   UNFRAME(sp)     gives the frame back before a GJUMP, whose callee finds its stack arguments at sp.
  */
 #ifndef DECOMP_GUEST_H

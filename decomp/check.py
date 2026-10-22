@@ -120,7 +120,7 @@ def build(sources: list[str] | None = None) -> ctypes.CDLL:
         return ctypes.CDLL(out)
 
 
-# SHC's runtime library. A literal that points into it names an offset table its shift routines read.
+# SHC's runtime library. A literal that points into it names a table the routines read, or one of the routines.
 LIBRARY = (0x06094400, 0x06094D80)
 
 
@@ -143,7 +143,7 @@ def code_runs() -> list[list[int]]:
     for row in status.previous().values():
         if row.module != "KRNL":
             continue
-        for ins in status.own(image, row.address, code.get(row.address)):      # a jump table's targets too
+        for ins in status.own(image, row.address, code.get(row.address)):
             used.update((ins.pc, ins.pc + 1))
             if ins.target is not None and ins.op in ("mov.w", "mov.l", "mova"):
                 used.update(range(ins.target, ins.target + (2 if ins.op == "mov.w" else 4)))
@@ -199,7 +199,7 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
                     cpu.mem.write(sp + 4 * (i - 4), 4, args[i])
             cpu.r[15] = sp
             cpu.r[:8] = junk
-            if n < 0:                               # one of SHC's routines, given r0 up
+            if n < 0:
                 return cpu.call(addr, **{"r%d" % i: args[i] for i in range(-n)})
             return cpu.call(addr, **{"r%d" % (4 + i): args[i] for i in range(min(n, 4))})
         except Exception as e:                      # an access outside the mapped memory, or no return

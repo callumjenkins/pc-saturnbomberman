@@ -74,3 +74,21 @@ def test_a_tail_jump_with_no_runtime_to_run_it_faults(mem):
     mem.g_jump.argtypes = [ctypes.c_uint32, ctypes.c_void_p, ctypes.c_int]
     mem.g_jump(0x06006000, None, 0)
     assert fault(mem) == 1
+
+
+@pytest.mark.parametrize("size, lowered", [
+    pytest.param(0, 0, id="nothing"),
+    pytest.param(1, 4, id="a byte, rounded up to a word"),
+    pytest.param(5, 8, id="five bytes, rounded up to two words"),
+    pytest.param(8, 8, id="two words exactly"),
+])
+def test_a_frame_lowers_the_games_stack_by_its_size_rounded_up_to_a_word_and_returns_the_old_top(mem, size, lowered):
+    sp = ctypes.c_uint32.in_dll(mem, "g_sp")
+    sp.value = 0x060FFF00
+    mem.g_frame.restype = ctypes.c_uint32
+    mem.g_frame.argtypes = [ctypes.c_int]
+    mem.g_unframe.argtypes = [ctypes.c_uint32]
+    top = mem.g_frame(size)
+    assert (top, sp.value) == (0x060FFF00, 0x060FFF00 - lowered)
+    mem.g_unframe(top)
+    assert sp.value == 0x060FFF00

@@ -5,8 +5,7 @@
 The draft is straight from the instructions: registers become locals (r4 to r7 are the parameters,
 stack slots become v locals), loads and stores go through LD and ST, calls go through GCALL, and the
 control flow is rebuilt as if, while, break and continue. It is meant to be read and rewritten; run.py's
-cosim decides whether it is right. Raises Unsupported for what it cannot read: a jump table, a pointer
-to a local, a stack argument, a control-register access, or code that reads a register it never set.
+cosim decides whether it is right. Raises Unsupported for what it cannot read: a jump table, a control-register access, or code that reads a register it never set.
 """
 import argparse
 import os
@@ -79,7 +78,7 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         args = [a or "0" for a in args]
     extra = stack_arguments(st) if not tail else []
     if extra:
-        args += ["0"] * (4 - len(args)) + extra         # r4 to r7 first, then the stack words
+        args += ["0"] * (4 - len(args)) + extra
     text = "%s%d(%s%s)" % ("GJUMP" if tail else "GCALL", len(args), where, "".join(", " + a for a in args))
     if tail and st.framed:
         st.effect("UNFRAME(sp);")
@@ -213,8 +212,7 @@ def liveness(reads: dict[int, Read], returns: bool) -> tuple[dict[int, set[str]]
 
 
 def stack_arguments(st: State) -> list[str]:
-    """The words stored at the bottom of the frame, which a callee may read as its fifth and later arguments.
-    The function's stores are not told apart by path, so a local that sits there is passed too, harmlessly."""
+    """The words stored at the bottom of the frame, which a callee may read as its fifth and later arguments."""
     words = []
     while st.sp + 4 * len(words) in st.stored and len(words) < 4:
         words.append(st.sp + 4 * len(words))

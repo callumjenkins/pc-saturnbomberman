@@ -99,7 +99,7 @@ arguments go in r4 to r7 and later ones on the stack, lowest first. r8 to r15 an
 unchanged. Calls between functions of `src/` are ordinary C calls (`f0600942E` calls `f0600940A`).
 `FRAME` lowers r15 while its function runs, so a callee's frame sits below it, and the swap's wrapper puts
 r15 back on return. Before a `GJUMP`, `UNFRAME(sp)` gives the callee the stack its caller left.
-Untested: more than four arguments. A callee that switches tasks is why `yields` functions are left alone.
+Calls with more than four arguments are tested on the host only. A callee that switches tasks is why `yields` functions are left alone.
 
 In the cosim, r0 to r7 that a call does not pass hold different values on the two sides, so C that
 leaves an argument to whatever a register held disagrees with the game. The game's function starts the

@@ -13,8 +13,8 @@ from saturnrecomp import sh2
 ARGUMENTS = frozenset({4, 5, 6, 7})          # what a callee nobody can read is taken to read
 # KRNL's division routines, r1 by r0: each leaves the result in r0 and changes r1.
 DIVISIONS = {0x0609410C: "DIVS", 0x060941C0: "DIVU", 0x06094268: "MODS", 0x06094330: "MODU"}
-# SHC's other runtime routines in KRNL, which loop, so the C calls them through guest.h's macros: the C
-# for a call, with {rN} for what the register holds, and the registers the routine changes.
+# SHC's other looping runtime routines in KRNL: the C for a call, with {rN} for what the register holds,
+# and the registers the routine changes.
 LIBRARY = {
     0x0609460C: ("SHL({r0}, {r1})", {1}),
     0x060947E4: ("SHR({r0}, {r1})", {1}),
@@ -89,7 +89,7 @@ def _node(image: sh2.Image, ins: sh2.Insn, code: set[int], functions: dict[int, 
           islands: list[int]) -> tuple[frozenset[int], frozenset[int], list[int]]:
     """(registers read, registers written, the instructions that can come next) for one instruction,
     with its delay slot, which runs before the branch takes effect. A jmp through a table goes to any of
-    the islands, the function's code that follows data, where the recompiler found the table's targets."""
+    the islands, the function's code that follows data."""
     uses, defs = _operands(ins)
     after = [ins.pc + 2]
     if ins.delay:
