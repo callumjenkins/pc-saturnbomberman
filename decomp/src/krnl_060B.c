@@ -82,6 +82,27 @@ void f060B0180(gaddr a, gaddr b, int c, int d)
     GCALL3(0x060B010A, (rest << 2) + b, a, d);
 }
 
+void f060B0212(gaddr dst, gaddr src, int n)
+{
+    if (dst > src) {
+        dst += n;
+        src += n;
+        while (--n >= 0) {
+            POLL();
+            src--;
+            dst--;
+            ST8(dst, LD8(src));
+        }
+    } else if (dst < src) {
+        while (--n >= 0) {
+            POLL();
+            ST8(dst, LD8(src));
+            dst++;
+            src++;
+        }
+    }
+}
+
 /* Copies n words from src to dst, backwards when dst is above src, as memmove does. */
 void f060B0246(gaddr dst, gaddr src, int n)
 {
@@ -102,6 +123,22 @@ void f060B0246(gaddr dst, gaddr src, int n)
             ST32(dst, LD32(src));
         }
     }
+}
+
+void f060B027E(gaddr a, gaddr b, int c, int d)
+{
+    GCALL3(0x060B0212, a, b, d);
+    GCALL3(0x060B0212, b, b + d, c - d);
+    POLL();
+    GJUMP3(0x060B0212, b + (c - d), a, d);
+}
+
+void f060B02B4(gaddr a, gaddr b, int c, int d)
+{
+    GCALL3(0x060B0246, a, b, d);
+    GCALL3(0x060B0246, b, b + d * 4, c - d);
+    POLL();
+    GJUMP3(0x060B0246, b + (c - d) * 4, a, d);
 }
 
 void f060B02F0(int n)
@@ -153,6 +190,18 @@ void f060B07B4(gaddr obj, gaddr desc)
     ST32(rec + 28, 1);
 }
 
+void f060B0810(gaddr h, gaddr p)
+{
+    gaddr st = LD32(h) + 48;
+
+    if (LD32(st + 8) != 1) {
+        GCALL2(0x060B07B4, h, p);
+        ST32(st + 52, (LD16(p + 26) << 16) | LDU16(p + 28));
+        ST32(st + 28, 6);
+        ST32(st + 48, LD32(st + 48) << 6);
+    }
+}
+
 void f060B086C(gaddr ctx, int value)
 {
     gaddr data = LD32(ctx);
@@ -163,6 +212,30 @@ void f060B086C(gaddr ctx, int value)
 int f060B087E(int a, int b, int c, int d)
 {
     return GJUMP4(0x060AD62C, 0x308, b, c, d);
+}
+
+void f060B0B08(gaddr dst, int limit, int a, int b)
+{
+    FRAME(sp, 0);
+    int left = LD32(sp);
+    int chunk;
+
+    if (dst & 3) {
+        dst = (dst + 3) & -4;
+        limit -= 4;
+    }
+    limit &= -4;
+    if (left > 0) {
+        do {
+            chunk = limit >= left ? left : limit;
+            if ((chunk & 3) == 0) {
+                GCALL4(0x060B02B4, dst, a, b >> 2, chunk >> 2);
+            } else {
+                GCALL4(0x060B027E, dst, a, b, chunk);
+            }
+            left -= chunk;
+        } while (AGAIN(left > 0));
+    }
 }
 
 /* Returns 96 when the ring has room and 0 when it is full. */
@@ -244,6 +317,48 @@ int f060B0C78(gaddr stream, int count)
     return GCALL2(0x060B0C30, stream, count);
 }
 
+gaddr f060B0E22(gaddr h, gaddr p)
+{
+    gaddr ring = LD32(h);
+    int pairs = LD32(p + 12) >> 1;
+    gaddr left = LD32(p);
+    gaddr right = LD32(p + 4);
+    gaddr src = LD32(p + 8);
+    gaddr start = LD32(ring + 4);
+    gaddr stop = LD32(ring + 48 + 68);
+    gaddr end = pairs * 4 + src;
+
+    if (end > start) {
+        if (pairs > 0) {
+            do {
+                ST16(left, LD16(src));
+                src += 2;
+                left += 2;
+                if (src >= stop) {
+                    src = LD32(ring + 4);
+                }
+                ST16(right, LD16(src));
+                src += 2;
+                right += 2;
+                if (src >= stop) {
+                    src = LD32(ring + 4);
+                }
+                pairs--;
+            } while (AGAIN(pairs > 0));
+        }
+    } else if (src < end) {
+        do {
+            ST16(left, LD16(src));
+            src += 2;
+            left += 2;
+            ST16(right, LD16(src));
+            src += 2;
+            right += 2;
+        } while (AGAIN(src < end));
+    }
+    return right;
+}
+
 gaddr f060B0E8E(gaddr obj, gaddr job)
 {
     gaddr o = LD32(obj);
@@ -280,6 +395,80 @@ gaddr f060B0E8E(gaddr obj, gaddr job)
         } while (AGAIN(src < end));
     }
     return right;
+}
+
+int f060B0EF6(gaddr h, gaddr p)
+{
+    gaddr ring = LD32(h);
+    gaddr stop = LD32(ring + 48 + 68);
+    gaddr dst = LD32(p);
+    gaddr src = LD32(p + 8);
+    int bytes = (LD32(p + 12) >> 1) << 1;
+    gaddr end = bytes + src;
+    gaddr wrap;
+
+    if (end > stop) {
+        wrap = bytes + src - ((LD32(ring + 8) >> 1) << 1);
+        if (src < stop) {
+            do {
+                ST16(dst, LD16(src));
+                src += 2;
+                dst += 2;
+            } while (AGAIN(src < stop));
+        }
+        src = LD32(ring + 4);
+        if (src < wrap) {
+            do {
+                ST16(dst, LD16(src));
+                src += 2;
+                dst += 2;
+            } while (AGAIN(src < wrap));
+        }
+    } else if (src < end) {
+        do {
+            ST16(dst, LD16(src));
+            src += 2;
+            dst += 2;
+        } while (AGAIN(src < end));
+    }
+    return 68;
+}
+
+int f060B0F5E(gaddr h, gaddr p)
+{
+    gaddr ring = LD32(h);
+    gaddr dst = LD32(p);
+    gaddr stop = LD32(ring + 48 + 68);
+    int count = LD32(p + 12);
+    gaddr src = LD32(p + 8);
+    gaddr end = src + count;
+    gaddr wrap;
+
+    if (end > stop) {
+        wrap = src + count - LD32(ring + 8);
+        if (src < stop) {
+            do {
+                ST8(dst, LD8(src));
+                src++;
+                dst++;
+            } while (AGAIN(src < stop));
+        }
+        src = LD32(ring + 4);
+        if (src < wrap) {
+            do {
+                ST8(dst, LD8(src));
+                src++;
+                dst++;
+            } while (AGAIN(src < wrap));
+        }
+    } else if (src < end) {
+        do {
+            ST8(dst, LD8(src));
+            src++;
+            dst++;
+        } while (AGAIN(src < end));
+    }
+    return count;
 }
 
 void f060B0FB6(gaddr obj)

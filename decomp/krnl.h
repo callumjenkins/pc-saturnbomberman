@@ -292,4 +292,34 @@ typedef struct {
 #define SLOT_USED 0x060BB98C
 #define SLOT_TABLE 0x060FC0E8
 
+/* Stores v in cells - 1 words from p. */
+static void fill_row(gaddr p, int v, int cells)
+{
+    int i = 1;
+
+    if (i < cells) {
+        do {
+            ST32(p, v);
+            i++;
+            p += 4;
+        } while (AGAIN(i < cells));
+    }
+}
+
+/* Makes a record with 0603666E and hands it to 06035DC4. */
+static void spawn(int group, int kind, int tag, int flags)
+{
+    GCALL2(0x06035DC4, GCALL3(0x0603666E, group, kind, tag), flags);
+}
+
+/* Moves the halfword at p by d, in steps of at most 2. */
+static void ease(gaddr p, int d)
+{
+    ST16(p, LD16(p) + DIVS(d, ABS(d) > 1 ? 2 : 1));
+}
+
+#define STRIDE (LDU8(0x060FA90C) + 2)
+/* Four bytes of the stream, most significant first. */
+#define BITS32(p) ((LDU8(p) << 24) | (LDU8((p) + 1) << 16) | (LDU8((p) + 2) << 8) | LDU8((p) + 3))
+
 #endif
