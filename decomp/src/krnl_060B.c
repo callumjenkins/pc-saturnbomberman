@@ -94,6 +94,40 @@ int f060B0392(int channel)
     return value;
 }
 
+void f060B0426(gaddr dst, gaddr src, int n)
+{
+    gaddr d = dst + 2;
+    gaddr s = src + 2;
+    int left = n - 2;
+
+    while (--left >= 0) {
+        POLL();
+        for (;;) {
+            ST8(d, LD8(s));
+            if (LDU8(d) == LDU8(s))
+                break;
+            POLL();
+            GCALL1(0x060B02F0, 0x100);
+        }
+        d++;
+        s++;
+    }
+}
+
+void f060B07B4(gaddr obj, gaddr desc)
+{
+    gaddr rec = LD32(obj) + 48;
+
+    if (LD32(rec + 8) == 1)
+        return;
+    ST32(rec + 36, LD16(desc + 8));
+    ST32(rec + 40, LD16(desc + 14));
+    ST32(rec + 44, LDU16(desc + 18));
+    ST32(rec + 44, SAR(LD32(rec + 44), 0x400E - LD16(desc + 16)));
+    ST32(rec + 48, (LD16(desc + 10) << 16) | LDU16(desc + 12));
+    ST32(rec + 28, 1);
+}
+
 void f060B086C(gaddr ctx, int value)
 {
     gaddr data = LD32(ctx);
@@ -183,6 +217,67 @@ int f060B0C78(gaddr stream, int count)
     ST32(base + 240, ring);
     ST32(base + 244, count);
     return GCALL2(0x060B0C30, stream, count);
+}
+
+gaddr f060B0E8E(gaddr obj, gaddr job)
+{
+    gaddr o = LD32(obj);
+    int count = LD32(job + 12);
+    gaddr left = LD32(job);
+    gaddr right = LD32(job + 4);
+    gaddr src = LD32(job + 8);
+    gaddr end = src + count * 2;
+    gaddr ring_end = LD32(o + 48 + 68);
+
+    if (end > LD32(o + 4)) {
+        if (count > 0)
+            do {
+                ST8(left, LD8(src));
+                src++;
+                left++;
+                if (src >= ring_end)
+                    src = LD32(o + 4);
+                ST8(right, LD8(src));
+                src++;
+                right++;
+                if (src >= ring_end)
+                    src = LD32(o + 4);
+                count--;
+            } while (AGAIN(count > 0));
+    } else if (src < end) {
+        do {
+            ST8(left, LD8(src));
+            src++;
+            left++;
+            ST8(right, LD8(src));
+            src++;
+            right++;
+        } while (AGAIN(src < end));
+    }
+    return right;
+}
+
+void f060B0FB6(gaddr obj)
+{
+    gaddr rec = LD32(obj) + 48;
+    gaddr item;
+
+    while (LD32(rec + 228) >= 0) {
+        POLL();
+        item = rec + 232 + LD32(rec + 228) * 16;
+        if (LD32(rec + 36) != 1) {
+            if (LD32(rec + 40) > 8)
+                GCALL2(0x060B0E22, obj, item);
+            else
+                GCALL2(0x060B0E8E, obj, item);
+        } else {
+            if (LD32(rec + 40) > 8)
+                GCALL2(0x060B0EF6, obj, item);
+            else
+                GCALL2(0x060B0F5E, obj, item);
+        }
+        ST32(rec + 228, LD32(rec + 228) - 1);
+    }
 }
 
 int f060B1154(gaddr stream)

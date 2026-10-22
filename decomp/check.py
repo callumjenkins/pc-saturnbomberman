@@ -120,11 +120,15 @@ def build(sources: list[str] | None = None) -> ctypes.CDLL:
         return ctypes.CDLL(out)
 
 
+# SHC's runtime library. A literal that points into it names an offset table its shift routines read.
+LIBRARY = (0x06094400, 0x06094D80)
+
+
 def code_runs() -> list[list[int]]:
     """The (start, end) offsets into 0KRNL.BIN of every function's instructions and the literals they load,
     which randomising the image must leave alone. Cached in build/decomp, as walking every function is slow."""
     cache = os.path.join(ROOT, "build", "decomp", "code-runs.json")
-    stamp = [os.path.getmtime(KRNL), os.path.getmtime(status.TABLE), TABLE_MAX]
+    stamp = [os.path.getmtime(KRNL), os.path.getmtime(status.TABLE), os.path.getmtime(__file__), TABLE_MAX, *LIBRARY]
     try:
         with open(cache, encoding="utf-8") as f:
             saved = json.load(f)
@@ -135,15 +139,18 @@ def code_runs() -> list[list[int]]:
     image = status.krnl_image()
     used = set()
     tables = set()
+    code = status.function_code()
     for row in status.previous().values():
         if row.module != "KRNL":
             continue
-        for ins in status.body(image, row.address):
+        for ins in status.own(image, row.address, code.get(row.address)):      # a jump table's targets too
             used.update((ins.pc, ins.pc + 1))
             if ins.target is not None and ins.op in ("mov.w", "mov.l", "mova"):
                 used.update(range(ins.target, ins.target + (2 if ins.op == "mov.w" else 4)))
             if ins.op == "mova":
                 tables.add(ins.target)
+            elif ins.op == "mov.l" and ins.target is not None and LIBRARY[0] <= image.u32(ins.target) < LIBRARY[1]:
+                tables.add(image.u32(ins.target))
     for start in tables:            # a jump table runs on to the next instruction, as SHC places it
         end = start + 4
         while end - start < TABLE_MAX and end not in used:

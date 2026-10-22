@@ -128,6 +128,46 @@ int f06062BAC(void)
     return n;
 }
 
+void f06062C34(int a, short b)
+{
+    FRAME(sp, 72);
+    unsigned short ids[3];
+    unsigned short at[3];
+    gaddr slot;
+    gaddr obj;
+    int i;
+
+    COPYB(sp - 60, 0x060B2728, 8);
+    if (GCALL2(0x06022F1C, a, 0x06062DC0) < 0)
+        return;
+    TSET(h6, 0);
+    TSET(h4, b);
+    ids[0] = TGET(h8);
+    slot = LD32(TASK_PTR) + 10;
+    ids[1] = GCALL1(0x060691DA, 0x1CC);
+    ST16(slot, ids[1]);
+    slot = LD32(TASK_PTR) + 12;
+    ids[2] = GCALL1(0x060691DA, 0x1CC);
+    ST16(slot, ids[2]);
+    i = 0;
+    do {
+        obj = OBJ(ids[i]);
+        ST16(obj + 44, 1);
+        ST16(obj + 4, 0x1CC);
+        at[i] = GCALL1(0x0600A10E, 500) + 60;
+        GCALL1(0x0606AB24, obj);
+        GCALL2(0x0606AAC8, obj, 0);
+        ST16(obj + 46, 0x380);
+        GCALL2(0x0606950C, obj, 1);
+        ST16(obj + 16, GCALL1(0x0600A10E, 320));
+        ST16(obj + 18, 0);
+        i++;
+    } while (AGAIN(i < 3));
+    TSET(h14, 0);
+    TSET(h16, at[1]);
+    TSET(h18, at[2]);
+}
+
 void f06063370(void)
 {
     GCALL1(0x06008A96, 1);
@@ -239,6 +279,22 @@ void f06065470(void)
 void f06065924(void)
 {
     GJUMP2(0x06022F1C, 2, 0x06065890);
+}
+
+void f06065A12(void)
+{
+    FRAME(sp, 40);
+    gaddr list = sp - 40;
+    gaddr cell;
+    int i = 0;
+
+    COPYB(list, 0x060B2758, 8);
+    do {
+        cell = 0x060EC8B0 + GCALL2(0x0600C950, LD16(list + i * 2), 10) * 2;
+        ST16(cell, LD16(cell) & 0xFF7F);
+        ST16(cell, LD16(cell) | 0xF00);
+        i++;
+    } while (AGAIN(i < 4));
 }
 
 void f06065EF2(void)
@@ -444,6 +500,36 @@ int f0606714E(void)
     return 1;
 }
 
+int f0606725C(void)
+{
+    int pos = (short)TGET(h12);
+    int cells;
+
+    GCALL5(0x06039DE0, 0, 160, 112, pos, pos);
+    pos = (unsigned short)pos;
+    cells = pos >> 4;
+    if (TGET(h10) == 0)
+        GCALL1(0x0606707C, 0);
+    if (cells >= 31)
+        cells = 31;
+    if (TGET(h16) != 0) {
+        if (pos >= 200) {
+            GCALL1(0x0600996A, 88);
+            TSET(h16, 0);
+        } else if (!(TGET(h10) & 7)) {
+            GCALL1(0x0600996A, 91);
+        }
+    }
+    GCALL2(0x0609C0B4, 0x318, cells);
+    TSET(h12, TGET(h12) + (TGET(h14) >> 4));
+    TSET(h14, TGET(h14) + 2);
+    if (TGET(h10) > 255)
+        TSET(fn, 0x0603DDA6);
+    pos = (short)TGET(h10) + 1;
+    TSET(h10, pos);
+    return pos;
+}
+
 void f0606828C(int n)
 {
     gaddr obj = OBJ(LDU16(0x060DFE40 + (n + 11) * 2));
@@ -563,6 +649,64 @@ void f06068EC8(void)
     }
 }
 
+void f06068F14(gaddr p)
+{
+    gaddr tiles = LD32(p + 16);
+
+    for (;;) {
+        ST16(p + 20, LD16(tiles + 4));
+        if (LDU16(tiles + 4) != 0)
+            break;
+        tiles = LD32(p + 12);
+        POLL();
+    }
+    GCALL3(0x06068F5A, LD32(tiles), LD32(p + 8), LDU16(p + 4));
+    ST32(p + 16, tiles + 8);
+}
+
+void f06068F5A(gaddr src, gaddr dst, unsigned int row)
+{
+    unsigned int width;
+    unsigned int height;
+    unsigned int y;
+    unsigned int i;
+    unsigned int j;
+    unsigned int n;
+    gaddr d;
+
+    src += 4;
+    width = LDU16(src);
+    src += 2;
+    height = LDU16(src);
+    src += 2;
+    dst += row << 5;
+    for (j = 0; j < height; j++) {
+        POLL();
+        d = dst;
+        y = row;
+        for (i = 0; i < width; i++) {
+            POLL();
+            n = 32;
+            do {
+                ST8(d, LD8(src));
+                src++;
+                d++;
+            } while (AGAIN(--n != 0));
+            y++;
+            if ((y & 15) == 0) {
+                y += 240;
+                d += 7680;
+            }
+        }
+        row += 16;
+        dst += 512;
+        if ((row & 255) == 0) {
+            dst += 8192;
+            row += 256;
+        }
+    }
+}
+
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
 int f06068FF0(void)
 {
@@ -599,6 +743,84 @@ void f06068FF4(unsigned short n)
     ST8(o + 77, 0);
     ST8(o + 76, 0);
     ST16(o + 74, 8);
+}
+
+void f060690AA(void)
+{
+    int i = 0;
+
+    do {
+        ST32(OBJ(i), 0);
+        GCALL2(0x06069462, i, 0);
+        GCALL1(0x06068FF4, i);
+        i++;
+    } while (AGAIN(i < 400));
+    ST16(OBJS + 6, 1);
+    ST16(OBJS + 8, 1);
+    ST32(OBJS, 1);
+    ST16(OBJS + 84 + 6, 0);
+    ST16(OBJS + 84 + 8, 1);
+    ST32(OBJS + 84, 255);
+    ST16(0x060C1AAC, 2);
+    ST16(0x060C1AB0, 0);
+    ST16(0x060C1AAE, 0);
+    GCALL1(0x0606A996, 0x06068FF0);
+    ST32(0x060C1ABC, GCALL4(0x060069C2, 0x06069646, 0x060C341C, 0x400, 1));
+    ST32(0x2600603C, 0);
+    GCALL0(0x06068DE0);
+    GCALL3(0x06098700, 0x060C1E28, 16, 0x060C1B28);
+    GJUMP0(0x0606AA06);
+}
+
+void f06069194(void)
+{
+    ST16(0x060C1AB4 + 2, 0);
+    ST16(0x060C1AB4, 0);
+    ST16(0x060C1AB8, 319);
+    ST16(0x060C1AB8 + 2, 223);
+    ST16(0x060C1AC0, 0);
+    ST16(0x060C1AC0 + 2, 0);
+    ST16(0x060C1AC0 + 4, LD16(0x060C1AB8));
+    ST16(0x060C1AC0 + 6, LD16(0x060C1AB8 + 2));
+    GCALL1(0x0609F1A8, 0x060C1E34);
+    GCALL1(0x0609F464, 0x060BB8D8);
+    GCALL1(0x0609F624, 1);
+    POLL();
+    GJUMP0(0x060689EC);
+}
+
+int f060691DA(unsigned int key)
+{
+    int i = 2;
+    int after;
+
+    if (LDU16(0x060C1AAC) >= 400)
+        return 0;
+    ST16(0x060C1AAA, i);
+    ST32(0x060CBB5C, OBJ(i));
+    while (i < 400 && LD32(LD32(0x060CBB5C)) != 0) {
+        POLL();
+        ST32(0x060CBB5C, LD32(0x060CBB5C) + 84);
+        i++;
+        ST16(0x060C1AAA, i);
+    }
+    if (i >= 400)
+        return 0;
+    GCALL1(0x06068FF4, i);
+    after = LDU16(OBJS + 8);
+    while (after != 1) {
+        POLL();
+        if ((unsigned int)LD32(OBJ(after)) >= key)
+            break;
+        after = LDU16(OBJ(after) + 8);
+    }
+    GCALL2(0x0606935A, i, after);
+    ST32(LD32(0x060CBB5C), key);
+    GCALL2(0x06069462, i, key);
+    ST16(0x060C1AAC, LD16(0x060C1AAC) + 1);
+    if (LDU16(0x060C1AAC) > LDU16(0x060B7BA2))
+        ST16(0x060B7BA2, LD16(0x060C1AAC));
+    return i;
 }
 
 void f060692DC(unsigned int n)
@@ -684,6 +906,35 @@ int f060694B8(void)
     return 0x060C3820;
 }
 
+void f0606950C(gaddr obj, int mask)
+{
+    gaddr t = 0x060B7BA8 + (LDU16(0x060FB89C) & 15) * 4;
+
+    ST16(obj + 46, LD16(obj + 46) & LD16(t + 2));
+    ST16(obj + 46, LD16(obj + 46) | SHL(mask & 7, LDU16(t)));
+}
+
+void f06069546(unsigned short i, int mask)
+{
+    POLL();
+    GJUMP2(0x0606950C, OBJ(i), mask);
+}
+
+int f06069562(gaddr obj)
+{
+    gaddr t = 0x060B7BA8 + (LDU16(0x060FB89C) & 15) * 4;
+
+    return SHR(LDU16(obj + 46) & ~LDU16(t + 2), LDU16(t));
+}
+
+void f060695B0(gaddr obj, int mask)
+{
+    gaddr t = 0x060B7BE8 + (LDU16(0x060FB89C) & 15) * 4;
+
+    ST16(obj + 46, LD16(obj + 46) & LD16(t + 2));
+    ST16(obj + 46, LD16(obj + 46) | SHL(mask & 7, LDU16(t)));
+}
+
 int f060695EA(unsigned short obj, int bits)
 {
     return GJUMP2(0x060695B0, OBJ(obj), bits);
@@ -694,6 +945,154 @@ unsigned short f06069606(gaddr p)
     int k = (LDU16(0x060FB89C) & 15) * 4;
 
     return LDU16(p + 46) & LDU16(0x060B7BAA + k) & LDU16(0x060B7BEA + k);
+}
+
+void f06069906(void)
+{
+    ST16(0x060C1AF4, LD16(LD32(0x060CBB5C) + 16) + LD16(LD32(0x060CBB5C) + 36));
+    ST16(0x060C1AF6, LD16(LD32(0x060CBB5C) + 18) + LD16(LD32(0x060CBB5C) + 38));
+    GCALL2(0x06008A6A, 8, LDU16(LD32(0x060CBB5C) + 44));
+    ST32(0x060C1AF0, GCALL1(0x06008ACC, LD16(LD32(0x060CBB5C) + 10)));
+    while (LDU16(LD32(0x060C1AF0)) < 0x8000 && (unsigned int)LD32(0x060C1B04) < 0x323) {
+        POLL();
+        ST16(0x060C1AE0, LD16(LD32(0x060C1AF0) + 10) + LD16(0x060C1AF4));
+        ST16(0x060C1AE2, LD16(0x060C1AF6) + LD16(LD32(0x060C1AF0) + 12));
+        GCALL7(0x0609FF14, LD16(LD32(0x060CBB5C) + 4), LDU16(LD32(0x060C1AF0)) & 48, LD16(LD32(0x060CBB5C) + 40),
+               LD32(0x060C1B10) == 0 ? LDU16(LD32(0x060CBB5C) + 46) + LDU16(LD32(0x060C1AF0) + 6) : LD32(0x060C1B18),
+               LD16(LD32(0x060C1AF0) + 2), 0x060C1AE0, LD16(LD32(0x060CBB5C) + 64));
+        ST32(0x060C1AF0, LD32(0x060C1AF0) + 20);
+        ST32(0x060C1B04, LD32(0x060C1B04) + 1);
+    }
+}
+
+void f06069A3E(void)
+{
+    int v;
+
+    v = LD16(LD32(0x060CBB5C) + 20) + LD32(0x060C1B08);
+    ST16(LD32(0x060CBB5C) + 20, v);
+    ST16(0x060C1AF4, v + LD16(LD32(0x060CBB5C) + 36));
+    v = LD16(LD32(0x060CBB5C) + 22) + LD32(0x060C1B0C);
+    ST16(LD32(0x060CBB5C) + 22, v);
+    ST16(0x060C1AF6, v + LD16(LD32(0x060CBB5C) + 38));
+    v = LD16(LD32(0x060CBB5C) + 24) + LD32(0x060C1B08);
+    ST16(LD32(0x060CBB5C) + 24, v);
+    ST16(0x060C1AF8, v + LD16(LD32(0x060CBB5C) + 36));
+    v = LD16(LD32(0x060CBB5C) + 26) + LD32(0x060C1B0C);
+    ST16(LD32(0x060CBB5C) + 26, v);
+    ST16(0x060C1AFA, v + LD16(LD32(0x060CBB5C) + 38));
+    GCALL2(0x06008A6A, 8, LDU16(LD32(0x060CBB5C) + 44));
+    ST32(0x060C1AF0, GCALL1(0x06008ACC, LD16(LD32(0x060CBB5C) + 10)));
+    while (LDU16(LD32(0x060C1AF0)) < 0x8000 && (unsigned int)LD32(0x060C1B04) < 0x323) {
+        POLL();
+        ST16(0x060C1AE0, LD16(LD32(0x060C1AF0) + 10) + LD16(0x060C1AF4));
+        ST16(0x060C1AE2, LD16(0x060C1AF6) + LD16(LD32(0x060C1AF0) + 12));
+        ST16(0x060C1AE4, LD16(LD32(0x060C1AF0) + 10) + LD16(0x060C1AF8));
+        ST16(0x060C1AE6, LD16(0x060C1AFA) + LD16(LD32(0x060C1AF0) + 12));
+        GCALL7(0x060A0018, LD16(LD32(0x060CBB5C) + 4), LD16(LD32(0x060C1AF0)) & 0xF30, LD16(LD32(0x060CBB5C) + 40),
+               LD32(0x060C1B10) == 0 ? LDU16(LD32(0x060CBB5C) + 46) + LDU16(LD32(0x060C1AF0) + 6) : LD32(0x060C1B18),
+               LD16(LD32(0x060C1AF0) + 2), 0x060C1AE0, LD16(LD32(0x060CBB5C) + 64));
+        ST32(0x060C1AF0, LD32(0x060C1AF0) + 20);
+        ST32(0x060C1B04, LD32(0x060C1B04) + 1);
+    }
+}
+
+void f06069BD2(void)
+{
+    unsigned int scale_x = LDU16(LD32(0x060CBB5C) + 68);
+    unsigned int scale_y = LDU16(LD32(0x060CBB5C) + 70);
+    int left = LD16(LD32(0x060CBB5C) + 72);
+    int top = LD16(LD32(0x060CBB5C) + 74);
+    gaddr q;
+    int w;
+
+    if (scale_x == 0 || scale_y == 0)
+        return;
+    ST16(0x060C1AF4, LD16(LD32(0x060CBB5C) + 16) + LD16(LD32(0x060CBB5C) + 36));
+    ST16(0x060C1AF6, LD16(LD32(0x060CBB5C) + 18) + LD16(LD32(0x060CBB5C) + 38));
+    ST16(0x060C1AF4, LD16(0x060C1AF4) + left);
+    ST16(0x060C1AF6, LD16(0x060C1AF6) + top);
+    GCALL2(0x06008A6A, 8, LDU16(LD32(0x060CBB5C) + 44));
+    ST32(0x060C1AF0, GCALL1(0x06008ACC, LD16(LD32(0x060CBB5C) + 10)));
+    while (LDU16(LD32(0x060C1AF0)) < 0x8000 && (unsigned int)LD32(0x060C1B04) < 0x323) {
+        POLL();
+        q = LD32(0x060C1AF0);
+        w = LDU16(q + 8);
+        ST16(0x060C1AE0, ((unsigned int)((LD16(LD32(0x060C1AF0) + 10) - left) * scale_x + 128) >> 8) + LD16(0x060C1AF4));
+        ST16(0x060C1AE2, ((unsigned int)((LD16(LD32(0x060C1AF0) + 12) - top) * scale_y + 128) >> 8) + LD16(0x060C1AF6));
+        ST16(0x060C1AE4, ((unsigned int)((LD16(LD32(0x060C1AF0) + 10) - left + ((w >> 5) & 0x1F8)) * scale_x + 128) >> 8) + LD16(0x060C1AF4) - 1);
+        ST16(0x060C1AE6, ((unsigned int)((LD16(LD32(0x060C1AF0) + 12) - top + (w & 255)) * scale_y + 128) >> 8) + LD16(0x060C1AF6) - 1);
+        GCALL7(0x060A0018, LD16(LD32(0x060CBB5C) + 4), LDU16(LD32(0x060C1AF0)) & 48, LD16(LD32(0x060CBB5C) + 40),
+               LD32(0x060C1B10) == 0 ? LDU16(LD32(0x060CBB5C) + 46) + LDU16(LD32(0x060C1AF0) + 6) : LD32(0x060C1B18),
+               LD16(LD32(0x060C1AF0) + 2), 0x060C1AE0, LD16(LD32(0x060CBB5C) + 64));
+        ST32(0x060C1AF0, LD32(0x060C1AF0) + 20);
+        ST32(0x060C1B04, LD32(0x060C1B04) + 1);
+    }
+}
+
+void f06069DBC(void)
+{
+    int corner;
+    int v;
+
+    for (corner = 0; corner < 4; corner++) {
+        v = LD16(LD32(0x060CBB5C) + 20 + corner * 4 + 0) + LD32(0x060C1B08);
+        ST16(LD32(0x060CBB5C) + 20 + corner * 4, v);
+        ST16(0x060C1AF4 + corner * 4, v + LD16(LD32(0x060CBB5C) + 36));
+        v = LD16(LD32(0x060CBB5C) + 22 + corner * 4) + LD32(0x060C1B0C);
+        ST16(LD32(0x060CBB5C) + 22 + corner * 4, v);
+        ST16(0x060C1AF6 + corner * 4, v + LD16(LD32(0x060CBB5C) + 38));
+    }
+    GCALL2(0x06008A6A, 8, LDU16(LD32(0x060CBB5C) + 44));
+    ST32(0x060C1AF0, GCALL1(0x06008ACC, LD16(LD32(0x060CBB5C) + 10)));
+    while (LDU16(LD32(0x060C1AF0)) < 0x8000 && (unsigned int)LD32(0x060C1B04) < 0x323) {
+        POLL();
+        for (corner = 0; corner < 4; corner++) {
+            ST16(0x060C1AE0 + corner * 4, LD16(LD32(0x060C1AF0) + 10) + LD16(0x060C1AF4 + corner * 4));
+            ST16(0x060C1AE2 + corner * 4, LD16(0x060C1AF6 + corner * 4) + LD16(LD32(0x060C1AF0) + 12));
+        }
+        GCALL7(0x060A0158, LD16(LD32(0x060CBB5C) + 4), LDU16(LD32(0x060C1AF0)) & 48, LD16(LD32(0x060CBB5C) + 40),
+               LD32(0x060C1B10) == 0 ? LDU16(LD32(0x060CBB5C) + 46) + LDU16(LD32(0x060C1AF0) + 6) : LD32(0x060C1B18),
+               LD16(LD32(0x060C1AF0) + 2), 0x060C1AE0, LD16(LD32(0x060CBB5C) + 64));
+        ST32(0x060C1AF0, LD32(0x060C1AF0) + 20);
+        ST32(0x060C1B04, LD32(0x060C1B04) + 1);
+    }
+}
+
+void f0606A400(void)
+{
+    gaddr obj = LD32(0x060CBB5C);
+    gaddr quad = 0x060C1AE0;
+    int x = LD16(obj + 20) + LD32(0x060C1B08);
+    int y;
+
+    ST16(obj + 20, x);
+    ST16(quad, x + LD16(LD32(0x060CBB5C) + 36));
+    y = LD16(LD32(0x060CBB5C) + 22) + LD32(0x060C1B0C);
+    ST16(LD32(0x060CBB5C) + 22, y);
+    ST16(quad + 2, LD16(LD32(0x060CBB5C) + 38) + y);
+    quad += 4;
+    x = LD16(LD32(0x060CBB5C) + 24) + LD32(0x060C1B08);
+    ST16(LD32(0x060CBB5C) + 24, x);
+    ST16(quad, x + LD16(LD32(0x060CBB5C) + 36));
+    y = LD16(LD32(0x060CBB5C) + 26) + LD32(0x060C1B0C);
+    ST16(LD32(0x060CBB5C) + 26, y);
+    ST16(quad + 2, LD16(LD32(0x060CBB5C) + 38) + y);
+    if ((unsigned int)LD32(0x060C1B04) < 803) {
+        obj = LD32(0x060CBB5C);
+        GCALL5(0x0609FCE8, LD16(obj + 4), (LD16(obj + 40) | 192) & 0xEFC7, LD16(obj + 46), 0x060C1AE0, LD16(obj + 64));
+        ST32(0x060C1B04, LD32(0x060C1B04) + 1);
+    }
+}
+
+void f0606A4D4(void)
+{
+    QUAD_SPRITE(0x0609FD9E);
+}
+
+void f0606A6E8(void)
+{
+    QUAD_SPRITE(0x0609FE50);
 }
 
 void f0606A8FC(void)
@@ -738,6 +1137,47 @@ void f0606AA06(void)
 {
     ST16(0x060B7BA4, 0);
     ST16(0x060B7BA6, 0);
+}
+
+void f0606AA58(void)
+{
+    unsigned short id = LDU16(OBJS + 8);
+
+    if (id != 1)
+        do {
+            gaddr p = OBJ(id);
+
+            ST32(QUAD_PTR, p);
+            ST16(p + 42, LDU16(p + 42) | 32);
+            id = LDU16(LD32(QUAD_PTR) + 8);
+        } while (AGAIN(id != 1));
+}
+
+void f0606AA90(void)
+{
+    unsigned short id = LDU16(OBJS + 8);
+
+    if (id != 1)
+        do {
+            gaddr p = OBJ(id);
+
+            ST32(QUAD_PTR, p);
+            ST16(p + 42, LDU16(p + 42) & 0xFFDF);
+            id = LDU16(LD32(QUAD_PTR) + 8);
+        } while (AGAIN(id != 1));
+}
+
+void f0606AAC8(gaddr obj, int state)
+{
+    FRAME(sp, 72);
+    gaddr table = sp - 72;
+
+    COPYW(0x06094450, table, 0x060B27D4, 64);
+    ST16(obj + 42, (LDU16(obj + 42) & ~15) | state);
+    if (LD32(table + (state << 2))) {
+        ST16(obj + 10, 1);
+        GCALL1(0x0606AB72, obj);
+    }
 }
 
 int f0606AB08(int n, int index)
@@ -1301,6 +1741,53 @@ int f0606C268(int n)
     return v >= 1 && v <= 4 ? v : 2;
 }
 
+int f0606C28A(void)
+{
+    return GJUMP1(0x0606C292, 2);
+}
+
+int f0606C292(int arg)
+{
+    unsigned short n = LDU16(LD32(CURRENT) + 64);
+    int r = GCALL1(0x0606C268, n);
+
+    return GCALL3(0x0606C2B8, arg, n, r);
+}
+
+int f0606C2B8(unsigned int count, int cell, int step)
+{
+    FRAME(sp, 44);
+    gaddr table = sp - 40;
+    gaddr c = CELL(cell);
+    gaddr obj = LD32(CURRENT);
+    int x = (LDU16(obj + 24) + 8) & 0xFFF0;
+    int y = (LDU16(obj + 28) + 8) & 0xFFF0;
+    unsigned int i = 0;
+
+    COPYB(table, 0x060B2844, 20);
+    if (count != 0)
+        do {
+            if (x != 0) {
+                int dx = LD16(table + step * 4);
+
+                x += dx;
+                ST16(c, LD16(c) + dx);
+            }
+            i++;
+            if (y != 0) {
+                int dy = LD16(table + step * 4 + 2);
+
+                y += dy;
+                ST16(c + 2, LD16(c + 2) + dy);
+            }
+        } while (AGAIN(i < count));
+    ST16(c + 4, GCALL1(0x060949D0, LD16(c)));
+    ST16(c + 8, LDU16(c + 4) >> 4);
+    ST16(c + 6, GCALL1(0x060949D0, LD16(c + 2)));
+    ST16(c + 10, LDU16(c + 6) >> 4);
+    return GCALL0(0x0606BB4C);
+}
+
 int f0606C390(unsigned int range)
 {
     gaddr cur = LD32(CURRENT);
@@ -1427,6 +1914,24 @@ int f0606C640(void)
         ST16(0x060C1F34, LD16(0x060C1F34) + step);
     }
     return 0;
+}
+
+int f0606C6C2(unsigned int limit)
+{
+    int link = LD8(0x060D84A3);
+    gaddr a;
+
+    limit = (limit & -64) + 64;
+    for (;;) {
+        a = 0x060D849C + (link & 255) * 38;
+        ST32(0x060D8C08, a);
+        link = LD8(a + 7);
+        if (link == 0)
+            return 0;
+        POLL();
+        if (LDU16(a + 4) >= limit)
+            return 1;
+    }
 }
 
 int f0606C724(int a, int b)
@@ -1800,6 +2305,21 @@ int f0606D7A6(int unused, int fallback)
     return whole - LDU16(cur + axis);
 }
 
+void f0606D8E6(int index)
+{
+    gaddr obj = LD32(CURRENT);
+
+    ST16(obj + 60, 0);
+    obj = LD32(CURRENT);
+    ST16(obj + 64, 0);
+    obj = LD32(CURRENT);
+    ST16(obj + 82, 0);
+    obj = LD32(CURRENT);
+    ST16(obj + 84, 0);
+    GCALL1(0x06014820, LD16(0x060C062C));
+    GJUMP1(0x060144F4, LD32(0x060B9508 + (index << 2)));
+}
+
 int f0606D920(void)
 {
     if (!GCALL0(0x0606BB4C))
@@ -1822,6 +2342,13 @@ int f0606D95C(void)
         return 0;
     GCALL0(0x0606D986);
     return 1;
+}
+
+void f0606D992(void)
+{
+    ST8(LD32(CURRENT) + 6, LD8(0x060C1F25));
+    POLL();
+    GJUMP0(0x0606B620);
 }
 
 void f0606D9EC(void)
@@ -1939,6 +2466,22 @@ int f0606F2CC(int cur, int target, int step, int limit)
             cur -= step * 2;
     }
     return cur;
+}
+
+void f0606F330(void)
+{
+    gaddr slot = LD32(CURRENT) + 74;
+    int found = GCALL1(0x060691DA, 100);
+    gaddr o;
+
+    ST16(slot, found);
+    if ((found & 0xFFFF) == 0)
+        return;
+    o = OBJ(LDU16(LD32(CURRENT) + 74));
+    ST16(o + 44, LD16(LD32(MOVER_PTR) + 44));
+    ST16(o + 46, LD16(LD32(MOVER_PTR) + 46) + 2);
+    GCALL2(0x0606AAC8, o, 4);
+    GJUMP0(0x0606F38C);
 }
 
 int f0606F38C(void)

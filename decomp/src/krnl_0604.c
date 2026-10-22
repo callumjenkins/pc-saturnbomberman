@@ -76,6 +76,21 @@ void f06040BD4(short n, short x)
     TSET(h16, x);
 }
 
+int f06040DEE(unsigned short cell)
+{
+    int result = 0;
+    gaddr a;
+
+    if (!(LDU16(FLAGS_AT(cell)) & 7))
+        return 0;
+    a = 0x060D849C + GCALL1(0x06020F8C, cell) * 38;
+    if ((unsigned int)LD8(a + 15) < (unsigned int)LD8(BOMBER_COUNT))
+        result = SHL(1, LDU8(a + 15));
+    if (LDU8(a + 15) >= 50)
+        result = 3;
+    return result;
+}
+
 int f06040E4A(void)
 {
     unsigned short key = GCALL1(0x0600CA6A, TGET(h8));
@@ -240,6 +255,18 @@ int f06043BFC(int n)
     return 0;
 }
 
+void f06045208(unsigned short value)
+{
+    gaddr e = 0x060B65B8;
+    int i = 0;
+
+    do {
+        GCALL3(0x060090A8, LDU16(e), LDU16(e + 2), value);
+        i++;
+        e += 4;
+    } while (AGAIN(i < 4));
+}
+
 void f06045C70(unsigned short first)
 {
     int i = 0;
@@ -302,6 +329,76 @@ int f06046712(void)
     return left;
 }
 
+void f06046834(void)
+{
+    unsigned short blocked[8];
+    unsigned short open[8];
+    int base;
+    int facing;
+    int mask;
+    int dir;
+    int n;
+    int i;
+    int result;
+
+    if ((unsigned short)GCALL0(0x060469A4) == 0)
+        return;
+    base = TGET(h14);
+    facing = TGET(h12) & 255;
+    mask = (unsigned short)GCALL1(0x06046A5C, base);
+    if (mask == 0) {
+        TSET(h16, 0);
+        result = facing;
+    } else {
+        i = 0;
+        do {
+            blocked[i] = 0;
+            i++;
+        } while (AGAIN(i < 8));
+        dir = 0;
+        do {
+            if (SHL(1, dir) & mask) {
+                blocked[(dir * 2 - 1) & 7] = 1;
+                blocked[dir * 2] = 1;
+                blocked[dir * 2 + 1] = 1;
+            }
+            dir++;
+        } while (AGAIN(dir < 4));
+        result = facing;
+        if (TGET(h16) == 0 || blocked[facing] != 0) {
+            blocked[facing ^ 4] = 1;
+            if (TGET(h16) == 0) {
+                TSET(h16, GCALL1(0x0600A0EC, 3) + 2);
+            } else {
+                i = 1;
+                do {
+                    i += 2;
+                    blocked[i - 2] = 1;
+                } while (AGAIN(i < 7));
+            }
+            n = 0;
+            i = 0;
+            if (i < 8) {
+                do {
+                    if (blocked[i] == 0) {
+                        open[n] = i;
+                        n++;
+                    }
+                    i++;
+                } while (AGAIN(i < 8));
+            }
+            if (n == 0)
+                result = 4 ^ facing;
+            else
+                result = open[GCALL1(0x0600A0EC, n)];
+        }
+        if (TGET(h16) != 0)
+            TSET(h16, TGET(h16) - 1);
+    }
+    TSET(h12, result);
+    TSET(h14, LD16(0x060B671A + (unsigned short)result * 2) + base);
+}
+
 int f060469A4(void)
 {
     gaddr obj;
@@ -326,6 +423,22 @@ int f060469A4(void)
         ST16(LD32(TASK_OBJ) + 18, LD16(LD32(TASK_OBJ) + 18) + 1);
     }
     return LD16(LD32(TASK_OBJ) + 18) == LD16(0x060D7E8A) && LD16(LD32(TASK_OBJ) + 16) == LD16(0x060D7E88);
+}
+
+int f06046A5C(unsigned short cell)
+{
+    gaddr flags = 0x060EE8B0 + cell * 2;
+    int mask = 0;
+    int i = 0;
+    int kind;
+
+    do {
+        kind = LD16(flags + LD16(0x060B672A + i * 2) * 2) & 15;
+        if (kind == 13 || kind == 14)
+            mask |= SHL(1, DIVU(i, 3));
+        i++;
+    } while (AGAIN(i < 12));
+    return mask;
 }
 
 void f06046C7E(void)
@@ -429,6 +542,64 @@ void f06049E8C(gaddr p, unsigned char kind)
         ST16(OBJ(LDU16(q)) + 38, v);
         q += 2;
     } while (AGAIN(q < p + 38));
+}
+
+void f0604A8B4(short width, short height, gaddr slots, unsigned short mode)
+{
+    FRAME(sp, 72);
+    gaddr table = sp - 56;
+    int scale = DIVS(width << 8, 128) - 256;
+    int ratio = DIVS(height << 8, 136);
+    short i = 0;
+    int k = 0;
+    gaddr obj;
+    int t;
+    int top;
+    int bottom;
+    int half_w;
+    int half_h;
+    int s;
+
+    COPYB(table, 0x060B22BE, 20);
+    while (i < LDU8(0x060C1760)) {
+        POLL();
+        obj = OBJ(LDU16(slots + k + 20));
+        t = LD16(table + k);
+        top = t * 24 - 116;
+        bottom = top + 20;
+        top -= 12;
+        half_w = (t & 1) ? 120 : 64;
+        half_h = (t & 1) ? 72 : 16;
+        if (mode == 64) {
+            ST16(obj + 32, top);
+            ST16(obj + 20, top);
+            ST16(obj + 28, bottom);
+            ST16(obj + 24, bottom);
+            ST16(obj + 26, -half_w);
+            ST16(obj + 22, -half_w);
+            ST16(obj + 34, -half_h);
+            ST16(obj + 30, -half_h);
+        } else {
+            s = scale * DIVS(half_w << 8, 136);
+            ST16(obj + 20, (short)((unsigned int)(s * top) >> 16) + top);
+            ST16(obj + 24, (short)((unsigned int)(s * bottom) >> 16) + bottom);
+            s = scale * DIVS(half_h << 8, 136);
+            ST16(obj + 32, (short)((unsigned int)(s * top) >> 16) + top);
+            ST16(obj + 28, (short)((unsigned int)(s * bottom) >> 16) + bottom);
+            ST16(obj + 26, HELPER((ratio * half_w) >> 8));
+            ST16(obj + 22, LD16(obj + 26));
+            ST16(obj + 34, HELPER((ratio * half_h) >> 8));
+            ST16(obj + 30, LD16(obj + 34));
+            ST16(obj + 36, 160);
+            ST16(obj + 38, 160);
+        }
+        k += 2;
+        ST16(obj + 24, LD16(obj + 24) - 1);
+        ST16(obj + 28, LD16(obj + 28) - 1);
+        ST16(obj + 30, LD16(obj + 30) - 1);
+        ST16(obj + 34, LD16(obj + 34) - 1);
+        i++;
+    }
 }
 
 void f0604ABAC(short id, short px, short py, unsigned char turn)

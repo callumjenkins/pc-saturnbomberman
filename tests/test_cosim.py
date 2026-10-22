@@ -206,6 +206,17 @@ def test_a_register_the_c_does_not_pass_to_a_call_holds_something_else_on_each_s
     assert ran > 10 and (not fails) == agrees
 
 
+def test_the_image_keeps_the_offset_tables_the_shift_routines_read():
+    kept = {a for start, end in check.code_runs() for a in range(BASE + start, BASE + end)}
+    assert set(range(0x060945EC, 0x0609460C)) | set(range(0x060947C4, 0x060947E4)) <= kept
+
+
+def test_the_image_keeps_the_code_a_computed_jump_reaches():
+    # 06094450 jumps through a table of addresses into 0609446E, which no branch of its own reaches
+    kept = {a for start, end in check.code_runs() for a in range(BASE + start, BASE + end)}
+    assert set(range(0x0609446E, 0x060944AE)) <= kept
+
+
 def test_the_image_keeps_a_jump_table_up_to_the_code_after_it():
     # 060276D0 jumps through 19 halfwords at 06027710; its next instruction is at 06027736
     kept = {a for start, end in check.code_runs() for a in range(BASE + start, BASE + end)}

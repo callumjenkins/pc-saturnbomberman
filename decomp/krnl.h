@@ -172,4 +172,124 @@ typedef struct { unsigned char state, b1; short count; unsigned short obj; unsig
     do {                                       \
     } while (AGAIN(LD8(SMPC_SF) & 1))
 
+#define QUAD_PTR   0x060CBB5C
+#define QUAD_OUT   0x060C1AE0
+#define QUAD_COUNT 0x060C1B04
+#define QUAD_DX    0x060C1B08
+#define QUAD_DY    0x060C1B0C
+
+/* A sprite's four corners at 20 to 34, the offset added to each at 36 and 38. */
+typedef struct {
+    char pad0[4];
+    short id;
+    char pad6[14];
+    short x0, y0, x1, y1, x2, y2, x3, y3;
+    short ox, oy;
+    short flags40, flags42;
+    char pad44[2];
+    short w46;
+    char pad48[16];
+    short w64;
+} Quad;
+
+/* Moves one corner by the step and stores it, offset, as the nth point. */
+#define QUAD_POINT(q, n, fx, fy)                                                              \
+    do {                                                                                      \
+        SET(Quad, q, fx, GET(Quad, q, fx) + LD32(QUAD_DX));                                   \
+        ST16(QUAD_OUT + 4 * (n), GET(Quad, q, fx) + GET(Quad, q, ox));                        \
+        SET(Quad, q, fy, GET(Quad, q, fy) + LD32(QUAD_DY));                                   \
+        ST16(QUAD_OUT + 4 * (n) + 2, GET(Quad, q, oy) + GET(Quad, q, fy));                    \
+    } while (0)
+
+#define QUAD_SUBMIT(draw)                                                                     \
+    do {                                                                                      \
+        if ((unsigned int)LD32(QUAD_COUNT) < 0x323) {                                         \
+            gaddr q = LD32(QUAD_PTR);                                                         \
+            GCALL5(draw, GET(Quad, q, id), (GET(Quad, q, flags40) | 192) & 0xEFC7,            \
+                   GET(Quad, q, w46), QUAD_OUT, GET(Quad, q, w64));                           \
+            ST32(QUAD_COUNT, LD32(QUAD_COUNT) + 1);                                           \
+        }                                                                                     \
+    } while (0)
+
+#define QUAD_SPRITE(draw)                                                                     \
+    gaddr q = LD32(QUAD_PTR);                                                                 \
+    if (!(GET(Quad, q, flags42) & 0x100)) {                                                   \
+        QUAD_POINT(q, 0, x0, y0);                                                             \
+        QUAD_POINT(q, 1, x1, y1);                                                             \
+        QUAD_POINT(q, 2, x2, y2);                                                             \
+        QUAD_POINT(q, 3, x3, y3);                                                             \
+    } else {                                                                                  \
+        QUAD_POINT(q, 0, x1, y0);                                                             \
+        QUAD_POINT(q, 1, x1, y1);                                                             \
+        QUAD_POINT(q, 2, x0, y1);                                                             \
+        QUAD_POINT(q, 3, x0, y0);                                                             \
+    }                                                                                         \
+    QUAD_SUBMIT(draw)
+
+#define FMUL(a, b) GCALL2(0x060980B4, a, b)
+#define FDIV(a, b) GCALL2(0x060980C8, a, b)
+#define WORD(base, i) LD32((base) + (i) * 4)
+#define SET_WORD(base, i, v) ST32((base) + (i) * 4, v)
+
+/* Sets or clears one bit of the shadow at 060FB8A8, and stores the level in its byte of the lane when it is set. */
+#define SET_LEVEL(bit, spec, lane, high)                                                  \
+    do {                                                                                  \
+        BITSET(0x060FB8DC, 1, 1);                                                         \
+        if (level >= 32) {                                                                \
+            ST16(0x060FB8A8, LDU16(0x060FB8A8) & ~(bit));                                 \
+        } else {                                                                          \
+            ST16(0x060FB8A8, (LDU16(0x060FB8A8) & ~(bit)) | (bit));                       \
+            BITSET(0x060FB8DC, 1, spec);                                                  \
+            if (high)                                                                     \
+                ST16(lane, (LDU16(lane) & 255) | (level << 8));                           \
+            else                                                                          \
+                ST16(lane, (LDU16(lane) & 0xFF00) | level);                               \
+        }                                                                                 \
+    } while (0)
+
+#define LATCH(spec) BITSET(0x060FB8DC, 1, spec)
+/* Masks the halfword at reg, after taking the latch. */
+#define MASK(spec, reg, mask)                 \
+    do {                                      \
+        LATCH(spec);                          \
+        ST16(reg, LDU16(reg) & (mask));       \
+    } while (0)
+/* Replaces the bits of the halfword at reg outside keep with bits. */
+#define SET_FIELD(spec, reg, keep, bits)                    \
+    do {                                                    \
+        LATCH(spec);                                        \
+        ST16(reg, (LDU16(reg) & (keep)) | (bits));          \
+    } while (0)
+#define MASK_FIELDS(reg)                      \
+    do {                                      \
+        MASK(1, reg, 0xFFFC);                 \
+        MASK(1, reg, 0xFFF3);                 \
+        MASK(1, reg, 0xFFCF);                 \
+        MASK(1, reg, 0xFF3F);                 \
+        MASK(1, reg, 0xFCFF);                 \
+    } while (0)
+
+/* Sends the three blocks of a queued sound transfer; len1 and id1 are the second block's, len2 and id2 the last's. */
+#define SEND_BLOCKS(a, b, flags, len1, id1, len2, id2)                                    \
+    if (((a) | (flags)) != 0)                                                             \
+        GCALL5(0x060AA39C, a, flags, 0x060FAA70, 128, 127);                               \
+    if (((b) | (flags)) != 0)                                                             \
+        GCALL5(0x060AA39C, b, flags, 0x060FAA70, len1, id1);                              \
+    GCALL5(0x060AA39C, flags, -1, 0x060FAA70, len2, id2);                                 \
+    ST16(0x060FAA50, ((flags) & 0x00010000) ? 3 : LD16(0x060FB898));                      \
+    if (LDU16(0x060BB8FC) == 0)                                                           \
+    ST16(0x060BB8FC, 1)
+
+#define TONE_FLAG(flag)                                         \
+    do {                                                        \
+        if ((on & 255) == 0)                                    \
+            ST16(0x060FA9C0, LDU16(0x060FA9C0) & ~(flag));      \
+        else                                                    \
+            ST16(0x060FA9C0, LDU16(0x060FA9C0) | (flag));       \
+    } while (0)
+
+#define SLOT_BITS 0x060BBA9C
+#define SLOT_USED 0x060BB98C
+#define SLOT_TABLE 0x060FC0E8
+
 #endif

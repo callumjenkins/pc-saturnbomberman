@@ -22,7 +22,7 @@ import registers  # noqa: E402
 import status  # noqa: E402
 import structure  # noqa: E402
 from saturnrecomp import sh2  # noqa: E402
-from state import LOCAL_TYPES, VAR, State, Stmt, Unsupported, const, fold_frame, number, sp_change, step, strip  # noqa: E402
+from state import LOCAL_TYPES, VAR, State, Stmt, Unsupported, const, fold_frame, framed, number, sp_change, step, strip  # noqa: E402
 
 IMAGES = {"KRNL": ("build/extract/BOMSS/0KRNL.BIN", 0x06006000)}
 _CALLS = ("bsr", "jsr")
@@ -77,6 +77,9 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         while args and not args[-1]:
             args.pop()
         args = [a or "0" for a in args]
+    extra = stack_arguments(st) if not tail else []
+    if extra:
+        args += ["0"] * (4 - len(args)) + extra         # r4 to r7 first, then the stack words
     text = "%s%d(%s%s)" % ("GJUMP" if tail else "GCALL", len(args), where, "".join(", " + a for a in args))
     if tail and st.framed:
         st.effect("UNFRAME(sp);")
@@ -209,10 +212,21 @@ def liveness(reads: dict[int, Read], returns: bool) -> tuple[dict[int, set[str]]
     return live_in, live_out
 
 
+def stack_arguments(st: State) -> list[str]:
+    """The words stored at the bottom of the frame, which a callee may read as its fifth and later arguments.
+    The function's stores are not told apart by path, so a local that sits there is passed too, harmlessly."""
+    words = []
+    while st.sp + 4 * len(words) in st.stored and len(words) < 4:
+        words.append(st.sp + 4 * len(words))
+    return [("LD32(%s)" % framed(off)) if st.framed else "v%d" % -off for off in words]
+
+
 def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: set[int], flags: int,
                slots: dict[int, int], fresh: set[int], code: set[int] | None,
-               functions: dict[int, set[int]] | None = None, framed: bool = False) -> tuple[Read, int]:
-    st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh), framed=framed)
+               functions: dict[int, set[int]] | None = None, framed: bool = False,
+               stored: set[int] | None = None, saved: set[int] | None = None) -> tuple[Read, int]:
+    st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh), framed=framed,
+               stored=stored if stored is not None else set(), saved=saved if saved is not None else set())
     block = structure.Block(start)
     term = ""
     tail = False
@@ -272,8 +286,11 @@ def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: s
         flags = 0
         reads: dict[int, Read] = {}
         slots: dict[int, int] = {}
+        stored: set[int] = set()
+        saved: set[int] = set()
         for at in sorted(stops):
-            reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions, framed)
+            reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions, framed,
+                                          stored, saved)
         into: dict[int, list[set[int]]] = {at: [] for at in stops}
         for read in reads.values():
             for target in read.block.targets:

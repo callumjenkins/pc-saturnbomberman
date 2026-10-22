@@ -51,6 +51,8 @@ class State:
     sp: int = 0                             # r15 relative to its value on entry
     slots: dict[int, int] = field(default_factory=dict)     # the function's stack locals: offset to size
     framed: bool = False                    # locals live in guest memory below `sp`, r15 on entry
+    stored: set[int] = field(default_factory=set)   # offsets from r15 on entry stored to anywhere in the function
+    saved: set[int] = field(default_factory=set)    # r8 to r14 the function's prologue has pushed
 
     def get(self, reg: int) -> str:
         if reg == 15 and self.framed:
@@ -147,9 +149,13 @@ def frame(ins: "sh2.Insn", st: State) -> bool:
         return True
     if op == "mov.l" and fmt == "mov.l Rm,@-Rn" and n == 15:
         st.sp -= 4
-        if st.framed and not 8 <= m <= 14:
+        if 8 <= m <= 14 and m not in st.saved:          # the first push of r8 to r14 saves the caller's
+            st.saved.add(m)
+            return True
+        st.stored.add(st.sp)
+        if st.framed:
             st.effect("ST32(%s, %s);" % (st.get(15), strip(st.get(m))))
-        elif not 8 <= m <= 14:
+        else:
             st.put_local(local(st, st.sp, 4, ins), st.get(m))
         return True
     if op == "mov.l" and fmt == "mov.l @Rm+,Rn" and m == 15:
@@ -159,6 +165,10 @@ def frame(ins: "sh2.Insn", st: State) -> bool:
             st.put(n, local(st, st.sp, 4, ins))
         st.sp += 4
         return True
+    if op.startswith("mov.") and "@" in fmt:
+        source, dest = operands(fmt)
+        if dest.startswith("@") and n == 15 and dest in ("@Rn", "@(disp,Rn)"):
+            st.stored.add(st.sp + (ins.disp or 0))
     if op.startswith("mov.") and "@" in fmt and not st.framed:
         size = _SIZES[op[-1]]
         source, dest = operands(fmt)

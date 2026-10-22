@@ -1,8 +1,28 @@
 #include "krnl.h"
 
-int f0607123A(int n)
+void f0607123A(int n)
 {
-    return GJUMP1(0x0601628E, n);
+    GJUMP1(0x0601628E, n);
+}
+
+void f0607193C(void)
+{
+    FRAME(sp, 20);
+    gaddr table = sp - 20;
+    gaddr obj, rec;
+
+    COPYB(table, 0x060B298C, 10);
+    obj = LD32(CURRENT);
+    ST16(obj + 48, LD16(table + (LDU8(obj + 6) << 1)));
+    rec = REC(LDU16(LD32(CURRENT) + 68));
+    ST16(rec + 66, 0);
+    while (LD16(rec + 68) != 0) {
+        POLL();
+        rec = REC(LDU16(rec + 68));
+    }
+    if (LDU16(rec + 40) != 1)
+        ST16(rec + 72, 1);
+    GCALL1(0x060144F4, 0x0606D2C8);
 }
 
 int f060733DE(void)
@@ -459,6 +479,25 @@ void f0607A620(void)
     } while (AGAIN(p < 0x060C285C));
 }
 
+void f0607A990(void)
+{
+    FRAME(sp, 88);
+    gaddr table = sp - 88;
+    gaddr entry;
+    int scale;
+    int dx, dy;
+
+    COPYW(0x060944F4, table, 0x060B2B3C, 80);
+    scale = LD16(0x060C2808);
+    entry = table + (LDU8(LD32(CURRENT) + 6) << 4);
+    dx = LD32(entry) * scale;
+    dy = LD32(entry + 4) * scale;
+    ST32(0x060C2834, LD32(0x060C2834) + dx);
+    ST32(0x060C2838, LD32(0x060C2838) + dy);
+    ST32(0x060C2848, LD32(0x060C2848) + dx * 2);
+    ST32(0x060C284C, LD32(0x060C284C) + dy * 2);
+}
+
 void f0607ADAE(void)
 {
     int n = LDU16(0x060C27F0);
@@ -534,6 +573,20 @@ void f0607BD28(void)
         ST16(FLAGS_AT(cell), LDU16(FLAGS_AT(cell)) & 0xFF7F);
         p += 4;
     } while (AGAIN(p < 0x060BAECE));
+}
+
+int f0607CCBC(gaddr list)
+{
+    gaddr rec = REC(LDU16(0x060C2860));
+    int key = LDU16(OBJ(LDU16(rec + 22)) + 50) - LDU16(rec + 80);
+
+    while (LD16(list) != -1) {
+        POLL();
+        if (LD16(list) == key)
+            return 1;
+        list += 2;
+    }
+    return 0;
 }
 
 void f0607D2A4(void)
