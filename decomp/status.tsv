@@ -13833,8 +13833,8 @@ KRNL	060A4FBE	49	4	no	yes	no	no	todo
 KRNL	060A5020	28	2	no	yes	no	no	todo	
 KRNL	060A5058	15	0	yes	yes	no	no	swapped	
 KRNL	060A5076	12	0	yes	no	no	no	swapped	
-KRNL	060A50A0	62	0	yes	no	no	no	todo	
-KRNL	060A5124	46	0	yes	no	no	no	todo	
+KRNL	060A50A0	62	0	yes	no	no	no	swapped	
+KRNL	060A5124	46	0	yes	no	no	no	swapped	
 KRNL	060A5180	14	0	yes	yes	no	no	swapped	
 KRNL	060A51AC	36	0	yes	yes	no	no	swapped	
 KRNL	060A51F4	111	2	no	yes	no	no	swapped	

@@ -2114,6 +2114,8 @@ int f060A4FA8(int, uint32_t, uint32_t);
 int f060A4FAC(int, uint32_t);
 void f060A5058(uint32_t, uint32_t);
 void f060A5076(int);
+int f060A50A0(unsigned char);
+int f060A5124(void);
 void f060A5180(uint32_t, unsigned int);
 void f060A51AC(uint32_t);
 void f060A51F4(uint32_t, int);
@@ -4505,6 +4507,8 @@ void swap_f060A4FA8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f060A4FA8(
 void swap_f060A4FAC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f060A4FAC((int)c.r[4], (uint32_t)c.r[5]); }
 void swap_f060A5058(SH2Context& c) { InSwap in(c); f060A5058((uint32_t)c.r[4], (uint32_t)c.r[5]); }
 void swap_f060A5076(SH2Context& c) { InSwap in(c); f060A5076((int)c.r[4]); }
+void swap_f060A50A0(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f060A50A0((unsigned char)c.r[4]); }
+void swap_f060A5124(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f060A5124(); }
 void swap_f060A5180(SH2Context& c) { InSwap in(c); f060A5180((uint32_t)c.r[4], (unsigned int)c.r[5]); }
 void swap_f060A51AC(SH2Context& c) { InSwap in(c); f060A51AC((uint32_t)c.r[4]); }
 void swap_f060A51F4(SH2Context& c) { InSwap in(c); f060A51F4((uint32_t)c.r[4], (int)c.r[5]); }

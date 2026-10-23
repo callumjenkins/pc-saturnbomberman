@@ -18,8 +18,8 @@ STACK = WRAM + RAM - 0x1000
 DATA = (0x060B0000, STACK)
 # Memory past the two work RAMs, as plain memory: a trial compares what a function writes to a
 # device's registers, and nothing the device would do with it, apart from the three writes `Devices`
-# answers. The last five hold the CD block, the cache-purge mirror, the SMPC, the SCSP's registers, and the words
-# above work RAM that a function reading stack arguments reaches from the cosim's stack.
+# answers. The last six hold the CD block, the cache-purge mirror, the SMPC, the SCSP's registers, the words
+# above work RAM that a function reading stack arguments reaches from the cosim's stack, and the cache's address array.
 DEVICES = (
     ("sound RAM", 0x05A00000, 0x80000),
     ("VDP1 VRAM", 0x05C00000, 0xC0000),
@@ -34,6 +34,7 @@ DEVICES = (
     ("SMPC", 0x00100000, 0x100),
     ("SCSP registers", 0x05B00000, 0x1000),
     ("above work RAM", 0x06100000, 0x1000),
+    ("cache address array", 0x60000000, 0x1000),
 )
 MAX_REGIONS = 16                 # host_mem.c's
 HIRQ, CR1, SMPC_SF = 0x05890008, 0x05890018, 0x00100063

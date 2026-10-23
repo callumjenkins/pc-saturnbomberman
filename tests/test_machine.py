@@ -56,6 +56,8 @@ def test_a_plant_goes_over_a_dump(dumped):
     pytest.param(0x05D00010, 0x05D00010, id="a device register"),
     pytest.param(0x260C0000, 0x060C0000, id="the cache-through mirror of work RAM"),
     pytest.param(0x00200010, 0x00200010, id="work RAM-L"),
+    pytest.param(0x60000010, 0x60000010, id="the cache address array"),
+    pytest.param(0x25890010, 0x25890010, id="the CD block through the cache-through mirror"),
 ])
 def test_a_plant_lands_in_the_region_its_address_names(address, at):
     cpu = filled(1, [(address, 2, [0x1234], 1.0)])

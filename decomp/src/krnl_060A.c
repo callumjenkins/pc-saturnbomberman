@@ -1457,6 +1457,61 @@ void f060A5076(int n)
     }
 }
 
+int f060A50A0(unsigned char mode)
+{
+    int way = 0;
+    gaddr p;
+    int n;
+    int ccr;
+
+    ST8(SH2_CCR, LDU8(SH2_CCR) & 254);
+    do {
+        ST8(SH2_CCR, (LDU8(SH2_CCR) & 63) | way);
+        p = 0x60000000;
+        n = 64;
+        do {
+            ST32(p, 0);
+            n -= 2;
+            p += 16;
+            ST32(p, 0);
+            p += 16;
+        } while (AGAIN(n != 0));
+        way += 64;
+    } while (AGAIN(way < 0x100));
+    ST8(SH2_CCR, (LDU8(SH2_CCR) & 247) | mode);
+    ST8(SH2_CCR, LDU8(SH2_CCR) & 253);
+    ST8(SH2_CCR, LDU8(SH2_CCR) & 251);
+    ccr = (LDU8(SH2_CCR) & 254) | 1;
+    ST8(SH2_CCR, ccr);
+    return ccr;
+}
+
+int f060A5124(void)
+{
+    int way = 0;
+    gaddr p;
+    int n;
+    int ccr;
+
+    ST8(SH2_CCR, LDU8(SH2_CCR) & 254);
+    do {
+        ST8(SH2_CCR, (LDU8(SH2_CCR) & 63) | way);
+        p = 0x60000000;
+        n = 64;
+        do {
+            n -= 2;
+            ST32(p, 0);
+            p += 16;
+            ST32(p, 0);
+            p += 16;
+        } while (AGAIN(n != 0));
+        way += 64;
+    } while (AGAIN(way < 0x100));
+    ccr = (LDU8(SH2_CCR) & 254) | 1;
+    ST8(SH2_CCR, ccr);
+    return ccr;
+}
+
 void f060A5180(gaddr addr, unsigned int size)
 {
     gaddr end;
