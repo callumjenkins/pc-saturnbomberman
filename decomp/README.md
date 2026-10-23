@@ -147,3 +147,9 @@ Eight more functions came from the lifter (`f060086EA` and the others in `status
 that `src/` marks "Lifted by"). Most are empty or return a constant, so they show the pipeline works
 and little else. With all 18 swapped, `normal`, `battle-round`, `mad-bomber-com`, `bonus-game`,
 `clear-M-1`, `die` and `items` match their recorded frame and sound hashes.
+
+## Return types
+
+A function is `void` when every caller the build shows ignores r0, since the cosim compares r0 and the game leaves
+a leftover there. A function reached only through a pointer keeps the result the game's code leaves in r0, so its
+type is a judgement; a wrong one shows in the routes or in the Beetle compare.
