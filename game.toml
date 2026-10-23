@@ -10809,6 +10809,16 @@ symbol = "swap_f060A5076"
 
 [[replace]]
 module = "KRNL"
+at = 0x060A50A0
+symbol = "swap_f060A50A0"
+
+[[replace]]
+module = "KRNL"
+at = 0x060A5124
+symbol = "swap_f060A5124"
+
+[[replace]]
+module = "KRNL"
 at = 0x060A5180
 symbol = "swap_f060A5180"
 

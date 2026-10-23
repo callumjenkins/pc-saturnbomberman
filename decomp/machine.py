@@ -18,8 +18,7 @@ STACK = WRAM + RAM - 0x1000
 DATA = (0x060B0000, STACK)
 # Memory past the two work RAMs, as plain memory: a trial compares what a function writes to a
 # device's registers, and nothing the device would do with it, apart from the three writes `Devices`
-# answers. The last six hold the CD block, the cache-purge mirror, the SMPC, the SCSP's registers, the words
-# above work RAM that a function reading stack arguments reaches from the cosim's stack, and the cache's address array.
+# answers.
 DEVICES = (
     ("sound RAM", 0x05A00000, 0x80000),
     ("VDP1 VRAM", 0x05C00000, 0xC0000),
@@ -41,10 +40,8 @@ HIRQ, CR1, SMPC_SF = 0x05890008, 0x05890018, 0x00100063
 
 
 class Devices(sh2emu.Memory):
-    """The memory of a trial once it is filled. Three writes get the answer the drivers cannot do without,
-    and host_mem.c's `g_wr` gives the same: HIRQ keeps the flags written as 1 and sets CMOK, as the CD block
-    does once it has taken a command; CR1 keeps the status a plant gave it, so a command does not overwrite
-    the response; and the SMPC finishes a command at once, so SF reads back 0."""
+    """The memory of a trial once it is filled, with the three writes host_mem.c's `g_wr` answers the same way:
+    HIRQ keeps the flags written as 1 and sets CMOK, CR1 keeps what a plant gave it, and SF reads back 0."""
 
     def write(self, addr: int, size: int, value: int) -> None:
         a = addr & 0x1FFFFFFF
@@ -58,7 +55,7 @@ class Devices(sh2emu.Memory):
 
 
 def attach(cpu: sh2emu.CPU) -> None:
-    """Makes cpu's memory answer those writes. Plants go in before this, so they are not answered."""
+    """Plants go in before this, so they are not answered."""
     cpu.mem.__class__ = Devices
 
 

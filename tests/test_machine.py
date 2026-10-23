@@ -1,5 +1,6 @@
 import os
 import random
+import re
 import shutil
 import sys
 
@@ -10,9 +11,10 @@ sys.path.insert(0, os.path.join(ROOT, "decomp"))
 sys.path.insert(0, os.path.join(ROOT, "saturn-recomp", "src"))
 import check  # noqa: E402
 import gen  # noqa: E402
+import hwnames  # noqa: E402
 import machine  # noqa: E402
 import snapshots  # noqa: E402
-from saturnrecomp import sh2emu  # noqa: E402
+from saturnrecomp import hw, sh2emu  # noqa: E402
 
 BASE = 0x06006000
 CODE = [(0, 0x10)]
@@ -116,3 +118,43 @@ def test_the_host_build_writes_to_the_devices(tmp_path, extra, agrees):
     sig = gen.signatures([str(path)])[0x06062168]
     fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 20, 1, sig)
     assert ran == 20 and (not fails) == agrees
+
+
+@pytest.mark.parametrize("offset", [
+    pytest.param(0, id="first byte"),
+    pytest.param(-1, id="last byte"),
+])
+@pytest.mark.parametrize("name, base, size", machine.DEVICES)
+def test_a_difference_in_any_device_region_is_reported_under_its_own_name(name, base, size, offset):
+    game, host = filled(3), sh2emu.load(os.devnull, BASE)
+    machine.copy(game, host)
+    address = base + (size + offset if offset else 0)
+    host.mem.write(address, 1, host.mem.read(address, 1) ^ 1)
+    assert machine.differences(host, game) == ["%s differs first at %08X: host %02X, game %02X"
+                                               % (name, address, host.mem.read(address, 1), game.mem.read(address, 1))]
+
+
+def test_every_register_hw_h_names_is_in_memory_a_trial_maps():
+    cpu = filled(3)
+    for name, address in hwnames.names().items():
+        cpu.mem.read(address, 1)
+
+
+def test_the_regions_are_as_many_as_host_mem_c_has_room_for_and_none_overlap():
+    with open(os.path.join(ROOT, "decomp", "host_mem.c")) as f:
+        (c_limit,) = re.findall(r"#define MAX_REGIONS (\d+)", f.read())
+    assert int(c_limit) == machine.MAX_REGIONS
+    regions = sorted([(machine.WRAM, machine.RAM), (machine.WRAML, machine.RAM)] + [(base, size) for name, base, size in machine.DEVICES])
+    assert len(regions) <= machine.MAX_REGIONS
+    assert all(lo + size <= next_lo for (lo, size), (next_lo, _) in zip(regions, regions[1:]))
+
+
+HARDWARE = [(lo, hi, name) for lo, hi, name in hw.REGIONS if name in (
+    "SMPC", "WRAM-L", "SCSP RAM", "SCSP", "VDP1 VRAM", "VDP1", "VDP2 VRAM", "VDP2 CRAM", "VDP2", "SCU", "WRAM-H")]
+
+
+@pytest.mark.parametrize("lo, hi", [pytest.param(lo, hi, id=name) for lo, hi, name in HARDWARE])
+def test_the_cosim_maps_the_whole_of_each_hardware_region_the_decompiled_code_reaches(lo, hi):
+    cpu = filled(3)
+    cpu.mem.read(lo, 1)
+    cpu.mem.read(hi - 1, 1)
