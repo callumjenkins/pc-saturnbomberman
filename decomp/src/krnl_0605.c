@@ -624,6 +624,46 @@ int f06054ED4(void)
     return count;
 }
 
+void f06054FB8(void)
+{
+    gaddr config = LD8(0x060FA900) ? 0x060FA8F4 : 0;
+    int value;
+
+    if (config == 0)
+        return;
+    value = LD32(config + 4) & ~0x200;
+    do {
+    } while (AGAIN(LD8(SMPC_SF) & 1));
+    ST8(SMPC_SF, 1);
+    ST8(SMPC_IREG(0), value >> 24);
+    ST8(SMPC_IREG(1), value >> 16);
+    ST8(SMPC_IREG(2), value >> 8);
+    ST8(SMPC_IREG(3), value);
+    ST8(SMPC_COMREG, 0x17);
+    do {
+    } while (AGAIN(LD8(SMPC_SF) & 1));
+}
+
+void f06055060(void)
+{
+    gaddr state = LDU8(0x060FA900) ? 0x060FA8F4 : 0;
+    int v;
+
+    if (state != 0) {
+        v = LD32(state + 4) | 0x200;
+        do {
+        } while (AGAIN((LDU8(SMPC_SF) & 1) == 1));
+        ST8(SMPC_SF, 1);
+        ST8(0x20100001, (unsigned int)v >> 24);
+        ST8(0x20100003, (unsigned int)v >> 16);
+        ST8(0x20100005, (unsigned int)v >> 8);
+        ST8(0x20100007, v);
+        ST8(SMPC_COMREG, 23);
+        do {
+        } while (AGAIN((LDU8(SMPC_SF) & 1) != 0));
+    }
+}
+
 void f060550D8(unsigned short value)
 {
     ST32(0x060C0AB4, value);

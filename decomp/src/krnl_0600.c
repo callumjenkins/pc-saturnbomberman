@@ -177,6 +177,19 @@ void f06006780(void)
     } while (AGAIN(++i < 0x100));
 }
 
+void f060067F8(void)
+{
+    gaddr p = 0x25B00800;
+    int i = 0;
+
+    POLL();
+    do {
+        ST16(p, 0);
+        p += 2;
+        i += 2;
+    } while (AGAIN(i < 0x400));
+}
+
 void f0600687A(int n)
 {
     int rec = RECS + (short)(n * 88);
