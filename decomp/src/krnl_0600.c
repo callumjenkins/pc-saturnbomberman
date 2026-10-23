@@ -2,7 +2,7 @@
 
 void f0600620C(void)
 {
-    ST16(0xFFFFFE92, 17);
+    ST16(SH2_CCR, 17);
 }
 
 void f06006218(void)
@@ -87,7 +87,7 @@ void f06006652(void)
  * with a zero link, then the halfword the game keeps at 060BC12E. */
 void f0600665C(void)
 {
-    H16PTR p = (H16PTR)0x25D00000;
+    H16PTR p = (H16PTR)VDP1_TVMR;
 
     PUT16(p, 0);
     PUT16(p, 0);
@@ -100,7 +100,7 @@ void f0600665C(void)
 void f060066A4(void)
 {
     gaddr src = 0x060BC130;
-    gaddr dst = 0x25C00000;
+    gaddr dst = VDP1_VRAM;
     int i = 0;
 
     GCALL3(0x060065FC, 0x060BC130, 0, 96);
@@ -131,15 +131,15 @@ void f060066EC(void)
 int f06006700(int mode)
 {
     if (mode == 0) {
-        ST8(0x2010001F, 7);
+        ST8(SMPC_COMREG, 7);
     } else if (mode == 1) {
         ST8(0x25B00400, 2);
-        GCALL3(0x0600663C, 0x25A00000, 0x400, 0x3FC);
-        ST32(0x25A00000, 0x0007FFFC);
+        GCALL3(0x0600663C, SCSP_RAM, 0x400, 0x3FC);
+        ST32(SCSP_RAM, 0x0007FFFC);
         ST32(0x25A00400, 0x4E7160FC);
         return 0x25A00400;
     } else if (mode == 2) {
-        ST8(0x2010001F, 6);
+        ST8(SMPC_COMREG, 6);
     }
     return mode;
 }
@@ -154,7 +154,7 @@ void f06006742(void)
         ST32(0xFFFFFF88 + ch * 16, 1);
         (void)LD32(0xFFFFFF8C + ch * 16);
         ST32(0xFFFFFF8C + ch * 16, 0);
-        ST8(0xFFFFFE71 + ch, 0);
+        ST8(SH2_DRCR0 + ch, 0);
     } while (AGAIN(++ch < 2));
     (void)LD32(0xFFFFFFB0);
     ST32(0xFFFFFFB0, 0);
@@ -165,15 +165,15 @@ void f06006780(void)
 {
     int i;
 
-    ST32(0x25FE0080, 0);
+    ST32(SCU_PPAF, 0);
     i = 0x100;
     do {
-        ST32(0x25FE0084, 0xF0000000);
+        ST32(SCU_PPD, 0xF0000000);
     } while (AGAIN(--i != 0));
     i = 0;
     do {
-        ST32(0x25FE0088, i);
-        ST32(0x25FE008C, 0);
+        ST32(SCU_PDA, i);
+        ST32(SCU_PDD, 0);
     } while (AGAIN(++i < 0x100));
 }
 
@@ -765,7 +765,7 @@ int f060090D8(void)
             if (flag) {
                 j = 0;
                 do {
-                    ST16(0x25F00000 + i * 32 + j * 2, LD16(0x060CBC60 + i * 32 + j * 2));
+                    ST16(VDP2_CRAM + i * 32 + j * 2, LD16(0x060CBC60 + i * 32 + j * 2));
                 } while (AGAIN(++j < 16));
                 ST16(0x060CBB60 + i * 2, 0);
             }
@@ -946,13 +946,13 @@ int f060095E0(int bank)
 
 void f060096FA(gaddr out, gaddr link, unsigned short kind, unsigned short index)
 {
-    gaddr entry = 0x25A00000 + LD32(0x25A00408);
+    gaddr entry = SCSP_RAM + LD32(0x25A00408);
     unsigned int head = LD32(entry);
 
     while (!(head & 0x80000000)) {
         POLL();
         if (((head & 0x70000000) >> 28) == kind && ((head & 0x0F000000) >> 24) == index) {
-            ST32(out, (head & 0x000FFFFF) + 0x25A00000);
+            ST32(out, (head & 0x000FFFFF) + SCSP_RAM);
             ST32(link, entry + 4);
             break;
         }
@@ -1606,7 +1606,7 @@ int f0600A63E(int mode)
         offset &= 0x1FE;
     else if ((unsigned short)shape == 3)
         offset &= 0x1FC;
-    return (0x000FFFFF & (offset * GCALL1(0x0600A570, mode))) + 0x25E00000;
+    return (0x000FFFFF & (offset * GCALL1(0x0600A570, mode))) + VDP2_VRAM;
 }
 
 int f0600A76E(int mode, unsigned int value)
@@ -1879,7 +1879,7 @@ void f0600B67E(unsigned int w, unsigned int h)
     ST16(0x060B2F7A, h + y - 1);
     ST16(0x060B2F7C, x);
     ST16(0x060B2F7E, h + y - 1);
-    GJUMP3(0x060949E0, 0x25C00000, 0x060B2F04, 160);
+    GJUMP3(0x060949E0, VDP1_VRAM, 0x060B2F04, 160);
 }
 
 #undef COPY_KEEP

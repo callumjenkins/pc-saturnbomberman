@@ -2963,11 +2963,11 @@ void f060393EE(void)
 void f06039598(void)
 {
     if (LD32(0x060C0AA8) == 0) {
-        while (AGAIN(LD8(0x20100063) & 1))
+        while (AGAIN(LD8(SMPC_SF) & 1))
             ;
-        ST8(0x20100063, 1);
-        ST8(0x2010001F, 26);
-        while (AGAIN(LD8(0x20100063) & 1))
+        ST8(SMPC_SF, 1);
+        ST8(SMPC_COMREG, 26);
+        while (AGAIN(LD8(SMPC_SF) & 1))
             ;
     }
 }
@@ -2977,11 +2977,11 @@ void f060395C2(void)
     if (LD32(0x060C0AA8))
         return;
     do {
-    } while (AGAIN(LD8(0x20100063) & 1));
-    ST8(0x20100063, 1);
-    ST8(0x2010001F, 25);
+    } while (AGAIN(LD8(SMPC_SF) & 1));
+    ST8(SMPC_SF, 1);
+    ST8(SMPC_COMREG, 25);
     do {
-    } while (AGAIN(LD8(0x20100063) & 1));
+    } while (AGAIN(LD8(SMPC_SF) & 1));
 }
 
 void f0603968C(gaddr out, int angle, short x, short y)
@@ -3170,7 +3170,7 @@ void f06039DE0(int second, short mid, short rows, short a)
     int ofs = (flag & (second ? 2 : 1)) ? lo + 0x800 : lo;
 
     ST8(0x060C1725, flag ^ (second ? 2 : 1));
-    GCALL7(0x06039C28, a / 2, b / 2, a / 2, b / 2, mid, rows, 0x25E00000 + ofs);
+    GCALL7(0x06039C28, a / 2, b / 2, a / 2, b / 2, mid, rows, VDP2_VRAM + ofs);
     ST32(0x060FAA60 + (second ? 28 : 24), ((ofs >> 1) & 0x7FFFE) | 0x80000000);
     ST16(0x060FAA60 + (second ? 10 : 2), 0);
     ST16(0x060FAA60 + (second ? 14 : 6), 223);

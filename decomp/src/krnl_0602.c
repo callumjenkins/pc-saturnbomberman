@@ -1263,8 +1263,8 @@ int f06023EF8(void)
 
 void f060240E0(void)
 {
-    GCALL4(0x06068E10, 2, 0x25E20000, 102, 1);
-    GCALL4(0x06068E10, 3, 0x25E20000, 2, 1);
+    GCALL4(0x06068E10, 2, VDP2_VRAM_A1, 102, 1);
+    GCALL4(0x06068E10, 3, VDP2_VRAM_A1, 2, 1);
     GCALL1(0x060092D4, 9);
     GJUMP1(0x060092D4, 10);
 }
@@ -2423,7 +2423,7 @@ void f06029718(int pad)
     if (pad & 128)
         out |= 2;
     ST16(0x060FB8CA, out);
-    ST16(0x25F80110, out);
+    ST16(VDP2_CLOFEN, out);
 }
 
 void f0602977C(int pad)
@@ -2462,7 +2462,7 @@ void f060298F4(int pad)
 
 void f06029A78(void)
 {
-    gaddr reg = 0x25F80114;
+    gaddr reg = VDP2_COAR;
     int i = 0;
 
     GCALL1(0x06029718, 0x13C);
@@ -2475,7 +2475,7 @@ void f06029A78(void)
 
 void f06029A9A(void)
 {
-    gaddr reg = 0x25F80114;
+    gaddr reg = VDP2_COAR;
     int i = 0;
 
     GCALL1(0x06029718, 0x13C);
@@ -2489,16 +2489,16 @@ void f06029A9A(void)
 void f06029ABC(int x, int y, int z)
 {
     GCALL1(0x06029718, 0x13C);
-    ST16(0x25F80114, x & 0x1FF);
-    ST16(0x25F80116, y & 0x1FF);
-    ST16(0x25F80118, z & 0x1FF);
+    ST16(VDP2_COAR, x & 0x1FF);
+    ST16(VDP2_COAG, y & 0x1FF);
+    ST16(VDP2_COAB, z & 0x1FF);
 }
 
 void f06029AEE(void)
 {
     POLL();
     ST16(0x060FB8CA, 0);
-    ST16(0x25F80110, 0);
+    ST16(VDP2_CLOFEN, 0);
 }
 
 /* Clamps pos to 0..0x1FF, subtracts 256 and wraps to 9 bits. */

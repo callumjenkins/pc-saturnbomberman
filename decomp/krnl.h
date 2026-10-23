@@ -3,6 +3,7 @@
 #define KRNL_H
 
 #include "guest.h"
+#include "hw.h"
 
 typedef struct { int active; char pad[76]; char flag; char pad2[7]; } Rec88;
 typedef struct { char pad[8]; short w8; char pad2[1]; char f; char pad3[4]; } Ent16;
@@ -147,21 +148,11 @@ typedef struct { unsigned char state, b1; short count; unsigned short obj; unsig
 #define LAYOUT 0x060FBFC0
 #define LAYOUT_A 0x060FBFDC
 #define LAYOUT_B 0x060FBFEC
-#define VIDEO_MODE 0x25F80004
 #define VIDEO_DIV(tv) (((((tv) & 1 ? ((tv) & 0xC0 ? 0x320000 : 0x31EB8B) : ((tv) & 0xC0 ? 0x3BF0A3 : 0x3BD374)) >> 9) + 1) >> 1)
 
 #define KEYED(n) (0x060C104C + (n) * 16)
 
-#define CD_HIRQ        0x25890008
-#define CD_CR1         0x25890018
-#define CD_CR2         0x2589001C
-#define CD_CR3         0x25890020
-#define CD_CR4         0x25890024
-#define CD_DATA        0x25898000
 #define CD_HIRQ_SHADOW 0x060FA8B8
-#define SMPC_COMREG    0x2010001F
-#define SMPC_SF        0x20100063
-#define SCSP_RAM       0x25A00000
 
 /* Waits for the SMPC to be idle, issues a command and waits for it to finish. */
 #define SMPC_COMMAND(cmd)                      \
@@ -324,19 +315,9 @@ static void ease(gaddr p, int d)
 
 #define VELOCITY 0x060C1762
 
-#define CCR 0xFFFFFE92
 #define CD_ERROR 0x060FC080
 #define CD_RETRIES 0x00030000
 #define CD_ENTRY(i) (LD32(DEV) + 92 + (i) * 16)
 
-#define CD_HIRQ        0x25890008
-#define CD_CR1         0x25890018
-#define CD_CR2         0x2589001C
-#define CD_CR3         0x25890020
-#define CD_CR4         0x25890024
-#define CD_DATA        0x25898000
-#define SMPC_COMREG    0x2010001F
-#define SMPC_SF        0x20100063
-#define SMPC_IREG(n)   (0x20100001 + 2 * (n))
 
 #endif

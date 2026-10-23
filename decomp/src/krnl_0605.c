@@ -654,10 +654,10 @@ void f06055060(void)
         do {
         } while (AGAIN((LDU8(SMPC_SF) & 1) == 1));
         ST8(SMPC_SF, 1);
-        ST8(0x20100001, (unsigned int)v >> 24);
-        ST8(0x20100003, (unsigned int)v >> 16);
-        ST8(0x20100005, (unsigned int)v >> 8);
-        ST8(0x20100007, v);
+        ST8(SMPC_IREG0, (unsigned int)v >> 24);
+        ST8(SMPC_IREG1, (unsigned int)v >> 16);
+        ST8(SMPC_IREG2, (unsigned int)v >> 8);
+        ST8(SMPC_IREG3, v);
         ST8(SMPC_COMREG, 23);
         do {
         } while (AGAIN((LDU8(SMPC_SF) & 1) != 0));

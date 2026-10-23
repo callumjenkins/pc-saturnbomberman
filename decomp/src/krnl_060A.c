@@ -1544,7 +1544,7 @@ int f060A532A(int ch)
 
 void f060A5338(gaddr desc, int ch)
 {
-    gaddr regs = 0x25FE0000 + (ch << 5);
+    gaddr regs = SCU_D0R + (ch << 5);
 
     if ((LD32(desc + 36) & 1) == 1)
         ST32(regs, LD32(desc));
@@ -4062,14 +4062,14 @@ int f060AC62E(gaddr ctx)
 
 void f060ACB0C(void)
 {
-    ST8(0xFFFFFE16, (LD8(0xFFFFFE16) & ~3) | 2);
+    ST8(SH2_TCR, (LD8(SH2_TCR) & ~3) | 2);
     ST32(0x060FC174, 0);
     ST16(0x060FC178, 0);
 }
 
 int f060ACB2C(void)
 {
-    int v = ((LD8(0xFFFFFE12) & 255) << 8) | (LD8(0xFFFFFE13) & 255);
+    int v = ((LD8(SH2_FRCH) & 255) << 8) | (LD8(SH2_FRCL) & 255);
 
     if (v < LDU16(0x060FC178))
         ST32(0x060FC174, LD32(0x060FC174) + 0x100);
@@ -4122,7 +4122,7 @@ void f060ACCB2(gaddr ctx, gaddr scaled, gaddr raw)
         n = (mode == 1 ? LD32(s + 0xE4) : LD32(0x060FC0E4)) - LD32(s + 0xE0);
         ST32(raw, n);
         m = n << 1;
-        tv = LDU16(VIDEO_MODE);
+        tv = LDU16(VDP2_TVSTAT);
         d = VIDEO_DIV(tv);
         a = LD32(dev + 56) << 5;
         ST32(scaled, DIVS(m, d) * a + DIVU(a, d) * MODS(m, d) + DIVU(MODU(a, d) * MODS(m, d), d));
@@ -4172,7 +4172,7 @@ void f060AD27A(gaddr h, gaddr out_a, gaddr out_b)
 
 void f060AD39C(void)
 {
-    ST8(0xFFFFFE16, (LD8(0xFFFFFE16) & ~3) | 2);
+    ST8(SH2_TCR, (LD8(SH2_TCR) & ~3) | 2);
     ST32(0x060FC17C, 0);
     ST16(0x060FC180, 0);
 }

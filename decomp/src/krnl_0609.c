@@ -1285,7 +1285,7 @@ int f06098EA4(gaddr first, gaddr second)
         ST32(first, 0);
         return 1;
     }
-    if ((LD8(0x20100061) & 16) == 16) {
+    if ((LD8(SMPC_SR) & 16) == 16) {
         count = LD32(0x060FA960) + 1;
         ST32(0x060FA960, count);
         if (count >= 3) {
@@ -1346,13 +1346,13 @@ int f06098EA4(gaddr first, gaddr second)
     if ((LD8(0x060FA970) & 255) == 4)
         return 1;
     ST8(0x060FA970, 3);
-    if ((LD8(0x20100063) & 1) == 1)
+    if ((LD8(SMPC_SF) & 1) == 1)
         return 1;
-    ST8(0x20100063, 1);
-    ST8(0x20100001, LD8(0x060FA903));
-    ST8(0x20100003, LD8(0x060FA904));
-    ST8(0x20100005, LD8(0x060FA905));
-    ST8(0x2010001F, 16);
+    ST8(SMPC_SF, 1);
+    ST8(SMPC_IREG0, LD8(0x060FA903));
+    ST8(SMPC_IREG1, LD8(0x060FA904));
+    ST8(SMPC_IREG2, LD8(0x060FA905));
+    ST8(SMPC_COMREG, 16);
     ST8(0x060FA970, 2);
     return 0;
 }
@@ -1360,7 +1360,7 @@ int f06098EA4(gaddr first, gaddr second)
 /* 20100061 is SMPC's status register. */
 void f060997BC(void)
 {
-    if ((unsigned int)LD32(0x060FA964) >= 0x20100061 && (LD8(0x20100061) & 0x20))
+    if ((unsigned int)LD32(0x060FA964) >= SMPC_SR && (LD8(SMPC_SR) & 0x20))
         ST8(0x060FA970, 2);
 }
 
@@ -1522,7 +1522,7 @@ void f06099CDC(int addr, unsigned short mode, int src)
         return;
     addr &= 0x0007FFFF;
     ST32(0x060FAA4C, addr);
-    GCALL3(0x0609B734, addr | 0x25E00000, src, mode << 1);
+    GCALL3(0x0609B734, addr | VDP2_VRAM, src, mode << 1);
     ST32(0x060FAA4C, (unsigned int)LD32(0x060FAA4C) >> 1);
     if (mode != 1)
         ST32(0x060FAA10 + 60, LD32(0x060FAA10 + 60) | 0x80000000);
@@ -1569,12 +1569,12 @@ void f06099F30(gaddr cfg)
             else
                 ST16(0x060FA9AE, LDU16(0x060FA9AE) & 0xFFFC);
             ST16(0x060FAA56, LDU16(0x060FAA56) & 0xFF00);
-            ST32(0x060FB85C, LD32(0x060FB864) + 0x25E00000);
+            ST32(0x060FB85C, LD32(0x060FB864) + VDP2_VRAM);
             ones = 1;
         }
     } else if (mode == 4) {
         ST16(0x060FAA56, LDU16(0x060FAA56) & 255);
-        ST32(0x060FB860, LD32(0x060FB868) + 0x25E00000);
+        ST32(0x060FB860, LD32(0x060FB868) + VDP2_VRAM);
     }
 
     mode = LD8(cfg + 11) & 255;
@@ -1586,7 +1586,7 @@ void f06099F30(gaddr cfg)
                     ST16(0x060FA9AE, LDU16(0x060FA9AE) & 0xFFF3);
                 ST16(0x060FAA56, LDU16(0x060FAA56) & 255);
                 ST16(0x060FAA56, LDU16(0x060FAA56) | 0x100);
-                ST32(0x060FB860, LD32(0x060FB868) + 0x25E20000);
+                ST32(0x060FB860, LD32(0x060FB868) + VDP2_VRAM_A1);
                 ones++;
             } else {
                 if (LD32(0x060FB864) == 0)
@@ -1595,14 +1595,14 @@ void f06099F30(gaddr cfg)
                     ST16(0x060FA9AE, LDU16(0x060FA9AE) & 0xFFF3);
                 ST16(0x060FAA56, LDU16(0x060FAA56) & 0xFF00);
                 ST16(0x060FAA56, LDU16(0x060FAA56) | 1);
-                ST32(0x060FB85C, LD32(0x060FB864) + 0x25E20000);
+                ST32(0x060FB85C, LD32(0x060FB864) + VDP2_VRAM_A1);
                 ones = 1;
             }
         }
     } else if (mode == 4) {
         ST16(0x060FAA56, LDU16(0x060FAA56) & 255);
         ST16(0x060FAA56, LDU16(0x060FAA56) | 0x100);
-        ST32(0x060FB860, LD32(0x060FB868) + 0x25E20000);
+        ST32(0x060FB860, LD32(0x060FB868) + VDP2_VRAM_A1);
     }
 
     mode = LD8(cfg + 12) & 255;
@@ -1615,7 +1615,7 @@ void f06099F30(gaddr cfg)
                 ST16(0x060FAA56, LDU16(0x060FAA56) & 255);
                 ST16(0x060FAA56, LDU16(0x060FAA56) | 0x200);
                 ones++;
-                ST32(0x060FB860, LD32(0x060FB868) + 0x25E40000);
+                ST32(0x060FB860, LD32(0x060FB868) + VDP2_VRAM_B0);
             } else {
                 if (LD32(0x060FB864) == 0)
                     sel = 3;
@@ -1623,14 +1623,14 @@ void f06099F30(gaddr cfg)
                     ST16(0x060FA9AE, LDU16(0x060FA9AE) & 0xFFCF);
                 ST16(0x060FAA56, LDU16(0x060FAA56) & 0xFF00);
                 ST16(0x060FAA56, LDU16(0x060FAA56) | 2);
-                ST32(0x060FB85C, LD32(0x060FB864) + 0x25E40000);
+                ST32(0x060FB85C, LD32(0x060FB864) + VDP2_VRAM_B0);
                 ones = 1;
             }
         }
     } else if (mode == 4 && LD32(0x060FB868)) {
         ST16(0x060FAA56, LDU16(0x060FAA56) & 255);
         ST16(0x060FAA56, LDU16(0x060FAA56) | 0x200);
-        ST32(0x060FB860, LD32(0x060FB868) + 0x25E40000);
+        ST32(0x060FB860, LD32(0x060FB868) + VDP2_VRAM_B0);
     }
 
     mode = LD8(cfg + 13) & 255;
@@ -1642,7 +1642,7 @@ void f06099F30(gaddr cfg)
                     ST16(0x060FA9AE, LDU16(0x060FA9AE) & 0xFF3F);
                 ST16(0x060FAA56, LDU16(0x060FAA56) & 255);
                 ST16(0x060FAA56, LDU16(0x060FAA56) | 0x300);
-                ST32(0x060FB860, LD32(0x060FB868) + 0x25E60000);
+                ST32(0x060FB860, LD32(0x060FB868) + VDP2_VRAM_B1);
             } else {
                 if (LD32(0x060FB864) == 0)
                     sel = 4;
@@ -1650,13 +1650,13 @@ void f06099F30(gaddr cfg)
                     ST16(0x060FA9AE, LDU16(0x060FA9AE) & 0xFF3F);
                 ST16(0x060FAA56, LDU16(0x060FAA56) & 0xFF00);
                 ST16(0x060FAA56, LDU16(0x060FAA56) | 3);
-                ST32(0x060FB85C, LD32(0x060FB864) + 0x25E60000);
+                ST32(0x060FB85C, LD32(0x060FB864) + VDP2_VRAM_B1);
             }
         }
     } else if (mode == 4 && LD32(0x060FB868)) {
         ST16(0x060FAA56, LDU16(0x060FAA56) & 255);
         ST16(0x060FAA56, LDU16(0x060FAA56) | 0x300);
-        ST32(0x060FB860, LD32(0x060FB868) + 0x25E60000);
+        ST32(0x060FB860, LD32(0x060FB868) + VDP2_VRAM_B1);
     }
 
     if (LD32(0x060FB860))
@@ -1693,12 +1693,12 @@ void f06099F30(gaddr cfg)
     if (LD32(0x060FB864) && LD8(0x060FB870)) {
         ST16(0x060FAA56, LDU16(0x060FAA56) & 0xFF00);
         ST16(0x060FAA56, LDU16(0x060FAA56) | (DIVS(LD32(0x060FB864), 0x00020000) & 0xFFFF));
-        ST32(0x060FB85C, LD32(0x060FB864) + 0x25E00000);
+        ST32(0x060FB85C, LD32(0x060FB864) + VDP2_VRAM);
     }
     if (LD32(0x060FB868) && LD8(0x060FB871)) {
         ST16(0x060FAA56, LDU16(0x060FAA56) & 255);
         ST16(0x060FAA56, LDU16(0x060FAA56) | ((DIVS(LD32(0x060FB868), 0x00020000) & 0xFFFF) << 8));
-        ST32(0x060FB860, LD32(0x060FB868) + 0x25E00000);
+        ST32(0x060FB860, LD32(0x060FB868) + VDP2_VRAM);
     }
 }
 
@@ -1917,7 +1917,7 @@ void f0609AFF4(void)
     ST32(0x060FB864, 0);
     ST32(0x060FB868, 0);
     GCALL0(0x0609C010);
-    ST32(0x060FA99C, 0x25F80000);
+    ST32(0x060FA99C, VDP2_TVMD);
     ST16(0x060FA9A0, 0x8000);
     ST16(0x060FA9A2, 0);
     ST16(0x060FA9A6, 0);
@@ -2064,7 +2064,7 @@ void f0609B8C0(unsigned int addr, unsigned short count, gaddr src)
         return;
     addr &= 0x7FFFF;
     ST32(0x060FAA48, addr);
-    dst = addr | 0x25E00000;
+    dst = addr | VDP2_VRAM;
     if (count > 0) {
         i = 0;
         do {
@@ -2091,7 +2091,7 @@ void f0609B960(int a, int b, int c)
 void f0609B9E0(int row, int col, int count, gaddr src)
 {
     if (GCALL0(0x0609C062) != 2) {
-        gaddr dst = 0x25F00000 + (GCALL1(0x060A8D0C, row) << 9) + (col << 1);
+        gaddr dst = VDP2_CRAM + (GCALL1(0x060A8D0C, row) << 9) + (col << 1);
 
         if (count == 1) {
             ST16(dst, LD16(src));
@@ -2100,7 +2100,7 @@ void f0609B9E0(int row, int col, int count, gaddr src)
             GJUMP3(0x0609B734, dst, src, count << 1);
         }
     } else {
-        gaddr dst = 0x25F00000 + (GCALL1(0x060A8D0C, row) << 10) + (col << 2);
+        gaddr dst = VDP2_CRAM + (GCALL1(0x060A8D0C, row) << 10) + (col << 2);
 
         if (count == 1) {
             ST32(dst, LD32(src));
@@ -2377,7 +2377,7 @@ void f0609D96C(unsigned short mode)
     ST16(0x060BB91C, state);
     ST32(0x060BB920, flag);
     ST32(0x060BB924, index);
-    ST16(0x25D00002, state ? LDU16(0x060FBF72) | 3 : LDU16(0x060FBF72));
+    ST16(VDP1_FBCR, state ? LDU16(0x060FBF72) | 3 : LDU16(0x060FBF72));
 }
 
 int f0609DA34(void)
@@ -2414,24 +2414,24 @@ void f0609DA9C(void)
         }
     } else if (state == 3) {
         if (LD32(0x060BB92C)) {
-            ST16(0x25D00000, LDU16(0x060FBF70) | 8);
-            ST16(0x25D00002, LDU16(0x060FBF72) | 3);
-            GCALL3(0x0609B69A, 0x060BB91C, 0x25D00002, 0x060FBF72);
+            ST16(VDP1_TVMR, LDU16(0x060FBF70) | 8);
+            ST16(VDP1_FBCR, LDU16(0x060FBF72) | 3);
+            GCALL3(0x0609B69A, 0x060BB91C, VDP1_FBCR, 0x060FBF72);
             ST32(0x060FBF34, 3);
         }
     } else if (state != 0) {
         ST32(0x060BB928, LD32(0x060BB928) + 1);
         if (LD32(0x060BB920) == 1 && LD32(0x060BB924) - 1 <= LD32(0x060BB928))
-            ST16(0x25D00002, LDU16(0x060FBF72) | 2);
+            ST16(VDP1_FBCR, LDU16(0x060FBF72) | 2);
         if (LD32(0x060BB924) <= LD32(0x060BB928)) {
             if (LD32(0x060BB92C)) {
-                GCALL3(0x0609B69A, 0x060BB91C, 0x25D00002, 0x060FBF72);
+                GCALL3(0x0609B69A, 0x060BB91C, VDP1_FBCR, 0x060FBF72);
                 ST32(0x060FBF34, 1);
             }
             ST32(0x060BB928, 0);
         }
     } else {
-        GCALL3(0x0609B69A, 0x060BB91C, 0x25D00002, 0x060FBF72);
+        GCALL3(0x0609B69A, 0x060BB91C, VDP1_FBCR, 0x060FBF72);
         ST32(0x060BB92C, 0);
     }
 }
@@ -2441,7 +2441,7 @@ void f0609DB80(void)
     int mode;
 
     if (LDU16(0x060FBF74)) {
-        ST16(0x25D00002, LDU16(0x060FBF72) | ((LD16(0x25F80004) & 2) ? 12 : 8));
+        ST16(VDP1_FBCR, LDU16(0x060FBF72) | ((LD16(VDP2_TVSTAT) & 2) ? 12 : 8));
         ST32(0x060FBF34, 0);
         ST32(0x060BB92C, 0);
         return;
@@ -2449,13 +2449,13 @@ void f0609DB80(void)
     mode = LD32(0x060FBF34);
     if (!mode)
         return;
-    if (mode == 2 && LD32(0x060BB938) && !(LDU16(0x25D00010) & 2)) {
+    if (mode == 2 && LD32(0x060BB938) && !(LDU16(VDP1_EDSR) & 2)) {
         ST32(0x060BB930, 1);
     } else {
         if (LD32(0x060FBF34) != 3)
-            ST16(0x25D00002, LDU16(0x060FBF72) | 3);
+            ST16(VDP1_FBCR, LDU16(0x060FBF72) | 3);
         else
-            ST16(0x25D00000, LD16(0x060FBF70));
+            ST16(VDP1_TVMR, LD16(0x060FBF70));
         ST32(0x060FBF34, 0);
         ST32(0x060BB930, 0);
     }
@@ -3056,7 +3056,7 @@ void f0609EF5C(gaddr out_pos, gaddr out_entry, unsigned short kind, unsigned sho
     while (!(entry & 0x80000000)) {
         POLL();
         if (HELPER((entry & 0x70000000) >> 28) == kind && ((entry & 0x0F000000) >> 24) == id) {
-            ST32(out_pos, (entry & 0x000FFFFF) + 0x25A00000);
+            ST32(out_pos, (entry & 0x000FFFFF) + SCSP_RAM);
             ST32(out_entry, LD32(0x060FBF4C) + (i - 1) * 8 + 4);
             break;
         }
@@ -3153,7 +3153,7 @@ void f0609F274(unsigned short mode, unsigned short idx, unsigned short wide)
     if (idx > 7)
         idx = 0;
     ST16(0x060FBF70, mode & 7);
-    ST16(0x25D00000, mode & 7);
+    ST16(VDP1_TVMR, mode & 7);
     a = LD16(0x060BB94C + idx * 4);
     b = LD16(0x060BB94C + idx * 4 + 2);
     ST32(0x060FBF68, a);
@@ -3177,7 +3177,7 @@ void f0609F354(int color, unsigned short x1, unsigned short y1, int x2)
     ST16(0x060BB944, y1);
     ST16(0x060BB946, x2);
     ST16(0x060BB948, y2);
-    ST16(0x25D00006, color);
+    ST16(VDP1_EWDR, color);
     if (mode == 0)
         x1 >>= 3;
     else
@@ -3185,7 +3185,7 @@ void f0609F354(int color, unsigned short x1, unsigned short y1, int x2)
     if (half)
         y1 >>= 1;
     ST16(0x060BB93C, (x1 << 9) + y1);
-    ST16(0x25D00008, LD16(0x060BB93C));
+    ST16(VDP1_EWLR, LD16(0x060BB93C));
     if (mode == 0)
         x2 = (unsigned short)(x2 + 1) >> 3;
     else
@@ -3193,7 +3193,7 @@ void f0609F354(int color, unsigned short x1, unsigned short y1, int x2)
     if (half)
         y2 >>= 1;
     ST16(0x060BB93E, (x2 << 9) + y2);
-    ST16(0x25D0000A, LD16(0x060BB93E));
+    ST16(VDP1_EWRR, LD16(0x060BB93E));
 }
 
 void f0609F448(int flag)
