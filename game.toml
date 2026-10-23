@@ -9964,16 +9964,6 @@ symbol = "swap_f0609E020"
 
 [[replace]]
 module = "KRNL"
-at = 0x0609E27E
-symbol = "swap_f0609E27E"
-
-[[replace]]
-module = "KRNL"
-at = 0x0609E282
-symbol = "swap_f0609E282"
-
-[[replace]]
-module = "KRNL"
 at = 0x0609E28C
 symbol = "swap_f0609E28C"
 

@@ -13393,8 +13393,8 @@ KRNL	0609DD9C	193	6	no	yes	no	no	swapped
 KRNL	0609DF54	83	10	no	yes	no	no	swapped	
 KRNL	0609E020	133	16	no	yes	no	no	swapped	
 KRNL	0609E16E	118	16	no	no	no	no	todo	
-KRNL	0609E27E	115	12	no	yes	no	no	swapped	
-KRNL	0609E282	115	12	no	yes	no	no	swapped	
+KRNL	0609E27E	115	12	no	yes	no	no	todo	
+KRNL	0609E282	115	12	no	yes	no	no	todo	
 KRNL	0609E28C	135	8	no	yes	no	no	swapped	
 KRNL	0609E3FA	22	4	no	yes	no	no	swapped	
 KRNL	0609E434	83	4	no	yes	no	no	swapped	

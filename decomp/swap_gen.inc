@@ -1945,8 +1945,6 @@ void f0609DC4C(unsigned char, int, int, int);
 void f0609DD9C(unsigned char, int, int, int);
 void f0609DF54(int, int, int);
 void f0609E020(int);
-void f0609E27E(int);
-void f0609E282(int);
 void f0609E28C(uint32_t);
 void f0609E3FA(int, int, int, int);
 void f0609E434(signed char);
@@ -4338,8 +4336,6 @@ void swap_f0609DC4C(SH2Context& c) { InSwap in(c); f0609DC4C((unsigned char)c.r[
 void swap_f0609DD9C(SH2Context& c) { InSwap in(c); f0609DD9C((unsigned char)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_f0609DF54(SH2Context& c) { InSwap in(c); f0609DF54((int)c.r[4], (int)c.r[5], (int)c.r[6]); }
 void swap_f0609E020(SH2Context& c) { InSwap in(c); f0609E020((int)c.r[4]); }
-void swap_f0609E27E(SH2Context& c) { InSwap in(c); f0609E27E((int)c.r[4]); }
-void swap_f0609E282(SH2Context& c) { InSwap in(c); f0609E282((int)c.r[4]); }
 void swap_f0609E28C(SH2Context& c) { InSwap in(c); f0609E28C((uint32_t)c.r[4]); }
 void swap_f0609E3FA(SH2Context& c) { InSwap in(c); f0609E3FA((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_f0609E434(SH2Context& c) { InSwap in(c); f0609E434((signed char)c.r[4]); }

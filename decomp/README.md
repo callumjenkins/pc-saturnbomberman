@@ -116,6 +116,15 @@ a 16-bit division and a bit-field store. For those the C names the operation, `S
 game's own routine with r0 to r2 set (`g_routine`), so its loops advance time as the original's do.
 Under SHC they are the plain operator or library call.
 
+## The build
+
+A `[[replace]]` in `game.toml` makes the recompiler emit a stub that calls the function's wrapper in `swap.cpp`
+instead of translating its instructions, so a swapped function's generated body is not in the build at all.
+The build is the C in `src/` for the functions `status.tsv` marks `swapped`, and the generated code for the
+rest. A call from the C to a function that is not swapped runs the generated one (`GCALLn`), and a function
+is not swapped if the C jumps to an address inside another function, since the recompile has no entry there.
+`tests/test_targets.py` checks every call and jump target of the C is a function the recompile has.
+
 ## Library names
 
 `sbl.tsv` lists the functions in KRNL that match one of Sega's Saturn Base Library (SBL 6.01) compiled with

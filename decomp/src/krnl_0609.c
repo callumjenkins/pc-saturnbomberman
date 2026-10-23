@@ -2588,18 +2588,6 @@ void f0609E020(int sel)
     SET_FIELD(1, 0x060FB8A8, 0x8FFF, field);
 }
 
-void f0609E27E(int sel)
-{
-    POLL();
-    GJUMP2(0x0609E178, sel, 1);
-}
-
-void f0609E282(int sel)
-{
-    POLL();
-    GJUMP2(0x0609E178, sel, 0);
-}
-
 void f0609E28C(gaddr sound)
 {
     gaddr state;

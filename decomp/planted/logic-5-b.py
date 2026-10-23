@@ -151,8 +151,6 @@ case("f0609CBF8", [pick(0, 1), span(-300, 300), span(-300, 300), span(-300, 300)
 
 case("f0609DF54", [pick(0, 0, 5, -1), pick(0, 0, 1, 0x10000, -1), pick(0, 0, 3, -1)], False, SND)
 case("f0609E020", [pick(0, 1, 2, 4, 8, 16, 32, 128, 0x100, 3, 64)], False, [])
-case("f0609E27E", [pick(0, 1, 2, 4, 8, 16, 32, 128, 0x100, 3, 64)], False, [])
-case("f0609E282", [pick(0, 1, 2, 4, 8, 16, 32, 128, 0x100, 3, 64)], False, [])
 LISTP = BUF + 0x7C00
 SOUNDLIST = ([plant(0x060FBF4C, 4, [LISTP], 1.0), plant(0x060FBF64, 4, [BUF + 0x7D00], 1.0)]
              + [plant(LISTP + 8 * k, 4, [0x00000010, 0x11000020, 0x22000030, 0x33000040, 0x01000050, 0x10000060, 0x80000000, 0x12000070], 1.0) for k in range(10)]
