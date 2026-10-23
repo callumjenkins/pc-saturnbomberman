@@ -5,6 +5,17 @@ void f06070024(void)
     GJUMP0(0x0607005C);
 }
 
+int f06070E2E(void)
+{
+    GCALL1(0x0600996A, 0x79);
+    ST16(LD32(CURRENT) + 52, 0);
+    GCALL0(0x0606C7CE);
+    GCALL0(0x0606B6BC);
+    ST32(0x060E2154 + (short)(LD16(0x060C062C) * 20), 0x06070F1C);
+    GCALL1(0x060144F4, 0x06070E70);
+    return GJUMP1(0x06014516, 0x0606E7F4);
+}
+
 void f0607123A(int n)
 {
     GJUMP1(0x0601628E, n);
@@ -100,6 +111,29 @@ void f06073432(void)
     ST16(cur + 70, 4);
     cur = LD32(CURRENT);
     ST16(cur + 68, LD16(cur + 70) + 0x100);
+}
+
+void f060738A2(void)
+{
+    gaddr cur;
+    gaddr mover;
+    int a;
+    int w;
+    int v;
+
+    GCALL2(0x0606AAC8, LD32(MOVER_PTR), 3);
+    a = GCALL1(0x0606CE8C, 0xFF & (LDU16(LD32(CURRENT) + 68) << 2));
+    cur = LD32(CURRENT);
+    w = LD16(cur + 68);
+    mover = LD32(MOVER_PTR);
+    ST16(mover + 70, (short)((unsigned int)((0x180 - (unsigned short)w / 2) * a) >> 16) + w);
+    v = LDU16(mover + 70);
+    if (v < 0x100) {
+        v = 0x100;
+    }
+    ST16(mover + 68, DIVS(0x10000, v));
+    cur = LD32(CURRENT);
+    ST16(cur + 68, LD16(cur + 68) + LD16(cur + 70));
 }
 
 void f06073968(void)
@@ -955,6 +989,23 @@ void f0607E28C(void)
     GJUMP1(0x0609D730, 28);
 }
 
+void f0607E50C(void)
+{
+    gaddr m;
+
+    GCALL2(0x0606AAC8, LD32(MOVER_PTR), 0);
+    m = LD32(MOVER_PTR);
+    ST16(m + 70, 256);
+    ST16(m + 68, 256);
+    ST32(0x060E2160 + (short)(LD16(0x060C062C) * 20), 0x0607ECDE);
+    GCALL0(0x0606C7AA);
+    ST16(LD32(MOVER_PTR) + 48, 1);
+    GCALL0(0x0606B6BC);
+    GCALL1(0x060144F4, 0x0607E570);
+    ST16(LD32(MOVER_PTR) + 38, -8);
+    ST16(LD32(CURRENT) + 60, 480);
+}
+
 int f0607EA10(void)
 {
     if (!GCALL0(0x0606BF22))
@@ -968,6 +1019,16 @@ int f0607EBB4(void)
     GCALL1(0x060144F4, 0x0607EBD4);
     GCALL2(0x06074AFA, LDU16(LD32(CURRENT) + 24), 64);
     return GJUMP1(0x06014516, 0x06074CB4);
+}
+
+void f0607F3BE(void)
+{
+    GCALL2(0x0606AAC8, LD32(MOVER_PTR), 7);
+    ST16(LD32(CURRENT) + 68, 0);
+    GCALL0(0x0607F3FC);
+    ST32(0x060E2154 + (short)(LD16(0x060C062C) * 20), 0x0607F83C);
+    GCALL1(0x060144F4, 0x0607F648);
+    GJUMP1(0x06014516, 0x06074CB4);
 }
 
 void f0607F3FC(void)

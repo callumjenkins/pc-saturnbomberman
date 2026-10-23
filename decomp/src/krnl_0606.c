@@ -845,6 +845,36 @@ void f06065A12(void)
     } while (AGAIN(i < 4));
 }
 
+void f06065AF2(void)
+{
+    FRAME(sp, 40);
+    gaddr ids = sp - 40;
+    gaddr task;
+    gaddr obj;
+    int i = 0;
+
+    GCALL2(0x06022F1C, 1, 0x06065C18);
+    TSET(h6, 0);
+    GCALL2(0x0605EAF6, ids, 2);
+    do {
+        obj = OBJ(LD16(ids + i * 2));
+        ST16(obj + 44, 1);
+        ST16(obj + 46, 0x380);
+        GCALL1(0x0606AB24, obj);
+        GCALL3(0x0600D0E4, LD16(ids + i * 2), i == 0 ? 2 : 20, 4);
+        GCALL2(0x0606AAC8, obj, 7);
+        ST16(obj + 4, 10);
+        GCALL2(0x060695B0, obj, 1);
+        GCALL2(0x0606950C, obj, LDU8(0x060C1910));
+    } while (AGAIN(++i < 2));
+    TSET(h16, (unsigned int)LD32(0x060FAA10 + 16) >> 16);
+    TSET(h18, (unsigned int)LD32(0x060FAA10 + 20) >> 16);
+    task = TASK;
+    ST16(task + 12, GCALL0(0x0600A0E0));
+    task = TASK;
+    ST16(task + 14, GCALL0(0x0600A0E0));
+}
+
 void f06065EF2(void)
 {
     gaddr obj = LD32(TASK_OBJ);
@@ -1122,6 +1152,13 @@ void f06068B32(gaddr obj)
     ST16(obj + 10, LD16(p));
     ST32(obj + 56, p + 4);
     ST16(obj + 60, LD16(p + 2) << 8);
+}
+
+int f06068B4E(gaddr p)
+{
+    int d = LD32(p + 56) - LD32(p + 52);
+
+    return (unsigned int)(d / 2) >> 1;
 }
 
 int f06068B62(gaddr obj)
@@ -2109,6 +2146,18 @@ int f0606B648(void)
     return (LDU16(0x060EC8B0 + cell * 2) & LDU16(cur + 18)) == 0;
 }
 
+void f0606B6BC(int a, int b, int c, int d)
+{
+    POLL();
+    GJUMP4(LD32(0x060B90EC + LDU16(LD32(CURRENT) + 46) * 8), a, b, c, d);
+}
+
+void f0606B6D2(void)
+{
+    POLL();
+    GJUMP0(LD32(0x060B90E8 + LDU16(LD32(CURRENT) + 46) * 8));
+}
+
 void f0606B8CA(int n);
 
 void f0606B8BE(void)
@@ -2957,11 +3006,47 @@ void f0606D208(void)
         ST16(p + 62, LD16(p + 62) - 1);
 }
 
+/* The jump target gets in r4 the halfword stored at +20, which 0606C894 leaves there. */
+void f0606D23C(void)
+{
+    gaddr cur;
+    int angle;
+
+    ST32(0x060E2150, 0x060E2154 + (short)(LD16(0x060C062C) * 20));
+    ST8(LD32(CURRENT) + 4, LDU8(LD32(CURRENT) + 4) | 128);
+    ST16(LD32(MOVER_PTR) + 62, 0x100);
+    ST16(LD32(MOVER_PTR) + 42, LD16(LD32(MOVER_PTR) + 42) & 0xFFDF);
+    GCALL0(0x0600CAA4);
+    cur = LD32(CURRENT);
+    angle = (unsigned short)GCALL0(0x0600CA84);
+    ST16(cur + 20, angle);
+    GCALL0(0x0606C894);
+    GJUMP1(LD32(LD32(0x060E2150) + 12), angle);
+}
+
 int f0606D37A(void)
 {
     if (LDU16(LD32(MOVER_PTR) + 60) >= 0xFF00)
         GCALL0(0x060145A8);
     return 1;
+}
+
+int f0606D410(void)
+{
+    GCALL0(0x0600CAA4);
+    if (!(LDU16(LD32(CURRENT) + 42) & 128)) {
+        if (LD16(0x060C1E44) != 0 && LDU16(LD32(CURRENT) + 20) < 0x1000)
+            GCALL1(0x060149E0, LDU16(0x060C062C));
+        GCALL0(0x060694B8);
+        if (LDU16(LD32(CURRENT) + 42) & 16) {
+            gaddr m = LD32(MOVER_PTR);
+            int v = LD16(m + 4) - 64;
+
+            ST16(m + 4, v >= 20 ? v : 20);
+        }
+    }
+    GCALL0(0x0606C850);
+    return GJUMP0(LD32(LD32(0x060E2150) + 4));
 }
 
 int f0606D648(int unused, int fallback)
@@ -3082,6 +3167,22 @@ int f0606D95C(void)
         return 0;
     GCALL0(0x0606D986);
     return 1;
+}
+
+/* The jump passes r4 and r5 as 0606D992 leaves them. */
+void f0606D97A(void)
+{
+    GCALL0(0x0606D992);
+    GJUMP2(0x0606B6BC, CURRENT, 0xFFF0);
+}
+
+/* The jump into 0606B6D2's code and that code's own table jump each advance time. */
+void f0606D986(void)
+{
+    GCALL0(0x0606D992);
+    POLL();
+    POLL();
+    GJUMP0(LD32(0x060B90E8 + LDU16(LD32(CURRENT) + 46) * 8));
 }
 
 void f0606D992(void)
@@ -3432,6 +3533,19 @@ int f0606F770(int unused, int b, int c, int d)
         ST16(LD32(CURRENT) + 10, angle);
     }
     return 0;
+}
+
+int f0606FC60(void)
+{
+    if (LD16(LD32(CURRENT) + 62) != 0) {
+        return 0;
+    }
+    GCALL0(0x0606C7EE);
+    ST16(LD32(CURRENT) + 48, 23);
+    ST16(LD32(MOVER_PTR) + 48, 12);
+    GCALL0(0x0606B6BC);
+    ST32(0x060E215C + (short)(LD16(0x060C062C) * 20), 0x0606FCAE);
+    return 1;
 }
 
 int f0606FE7C(int dir)

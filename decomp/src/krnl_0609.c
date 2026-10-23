@@ -552,6 +552,45 @@ int f0609720A(gaddr p)
     return LD32(p + 88);
 }
 
+int f060972D8(int n)
+{
+    int guess;
+    int prev;
+
+    if (n > 0) {
+        guess = n > 0x10000 ? n : 0x10000;
+        do {
+            prev = guess;
+            guess = (GCALL2(0x060980C8, n, guess) + guess) / 2;
+        } while (AGAIN(guess < prev));
+        return prev;
+    }
+    return n != 0 ? 0xFFFF0000 : 0;
+}
+
+int f0609732A(int a, int b)
+{
+    int x = ABS(a);
+    int y = ABS(b);
+    int big = x > y ? x : y;
+    int scale, squares;
+
+    if (x > 0x10000 || y > 0x10000) {
+        scale = GCALL1(0x060980E4, big);
+        x = DIVS(x, scale);
+        y = DIVS(y, scale);
+        squares = FMUL(x, x);
+        squares += FMUL(y, y);
+        return scale * GCALL1(0x060972D8, squares);
+    }
+    scale = GCALL2(0x060980C8, 0x10000, big);
+    x = FMUL(x, scale);
+    y = FMUL(y, scale);
+    squares = FMUL(x, x);
+    squares += FMUL(y, y);
+    return GJUMP2(0x060980C8, GCALL1(0x060972D8, squares), scale);
+}
+
 void f0609741C(gaddr xs, gaddr ys, gaddr y2, int n)
 {
     gaddr h = LD32(0x060FA8C8);
@@ -1305,6 +1344,173 @@ void f0609A464(gaddr p)
     do {
         ST32(p + 12 + i * 4, 0);
     } while (AGAIN(++i < 16));
+}
+
+#define SETF(p, keep, bits) ST16((p), (LDU16(p) & (keep)) | (bits))
+#define PACK_SIZE(p) ST16((p), (LDU16(d + 10) & 0x3FFF) | ((LDU8(d + 2) << 15) & 0x8000) | top)
+
+static void fill_pairs(gaddr d, gaddr dst, int n, int divisor)
+{
+    int i = 0;
+    int low;
+    int high;
+
+    if ((unsigned short)n == 0) {
+        return;
+    }
+    do {
+        low = DIVU(LD32(d + 12 + (unsigned short)i * 8) + 0xDA200000, divisor) & 63;
+        high = DIVU(LD32(d + 16 + (unsigned short)i * 8) + 0xDA200000, divisor) & 63;
+        ST16(dst + (unsigned short)i * 2, low | ((high << 8) & 0x3F00));
+    } while (AGAIN((unsigned short)++i < (unsigned short)n));
+}
+
+/* A mode with no case, or mode 2 when the checks fail, runs the tail with dest, dest1, shift and n as they were on entry. */
+void f0609A4AC(int mode, gaddr d)
+{
+    int top = (LDU8(d + 8) << 14) & 0x4000;
+    gaddr dest = mode;
+    gaddr dest1 = 12;
+    gaddr dest2 = 0;
+    int shift = top;
+    int n = 0x060FA9A0;
+    int w;
+    int out;
+    int nibble;
+
+    switch ((unsigned short)mode) {
+    case 1:
+        POLL();
+        SETF(0x060FA9C0, 0xFFEF, (LDU8(d) << 4) & 16);
+        SETF(0x060FA9CA, 0xFEFF, (LDU8(d + 1) << 8) & 0x100);
+        PACK_SIZE(0x060FA9D8);
+        SETF(0x060FA9CA, 0xFBFF, (LDU8(d + 4) << 10) & 0x400);
+        SETF(0x060FA9CA, 0x8FFF, (LDU8(d + 5) << 12) & 0x7000);
+        SETF(0x060FA9CA, 0xFDFF, (LDU8(d + 6) << 9) & 0x200);
+        n = 8;
+        if (LDU8(0x060FB870) == 1 && LDU8(0x060FB871) == 1) {
+            SETF(0x060FA9DE, 0xFFF0, 0);
+            dest = 0x060FA9DE;
+            shift = 0;
+            dest1 = 0x060FA9F0;
+            dest2 = 0x060FAA00;
+            SETF(0x060FA9DA, 0xFCFF, ((LDU8(d + 3) << 8) & 0x300) | ((LDU8(d + 3) << 12) & 0x3000));
+            SETF(0x060FA9DA, 0x33FF, ((LDU8(d + 7) << 10) & 0xC00) | ((LDU8(d + 7) << 14) & 0xC000));
+        } else if (LDU8(0x060FB870) == 1) {
+            SETF(0x060FA9DE, 0xFFF0, 0);
+            dest = 0x060FA9DE;
+            shift = 0;
+            dest1 = 0x060FA9F0;
+            SETF(0x060FA9DA, 0xFCFF, (LDU8(d + 3) << 8) & 0x300);
+            SETF(0x060FA9DA, 0xF3FF, (LDU8(d + 7) << 10) & 0xC00);
+        } else if (LDU8(0x060FB871) == 1) {
+            SETF(0x060FA9DE, 0xFF0F, 0);
+            dest = 0x060FA9DE;
+            shift = 4;
+            dest1 = 0x060FAA00;
+            SETF(0x060FA9DA, 0xCFFF, (LDU8(d + 3) << 12) & 0x3000);
+            SETF(0x060FA9DA, 0x3FFF, (LDU8(d + 7) << 14) & 0xC000);
+        }
+        break;
+    case 2:
+        POLL();
+        if (LDU8(0x060FB870) == 1 && LDU8(0x060FB871) == 2) {
+            SETF(0x060FA9C0, 0xFFDF, 0);
+            if (LDU8(d) != 0) {
+                ST16(0x060FA9C0, LDU16(0x060FA9C0) | 32);
+            }
+            SETF(0x060FA9C8, 0xFFFE, LDU8(d + 1) & 1);
+            PACK_SIZE(0x060FA9D0);
+            SETF(0x060FA9DA, 0xCFFF, (LDU8(d + 3) << 12) & 0x3000);
+            SETF(0x060FA9DA, 0x3FFF, (LDU8(d + 7) << 14) & 0xC000);
+            SETF(0x060FA9C8, 0xFF8F, (LDU8(d + 5) << 4) & 112);
+            SETF(0x060FA9C8, 0xFFFD, 0);
+            n = 8;
+            SETF(0x060FA9DE, 0xFF0F, 0);
+            dest = 0x060FA9DE;
+            shift = 4;
+            dest1 = 0x060FAA00;
+        }
+        break;
+    case 4:
+        POLL();
+        SETF(0x060FA9C0, 0xFFFE, LDU8(d) & 1);
+        SETF(0x060FA9C8, 0xFFFE, LDU8(d + 1) & 1);
+        PACK_SIZE(0x060FA9D0);
+        SETF(0x060FA9DA, 0xFFFC, LDU8(d + 3) & 3);
+        SETF(0x060FA9C8, 0xFFF3, (LDU8(d + 4) << 2) & 12);
+        SETF(0x060FA9C8, 0xFF8F, (LDU8(d + 5) << 4) & 112);
+        SETF(0x060FA9C8, 0xFFFD, (LDU8(d + 6) << 1) & 2);
+        SETF(0x060FA9DC, 0xFFF0, 0);
+        dest = 0x060FA9DC;
+        shift = 0;
+        dest1 = 0x060FA9E0;
+        n = 2;
+        break;
+    case 8:
+        POLL();
+        SETF(0x060FA9C0, 0xFFFD, (LDU8(d) << 1) & 2);
+        SETF(0x060FA9C8, 0xFEFF, (LDU8(d + 1) << 8) & 0x100);
+        PACK_SIZE(0x060FA9D2);
+        SETF(0x060FA9DA, 0xFFF3, (LDU8(d + 3) << 2) & 12);
+        SETF(0x060FA9C8, 0xF3FF, (LDU8(d + 4) << 10) & 0xC00);
+        SETF(0x060FA9C8, 0xCFFF, (LDU8(d + 5) << 12) & 0x3000);
+        SETF(0x060FA9C8, 0xFDFF, (LDU8(d + 6) << 9) & 0x200);
+        SETF(0x060FA9DC, 0xFF0F, 0);
+        dest = 0x060FA9DC;
+        shift = 4;
+        dest1 = 0x060FA9E4;
+        n = 2;
+        break;
+    case 16:
+        POLL();
+        SETF(0x060FA9C0, 0xFFFB, (LDU8(d) << 2) & 4);
+        SETF(0x060FA9CA, 0xFFFE, LDU8(d + 1) & 1);
+        PACK_SIZE(0x060FA9D4);
+        SETF(0x060FA9DA, 0xFFCF, (LDU8(d + 3) << 4) & 48);
+        SETF(0x060FA9CA, 0xFFFD, (LDU8(d + 5) << 1) & 2);
+        SETF(0x060FA9DC, 0xF0FF, 0);
+        dest = 0x060FA9DC;
+        shift = 8;
+        dest1 = 0x060FA9E8;
+        n = 2;
+        break;
+    case 32:
+        POLL();
+        SETF(0x060FA9C0, 0xFFF7, (LDU8(d) << 3) & 8);
+        SETF(0x060FA9CA, 0xFFEF, (LDU8(d + 1) << 4) & 16);
+        PACK_SIZE(0x060FA9D6);
+        SETF(0x060FA9DA, 0xFF3F, (LDU8(d + 3) << 6) & 192);
+        SETF(0x060FA9CA, 0xFFDF, (LDU8(d + 5) << 5) & 32);
+        SETF(0x060FA9DC, 0x0FFF, 0);
+        dest = 0x060FA9DC;
+        shift = 12;
+        dest1 = 0x060FA9EC;
+        n = 2;
+        break;
+    }
+    if (LDU8(d + 6) == 1) {
+        w = (unsigned short)(((unsigned int)(LD32(d + 12) + 0xDA200000) >> 17) & 7);
+        out = SHL(w, (unsigned short)shift);
+    } else {
+        if (LDU8(d + 2) == 1) {
+            w = LDU8(d + 1) == 0 ? 0x2000 : 0x800;
+        } else {
+            w = LDU8(d + 1) == 0 ? 0x4000 : 0x1000;
+        }
+        out = SHL((unsigned short)((DIVU(LD32(d + 12) + 0xDA200000, w) & 0x1C0) >> 6), (unsigned short)shift);
+    }
+    ST16(dest, LDU16(dest) | out);
+    fill_pairs(d, dest1, n, w);
+    if (dest2 != 0) {
+        nibble = LDU16(dest) & 15;
+        ST16(dest, nibble);
+        ST16(dest, nibble | (nibble << 4));
+        fill_pairs(d, dest2, n, w);
+    }
+    if (LDU16(0x060BB8FC) == 0) {
+        ST16(0x060BB8FC, 1);
+    }
 }
 
 void f0609AFCC(gaddr src)

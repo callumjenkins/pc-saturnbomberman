@@ -1576,6 +1576,25 @@ void f06034FF6(void)
     SP_STATE(2);
 }
 
+void f0603500C(void)
+{
+    gaddr obj = OBJ(SP(obj));
+    int x = LD16(obj + 16) + (SP(b6) >> 1);
+    int y;
+    int b;
+
+    ST16(obj + 16, x);
+    ST16(obj + 24, x);
+    ST16(obj + 20, x);
+    y = LD16(obj + 18) + (SP(b7) >> 1);
+    ST16(obj + 18, y);
+    ST16(obj + 26, y);
+    ST16(obj + 22, y);
+    b = SP(b1);
+    SP_SET(count, 3 * ((b >> 4) - (b & 15)));
+    SP_STATE(2);
+}
+
 void f060350AC(void)
 {
     if (!SP(count))
@@ -1640,6 +1659,36 @@ void f060351A4(void)
     ST16(obj + 24, SP(b6) + x - 1);
     ST16(obj + 22, y);
     ST16(obj + 26, SP(b7) + y - 1);
+}
+
+int f060352C4(void)
+{
+    int hi = SP(b1) >> 4;
+    int lo = SP(b1) & 15;
+    gaddr o = OBJ(SP(obj));
+    int count;
+    int x;
+    int dx;
+    int dy;
+
+    if (SP(count) > 10) {
+        int state = (SP(state) & 240) | 4;
+
+        SP_SET(count, 30);
+        SP_SET(state, state);
+        return state;
+    }
+    x = ((hi - lo * 2) * SP(w8)) >> 1;
+    x = (short)(LD16(o + 16) + DIVS(x * SP(count), 10));
+    dx = DIVS(SP(b6) * SP(count), 10);
+    dy = DIVS(SP(b7) * SP(count), 10);
+    ST16(o + 20, x - dx / 2);
+    ST16(o + 24, LD16(o + 20) + dx - 1);
+    ST16(o + 22, LD16(o + 18) - dy / 2);
+    ST16(o + 26, LD16(o + 22) + dy - 1);
+    count = SP(count) + 1;
+    SP_SET(count, count);
+    return count;
 }
 
 void f060353A2(void)
@@ -3112,6 +3161,22 @@ void f06039DD8(void)
     ST8(0x060C1725, 0);
 }
 
+void f06039DE0(int second, short mid, short rows, short a)
+{
+    FRAME(sp, 0);
+    short b = LD16(sp + 2);
+    int flag = LDU8(0x060C1725);
+    int lo = second ? 0x4F400 : 0x4F000;
+    int ofs = (flag & (second ? 2 : 1)) ? lo + 0x800 : lo;
+
+    ST8(0x060C1725, flag ^ (second ? 2 : 1));
+    GCALL7(0x06039C28, a / 2, b / 2, a / 2, b / 2, mid, rows, 0x25E00000 + ofs);
+    ST32(0x060FAA60 + (second ? 28 : 24), ((ofs >> 1) & 0x7FFFE) | 0x80000000);
+    ST16(0x060FAA60 + (second ? 10 : 2), 0);
+    ST16(0x060FAA60 + (second ? 14 : 6), 223);
+    ST16(0x060BB8FC, 1);
+}
+
 int f06039EEE(void)
 {
     GCALL0(0x06039DD8);
@@ -3743,6 +3808,58 @@ void f0603C7F2(void)
         GCALL1(0x0600996A, 184);
 }
 
+int f0603C83A(void)
+{
+    int step;
+    int dx;
+    int dy = 0;
+    int pattern;
+    int width;
+    int height;
+    int n;
+
+    if (TGET(h20) != 0) {
+        step = TGET(h20);
+    } else {
+        step = TGET(h18) != 0 ? 4 - DIVS((TGET(h14) + 1) * 4, TGET(h18)) : 0;
+        if (step == 0) {
+            TSET(fn, 0x0603DDA6);
+        }
+    }
+    pattern = TGET(h14) & 3;
+    dx = pattern == 2 ? step : 0;
+    if (pattern == 0) {
+        dx = -step;
+    }
+    pattern = TGET(h14) & 7;
+    if (pattern == 0 && step != 0) {
+        GCALL0(0x0603C7EE);
+    }
+    if (pattern == 4 && step / 2 != 0) {
+        GCALL0(0x0603C7EE);
+    }
+    if (pattern == 6) {
+        dy = step / 2;
+    }
+    if (pattern == 2) {
+        dy = -step / 2;
+    }
+    width = TGET(h10);
+    height = TGET(h12);
+    if (dy + height < 0 || dy + height > step) {
+        dy = -height;
+    }
+    if (dx + width < 0 || dx + width > step) {
+        dx = -width;
+    }
+    TSET(h10, width + dx);
+    TSET(h12, height + dy);
+    GCALL2(0x0600D5EA, dx, dy);
+    n = (short)TGET(h14) + 1;
+    TSET(h14, n);
+    return n;
+}
+
 void f0603C990(short x)
 {
     GCALL0(0x0603C7F2);
@@ -3784,6 +3901,33 @@ int f0603C9F6(void)
     ST16(0x060C173E, next);
     next &= 0xFFFF;
     return (next & 255) ^ (next >> 8);
+}
+
+void f0603CBEC(void)
+{
+    FRAME(sp, 40);
+    gaddr ids = sp - 40;
+    int i = 0;
+    gaddr obj;
+
+    GCALL2(0x06022F1C, 30, 0x0603CCB6);
+    TSET(h6, 0);
+    GCALL2(0x0605EAF6, ids, 2);
+    do {
+        obj = OBJ(LD16(ids + i * 2));
+        ST16(obj + 44, 0);
+        ST16(obj + 48, i ? 489 : 484);
+        ST16(obj + 4, 400 + i);
+        ST16(obj + 16, 48);
+        ST16(obj + 18, 120);
+        ST16(obj + 46, LD16(0x060C1738));
+        GCALL2(0x0606950C, obj, 1);
+        i++;
+    } while (AGAIN(i < 2));
+    TSET(h14, 0);
+    TSET(h16, 0);
+    TSET(h18, 0);
+    TSET(h12, 3);
 }
 
 void f0603CC9A(unsigned short v)

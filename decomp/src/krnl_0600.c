@@ -2781,6 +2781,16 @@ void f0600E3D6(gaddr dst, int n)
     ST16(dst + 44, 1);
 }
 
+void f0600E4A4(short first, short second, short x, short y)
+{
+    ST16(OBJIDX, first);
+    GCALL1(0x0600A2B0, x);
+    GCALL1(0x0600A32A, y);
+    ST16(OBJIDX, second);
+    GCALL1(0x0600A2B0, x);
+    GJUMP1(0x0600A32A, y);
+}
+
 void f0600E5CC(unsigned short a, unsigned short b)
 {
     if (a)

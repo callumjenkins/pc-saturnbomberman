@@ -701,6 +701,16 @@ int f060A39F2(gaddr obj, int b, int c, int d)
     return GJUMP4(0x060AB12E, obj, b, c, d);
 }
 
+void f060A3AAA(gaddr obj, int b, int c, int d)
+{
+    if (!obj) {
+        GJUMP4(0x060AAE08, 0x504, b, c, d);
+        return;
+    }
+    POLL();
+    GJUMP4(LD32(LD32(obj) + 364), obj, b, c, d);
+}
+
 void f060A3AE0(int a, int b, int c, int d)
 {
     if (a)
@@ -1054,6 +1064,16 @@ int f060A46C0(gaddr obj, int b, int c, int d)
     return GJUMP4(0x060ADAAA, obj, b, c, d);
 }
 
+void f060A47E2(gaddr obj)
+{
+    if (obj == 0) {
+        GJUMP1(0x060AD62C, 0x504);
+        return;
+    }
+    POLL();
+    GJUMP1(LD32(LD32(obj) + 0x1BC), obj);
+}
+
 void f060A47FE(gaddr ctx)
 {
     if (!ctx) {
@@ -1219,6 +1239,16 @@ int f060A4B24(gaddr obj, int b, int c, int d)
 
 void f060A4BDE(void)
 {
+}
+
+void f060A4BE2(gaddr obj, int b, int c, int d)
+{
+    if (!obj) {
+        GJUMP4(0x060AD62C, 0x504, b, c, d);
+        return;
+    }
+    POLL();
+    GJUMP4(LD32(LD32(obj) + 460), obj, b, c, d);
 }
 
 void f060A4C08(void)
@@ -1403,6 +1433,30 @@ void f060A5E26(gaddr dst, gaddr src)
     ST8(dst + 11, LD8(src + 9));
     ST8(dst + 8, LD8(src + 10));
     ST8(dst + 9, LD8(src + 11));
+}
+
+int f060A5E62(gaddr obj, int ignored1, int ignored2, int arg)
+{
+    POLL();
+    return GJUMP4(LD32(0x060B1220 + LD32(obj + 40) * 16), obj + 12, 0xFFFF, 0, arg);
+}
+
+void f060A5E7C(gaddr obj, int b, int c, int d)
+{
+    POLL();
+    GJUMP4(LD32(0x060B1224 + LD32(obj + 40) * 16), obj + 12, b, c, d);
+}
+
+int f060A5E9A(int a, gaddr obj, int c, int d)
+{
+    POLL();
+    return GJUMP4(LD32(0x060B1228 + LD32(obj + 28) * 16), a, obj + 28, c, d);
+}
+
+void f060A5EB6(gaddr obj, int b, int c, int d)
+{
+    POLL();
+    GJUMP4(LD32(0x060B122C + LD32(obj + 40) * 16), obj + 12, b, c, d);
 }
 
 /* Sets a 60-byte record up: zero except a 1 at 20, then the two setters, which the game keeps as
@@ -1679,6 +1733,39 @@ void f060A64F6(gaddr dst, int dst_step, gaddr src, int src_step)
 int f060A6534(void)
 {
     return 0;
+}
+
+int f060A6554(gaddr p, int ignored, int c, int d)
+{
+    int kind = LD32(p + 56);
+    gaddr a = LD32(p + 16);
+    int word = LD32(a);
+    unsigned int v;
+
+    if (kind == 0) {
+        v = word & 0x0FFFFFFF;
+        a = v;
+        if ((v >= 0x200000 && v < 0x300000) || (v >= 0x2000000 && v < 0x5900000)) {
+            kind = 3;
+        }
+    } else if (kind == 4) {
+        return 1;
+    }
+    POLL();
+    return GJUMP4(LD32(0x060B1250 + (signed char)(kind * 12)), a, word, c, d);
+}
+
+int f060A6668(gaddr obj)
+{
+    int state = LD32(obj + 56);
+    unsigned int tag = LD32(LD32(obj + 16)) & 0x0FFFFFFF;
+
+    if (state == 4)
+        return LD32(LD32(obj + 16) + 12) < 0;
+    if (state == 0 && ((tag >= 0x200000 && tag < 0x300000) || (tag >= 0x2000000 && tag < 0x5900000)))
+        state = 3;
+    POLL();
+    return GJUMP0(LD32(0x060B1258 + (signed char)(state * 12)));
 }
 
 void f060A66C8(int count, gaddr dst, gaddr src)

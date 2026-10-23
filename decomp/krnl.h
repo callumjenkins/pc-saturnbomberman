@@ -322,4 +322,6 @@ static void ease(gaddr p, int d)
 /* Four bytes of the stream, most significant first. */
 #define BITS32(p) ((LDU8(p) << 24) | (LDU8((p) + 1) << 16) | (LDU8((p) + 2) << 8) | LDU8((p) + 3))
 
+#define VELOCITY 0x060C1762
+
 #endif

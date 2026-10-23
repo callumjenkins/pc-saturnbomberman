@@ -411,6 +411,16 @@ void f060848D4(void)
     GJUMP1(0x0609D730, 28);
 }
 
+void f06084ACC(void)
+{
+    ST16(LD32(CURRENT) + 40, 15);
+    ST16(0x060C2E7E, 0);
+    ST32(0x060E215C + (short)(LD16(0x060C062C) * 20), 0x06084FC8);
+    GCALL1(0x0606D8E6, LDU16(LD32(CURRENT) + 40));
+    ST16(LD32(MOVER_PTR) + 48, 11);
+    GJUMP0(0x0606B6BC);
+}
+
 int f06084BD0(void)
 {
     int dir = GCALL0(0x0606C5EA);
@@ -430,6 +440,18 @@ int f06084D48(void)
 int f06084E7E(void)
 {
     return (LD8(LD32(CURRENT) + 7) & 255) >= 2 && GCALL0(0x0606BF8C) != 0;
+}
+
+int f06085184(void)
+{
+    int dist = LDU16(LD32(CURRENT) + 54) - 12;
+    int d = 0x90 - dist * dist;
+    gaddr mover = LD32(MOVER_PTR);
+
+    ST16(mover + 38, -DIVS(d, 8));
+    ST16(mover + 70, d / 2 + 0x100);
+    GCALL1(0x0606CB86, mover);
+    return 0;
 }
 
 void f060854F4(void)
@@ -915,6 +937,22 @@ int f0608A8B2(void)
     if (LDU16(0x060C1E3C) <= 2)
         GCALL1(0x06009A3A, 0x135);
     return GJUMP1(0x060144F4, 0x0606D2C8);
+}
+
+/* Its callees recurse deeply, so the frame keeps their stack where the game's push of pr puts it. */
+int f0608A8E4(void)
+{
+    FRAME(sp, 4);
+    int flags = LDU16(0x060EC8B0 + LDU16(LD32(CURRENT) + 20) * 2);
+
+    if ((flags & 0x88) == 0x88 || (flags & 7) == 7)
+        return 0;
+    ST16(0x060C2EFC, 0);
+    ST32(0x060C2F00, 0x060F08F0);
+    GCALL0(0x0608A944);
+    ST16(0x060C2EFC, 1);
+    ST16(0x060C2EFE, LD16(LD32(CURRENT) + 20));
+    return GCALL2(0x0608AA18, LDU16(LD32(CURRENT) + 20), 0) == 0;
 }
 
 void f0608A944(void)

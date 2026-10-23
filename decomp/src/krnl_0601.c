@@ -758,6 +758,19 @@ void f06011BF0(REF(Brain) brain)
     }
 }
 
+void f06011C16(gaddr task)
+{
+    if (LDU8(task + 29) == 0 || LD16(LD32(CURRENT) + 20) != LD16(task + 18)) {
+        int next = LD32(task + 4);
+
+        ST32(task, next);
+        POLL();
+        GJUMP1(next, task);
+        return;
+    }
+    ST8(task + 29, LDU8(task + 29) - 1);
+}
+
 /* Puts the brain back on the course it was last given and starts it on its next step. */
 static void retarget(REF(Brain) brain)
 {
@@ -890,6 +903,33 @@ void f06011F26(REF(Brain) brain)
     BR_SET(brain, w12, BR(brain, w14));
     BR_SET(brain, w18, LD16(LD32(CURRENT) + 20));
     BR_SET(brain, fn, 0x06011F38);
+}
+
+int f06011F38(gaddr task)
+{
+    int n = LD16(task + 18);
+    gaddr next;
+
+    if (n) {
+        ST32(task, 0x06011F44);
+        return n;
+    }
+    GCALL1(0x06011762, task);
+    next = LD32(task + 4);
+    ST32(task, next);
+    POLL();
+    return GJUMP1(next, task);
+}
+
+void f06011F44(gaddr task)
+{
+    int next;
+
+    GCALL1(0x06011762, task);
+    next = LD32(task + 4);
+    ST32(task, next);
+    POLL();
+    GJUMP1(next, task);
 }
 
 int f06011F98(gaddr task, unsigned int need)
@@ -3220,6 +3260,27 @@ int f06017FF6(void)
     return GET(Slide, slide, count);
 }
 
+void f06018138(int x)
+{
+    int h = LD16(0x060C062C);
+    gaddr rec = 0x060C07B0 + (short)(h * 18);
+    unsigned int n = DIVS(x + 8, 16);
+    int w;
+
+    if (n > 8)
+        n = 8;
+    w = LDU16(0x060B45FC + n * 2);
+    ST16(rec + 2, -(w / 2));
+    ST8(rec + 14, 8);
+    ST16(rec, DIVS(w, 8) + 1);
+    ST16(rec + 12, DIVS(LDU16(LD32(CURRENT) + 66) << 8, LD16(rec)) + 1);
+    ST16(rec + 10, 0);
+    ST16(rec + 4, LD16(LD32(MOVER_PTR) + 38));
+    ST16(rec + 6, 100 * LD16(LD32(MOVER_PTR) + 38));
+    if (LDU16(0x060C062C) < LDU8(BOMBER_COUNT))
+        ST16(LD32(CURRENT) + 46, LD16(LD32(CURRENT) + 46) | 8);
+}
+
 int f06018C72(void)
 {
     int team = (unsigned char)LD8(0x060C029C) >= 9 ? 100 : 0;
@@ -3862,6 +3923,14 @@ void f0601C244(int forward)
         ST16(obj + 16, LD16(obj + 16) + LD16(0x060B472C + LDU8(LD32(0x060D8310) + 6) * 2));
         ST16(obj + 18, LD16(obj + 18) + LD16(0x060B4736 + LDU8(LD32(0x060D8310) + 6) * 2));
     }
+}
+
+int f0601C2A8(void)
+{
+    gaddr mover = LD32(MOVER_PTR);
+    int d = LD32(mover + 56) - LD32(mover + 52);
+
+    return (d / 2 >> 1) + 0xFFFF;
 }
 
 void f0601C2C2(int id)

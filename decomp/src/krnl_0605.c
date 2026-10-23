@@ -142,6 +142,67 @@ void f0605112C(void)
     } while (AGAIN(i < 10));
 }
 
+/* counts and offs are in the game's frame, saved registers included: a group of 8 or more overwrites them. */
+void f060512C0(gaddr out)
+{
+    FRAME(sp, 36);
+    gaddr offs = sp - 36;
+    gaddr counts = sp - 28;
+    int i = 0;
+    int n;
+    int stride;
+    int value;
+    int pos;
+    int k;
+
+    do {
+        ST16(out + i * 2, 255);
+    } while (AGAIN(++i < 10));
+    if ((LD32(0x060C1048) & 0xC00) == 0x400) {
+        n = LDU8(0x060C063C);
+        if (n > 4) {
+            stride = DIVS(32, n);
+            value = (MODS(32, n) - 1) / 2 + 8;
+        } else {
+            stride = DIVS(32, n + 1);
+            value = stride + 6;
+        }
+        i = 0;
+        do {
+            if (LD8(0x060C0FC4 + i) != 0) {
+                ST16(out + i * 2, (unsigned char)value);
+                value += stride;
+            }
+        } while (AGAIN(++i < 10));
+        return;
+    }
+    for (k = 0; k < 5; k++) {
+        ST8(counts + k, 0);
+    }
+    i = 0;
+    do {
+        if (LD8(0x060C0FC4 + i) != 0) {
+            k = LDU8(0x060C0640 + i) >> 2;
+            ST8(counts + k, LD8(counts + k) + 1);
+        }
+    } while (AGAIN(++i < 10));
+    pos = 0;
+    for (k = 0; k < 5; k++) {
+        if (LD8(counts + k) != 0) {
+            ST8(offs + k, pos + 8);
+            pos += 2 + LD8(counts + k) * 2;
+        }
+    }
+    i = 0;
+    do {
+        if (LD8(0x060C0FC4 + i) != 0) {
+            k = LDU8(0x060C0640 + i) >> 2;
+            ST16(out + i * 2, LDU8(offs + k));
+            ST8(offs + k, LD8(offs + k) + 2);
+        }
+    } while (AGAIN(++i < 10));
+}
+
 /* The fifth to seventh arguments are on the stack, each a halfword in the low half of its word. */
 void f060516B0(short kind, unsigned short first, unsigned short second, short x)
 {
@@ -486,6 +547,40 @@ int f0605404C(void)
     TSET(h12, 0);
     TSET(h10, 0);
     return 0;
+}
+
+void f06054086(void)
+{
+    int n = 4 - DIVS((TGET(h14) + 1) << 2, TGET(h18));
+    int dx = 0;
+    int dy = 0;
+    int px, py;
+
+    if (n == 0)
+        TSET(fn, 0x0603DDA6);
+    ST32(0x060D7B60, 0x06054086);
+    if ((TGET(h14) & 3) == 2)
+        dx = n;
+    if ((TGET(h14) & 3) == 0)
+        dx = -n;
+    if ((TGET(h14) & 7) == 6)
+        dy = n / 2;
+    if ((TGET(h14) & 7) == 2)
+        dy = -n / 2;
+    px = LD16(TASK + 10);
+    py = LD16(TASK + 12);
+    if (py + dy < 0 || py + dy > n)
+        dy = -py;
+    if (px + dx < 0 || px + dx > n)
+        dx = -px;
+    TSET(h10, TGET(h10) + dx);
+    TSET(h12, TGET(h12) + dy);
+    ST32(0x060FAA10, LD32(0x060FAA10) + dx * 65536);
+    ST32(0x060FAA14, LD32(0x060FAA14) - dy * 65536);
+    ST16(0x060BB8FC, 1);
+    ST16(0x060C1AAE, LD16(0x060C1AAE) + dx);
+    ST16(0x060C1AB0, LD16(0x060C1AB0) - dy);
+    TSET(h14, TGET(h14) + 1);
 }
 
 void f0605417A(short v)

@@ -1757,6 +1757,36 @@ void f060269A4(void)
     GJUMP1(0x060144F4, 0x060269D4);
 }
 
+void f06026AD4(void)
+{
+    gaddr obj = OBJ(LD16(LD32(CURRENT) + 36));
+    gaddr mover, entry;
+    int y;
+    unsigned int k;
+
+    GCALL2(0x0600A3D8, LDU16(LD32(CURRENT) + 22), LDU16(LD32(CURRENT) + 36));
+    y = LD16(LD32(MOVER_PTR) + 18);
+    GCALL2(0x06069462, LD16(LD32(CURRENT) + 22), y > LIM_UP ? y + 30 : 490);
+    GCALL2(0x06069462, LD16(LD32(CURRENT) + 36), LD16(LD32(MOVER_PTR) + 4));
+    entry = 0x060B4E70 + (LDU8(LD32(CURRENT) + 6) - 1) * 4;
+    mover = LD32(MOVER_PTR);
+    ST16(obj + 36, LD16(entry));
+    ST16(mover + 36, LD16(entry));
+    ST16(obj + 38, LD16(entry + 2));
+    ST16(mover + 38, LD16(entry + 2));
+    ST16(mover + 38, LD16(mover + 38) + (LDU16(LD32(CURRENT) + 42) == 5 ? -3 : -2));
+    if (LD16(LD32(CURRENT) + 58)) {
+        k = GCALL1(0x06068B4E, obj);
+        if (k >= 3 && k < 5) {
+            entry = 0x060B4E80 + (LDU8(LD32(CURRENT) + 6) - 1) * 8 + (k - 3) * 4;
+            mover = LD32(MOVER_PTR);
+            ST16(mover + 36, LD16(mover + 36) + LD16(entry));
+            mover = LD32(MOVER_PTR);
+            ST16(mover + 38, LD16(mover + 38) + LD16(entry + 2));
+        }
+    }
+}
+
 int f06026C08(int pad)
 {
     int dir = 0;
@@ -3664,6 +3694,30 @@ void f0602E5D2(void)
     GJUMP0(0x0602E5DC);
 }
 
+void f0602E5E4(unsigned char n)
+{
+    unsigned int current = LD32(0x060C0690 + n * 4);
+    unsigned int lowest = LD32(0x060C0FDC + n * 4);
+    unsigned short stop;
+    unsigned short i;
+
+    if (current < lowest) {
+        lowest = current;
+    }
+    ST32(0x060C0FDC + n * 4, current);
+    stop = GCALL1(0x0602E656, current);
+    i = GCALL1(0x0602E656, lowest);
+    if (stop > i) {
+        if (LDU8(0x060C063E) < 9) {
+            GCALL1(0x0600996A, 21);
+        }
+        do {
+            GCALL0(0x06018D0C);
+            i++;
+        } while (AGAIN(stop > i));
+    }
+}
+
 int f0602E656(unsigned int n)
 {
     int count = 0;
@@ -3940,6 +3994,16 @@ void f0602F374(void)
         i++;
         p += 2;
     } while (AGAIN(i < 4));
+}
+
+void f0602F638(void)
+{
+    GJUMP0(LD32(0x060C1034));
+}
+
+void f0602F640(int a, int b, int c, int d)
+{
+    GJUMP4(LD32(0x060C1038), a, b, c, d);
 }
 
 int f0602F648(void)

@@ -1051,6 +1051,79 @@ void f06049E8C(gaddr p, unsigned char kind)
     } while (AGAIN(q < p + 38));
 }
 
+void f06049F98(gaddr p)
+{
+    gaddr obj = OBJ(LD16(p + 6));
+    int v;
+
+    if (LD16(obj + 38) > 100) {
+        if (LD16(obj + 36) < 350) {
+            ST16(obj + 36, LD16(obj + 36) + 5);
+            v = GCALL1(0x0609812C, LD32(0x060B9108 + ((LD16(obj + 36) / 2) & 255) * 4));
+            ST16(obj + 38, DIVS(v, 0x2000) + 170);
+            return;
+        }
+        ST16(obj + 16, 0);
+        ST16(obj + 18, 50);
+        ST16(obj + 36, 600);
+        ST16(obj + 38, 0);
+        ST16(obj + 4, 20);
+        GCALL2(0x0606950C, obj, 1);
+        GJUMP2(0x0606AAC8, obj, 3);
+        return;
+    }
+    if (LD16(obj + 36) > -300) {
+        ST16(obj + 36, LD16(obj + 36) - 1);
+        v = GCALL1(0x0609812C, LD32(0x060B9108 + (LD16(obj + 36) & 255) * 4));
+        ST16(obj + 38, DIVS(v, 0x2000));
+        v = DIVS(v, 0x800) + 256;
+        ST16(obj + 70, v);
+        ST16(obj + 68, v);
+        return;
+    }
+    ST16(obj + 38, 170);
+    ST16(obj + 36, LD16(obj + 36) - 200);
+    ST16(obj + 20, 399);
+    ST16(obj + 24, 0);
+    ST16(obj + 22, 0);
+    ST16(obj + 26, 199);
+    ST16(obj + 4, 495);
+    GCALL2(0x0606950C, obj, 0);
+    GJUMP2(0x0606AAC8, obj, 1);
+}
+
+void f0604A7B4(gaddr pair, short angle)
+{
+    int a = -GCALL2(0x060980B4, GCALL1(0x0606CE8C, angle), 192);
+    int b = 128 + GCALL2(0x060980B4, GCALL1(0x0606CEB0, angle), 52);
+    gaddr first = OBJ(LD16(pair));
+    gaddr second;
+    int height = LD16(first + 38);
+    int a2;
+    int b2;
+
+    ST16(first + 20, -b);
+    ST16(first + 24, b - 1);
+    ST16(first + 28, 127);
+    ST16(first + 32, -128);
+    ST16(first + 26, a + 48);
+    ST16(first + 22, a + 48);
+    ST16(first + 34, (243 - height) / 2);
+    ST16(first + 30, (243 - height) / 2);
+    a2 = -GCALL2(0x060980B4, GCALL1(0x0606CE8C, angle + 64), 191);
+    b2 = b + GCALL2(0x060980B4, GCALL1(0x0606CEB0, angle + 64), 52);
+    second = OBJ(LD16(pair + 2));
+    ST16(second + 20, -b2);
+    ST16(second + 24, b2 - 1);
+    ST16(second + 28, b - 1);
+    ST16(second + 32, -b);
+    ST16(second + 26, a2 + a + 48);
+    ST16(second + 22, a2 + a + 48);
+    ST16(second + 34, a + 48);
+    ST16(second + 30, a + 48);
+    ST16(second + 38, height);
+}
+
 void f0604A8B4(short width, short height, gaddr slots, unsigned short mode)
 {
     FRAME(sp, 72);
@@ -1158,6 +1231,29 @@ void f0604ABAC(short id, short px, short py, unsigned char turn)
     ST16(obj + 26, ty);
     ST16(obj + 30, -1 - tx);
     ST16(obj + 34, -1 - ty);
+}
+
+void f0604AF5C(int unused, gaddr p)
+{
+    gaddr obj = OBJ(LD16(p + 2));
+    short y = LD16(obj + 22);
+    int target = LD16(obj + 30) - 191;
+    int step = target == y ? 0 : 32;
+
+    if (target >= y) {
+        ST16(VELOCITY, LD16(VELOCITY) + step);
+        y += LD16(VELOCITY) >> 3;
+        if (target < y)
+            ST16(VELOCITY, LD16(VELOCITY) / 2);
+    }
+    if (target <= y) {
+        ST16(VELOCITY, LD16(VELOCITY) - step);
+        y += LD16(VELOCITY) >> 3;
+        if (target > y)
+            ST16(VELOCITY, LD16(VELOCITY) / 2);
+    }
+    ST16(obj + 26, y);
+    ST16(obj + 22, y);
 }
 
 void f0604AFE2(unsigned int n, gaddr list)
