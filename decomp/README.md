@@ -116,6 +116,16 @@ a 16-bit division and a bit-field store. For those the C names the operation, `S
 game's own routine with r0 to r2 set (`g_routine`), so its loops advance time as the original's do.
 Under SHC they are the plain operator or library call.
 
+## Library names
+
+`sbl.tsv` lists the functions in KRNL that match one of Sega's Saturn Base Library (SBL 6.01) compiled with
+SHC: the library, the source file it comes from, its name, the address here, its instruction count and how
+alike the two are (1.00 is the same instructions, ignoring literal addresses and branch targets; the rest
+are 0.90 and up). They are GFS, with one from PCM. The game links SBL 2.10, so a lower score can be the
+version gap. `status.tsv` carries the same name for each address; a function the two sources share
+(`GFBF_GetTranData` and `GFBF_GetSrcPk`) shows both. The C itself is our own, written from the game's
+code, and none of Sega's source is in the repository.
+
 ## Advancing the game's time
 
 The recompiled game advances its time (`SH2_POLL`) at each call, at each branch to the same or an

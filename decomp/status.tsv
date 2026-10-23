@@ -13920,12 +13920,12 @@ KRNL	060A5DA0	48	4	no	no	no	no	todo
 KRNL	060A5DB2	39	2	no	no	no	no	todo	
 KRNL	060A5DD0	27	2	no	no	no	no	todo	
 KRNL	060A5E26	14	0	yes	yes	no	no	swapped	
-KRNL	060A5E44	15	0	yes	no	no	no	todo	
-KRNL	060A5E62	13	0	yes	yes	no	no	swapped	
+KRNL	060A5E44	15	0	yes	no	no	no	todo	GFBF_GetTranData/GFBF_GetSrcPk
+KRNL	060A5E62	13	0	yes	yes	no	no	swapped	GFBF_GetNumData
 KRNL	060A5E7C	15	0	yes	yes	no	no	swapped	
-KRNL	060A5E9A	14	0	yes	yes	no	no	swapped	
-KRNL	060A5EB6	15	0	yes	yes	no	no	swapped	
-KRNL	060A5EEC	27	2	no	yes	no	no	swapped	
+KRNL	060A5E9A	14	0	yes	yes	no	no	swapped	GFBF_GetSctData
+KRNL	060A5EB6	15	0	yes	yes	no	no	swapped	GFBF_RtnPk
+KRNL	060A5EEC	27	2	no	yes	no	no	swapped	GFTR_Setup
 KRNL	060A5F22	6	0	yes	yes	no	no	swapped	swap_w56
 KRNL	060A5F2E	2	0	yes	yes	no	no	swapped	set_w44
 KRNL	060A5F32	33	2	no	yes	no	no	swapped	
@@ -13933,30 +13933,30 @@ KRNL	060A5F74	2	0	yes	no	no	no	swapped	get_field_24
 KRNL	060A5F7C	3	0	yes	yes	no	no	swapped	swap_field20
 KRNL	060A5F82	3	0	yes	yes	no	no	swapped	set_field_48
 KRNL	060A5F88	3	0	yes	no	no	no	swapped	clear_w48
-KRNL	060A5F8E	68	6	no	yes	yes	no	todo	
+KRNL	060A5F8E	68	6	no	yes	yes	no	todo	GFTR_Stop
 KRNL	060A5FB8	50	6	no	no	no	no	todo	
 KRNL	060A6028	57	2	no	yes	yes	no	todo	
 KRNL	060A6076	21	2	no	no	no	no	todo	
 KRNL	060A609A	55	4	no	no	no	no	swapped	
 KRNL	060A6108	109	14	no	yes	yes	no	todo	
 KRNL	060A6182	48	6	no	no	no	no	todo	
-KRNL	060A61E2	59	8	no	yes	no	no	swapped	
-KRNL	060A625E	31	6	no	yes	no	no	swapped	
+KRNL	060A61E2	59	8	no	yes	no	no	swapped	gftr_getSrcPack
+KRNL	060A625E	31	6	no	yes	no	no	swapped	gftr_getDstPack
 KRNL	060A629C	2	0	yes	yes	no	no	swapped	return_1
 KRNL	060A62A0	63	6	no	yes	yes	no	todo	
 KRNL	060A6324	9	2	no	no	no	no	todo	
 KRNL	060A6336	21	2	no	yes	no	no	swapped	
 KRNL	060A6364	114	10	no	no	no	no	swapped	
 KRNL	060A6496	4	0	yes	no	no	no	swapped	return_one
-KRNL	060A649A	19	2	no	no	no	no	swapped	
+KRNL	060A649A	19	2	no	no	no	no	swapped	gftr_execSdma0
 KRNL	060A64C0	26	4	no	no	no	no	swapped	
 KRNL	060A64C4	4	0	yes	no	no	no	swapped	const_1
-KRNL	060A64C8	19	2	no	no	no	no	swapped	
+KRNL	060A64C8	19	2	no	no	no	no	swapped	gftr_execSdma1
 KRNL	060A64EE	26	4	no	no	no	no	swapped	
 KRNL	060A64F2	2	0	yes	yes	no	no	swapped	const_1
 KRNL	060A64F6	50	0	yes	yes	no	no	swapped	
 KRNL	060A6534	2	0	yes	yes	no	no	swapped	return_zero
-KRNL	060A6554	39	0	yes	yes	no	no	swapped	
+KRNL	060A6554	39	0	yes	yes	no	no	swapped	gftr_reqTrn
 KRNL	060A65A6	97	6	no	yes	yes	no	todo	
 KRNL	060A65CC	23	0	yes	no	no	no	todo	
 KRNL	060A6650	12	0	yes	no	no	no	todo	
@@ -13964,30 +13964,30 @@ KRNL	060A6668	46	0	yes	yes	no	no	swapped
 KRNL	060A66C8	19	0	yes	no	no	no	swapped	
 KRNL	060A66EE	2	0	yes	no	no	no	swapped	get_w8
 KRNL	060A66F2	7	0	yes	yes	no	no	swapped	mul_sub
-KRNL	060A6724	20	0	yes	yes	no	no	swapped	
-KRNL	060A674C	11	0	yes	yes	no	no	swapped	
+KRNL	060A6724	20	0	yes	yes	no	no	swapped	GFTR_GetDstPack
+KRNL	060A674C	11	0	yes	yes	no	no	swapped	GFTR_RtnDstPk
 KRNL	060A6762	7	0	yes	no	no	no	swapped	
 KRNL	060A6770	6	0	yes	yes	no	no	swapped	init_fields
 KRNL	060A677C	6	0	yes	yes	no	no	swapped	set_fields
-KRNL	060A6790	69	2	no	yes	no	no	swapped	
+KRNL	060A6790	69	2	no	yes	no	no	swapped	GFCF_Init
 KRNL	060A681A	103	12	no	yes	yes	no	todo	
 KRNL	060A68D2	24	0	yes	no	no	no	todo	
-KRNL	060A6902	27	2	no	yes	yes	no	todo	
+KRNL	060A6902	27	2	no	yes	yes	no	todo	GFCF_SetSct
 KRNL	060A691A	15	0	yes	no	no	no	todo	
 KRNL	060A6938	53	0	yes	yes	no	no	swapped	
 KRNL	060A69A2	157	16	no	yes	yes	no	todo	
 KRNL	060A69D2	133	12	no	no	no	no	todo	
 KRNL	060A69F2	78	6	no	no	no	no	todo	
 KRNL	060A6A10	63	2	no	no	no	no	todo	
-KRNL	060A6B08	61	12	no	no	yes	no	todo	
+KRNL	060A6B08	61	12	no	no	yes	no	todo	GFCF_StopInBuf
 KRNL	060A6B4A	28	6	no	no	no	no	todo	
-KRNL	060A6BA0	41	4	no	no	no	no	swapped	
+KRNL	060A6BA0	41	4	no	no	no	no	swapped	GFCF_Recover
 KRNL	060A6BF2	6	0	yes	yes	no	no	swapped	tail_a71e4
 KRNL	060A6BFE	117	16	no	yes	yes	no	todo	
 KRNL	060A6C04	69	10	no	no	no	no	swapped	
 KRNL	060A6C8E	28	4	no	yes	no	no	swapped	
 KRNL	060A6CE6	96	2	no	yes	no	no	swapped	
-KRNL	060A6DA6	23	0	yes	yes	no	no	swapped	flags_to_offset
+KRNL	060A6DA6	23	0	yes	yes	no	no	swapped	gfcf_getSctSize
 KRNL	060A6DE6	84	4	no	yes	yes	no	todo	
 KRNL	060A6E6A	18	0	yes	no	no	no	todo	
 KRNL	060A6EA0	149	10	no	yes	yes	no	todo	
@@ -14000,8 +14000,8 @@ KRNL	060A70BC	36	2	no	no	yes	no	todo
 KRNL	060A70C8	30	0	yes	no	no	no	todo	
 KRNL	060A70D4	75	8	no	yes	yes	no	todo	
 KRNL	060A7132	48	4	no	no	no	no	todo	
-KRNL	060A7196	27	4	no	no	yes	no	todo	
-KRNL	060A71CC	28	8	no	yes	yes	no	todo	
+KRNL	060A7196	27	4	no	no	yes	no	todo	GFCB_SetFilt
+KRNL	060A71CC	28	8	no	yes	yes	no	todo	GFCB_DeleteAllData
 KRNL	060A71E4	4	0	yes	yes	no	no	swapped	sum_fields
 KRNL	060A71EC	40	4	no	yes	yes	no	todo	
 KRNL	060A721C	16	0	yes	no	no	no	todo	
@@ -14016,7 +14016,7 @@ KRNL	060A7400	32	4	no	yes	yes	no	todo
 KRNL	060A742A	11	0	yes	no	no	no	todo	
 KRNL	060A7460	26	4	no	yes	yes	no	todo	
 KRNL	060A7486	7	0	yes	no	no	no	todo	
-KRNL	060A7494	9	0	yes	no	no	no	swapped	
+KRNL	060A7494	9	0	yes	no	no	no	swapped	GFCB_MovePickup
 KRNL	060A74A6	30	4	no	yes	yes	no	todo	
 KRNL	060A74CA	12	0	yes	no	no	no	todo	
 KRNL	060A74E2	20	2	no	yes	no	no	swapped	
@@ -14025,17 +14025,17 @@ KRNL	060A7516	23	0	yes	yes	no	no	swapped
 KRNL	060A7540	20	0	yes	yes	no	no	swapped	
 KRNL	060A7568	223	36	no	yes	no	no	todo	
 KRNL	060A777E	25	0	yes	yes	no	no	swapped	
-KRNL	060A77B0	24	0	yes	no	no	no	swapped	release_slot
-KRNL	060A77E0	21	0	yes	yes	no	no	swapped	
-KRNL	060A780A	64	10	no	yes	yes	no	todo	
+KRNL	060A77B0	24	0	yes	no	no	no	swapped	GFCD_FreeFilt
+KRNL	060A77E0	21	0	yes	yes	no	no	swapped	GFCD_AllocBuf
+KRNL	060A780A	64	10	no	yes	yes	no	todo	GFCD_FreeBuf
 KRNL	060A7852	30	6	no	no	no	no	todo	
-KRNL	060A788A	19	4	no	no	no	no	swapped	
-KRNL	060A78B0	24	0	yes	yes	no	no	swapped	
+KRNL	060A788A	19	4	no	no	no	no	swapped	GFCD_GetBaseFad
+KRNL	060A78B0	24	0	yes	yes	no	no	swapped	GFCD_GetPickup
 KRNL	060A78E0	17	0	yes	yes	no	no	swapped	
 KRNL	060A7902	15	0	yes	yes	no	no	swapped	
 KRNL	060A7920	73	4	no	yes	no	no	swapped	
 KRNL	060A79CC	35	6	no	no	no	no	swapped	
-KRNL	060A7A12	38	2	no	yes	no	no	swapped	
+KRNL	060A7A12	38	2	no	yes	no	no	swapped	GFCD_SetCon
 KRNL	060A7A5E	39	6	no	yes	no	no	swapped	
 KRNL	060A7ACA	45	2	no	yes	no	no	swapped	
 KRNL	060A7B24	41	2	no	yes	no	no	swapped	
@@ -14049,14 +14049,14 @@ KRNL	060A7DA6	32	4	no	no	no	no	swapped
 KRNL	060A7DE6	55	2	no	yes	no	no	swapped	
 KRNL	060A7E66	110	2	no	yes	no	no	swapped	
 KRNL	060A7F4E	100	12	no	yes	no	no	todo	
-KRNL	060A802C	24	4	no	yes	no	no	swapped	
+KRNL	060A802C	24	4	no	yes	no	no	swapped	GFCD_GetBufSiz
 KRNL	060A805C	92	14	no	yes	yes	no	todo	
 KRNL	060A80C8	38	4	no	no	no	no	todo	
 KRNL	060A80DE	34	4	no	no	no	no	todo	
-KRNL	060A8128	50	0	yes	yes	no	no	swapped	slot_empty
+KRNL	060A8128	50	0	yes	yes	no	no	swapped	gfcd_isIdleTask
 KRNL	060A81A0	1019	82	no	no	yes	no	todo	
 KRNL	060A81FE	4	0	yes	yes	no	no	swapped	
-KRNL	060A8206	16	6	no	yes	yes	no	todo	
+KRNL	060A8206	16	6	no	yes	yes	no	todo	GFCD_WaitServer
 KRNL	060A8214	11	4	no	no	no	no	todo	
 KRNL	060A8226	177	16	no	yes	no	no	swapped	
 KRNL	060A83A0	49	6	no	yes	no	no	swapped	
@@ -14071,12 +14071,12 @@ KRNL	060A89AA	28	0	yes	no	no	no	todo
 KRNL	060A89F4	182	6	no	yes	no	no	swapped	
 KRNL	060A8A9E	164	6	no	no	no	no	todo	
 KRNL	060A8B72	19	2	no	yes	no	no	swapped	
-KRNL	060A8B98	60	0	yes	yes	no	no	swapped	
+KRNL	060A8B98	60	0	yes	yes	no	no	swapped	gfcd_initCdbMng
 KRNL	060A8C10	17	2	no	yes	no	no	swapped	
 KRNL	060A8C32	8	0	yes	yes	no	no	swapped	
 KRNL	060A8C58	14	2	no	no	no	no	swapped	
 KRNL	060A8C74	4	0	yes	no	no	no	swapped	
-KRNL	060A8C7C	21	4	no	no	no	no	swapped	
+KRNL	060A8C7C	21	4	no	no	no	no	swapped	GFCD_WaitScdqFlag
 KRNL	060A8CA6	37	2	no	yes	no	no	swapped	
 KRNL	060A8D0C	85	0	yes	yes	no	no	swapped	reg_field
 KRNL	060A8DCC	217	12	no	yes	no	no	swapped	
@@ -14340,7 +14340,7 @@ KRNL	060B0142	31	6	no	no	no	no	swapped
 KRNL	060B0180	33	6	no	no	no	no	swapped	
 KRNL	060B0212	26	0	yes	no	no	no	swapped	
 KRNL	060B0246	28	0	yes	no	no	no	swapped	move_words
-KRNL	060B027E	53	4	no	no	no	no	swapped	
+KRNL	060B027E	53	4	no	no	no	no	swapped	pcm_RotateByte
 KRNL	060B02B4	57	4	no	no	no	no	swapped	
 KRNL	060B02F0	5	0	yes	no	no	no	swapped	
 KRNL	060B0322	49	4	no	no	no	no	todo	
