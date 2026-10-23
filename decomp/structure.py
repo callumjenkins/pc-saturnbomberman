@@ -99,6 +99,8 @@ def loops(blocks: dict[int, Block], order: list[int]) -> dict[int, set[int]]:
     return bodies
 
 
+REPEATS = 12            # how many times over the draft may write out the statements of its blocks
+
 # A jump back to the header of the loop being written, until loop() turns it into POLL() and a continue.
 BACK = "<back>;"
 
@@ -142,6 +144,7 @@ class Structurer:
         self.bodies = loops(blocks, self.order)
         self.active: list[tuple[int, int | None]] = []          # (header, exit) of the loops being written
         self.sides: dict[int, set[int]] = {}                    # each loop's exits other than its exit
+        self.room = REPEATS * sum(len(block.stmts) + 1 for block in blocks.values()) + 100   # lines left before it is a blowup
 
     def poll(self, block: Block, target: int) -> list[str]:
         """POLL() for an edge back that is not a loop's own, which gets one where the loop is written."""
@@ -203,6 +206,9 @@ class Structurer:
                     continue
             first = False
             block = self.blocks[at]
+            self.room -= len(block.stmts) + 1
+            if self.room < 0:
+                raise Unstructured("a block is written out so many times that the draft is a blowup")
             out += block.stmts
             if block.kind == "return":
                 return out + ["return %s;" % block.value if block.value else "return;"]

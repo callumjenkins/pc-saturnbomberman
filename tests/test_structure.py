@@ -43,3 +43,17 @@ def test_a_loop_entered_at_its_test_goes_back_in_one_place_only(body_polls, refu
             structure.Structurer(blocks, 0).run()
     else:
         assert structure.Structurer(blocks, 0).run()
+
+
+def test_a_draft_that_writes_a_shared_tail_out_for_every_path_to_it_is_refused():
+    # Two blocks per layer, each branching to both blocks of the next, and two different returns at the end:
+    # no layer has a place its paths meet, so each path writes out everything after it.
+    layers = 14
+    blocks = [branch(1, 2, 3)]
+    for layer in range(layers):
+        first, second = 2 + 2 * layer, 3 + 2 * layer
+        nxt = (4 + 2 * layer, 5 + 2 * layer) if layer < layers - 1 else (100, 101)
+        blocks += [branch(first, *nxt), branch(second, *nxt)]
+    blocks += [stop(100), stop(101)]
+    with pytest.raises(structure.Unstructured, match="blowup"):
+        structure.Structurer(graph(*blocks), 1).run()
