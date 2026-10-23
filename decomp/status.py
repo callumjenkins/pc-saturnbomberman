@@ -187,6 +187,12 @@ def own(image: sh2.Image, address: int, code: set[int] | None) -> list[sh2.Insn]
     return [found[at] for at in sorted(found)]
 
 
+def jump_kinds(root: str = ROOT) -> dict[int, str]:
+    """How the recompiler resolves each KRNL jmp and braf: `literal` (a tail call to a known address),
+    `pointer` or `unresolved` (a tail call through a register), or `switch` (a jump table)."""
+    return {int(a): kind for a, kind in _discovery(root)["jumps"].items()}
+
+
 def polling_jumps(root: str = ROOT) -> set[int]:
     """The KRNL jmp and braf instructions whose generated code advances time before it jumps, wherever the
     jump then goes: one that may go back within its function."""
@@ -271,7 +277,7 @@ def _discovery(root: str) -> dict:
     try:
         with open(cache, encoding="utf-8") as f:
             saved = json.load(f)
-        if saved["stamp"] == stamp and "polling" in saved:
+        if saved["stamp"] == stamp and "polling" in saved and "jumps" in saved:
             return saved
     except (OSError, ValueError, KeyError):
         pass
@@ -279,19 +285,22 @@ def _discovery(root: str) -> dict:
     _, path, base, seeds = next(s for s in recomp_build.specs(game) if s[0] == "KRNL")
     with open(path, "rb") as f:
         program = discover.Program(sh2.Image(f.read(), base), [base, *seeds])
+    polling, jumps = _polling_jumps(program)
     saved = {"stamp": stamp, "code": {e: sorted(fn.code) for e, fn in program.funcs.items()},
-             "polling": _polling_jumps(program)}
+             "polling": polling, "jumps": jumps}
     os.makedirs(os.path.dirname(cache), exist_ok=True)
     with open(cache, "w", encoding="utf-8") as f:
         json.dump(saved, f)
     return json.loads(json.dumps(saved))
 
 
-def _polling_jumps(program: discover.Program) -> list[int]:
+def _polling_jumps(program: discover.Program) -> tuple[list[int], dict[int, str]]:
     """The generator's own rule: a jump table advances time when any target it may take is in its function
-    at or before the jump, and an unresolved one may take any instruction of its function."""
+    at or before the jump, and an unresolved one may take any instruction of its function. Also how each
+    jump was resolved."""
     entries, volatile = set(program.funcs), recomp_main.volatile_literals(program)
     polling = []
+    kinds = {}
     for fn in program.funcs.values():
         jumps = [a for a in fn.code if program.img.insn(a).op in ("jmp", "braf")]
         if not jumps:
@@ -300,10 +309,11 @@ def _polling_jumps(program: discover.Program) -> list[int]:
         anywhere = [a for a in fn.code if a not in body.slots]
         for a in jumps:
             candidates, how = body._targets[a]
+            kinds[a] = how
             reach = anywhere if how == "unresolved" else candidates
             if any(v in fn.code and v <= a for v in reach):
                 polling.append(a)
-    return sorted(polling)
+    return sorted(polling), kinds
 
 
 def main() -> None:

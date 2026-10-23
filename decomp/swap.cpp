@@ -36,6 +36,53 @@ void g_poll(void)
     SH2_POLL(*g_cur);
 }
 
+// The control registers, in the order guest.h numbers them. A write to sr keeps what ldc keeps and
+// advances time, as the generated ldc does.
+uint32_t g_cr(int reg)
+{
+    const SH2Context& c = *g_cur;
+    return reg == 0 ? sh2_get_sr(c) : reg == 1 ? c.gbr : c.vbr;
+}
+
+void g_cr_set(int reg, uint32_t value)
+{
+    SH2Context& c = *g_cur;
+    if (reg == 0) {
+        sh2_set_sr(c, value & 0x3F3u);
+        SH2_POLL(c);
+    } else if (reg == 1) {
+        c.gbr = value;
+    } else {
+        c.vbr = value;
+    }
+}
+
+// The accumulate of mac.l and mac.w on a MACH:MACL the C holds as one 64-bit value.
+long long g_mac_l(long long acc, int a, int b)
+{
+    __int128 sum = (__int128)acc + (__int128)a * b;
+    if (g_cur->s) {
+        const __int128 hi = ((__int128)1 << 47) - 1, lo = -((__int128)1 << 47);
+        sum = sum > hi ? hi : sum < lo ? lo : sum;
+    }
+    return (long long)sum;
+}
+
+long long g_mac_w(long long acc, int a, int b)
+{
+    const long long product = (long long)(int16_t)a * (int16_t)b;
+    if (g_cur->s) {
+        long long sum = (int32_t)acc + product;
+        uint32_t mach = (uint64_t)acc >> 32;
+        if (sum > INT32_MAX || sum < INT32_MIN) {
+            sum = sum > 0 ? INT32_MAX : INT32_MIN;
+            mach |= 1;
+        }
+        return (long long)((uint64_t)mach << 32 | (uint32_t)sum);
+    }
+    return (long long)((uint64_t)acc + (uint64_t)product);
+}
+
 uint32_t g_frame(int size)
 {
     const uint32_t top = g_cur->r[15];

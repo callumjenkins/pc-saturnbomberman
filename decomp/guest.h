@@ -27,6 +27,10 @@
  *                   time by the copy routine at entry, STRCPY(d,s), STRCMP(a,b), and BITSET(p,v,spec) v
  *                   stored in a bit field of the word at p (spec: width, and offset << 8). Each calls SHC's
  *                   own routine in KRNL, as the game's code does, on the host through g_routine.
+ *   SR() GBR() VBR()           the control registers, SETSR(x) SETGBR(x) SETVBR(x) to write them. A write to sr
+ *                   advances time, as the game's ldc does, and changes the interrupt mask.
+ *   MAC_L/MAC_W(acc,a,b)  acc, a 64-bit MACH:MACL, plus the product of two words, as mac.l and mac.w add it
+ *                   (with sr's S bit set, saturated).
  *   FRAME(sp, n)    declares sp, the game's stack pointer on entry, and reserves n bytes of the game's
  *                   stack below it, for locals whose address the function passes on. The arguments a
  *                   caller passed on the stack start at sp. The swap's wrapper and SHC free the frame on return.
@@ -84,6 +88,18 @@ uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2);
 #define BITSET(p, v, spec) g_routine(0x06094B08, (v), (spec), (p))
 uint32_t g_frame(int size);
 void g_unframe(uint32_t top);
+uint32_t g_cr(int reg);
+void g_cr_set(int reg, uint32_t value);
+long long g_mac_l(long long acc, int a, int b);
+long long g_mac_w(long long acc, int a, int b);
+#define SR() ((int)g_cr(0))
+#define GBR() ((int)g_cr(1))
+#define VBR() ((int)g_cr(2))
+#define SETSR(x) g_cr_set(0, (uint32_t)(x))
+#define SETGBR(x) g_cr_set(1, (uint32_t)(x))
+#define SETVBR(x) g_cr_set(2, (uint32_t)(x))
+#define MAC_L(acc, a, b) g_mac_l((acc), (a), (b))
+#define MAC_W(acc, a, b) g_mac_w((acc), (a), (b))
 #define FRAME(sp, size) gaddr sp = g_frame(size)
 #define UNFRAME(sp) g_unframe(sp)
 int32_t g_divs(int32_t a, int32_t b);
@@ -173,6 +189,12 @@ typedef volatile unsigned short *H16PTR;
 #define STRCMP(a, b) strcmp((char *)(a), (char *)(b))
 #define BITSET(p, v, spec) _bitset((p), (v), (spec))
 #define UNFRAME(sp) ((void)0)
+#define SR() get_cr()
+#define GBR() get_gbr()
+#define VBR() get_vbr()
+#define SETSR(x) set_cr(x)
+#define SETGBR(x) set_gbr(x)
+#define SETVBR(x) set_vbr(x)
 #define DIVS(a, b) ((int)(a) / (int)(b))
 #define DIVU(a, b) ((unsigned int)(a) / (unsigned int)(b))
 #define MODS(a, b) ((int)(a) % (int)(b))

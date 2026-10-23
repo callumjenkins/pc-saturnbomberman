@@ -59,6 +59,22 @@ def attach(cpu: sh2emu.CPU) -> None:
     cpu.mem.__class__ = Devices
 
 
+def control_differences(lib: ctypes.CDLL, game: sh2emu.CPU) -> list[str]:
+    """How the host build left sr, gbr and vbr against the game's, leaving out the T bit, which a caller may not read."""
+    problems = []
+    host = (ctypes.c_uint32 * 3).in_dll(lib, "g_ctl")
+    for name, mine, theirs in zip(("sr", "gbr", "vbr"), host, (game.sr & ~1, game.gbr, game.vbr)):
+        if (mine & ~1 if name == "sr" else mine) != theirs:
+            problems.append("%s is %08X, the game's code %08X" % (name, mine, theirs))
+    return problems
+
+
+def controls(vals: list[int]) -> tuple[int, int, int]:
+    """The sr, gbr and vbr a trial starts with, drawn from its arguments so the trial's other draws stay as they were."""
+    r = random.Random(repr(vals))
+    return r.getrandbits(10) & 0x3F2, r.getrandbits(32), r.getrandbits(32)
+
+
 def copy(source: sh2emu.CPU, target: sh2emu.CPU) -> None:
     """Gives target the devices of source and the same bytes in every region."""
     for name, base, size in DEVICES:

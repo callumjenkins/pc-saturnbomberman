@@ -92,6 +92,26 @@ def test_reading_an_image_variable_as_the_value_it_was_loaded_with_is_caught(tmp
     assert differences(tmp_path, "int f06054ED4(void)\n{\n    return 0;\n}\n", 0x06054ED4) > 0
 
 
+MASKED_COPY = ("int f060A5020(int r4)\n{\n    int mask = (SR() >> 4) & 15;\n\n    %s\n"
+               "    COPYW(0x0609445C, r4, 0x060FC044, 12);\n    %s\n    return 0;\n}\n")
+MASK_OFF = "SETSR((SR() & -241) | 240);"
+MASK_BACK = "SETSR((mask << 4) | (SR() & -241));"
+
+
+@pytest.mark.parametrize("raise_mask, restore_mask, agrees", [
+    pytest.param(MASK_OFF, MASK_BACK, True, id="masking interrupts around the copy and putting the mask back"),
+    pytest.param(MASK_OFF, "", False, id="never putting the mask back"),
+    pytest.param("", MASK_BACK, False, id="never raising it"),
+    pytest.param(MASK_OFF, "SETSR(mask << 4);", False, id="writing the mask back without the rest of sr"),
+])
+def test_the_status_register_is_compared_and_a_write_to_it_advances_time(tmp_path, raise_mask, restore_mask, agrees):
+    assert (differences(tmp_path, MASKED_COPY % (raise_mask, restore_mask), 0x060A5020) == 0) == agrees
+
+
+def test_the_vbr_a_function_leaves_is_compared(tmp_path):
+    assert differences(tmp_path, "int f060A5020(int r4)\n{\n    SETVBR(1);\n    return 0;\n}\n", 0x060A5020) > 0
+
+
 @pytest.mark.parametrize("name", [
     pytest.param("f0600CA7C", id="a call"),
     pytest.param("f0600A1F4", id="a tail jump back into another function"),

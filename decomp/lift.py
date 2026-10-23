@@ -21,7 +21,7 @@ import registers  # noqa: E402
 import status  # noqa: E402
 import structure  # noqa: E402
 from saturnrecomp import sh2  # noqa: E402
-from state import LOCAL_TYPES, VAR, State, Stmt, Unsupported, const, fold_frame, framed, number, sp_change, step, strip  # noqa: E402
+from state import LOCAL_TYPES, MAC, VAR, State, Stmt, Unsupported, const, fold_frame, framed, number, sp_change, step, strip  # noqa: E402
 
 IMAGES = {"KRNL": ("build/extract/BOMSS/0KRNL.BIN", 0x06006000)}
 _CALLS = ("bsr", "jsr")
@@ -45,9 +45,12 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
     register that does go in passes 0."""
     tail = ins.op in ("jmp", "bra")
     where = const(ins.target) if ins.op in ("bsr", "bra") else st.get(ins.n)
-    if ins.op == "jmp" and number(where) is None:
-        raise Unsupported("a tail call through a register at %08X" % ins.pc)
+    through_register = ins.op == "jmp" and number(where) is None and functions is not None
+    if through_register and status.jump_kinds().get(ins.pc) == "switch":
+        raise Unsupported("a jump table at %08X" % ins.pc)
     step(slot, st, image)
+    if through_register and ins.pc in status.polling_jumps():
+        st.effect("POLL();")
     known = functions is not None and number(where) is not None
     needs = sorted(registers.saved(image, number(where), functions)) if known else []
     if needs:
@@ -67,7 +70,7 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         if helper:
             raise Unsupported("calls %s, which takes r%d, as a runtime routine does: write its operator in HELPER()"
                               % (where, helper[0]))
-        args = [st.get(r) for r in range(4, max(reads, default=3) + 1)]
+        args = [st.get(r) if r in reads else "0" for r in range(4, max(reads, default=3) + 1)]
     else:
         for r in range(4, 8):
             if r not in st.fresh and r not in params and not tail:
@@ -82,12 +85,17 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
     text = "%s%d(%s%s)" % ("GJUMP" if tail else "GCALL", len(args), where, "".join(", " + a for a in args))
     if tail and st.framed:
         st.effect("UNFRAME(sp);")
-    st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in range(1, 8)}))
-    st.clobbered |= set(range(1, 8))
+    written = registers.writes(image, number(where), functions) - {0} if known else registers.EVERY - {0}
+    st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in written}))
+    st.clobbered |= written
+    st.callee = where
     st.clobbered.discard(0)
-    st.fresh.clear()
+    st.fresh &= set(range(1, 8)) - written
     for r in range(8):
+        if r not in written:
+            continue
         st.known.pop(r, None)
+    st.known.pop(0, None)
     return tail
 
 
@@ -172,7 +180,8 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
     body = "\n".join(lines)
     names = sorted({v for v in VAR.findall(body)} - {"r%d" % p for p in params}, key=lambda v: (v[0] != "r", int(v[1:])))
     head = "%s f%08X(%s)" % ("int" if returns else "void", entry, ", ".join("int r%d" % p for p in sorted(params)) or "void")
-    decl = ["    int %s;" % ", ".join(n for n in names if n[0] != "v")] if any(n[0] != "v" for n in names) else []
+    decl = ["    int %s;" % ", ".join(n for n in names if n[0] in "rc")] if any(n[0] in "rc" for n in names) else []
+    decl += ["    long long %s;" % MAC] if MAC in names else []
     decl += ["    %s v%d;" % (LOCAL_TYPES[size], -offset) for offset, size in sorted(slots.items(), reverse=True)]
     decl += ["    FRAME(sp, %d);" % frame_size(image, stops)] if framed else []
     decl += [""] if decl else []
@@ -257,8 +266,6 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
             block.kind = "return"
             break
         if ins.op == "jmp":
-            if ins.n not in st.known:
-                raise Unsupported("a jump through a register that is not a known address, a switch, at %08X" % at)
             tail = call(ins, slot, st, params, image, functions)
             block.kind = "return"
             break

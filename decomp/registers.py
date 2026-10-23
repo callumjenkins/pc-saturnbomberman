@@ -11,6 +11,7 @@ import re
 from saturnrecomp import sh2
 
 ARGUMENTS = frozenset({4, 5, 6, 7})          # what a callee nobody can read is taken to read
+EVERY = frozenset(range(8))                  # what a callee nobody can read is taken to write
 # KRNL's division routines, r1 by r0: each leaves the result in r0 and changes r1.
 DIVISIONS = {0x0609410C: "DIVS", 0x060941C0: "DIVU", 0x06094268: "MODS", 0x06094330: "MODU"}
 # SHC's other looping runtime routines in KRNL: the C for a call, with {rN} for what the register holds,
@@ -35,6 +36,7 @@ _MOVES = frozenset({"mov", "mov.b", "mov.w", "mov.l", "mova", "movt", "sts", "st
 _KEEPS = frozenset({"cmp/eq", "cmp/ge", "cmp/gt", "cmp/hi", "cmp/hs", "cmp/pl", "cmp/pz", "cmp/str", "tst",
                     "div0s", "mul.l", "muls.w", "mulu.w", "dmuls.l", "dmulu.l", "jmp", "jsr", "braf", "bsrf",
                     "ldc", "lds"})
+_WRITES: dict[int, dict[int, frozenset[int] | None]] = {}     # the same for writes()
 _CACHES: dict[int, dict[int, frozenset[int] | None]] = {}     # per map of functions: address to what it reads, None while being read
 _REG = re.compile(r"\br(\d+)\b")
 _CALLS = ("bsr", "jsr", "bsrf")
@@ -53,6 +55,36 @@ def saved(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> fro
     """r8 to r14 the code at address reads before writing them, which a function's entry never does:
     code there is the middle of a larger function, and needs its caller's registers."""
     return frozenset(r for r in _live(image, address, functions) if 8 <= r <= 14)
+
+
+def writes(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> frozenset[int]:
+    """r0 to r7 the function at address, or anything it calls or jumps to, may write. A function without
+    code in `functions`, or one reached again while it is being read, writes all of them."""
+    cache = _WRITES.setdefault(id(functions), {})
+    if address in cache:
+        return cache[address] if cache[address] is not None else EVERY
+    code = functions.get(address)
+    if code is None:
+        return EVERY
+    cache[address] = None
+    found: set[int] = set()
+    for pc in sorted(code):
+        if pc - 2 in code and image.insn(pc - 2).delay:
+            continue                                    # a delay slot, counted with its branch
+        ins = image.insn(pc)
+        found |= _operands(ins)[1]
+        if ins.delay:
+            found |= _operands(image.insn(pc + 2))[1]
+        if ins.op in _CALLS or ins.op in _TAILS:
+            target = ins.target if ins.op in ("bsr", "bra") else _loaded(image, ins, code) if ins.op in ("jsr", "jmp") else None
+            if ins.op in _TAILS and target in code:
+                continue
+            helper = routine(image, target, functions) if target is not None else None
+            found |= ({0} | helper[1]) if helper else writes(image, target, functions) if target is not None else EVERY
+            if ins.op in _CALLS:
+                found.add(0)
+    cache[address] = frozenset(r for r in found if r < 8)
+    return cache[address]
 
 
 def _live(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> frozenset[int]:

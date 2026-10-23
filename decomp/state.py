@@ -7,13 +7,15 @@ if TYPE_CHECKING:
     from saturnrecomp import sh2
 
 LOCAL_TYPES = {1: "signed char", 2: "short", 4: "int"}
-VAR = re.compile(r"\b[rcv]\d+\b")
+VAR = re.compile(r"\b[rcmv]\d+\b")
 _FOLD = {"+": lambda a, b: a + b, "-": lambda a, b: a - b, "&": lambda a, b: a & b, "|": lambda a, b: a | b,
          "^": lambda a, b: a ^ b, "<<": lambda a, b: a << b, "*": lambda a, b: a * b}
 _LOAD = {1: "LD8", 2: "LD16", 4: "LD32"}
 _NUMBER = re.compile(r"^-?(?:0x[0-9A-Fa-f]+|\d+)$")
 _SIZES = {"b": 1, "w": 2, "l": 4}
 _STORE = {1: "ST8", 2: "ST16", 4: "ST32"}
+_CONTROL = {"sr": "SR", "gbr": "GBR", "vbr": "VBR"}
+MAC = "m0"                                  # MACH:MACL as one 64-bit variable
 _FRAMED = re.compile(r"sp|\(sp ([-+]) (\d+)\)")
 _SP_SUM = re.compile(r"\(\(sp ([-+]) (\d+)\) ([-+]) (\d+)\)")
 
@@ -44,9 +46,11 @@ class State:
     stmts: list[Stmt] = field(default_factory=list)
     known: dict[int, int] = field(default_factory=dict)
     clobbered: set[int] = field(default_factory=set)
+    callee: str = ""                        # the call that last overwrote them
     fresh: set[int] = field(default_factory=set)         # written since the last call, on every path here
     flag: str | None = None
-    macl: str | None = None
+    macl: str | None = None                 # the product of the last mul.l, muls.w or mulu.w, which sets MACL alone
+    mac64: bool = False                     # the block has set MACH:MACL as a whole (m0)
     flags: int = 0                          # how many flag variables have been made so far
     sp: int = 0                             # r15 relative to its value on entry
     slots: dict[int, int] = field(default_factory=dict)     # the function's stack locals: offset to size
@@ -61,7 +65,7 @@ class State:
 
     def _get(self, reg: int) -> str:
         if reg in self.clobbered:
-            raise Unsupported("r%d is read after a call overwrote it" % reg)
+            raise Unsupported("r%d is read after a call to %s overwrote it" % (reg, self.callee))
         return const(self.known[reg]) if reg in self.known else "r%d" % reg
 
     def put(self, reg: int, expr: str, pure: bool = True) -> None:
@@ -115,6 +119,20 @@ def framed(offset: int) -> str:
     return "sp" if not offset else "(sp %s %d)" % ("-" if offset < 0 else "+", abs(offset))
 
 
+def set_mac(st: State, expr: str, pure: bool = True) -> None:
+    """Assigns MACH:MACL as a whole, which also replaces a MACL the block set alone."""
+    st.stmts.append(Stmt(MAC, expr, pure))
+    st.macl = None
+    st.mac64 = True
+
+
+def carried(ins: "sh2.Insn", st: State) -> str:
+    """The T bit going into an instruction that adds or rotates it in."""
+    if st.flag is None:
+        raise Unsupported("the T bit is read before this block sets it at %08X" % ins.pc)
+    return st.flag
+
+
 def compare(ins: "sh2.Insn", st: State) -> None:
     kind = ins.op[4:]
     if ins.m is None and ins.imm is not None:
@@ -146,6 +164,22 @@ def frame(ins: "sh2.Insn", st: State) -> bool:
         return True
     if op in ("sts.l", "lds.l"):
         st.sp += sp_change(ins)
+        return True
+    if op in ("stc.l", "ldc.l"):
+        reg = fmt.split(" ")[1].split(",")[0] if op == "stc.l" else fmt.rsplit(",", 1)[1]
+        if reg not in _CONTROL:
+            raise Unsupported("%s at %08X" % (ins.text, ins.pc))
+        if op == "stc.l":
+            st.sp -= 4
+            st.stored.add(st.sp)
+            value = control(reg, st)
+            if st.framed:
+                st.effect("ST32(%s, %s);" % (st.get(15), strip(value)))
+            else:
+                st.put_local(local(st, st.sp, 4, ins), value)
+        else:
+            set_control(reg, "LD32(%s)" % st.get(15) if st.framed else local(st, st.sp, 4, ins), st)
+            st.sp += 4
         return True
     if op == "mov.l" and fmt == "mov.l Rm,@-Rn" and n == 15:
         st.sp -= 4
@@ -183,6 +217,28 @@ def frame(ins: "sh2.Insn", st: State) -> bool:
             st.put(0 if dest == "r0" else n, local(st, st.sp + offset, size, ins), pure=True)
             return True
     return False
+
+
+def control(reg: str, st: State) -> str:
+    """The value of sr, gbr or vbr. The T bit of sr is the lifter's flag when this block has set it."""
+    read = "%s()" % _CONTROL[reg]
+    return read if reg != "sr" or st.flag is None else op2(op2(read, "&", "~1"), "|", st.flag)
+
+
+def load_operand(ins: "sh2.Insn", st: State) -> str:
+    """The value an ldc or ldc.l brings in: the register, or the word it points at, which it steps past."""
+    if not ins.op.endswith(".l"):
+        return st.get(ins.m)
+    value = st.temp("LD32(%s)" % strip(st.get(ins.m)))
+    st.put(ins.m, op2(st.get(ins.m), "+", "4"))
+    return value
+
+
+def set_control(reg: str, value: str, st: State) -> None:
+    """Writes sr, gbr or vbr. A write to sr changes T and may unmask an interrupt, so time advances."""
+    st.effect("SET%s(%s);" % (_CONTROL[reg], strip(value)))
+    if reg == "sr":
+        st.flag = None
 
 
 def local(st: State, offset: int, size: int, ins: "sh2.Insn") -> str:
@@ -261,9 +317,9 @@ def signed(expr: str) -> str:
 
 def sp_change(ins: "sh2.Insn") -> int:
     """How far an instruction moves r15."""
-    if ins.op in ("sts.l", "mov.l") and ins.n == 15 and "@-Rn" in ins.fmt:
+    if ins.op in ("sts.l", "stc.l", "mov.l") and ins.n == 15 and "@-Rn" in ins.fmt:
         return -4
-    if ins.op in ("lds.l", "mov.l") and ins.m == 15 and "@Rm+" in ins.fmt:
+    if ins.op in ("lds.l", "ldc.l", "mov.l") and ins.m == 15 and "@Rm+" in ins.fmt:
         return 4
     if ins.op == "add" and ins.n == 15 and ins.imm is not None:
         return ins.imm
@@ -306,7 +362,8 @@ def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
     elif op == "not":
         st.put(n, "(~%s)" % st.get(m))
     elif op == "neg":
-        st.put(n, "(-%s)" % st.get(m))
+        value = st.get(m)
+        st.put(n, const(-number(value)) if number(value) is not None else "(-%s)" % value)
     elif op in ("shll", "shal"):
         st.put(n, op2(st.get(n), "<<", "1"))
         st.flag = None
@@ -332,7 +389,7 @@ def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
         st.put(n, op2(op2(st.get(m), "<<", "16"), "|", signed(op2(unsigned(st.get(m)), ">>", "16"))))
     elif op == "xtrct":
         st.put(n, op2(op2(st.get(m), "<<", "16"), "|", signed(op2(unsigned(st.get(n)), ">>", "16"))))
-    elif op.startswith("cmp/"):
+    elif op.startswith("cmp/") and op != "cmp/str":
         compare(ins, st)
     elif op == "tst":
         left = st.get(0) if ins.m is None else st.get(n)
@@ -343,18 +400,77 @@ def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
         st.set_flag(op2(st.get(n), "==", "0"))
     elif op in ("sett", "clrt"):
         st.set_flag("1" if op == "sett" else "0")
+    elif op in ("rotl", "rotr"):
+        value = st.get(n)
+        if op == "rotl":
+            st.set_flag(signed(op2(unsigned(value), ">>", "31")))
+            st.put(n, op2(op2(value, "<<", "1"), "|", signed(op2(unsigned(value), ">>", "31"))))
+        else:
+            st.set_flag(op2(value, "&", "1"))
+            st.put(n, signed(op2(op2(unsigned(value), ">>", "1"), "|", op2(value, "<<", "31"))))
+    elif op in ("rotcl", "rotcr"):
+        value, carry = st.get(n), carried(ins, st)
+        if op == "rotcl":
+            st.set_flag(signed(op2(unsigned(value), ">>", "31")))
+            st.put(n, op2(op2(value, "<<", "1"), "|", carry))
+        else:
+            st.set_flag(op2(value, "&", "1"))
+            st.put(n, signed(op2(op2(unsigned(value), ">>", "1"), "|", op2(carry, "<<", "31"))))
+    elif op in ("addc", "subc"):
+        carry, left, right = carried(ins, st), st.temp(st.get(n)), st.get(m)
+        first = st.temp(op2(left, "+" if op == "addc" else "-", right))
+        st.put(n, op2(first, "+" if op == "addc" else "-", carry))
+        wrapped = (lambda a, b: op2(unsigned(a), "<", unsigned(b)))
+        if op == "addc":
+            st.set_flag(op2(wrapped(first, left), "|", wrapped(st.get(n), first)))
+        else:
+            st.set_flag(op2(wrapped(left, first), "|", wrapped(first, st.get(n))))
+    elif op == "swap.b":
+        value = st.get(m)
+        st.put(n, op2(op2(value, "&", "0xFFFF0000"), "|",
+                      op2(op2(op2(value, "&", "255"), "<<", "8"), "|", op2(op2(unsigned(value), ">>", "8"), "&", "255"))))
+    elif op == "cmp/str":
+        difference = st.temp(op2(st.get(n), "^", st.get(m)))
+        st.set_flag(" || ".join(op2(difference, "&", mask) + " == 0" for mask in ("255", "0xFF00", "0xFF0000", "0xFF000000")))
     elif op == "movt":
         if st.flag is None:
             raise Unsupported("the T bit is read before this block sets it at %08X" % ins.pc)
         st.put(n, st.flag)
     elif op in ("mul.l", "muls.w", "mulu.w"):
         a, b = st.get(n), st.get(m)
-        st.macl = st.temp({"mul.l": op2(a, "*", b), "muls.w": op2("(short)" + a, "*", "(short)" + b),
-                           "mulu.w": op2(op2(a, "&", "0xFFFF"), "*", op2(b, "&", "0xFFFF"))}[op])
-    elif op == "sts" and fmt.startswith("sts macl"):
-        if st.macl is None:
-            raise Unsupported("macl is read before this block sets it at %08X" % ins.pc)
+        product = {"mul.l": op2(a, "*", b), "muls.w": op2("(short)" + a, "*", "(short)" + b),
+                   "mulu.w": op2(op2(a, "&", "0xFFFF"), "*", op2(b, "&", "0xFFFF"))}[op]
+        if st.mac64:                        # MACH stays, MACL becomes the product
+            st.stmts.append(Stmt(MAC, "(%s & ~0xFFFFFFFFLL) | (unsigned)%s" % (MAC, st.temp(product))))
+            st.macl = None
+        else:
+            st.macl = st.temp(product)
+    elif op in ("stc", "sts") and fmt.split(" ")[1].split(",")[0] in _CONTROL:
+        st.put(n, control(fmt.split(" ")[1].split(",")[0], st), pure=False)
+    elif op == "sts" and fmt.startswith("sts macl") and st.macl is not None:
         st.put(n, st.macl)
+    elif op == "sts" and fmt.startswith(("sts mach", "sts macl")):
+        st.put(n, "(int)(%s >> 32)" % MAC if fmt.startswith("sts mach") else "(int)%s" % MAC)
+    elif op in ("ldc", "ldc.l") and fmt.rsplit(",", 1)[1] in _CONTROL:
+        set_control(fmt.rsplit(",", 1)[1], load_operand(ins, st), st)
+    elif op == "lds" and fmt.endswith(("mach", "macl")):
+        high = fmt.endswith("mach")
+        keep = "(%s & 0xFFFFFFFFLL)" % MAC if high else "(%s & ~0xFFFFFFFFLL)" % MAC
+        part = "((long long)%s << 32)" % st.get(m) if high else "(unsigned)%s" % st.get(m)
+        set_mac(st, "(%s | %s)" % (keep, part))
+    elif op == "clrmac":
+        set_mac(st, "0")
+    elif op in ("dmuls.l", "dmulu.l"):
+        a, b = st.get(n), st.get(m)
+        set_mac(st, "(long long)%s * %s" % (a, b) if op == "dmuls.l"
+                else "(long long)((unsigned long long)(unsigned)%s * (unsigned)%s)" % (a, b))
+    elif op in ("mac.l", "mac.w"):
+        size = 4 if op == "mac.l" else 2
+        first = st.temp("%s(%s)" % (_LOAD[size], strip(st.get(n))))
+        st.put(n, op2(st.get(n), "+", str(size)))
+        second = st.temp("%s(%s)" % (_LOAD[size], strip(st.get(m))))
+        st.put(m, op2(st.get(m), "+", str(size)))
+        set_mac(st, "MAC_%s(%s, %s, %s)" % (op[-1].upper(), MAC, first, second), False)
     else:
         raise Unsupported("%s at %08X" % (ins.text, ins.pc))
 

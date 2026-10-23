@@ -49,7 +49,8 @@ class Asm:
 SCR=[0,5,6,7]       # writable scratch
 ALL=[0,1,2,3,5,6,7]
 def simple(a,r):
-    k=r.choice(['add','sub','and','or','xor','not','neg','sh','shn','ext','swap','xtrct','mov','movi','addi','mem','mem','memq','cmpt','mul','tst','ldpi','sti'])
+    k=r.choice(['add','sub','and','or','xor','not','neg','sh','shn','ext','swap','xtrct','mov','movi','addi','mem','mem','memq','cmpt','mul','tst','ldpi','sti',
+                'rot','rotc','swapb','cmpstr','dmul','mac','ctl'])
     d=r.choice(SCR); s=r.choice(ALL)
     if k in('add','sub','and','or','xor'): a.e({'add':'add Rm,Rn','sub':'sub Rm,Rn','and':'and Rm,Rn','or':'or Rm,Rn','xor':'xor Rm,Rn'}[k],d,s)
     elif k=='not': a.e('not Rm,Rn',d,s)
@@ -97,6 +98,23 @@ def simple(a,r):
         if r.random()<.5: a.e('tst Rm,Rn',r.choice(ALL),s)
         else: a.e('tst #imm,r0',low=r.choice([1,0x80,0xff,3]))
         a.e('movt Rn',d)
+    elif k=='rot': a.e(r.choice(['rotl Rn','rotr Rn']),d)
+    elif k in('rotc','swapb','cmpstr'):
+        if k=='swapb': a.e('swap.b Rm,Rn',d,s)
+        elif k=='cmpstr': a.e('cmp/str Rm,Rn',r.choice(ALL),s); a.e('movt Rn',d)
+        else:
+            a.e(r.choice(['cmp/eq Rm,Rn','cmp/hs Rm,Rn','cmp/ge Rm,Rn']),r.choice(ALL),s)
+            a.e(r.choice(['rotcl Rn','rotcr Rn','addc Rm,Rn','subc Rm,Rn']),d,s); a.e('movt Rn',r.choice(SCR))
+    elif k=='dmul':
+        a.e(r.choice(['dmuls.l Rm,Rn','dmulu.l Rm,Rn']),r.choice(ALL),s)
+        a.e('sts mach,Rn',d); a.e('sts macl,Rn',r.choice(SCR))
+    elif k=='mac':
+        sz=r.choice(['l','w']); a.e('clrmac'); a.e('mov Rm,Rn',3,4); a.e('mov Rm,Rn',6,4); a.e('add #imm,Rn',6,low=16)
+        for _ in range(r.randrange(1,3)): a.e('mac.%s @Rm+,@Rn+'%sz,6,3)
+        a.e('sts mach,Rn',d); a.e('sts macl,Rn',r.choice(SCR))
+    elif k=='ctl':
+        a.e('stc sr,Rn',0); a.e('and #imm,r0',low=0xF0); a.e('ldc Rm,sr',0,0)
+        a.e(r.choice(['stc gbr,Rn','stc vbr,Rn']),d)
     elif k=='ldpi': pass
     elif k=='sti':
         a.e(r.choice(['cmp/pz Rn','cmp/pl Rn']),r.choice(ALL)); a.e('movt Rn',d)
@@ -174,6 +192,7 @@ def run_one(seed, trials=40):
     rr=random.Random(seed*7+1)
     for t in range(trials):
         cpu=sh2emu.load(os.devnull,BASE); host=sh2emu.load(os.devnull,BASE)
+        cpu.sr=0; (ctypes.c_uint32*3).in_dll(lib,'g_ctl')[:]=[0,0,0]
         w=cpu.mem.regions[0][2]; hw=host.mem.regions[0][2]
         w[BASE-0x06000000:BASE-0x06000000+len(code)]=code
         data=rr.randbytes(0x400)

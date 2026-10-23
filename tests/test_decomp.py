@@ -64,10 +64,10 @@ def test_a_function_that_never_sets_r0_returns_nothing():
     assert code.splitlines()[0] == "void f06006000(int r4, int r5)"
 
 
-def test_a_jump_through_a_register_loaded_from_memory_is_refused():
+def test_a_jump_through_a_register_loaded_from_memory_is_a_tail_call_with_the_arguments_as_they_stand():
     # mov.l @r4,r1 ; jmp @r1 ; nop
-    with pytest.raises(lift.Unsupported, match="switch"):
-        lifted(encode("mov.l @Rm,Rn", 1, 4), encode("jmp @Rn", 1), NOP)
+    code = lifted(encode("mov.l @Rm,Rn", 1, 4), encode("jmp @Rn", 1), NOP)
+    assert body(code)[-2:] == ["r0 = GJUMP4(r1, r4, r5, r6, r7);", "return r0;"]
 
 
 def test_reading_a_register_nobody_set_is_refused():

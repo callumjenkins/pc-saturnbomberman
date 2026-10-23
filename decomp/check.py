@@ -185,12 +185,14 @@ def default_spec(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
 
 def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
     """What the host build's g_call runs: the game's function on the interpreter that holds the host
-    build's memory. Registers r8 to r15 and pr come back unchanged, as the runtime's swap does. r0 to r7
+    build's memory. Registers r8 to r15 and pr come back unchanged, as the runtime's swap does; sr, gbr and vbr go to the callee and back. r0 to r7
     that the call does not pass hold junk, so a callee that reads one the C did not pass disagrees with
     the game, whose registers hold something else."""
     @CALL_HOOK
     def hook(addr, args, n):
         keep = (cpu.r[8:], cpu.pr)
+        controls = (ctypes.c_uint32 * 3).in_dll(lib, "g_ctl")
+        cpu.sr, cpu.gbr, cpu.vbr = controls[0] | cpu.t, controls[1], controls[2]
         sp = ctypes.c_uint32.in_dll(lib, "g_sp").value
         try:
             if n > 4:
@@ -207,6 +209,7 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
             return 0
         finally:
             cpu.r[8:], cpu.pr = keep
+            controls[:] = [cpu.sr & ~1, cpu.gbr, cpu.vbr]
             state["calls"].append(addr)
     return hook
 
@@ -244,6 +247,10 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     machine.attach(cpu)
     machine.attach(host)
     vals = [value(a, r) for a in args]
+    sr, gbr, vbr = machine.controls(vals)
+    for side in (cpu, host):
+        side.sr, side.gbr, side.vbr = sr, gbr, vbr
+    (ctypes.c_uint32 * 3).in_dll(lib, "g_ctl")[:] = [sr, gbr, vbr]
 
     state = {"calls": []}
     keep = machine.point(lib, host)
@@ -282,6 +289,7 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     if returns and (got & 0xFFFFFFFF) != want:
         problems.append("returned %08X, the game's code %08X" % (got & 0xFFFFFFFF, want))
     problems += machine.differences(host, cpu)
+    problems += machine.control_differences(lib, cpu)
     return vals, problems, False
 
 

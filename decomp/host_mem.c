@@ -14,12 +14,58 @@ int g_fault;
 int g_polls;                /* g_poll()s and g_call()s, which check.py compares with the game's */
 uint32_t g_sp;              /* the game's r15, which check.py sets before each trial and g_call passes on */
 
+uint32_t g_ctl[3];          /* sr, gbr and vbr, which check.py sets before each trial and compares afterwards */
+
 /* Runs the game's function at addr with the arguments; check.py sets it. */
 uint32_t (*g_call_hook)(uint32_t addr, const uint32_t *args, int n);
 
 void g_poll(void)
 {
     g_polls++;
+}
+
+uint32_t g_cr(int reg)
+{
+    return g_ctl[reg];
+}
+
+/* sr keeps the bits ldc keeps, and the write advances time as the game's ldc does. */
+void g_cr_set(int reg, uint32_t value)
+{
+    if (reg == 0) {
+        value &= 0x3F3;
+        g_polls++;
+    }
+    g_ctl[reg] = value;
+}
+
+long long g_mac_l(long long acc, int a, int b)
+{
+    __int128 sum = (__int128)acc + (__int128)a * b;
+
+    if (g_ctl[0] & 2) {
+        const __int128 hi = ((__int128)1 << 47) - 1, lo = -((__int128)1 << 47);
+
+        sum = sum > hi ? hi : sum < lo ? lo : sum;
+    }
+    return (long long)sum;
+}
+
+long long g_mac_w(long long acc, int a, int b)
+{
+    long long product = (long long)(short)a * (short)b;
+
+    if (g_ctl[0] & 2) {
+        long long sum = (long long)(int)acc + product;
+        uint32_t mach = (uint64_t)acc >> 32;
+
+        if (sum > 0x7FFFFFFF || sum < -0x80000000LL) {
+            sum = sum > 0 ? 0x7FFFFFFF : -0x80000000LL;
+            mach |= 1;
+        }
+        return (long long)((uint64_t)mach << 32 | (uint32_t)sum);
+    }
+    return (long long)((uint64_t)acc + (uint64_t)product);
 }
 
 uint32_t g_frame(int size)
