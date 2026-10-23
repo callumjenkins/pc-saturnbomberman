@@ -241,6 +241,8 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     host = counting(sh2emu.load(KRNL, BASE))    # the memory the host build runs on, and its callees
     machine.fill(cpu, r, BASE, code_runs(), plants)
     machine.copy(cpu, host)
+    machine.attach(cpu)
+    machine.attach(host)
     vals = [value(a, r) for a in args]
 
     state = {"calls": []}

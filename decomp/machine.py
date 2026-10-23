@@ -17,7 +17,9 @@ STACK = WRAM + RAM - 0x1000
 # Random data covers the tables the functions read, up to the stack.
 DATA = (0x060B0000, STACK)
 # Memory past the two work RAMs, as plain memory: a trial compares what a function writes to a
-# device's registers, and nothing the device would do with it. The CD block is left out.
+# device's registers, and nothing the device would do with it, apart from the three writes `Devices`
+# answers. The last five hold the CD block, the cache-purge mirror, the SMPC, the SCSP's registers, and the words
+# above work RAM that a function reading stack arguments reaches from the cosim's stack.
 DEVICES = (
     ("sound RAM", 0x05A00000, 0x80000),
     ("VDP1 VRAM", 0x05C00000, 0xC0000),
@@ -27,8 +29,36 @@ DEVICES = (
     ("VDP2 registers", 0x05F80000, 0x200),
     ("SCU registers", 0x05FE0000, 0x100),
     ("on-chip registers", 0xFFFFFE00, 0x200),
+    ("CD block", 0x05890000, 0x10000),
+    ("cache purge", 0x46000000, 0x100000),
+    ("SMPC", 0x00100000, 0x100),
+    ("SCSP registers", 0x05B00000, 0x1000),
+    ("above work RAM", 0x06100000, 0x1000),
 )
 MAX_REGIONS = 16                 # host_mem.c's
+HIRQ, CR1, SMPC_SF = 0x05890008, 0x05890018, 0x00100063
+
+
+class Devices(sh2emu.Memory):
+    """The memory of a trial once it is filled. Three writes get the answer the drivers cannot do without,
+    and host_mem.c's `g_wr` gives the same: HIRQ keeps the flags written as 1 and sets CMOK, as the CD block
+    does once it has taken a command; CR1 keeps the status a plant gave it, so a command does not overwrite
+    the response; and the SMPC finishes a command at once, so SF reads back 0."""
+
+    def write(self, addr: int, size: int, value: int) -> None:
+        a = addr & 0x1FFFFFFF
+        if a == HIRQ and size == 2:
+            value = (self.read(addr, 2) & value) | 1
+        elif a == SMPC_SF and size == 1:
+            value &= ~1
+        elif a == CR1 and size == 2:
+            return
+        super().write(addr, size, value)
+
+
+def attach(cpu: sh2emu.CPU) -> None:
+    """Makes cpu's memory answer those writes. Plants go in before this, so they are not answered."""
+    cpu.mem.__class__ = Devices
 
 
 def copy(source: sh2emu.CPU, target: sh2emu.CPU) -> None:

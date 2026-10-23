@@ -95,9 +95,20 @@ uint32_t g_rd(uint32_t addr, int size)
 
 void g_wr(uint32_t addr, int size, uint32_t value)
 {
-    uint8_t *p = locate(addr, size);
+    uint8_t *p;
     int i;
 
+    if ((addr & 0x1FFFFFFF) == 0x05890008 && size == 2) {
+        uint8_t *q = locate(addr, 2);
+
+        if (q)
+            value = (((uint32_t)q[0] << 8 | q[1]) & value) | 1;
+    }
+    if ((addr & 0x1FFFFFFF) == 0x00100063 && size == 1)
+        value &= ~1u;
+    if ((addr & 0x1FFFFFFF) == 0x05890018 && size == 2)
+        return;
+    p = locate(addr, size);
     if (!p)
         return;
     for (i = size - 1; i >= 0; i--, value >>= 8)

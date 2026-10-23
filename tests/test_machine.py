@@ -64,7 +64,7 @@ def test_a_plant_lands_in_the_region_its_address_names(address, at):
 
 def test_a_plant_outside_every_region_is_refused():
     with pytest.raises(sh2emu.MemoryError_):
-        filled(1, [(0x06100000, 4, [0], 1.0)])
+        filled(1, [(0x07000000, 4, [0], 1.0)])
 
 
 def test_with_nothing_dumped_every_trial_is_random(monkeypatch):
