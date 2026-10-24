@@ -37,6 +37,10 @@ DEVICES = (
 )
 MAX_REGIONS = 16                 # host_mem.c's
 HIRQ, CR1, SMPC_SF = 0x05890008, 0x05890018, 0x00100063
+_ALIGNED = bytes(b & 0xFC for b in range(256))
+_HALF = bytes(0xFF if b < 128 else 0 for b in range(256))
+_LINKED = 0.5                    # the share of random fills whose variables hold addresses among the noise
+_VARIABLES_HIGH = bytes(0x0B + b % 5 for b in range(256))    # the second byte of an address in DATA, 060B to 060F
 
 
 class Devices(sh2emu.Memory):
@@ -123,11 +127,30 @@ def fill(cpu: sh2emu.CPU, r: random.Random, base: int, code: list[tuple[int, int
         lo = base - WRAM if r.random() < 0.5 else DATA[0] - WRAM    # the image's own variables too, half the time
         wram[lo:DATA[1] - WRAM] = r.randbytes(DATA[1] - WRAM - lo)
         wraml[:] = r.randbytes(RAM)
+        if r.random() < _LINKED:
+            lo = DATA[0] - WRAM
+            wram[lo:DATA[1] - WRAM] = linked(r, DATA[1] - DATA[0], wram[lo:DATA[1] - WRAM])
     for start, end in code:
         wram[base - WRAM + start:base - WRAM + end] = image[start:end]
     for address, size, values, chance in plants:
         if r.random() < chance:
             cpu.mem.write(address, size, r.choice(values))
+
+
+def linked(r: random.Random, size: int, noise: bytes) -> bytes:
+    """`noise` with half of its longwords replaced by a longword-aligned address in the variables' area, so that a
+    pointer a function loads from memory is usually one it can follow, and what it finds there holds more of them."""
+    words = size // 4
+    pointers = bytearray(size)
+    pointers[0::4] = bytes([0x06]) * words
+    pointers[1::4] = r.randbytes(words).translate(_VARIABLES_HIGH)
+    pointers[2::4] = r.randbytes(words)
+    pointers[3::4] = r.randbytes(words).translate(_ALIGNED)
+    choice = bytearray(size)
+    for lane in range(4):
+        choice[lane::4] = r.randbytes(words).translate(_HALF)
+    mask = int.from_bytes(choice, "big")
+    return (((int.from_bytes(pointers, "big") & mask) | (int.from_bytes(noise, "big") & ~mask)) & ((1 << 8 * size) - 1)).to_bytes(size, "big")
 
 
 def point(lib: ctypes.CDLL, cpu: sh2emu.CPU) -> list:

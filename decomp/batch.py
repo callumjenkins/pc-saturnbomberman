@@ -82,7 +82,7 @@ def main() -> None:
     parser.add_argument("--executed", action="store_true", help="only functions a route runs")
     parser.add_argument("--parked", action="store_true", help="the functions a task can park in, not the others")
     parser.add_argument("--limit", type=int, default=50, help="how many, smallest first")
-    parser.add_argument("--jobs", type=int, default=4)
+    parser.add_argument("--jobs", type=int, default=int(os.environ.get("FARM_CORES", 4)), help="default: FARM_CORES, set by `farm run`, else 4")
     args = parser.parse_args()
 
     os.makedirs(OUT, exist_ok=True)

@@ -1,0 +1,6 @@
+# Ignored files the cosim reads: the original's code, the recompiler's discovery caches and the RAM dumps.
+build/extract/BOMSS/0KRNL.BIN
+build/recomp/inputs.json
+build/decomp/function-code.json
+build/decomp/code-runs.json
+build/decomp/ram

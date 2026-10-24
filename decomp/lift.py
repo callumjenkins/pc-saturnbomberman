@@ -35,6 +35,7 @@ class Read:
     term: str                               # the branch condition or the returned expression
     tail: bool = False                      # it ends by jumping to another function
     fresh: set[int] = field(default_factory=set)         # State.fresh where the block ends
+    clobbered: set[int] = field(default_factory=set)     # State.clobbered where the block ends
 
 
 def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: "sh2.Image",
@@ -260,8 +261,10 @@ def stack_arguments(st: State) -> list[str]:
 def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: set[int], flags: int,
                slots: dict[int, int], fresh: set[int], code: set[int] | None,
                functions: dict[int, set[int]] | None = None, framed: bool = False,
-               stored: set[int] | None = None, saved: set[int] | None = None, parked: bool = False) -> tuple[Read, int]:
+               stored: set[int] | None = None, saved: set[int] | None = None, parked: bool = False,
+               clobbered: set[int] = frozenset()) -> tuple[Read, int]:
     st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh), framed=framed, parked=parked,
+               clobbered=set(clobbered),
                touched=registers.written(image, code) if code is not None else frozenset(range(8, 15)),
                stored=stored if stored is not None else set(), saved=saved if saved is not None else set())
     block = structure.Block(start)
@@ -309,15 +312,17 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
         if at in stops:
             block.kind, block.targets = "goto", [at]
             break
-    return Read(block, st.stmts, term, tail, st.fresh), st.flags
+    return Read(block, st.stmts, term, tail, st.fresh, st.clobbered), st.flags
 
 
 def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: set[int], code: set[int] | None,
                 functions: dict[int, set[int]] | None = None, framed: bool = False,
                 parked: bool = False) -> tuple[dict[int, Read], dict[int, int]]:
     """Every block, read until the registers a call may pass settle: those written since the last call
-    on every path into a block, so an argument set before a branch reaches the call after it."""
+    on every path into a block, so an argument set before a branch reaches the call after it, and those a call
+    overwrote on some path into it, which the block may not read."""
     fresh = {at: set() if at == entry else set(range(16)) for at in stops}
+    clobbered: dict[int, set[int]] = {at: set() for at in stops}
     while True:
         flags = 0
         reads: dict[int, Read] = {}
@@ -326,15 +331,18 @@ def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: s
         saved: set[int] = set()
         for at in sorted(stops):
             reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions, framed,
-                                          stored, saved, parked)
+                                          stored, saved, parked, clobbered[at])
         into: dict[int, list[set[int]]] = {at: [] for at in stops}
+        after: dict[int, list[set[int]]] = {at: [] for at in stops}
         for read in reads.values():
             for target in read.block.targets:
                 into[target].append(read.fresh)
+                after[target].append(read.clobbered)
         settled = {at: set() if at == entry or not into[at] else set.intersection(*into[at]) for at in stops}
-        if settled == fresh:
+        spoiled = {at: set().union(*after[at]) for at in stops}
+        if settled == fresh and spoiled == clobbered:
             return reads, slots
-        fresh = settled
+        fresh, clobbered = settled, spoiled
 
 
 def simplify(read: Read, live_out: set[str], returns: bool) -> None:

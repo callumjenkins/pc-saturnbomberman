@@ -160,3 +160,12 @@ def test_a_register_read_after_a_call_to_a_runtime_routine_is_still_the_callers(
               encode("lds.l @Rm+,pr", 0, 15), RTS, NOP)
     image, code = program(caller, (encode("shar Rn", 0), RTS, encode("shar Rn", 0)))
     assert registers.reads(image, BASE, code) == {4, 6}
+
+
+def test_a_register_a_call_overwrote_is_refused_when_a_later_block_reads_it():
+    # caller: bsr callee ; nop ; tst r0,r0 ; bt over ; mov r6,r4 ; over: rts ; nop       callee: mov #0,r6 ; rts ; nop
+    caller = (0xB005, NOP, encode("tst Rm,Rn", 0, 0), 0x8900, encode("mov Rm,Rn", 4, 6), RTS, NOP)
+    callee = (encode("mov #imm,Rn", 6, low=0), RTS, NOP)
+    image, code = program(caller, callee)
+    with pytest.raises(lift.Unsupported, match="r6 is read after a call"):
+        lift.lift(image, BASE, code[BASE], code)

@@ -47,6 +47,8 @@ EDGES = (0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7F
 KRNL = os.path.join(ROOT, "build", "extract", "BOMSS", "0KRNL.BIN")
 TABLE_MAX = 0x100                # bytes of a jump table code_runs keeps, at most
 FRAME_MAX = 0x400                # bytes of a function's stack check.py compares at a call, at most
+CALLS_MAX = 2000                # calls a trial that answers them follows before it gives up, since an endless loop of them would fill memory
+STUBBED = 0.5                    # the share of trials in which the calls out of the function are answered without running them
 
 
 class Counting(sh2emu.CPU):
@@ -57,12 +59,14 @@ class Counting(sh2emu.CPU):
     _code: dict[int, set[int]] | None = None
     _jumps: set[int] | None = None
     seen: set[tuple[int, bool]] | None = None     # (pc, taken) for each conditional branch of the called function's own code
+    stub: list[int] | None = None                 # when set, a call out of the function's own code returns the next of these without running
 
     def call(self, entry: int, max_steps: int = 10_000_000, **regs: int) -> int:
         self.code, self.outer = self._body(entry), []
         self.own = self.code
         self.entry_sp = regs.get("r15", self.r[15])
         self.calls: list[tuple[int, list[int], list[int]]] = []
+        self.stubbed: list[tuple[int, list[int]]] = []
         return super().call(entry, max_steps, **regs)
 
     def frame(self, sp: int) -> list[int]:
@@ -79,6 +83,12 @@ class Counting(sh2emu.CPU):
         if op in ("bsr", "jsr", "bsrf"):
             if self.code is self.own and pc in self.own:
                 self.calls.append((self.pr, self.r[8:16], self.frame(self.r[15])))
+                if self.stub is not None:
+                    if len(self.calls) > CALLS_MAX:
+                        raise RuntimeError("more than %d calls" % CALLS_MAX)
+                    self.polls += 1
+                    self.return_stub()
+                    return
             self.polls += 1
             self.outer.append(self.code)
             self.code = self._body(self.pc)
@@ -89,12 +99,24 @@ class Counting(sh2emu.CPU):
         elif op in ("braf", "jmp"):
             self.polls += pc in self._polling()
             if self.pc not in self.code:
+                if self.stub is not None and self.code is self.own:
+                    self.return_stub()
+                    return
                 self.code = self._body(self.pc)
         elif op == "bra" or op in CONDITIONAL and self.pc != pc + (4 if ins.delay else 2):
             if self.pc not in self.code:
+                if self.stub is not None and self.code is self.own:
+                    self.return_stub()
+                    return
                 self.code = self._body(self.pc)
             elif self.pc <= pc:
                 self.polls += 1
+
+    def return_stub(self) -> None:
+        """Answers the call just made, or the jump out of the function, without running the callee."""
+        self.stubbed.append((self.pc, self.r[4:8]))
+        self.r[0] = self.stub[(len(self.stubbed) - 1) % len(self.stub)]
+        self.pc = self.pr
 
     @classmethod
     def _body(cls, entry: int) -> set[int]:
@@ -200,11 +222,18 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
     the game, whose registers hold something else."""
     @CALL_HOOK
     def hook(addr, args, n):
+        if state.get("stub") and len(state["stubbed"]) > CALLS_MAX:
+            state["error"] = "more than %d calls" % CALLS_MAX
+            return 0
         regs = (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")
         at = ctypes.c_uint32.in_dll(lib, "g_sp").value - 4 * max(n - 4, 0)         # r15 as the callee gets it
         state.setdefault("snaps", []).append(
             (list(regs[8:15]), at, [cpu.rl(a) for a in range(at, min(state.get("entry_sp", at), at + FRAME_MAX), 4)],
              ctypes.c_uint32.in_dll(lib, "g_pr_value").value))
+        if state.get("stub"):
+            state["stubbed"].append((addr, list(args[:max(min(n, 4), 0)]), n))
+            state["calls"].append(addr)
+            return state["stub"][(len(state["stubbed"]) - 1) % len(state["stub"])]
         cpu.r[8:15] = regs[8:15]
         keep = (cpu.r[8:], cpu.pr)
         controls = (ctypes.c_uint32 * 3).in_dll(lib, "g_ctl")
@@ -280,7 +309,10 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     (ctypes.c_uint32 * 2).in_dll(lib, "g_mac_regs")[:] = [macl, mach]
     ctypes.c_uint32.in_dll(lib, "g_pr_value").value = sh2emu.RETURN_SENTINEL
 
-    state = {"calls": [], "snaps": [], "entry_sp": host.r[15]}
+    state = {"calls": [], "snaps": [], "entry_sp": host.r[15], "stubbed": []}
+    if random.Random("stub:" + repr(vals)).random() < STUBBED:
+        answers = random.Random("answers:" + repr(vals))
+        state["stub"] = cpu.stub = [value(("any",), answers) & 0xFFFFFFFF for _ in range(16)]
     keep = machine.point(lib, host)
     hook = hook_for(host, state, [value(("any",), r) & 0xFFFFFFFF for _ in range(8)], lib)
     ctypes.c_uint32.in_dll(lib, "g_sp").value = host.r[15]
@@ -319,8 +351,28 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     problems += machine.differences(host, cpu)
     problems += machine.control_differences(lib, cpu)
     problems += call_differences(state["snaps"], cpu.calls, sig is not None and sig.parked)
+    if state.get("stub"):
+        problems += stub_differences(state["stubbed"], cpu.stubbed)
     problems += register_differences(lib, cpu, machine.mac_start(vals))
     return vals, problems, False
+
+
+def stub_differences(host: list[tuple[int, list[int], int]], game: list[tuple[int, list[int]]]) -> list[str]:
+    """Where a trial answered the calls itself: whether both sides made the same calls, with the arguments the
+    callee reads."""
+    if len(host) != len(game):
+        return ["made %d calls out of the function, the game's code %d" % (len(host), len(game))]
+    image, code = status.krnl_image(), status.function_code()
+    problems = []
+    for i, ((addr, args, n), (target, regs)) in enumerate(zip(host, game)):
+        if addr != target:
+            problems.append("call %d goes to %08X, the game's code %08X" % (i + 1, addr, target))
+            continue
+        wanted = registers.reads(image, addr, code) if addr in code else frozenset(range(4, 8))
+        for position, mine in enumerate(args):
+            if 4 + position in wanted and mine != regs[position]:
+                problems.append("call %d passes r%d = %08X, the game's code %08X" % (i + 1, 4 + position, mine, regs[position]))
+    return problems
 
 
 def call_differences(host: list[tuple[list[int], int, list[int], int]],

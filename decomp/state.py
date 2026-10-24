@@ -68,7 +68,7 @@ class State:
 
     def _get(self, reg: int) -> str:
         if reg in self.clobbered:
-            raise Unsupported("r%d is read after a call to %s overwrote it" % (reg, self.callee))
+            raise Unsupported("r%d is read after a call%s overwrote it" % (reg, " to " + self.callee if self.callee else ""))
         return const(self.known[reg]) if reg in self.known else "r%d" % reg
 
     def put(self, reg: int, expr: str, pure: bool = True) -> None:

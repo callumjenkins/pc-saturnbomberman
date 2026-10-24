@@ -26,4 +26,6 @@ runtime units without game data. Bomberman's Python tests use `uv run pytest -q`
 parallelises routes. Agree on exclusive build access before running it. A reference comparison
 provides separate evidence of correctness; frame hashes and the internal interpreter do not.
 
+Run heavy batches (`decomp/batch.py`, the audit, a cosim sweep) under `farm run --cores N --mem-gb G --`, which queues them behind the machine's other jobs and caps them, and size worker pools from `FARM_CORES`. `farm map` spreads a list of items over several machines from a snapshot of the working tree; this repo's `.farm-include` lists the ignored files the cosim reads. See `/home/callum/gh/home-lab/farm/README.md`.
+
 Callum writes commits. Leave completed work in the working tree unless he asks for a commit.
