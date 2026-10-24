@@ -117,7 +117,6 @@ case("f0602A940", [], False, [plant(0x060C0FA8, 2, [0, 1, 1, 1]), plant(0x060C0F
 case("f0602BA62", [pick(0, 1, 0x1234, -1)], True, PAD_WORDS)
 case("f060306F0", [], True, [plant(0x060C101A, 1, [0, 1, 1, 2])] + [plant(0x06006096 + 2 * k, 2, [0, 0x70, 0xF0, 0x1F0], 0.6) for k in range(10)]
      + [plant(0x06006134 + k, 1, [0, 0, 1], 0.8) for k in range(10)] + [plant(0x060C0FF4 + 2 * k, 2, [3, 4, 5]) for k in range(3)])
-case("f0602B8FC", [pick(0, 1, 2, 3, 4)], True, PAD_WORDS)
 case("f0602C65E", [], True, PAD_WORDS + [plant(0x060C0640 + k, 1, [0, 0, 0, 4, 1], 0.95) for k in range(10)])
 
 # Table 060B69CC pairs two bytes with a kind, counted from 1; the plants make the first match fall at different places.

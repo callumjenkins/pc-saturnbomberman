@@ -55,6 +55,8 @@ class State:
     sp: int = 0                             # r15 relative to its value on entry
     slots: dict[int, int] = field(default_factory=dict)     # the function's stack locals: offset to size
     framed: bool = False                    # locals live in guest memory below `sp`, r15 on entry
+    parked: bool = False                    # a task can park in the function: its pushes and pops are real stores and loads
+    touched: frozenset[int] = frozenset(range(8, 15))   # r8 to r14 the function writes, which a jump out of it has to set
     stored: set[int] = field(default_factory=set)   # offsets from r15 on entry stored to anywhere in the function
     saved: set[int] = field(default_factory=set)    # r8 to r14 the function's prologue has pushed
 
@@ -162,6 +164,8 @@ def frame(ins: "sh2.Insn", st: State) -> bool:
     if op == "add" and n == 15 and ins.imm is not None:
         st.sp += ins.imm
         return True
+    if st.parked and parked_frame(ins, st):
+        return True
     if op in ("sts.l", "lds.l"):
         st.sp += sp_change(ins)
         return True
@@ -239,6 +243,41 @@ def set_control(reg: str, value: str, st: State) -> None:
     st.effect("SET%s(%s);" % (_CONTROL[reg], strip(value)))
     if reg == "sr":
         st.flag = None
+
+
+def parked_frame(ins: "sh2.Insn", st: State) -> bool:
+    """The saves and restores of pr and of r8 to r14 in a function a task can park in. A task resumed
+    inside it, on a stack the game built or on another fiber, pops them from the guest stack, so each is a
+    store or a load there, and r8 to r14 are the context's registers."""
+    op, fmt, n, m = ins.op, ins.fmt, ins.n, ins.m
+    if op in ("sts.l", "lds.l"):
+        reg = fmt.split(" ")[1].split(",")[0] if op == "sts.l" else fmt.rsplit(",", 1)[1]
+        if reg != "pr":
+            raise Unsupported("%s in a function a task can park in" % ins.text)
+        if op == "sts.l":
+            push(st, "PR()")
+        else:
+            pop(st, "SETPR(LD32(%s));")
+        return True
+    if op == "mov.l" and fmt == "mov.l Rm,@-Rn" and n == 15 and 8 <= m <= 14 and m not in st.saved:
+        st.saved.add(m)
+        push(st, "R(%d)" % m)
+        return True
+    if op == "mov.l" and fmt == "mov.l @Rm+,Rn" and m == 15 and 8 <= n <= 14:
+        pop(st, "SETR(%d, LD32(%%s));" % n)
+        return True
+    return False
+
+
+def pop(st: State, template: str) -> None:
+    st.effect(template % st.get(15))
+    st.sp += 4
+
+
+def push(st: State, value: str) -> None:
+    st.sp -= 4
+    st.stored.add(st.sp)
+    st.effect("ST32(%s, %s);" % (st.get(15), value))
 
 
 def local(st: State, offset: int, size: int, ins: "sh2.Insn") -> str:

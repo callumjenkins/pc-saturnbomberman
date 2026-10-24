@@ -14,14 +14,52 @@ int g_fault;
 int g_polls;                /* g_poll()s and g_call()s, which check.py compares with the game's */
 uint32_t g_sp;              /* the game's r15, which check.py sets before each trial and g_call passes on */
 
+uint32_t g_regs[16];        /* r8 to r14 in the context, which check.py sets from the game's side and compares afterwards */
+uint32_t g_pr_value;        /* pr, the same */
 uint32_t g_ctl[3];          /* sr, gbr and vbr, which check.py sets before each trial and compares afterwards */
 
 /* Runs the game's function at addr with the arguments; check.py sets it. */
 uint32_t (*g_call_hook)(uint32_t addr, const uint32_t *args, int n);
 
-void g_poll(void)
+int g_poll_limit = 3000000; /* g_poll()s after which a loop that tests with AGAIN ends and the trial counts as one that faulted */
+
+int g_poll(void)
 {
-    g_polls++;
+    if (++g_polls > g_poll_limit) {
+        g_fault = 1;
+        return 0;
+    }
+    return 1;
+}
+
+uint32_t g_entry_sp(void)
+{
+    return g_sp;
+}
+
+void g_set_sp(uint32_t sp)
+{
+    g_sp = sp;
+}
+
+uint32_t g_reg(int n)
+{
+    return g_regs[n];
+}
+
+void g_reg_set(int n, uint32_t value)
+{
+    g_regs[n] = value;
+}
+
+uint32_t g_pr(void)
+{
+    return g_pr_value;
+}
+
+void g_pr_set(uint32_t value)
+{
+    g_pr_value = value;
 }
 
 uint32_t g_cr(int reg)
@@ -81,13 +119,22 @@ void g_unframe(uint32_t top)
     g_sp = top;
 }
 
+/* A tail call: the callee's registers are the function's own when it returns, so g_tail tells the hook not to put
+ * r8 to r14 back. */
+int g_tail;
+
 uint32_t g_jump(uint32_t addr, const uint32_t *args, int n)
 {
+    uint32_t result;
+
     if (!g_call_hook) {
         g_fault = 1;
         return 0;
     }
-    return g_call_hook(addr, args, n);
+    g_tail = 1;
+    result = g_call_hook(addr, args, n);
+    g_tail = 0;
+    return result;
 }
 
 /* A routine's registers go to the hook as a negative count: -3 for r0, r1 and r2. */

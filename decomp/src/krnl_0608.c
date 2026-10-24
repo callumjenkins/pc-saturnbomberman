@@ -388,6 +388,17 @@ void f060846D2(void)
     GJUMP0(0x060846FE);
 }
 
+void f06084714(void)
+{
+    if (LDU16(LD32(CURRENT) + 66) == 2)
+        GCALL0(0x0608479C);
+    ST16(LD32(CURRENT) + 66, 0);
+    ST16(LD32(CURRENT) + 68, 1);
+    GCALL0(0x060145A8);
+    POLL();
+    GJUMP0(LD32(LD32(CURRENT)));
+}
+
 void f06084794(void)
 {
     POLL();
@@ -555,6 +566,11 @@ void f06086D52(void)
     GJUMP1(0x060144F4, 0x06086D64);
 }
 
+void f06086DD0(void)
+{
+    GJUMP0(0x06086EEC);
+}
+
 int f06087374(void)
 {
     gaddr flags = FLAGS_AT(LDU16(LD32(CURRENT) + 20));
@@ -697,6 +713,20 @@ int f06087FAE(void)
 {
     GCALL0(0x0606E81C);
     return !GCALL3(0x0606BCDE, LDU16(LD32(CURRENT) + 64), 5, 5);
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060883C6(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x060883CE);
+    r0 = GCALL5(0x0606C8C0, 0, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    return 0;
 }
 
 int f060884C6(void)
@@ -856,6 +886,20 @@ int f06089FDA(void)
         ST16(mover + 70, 0x1F0);
         ST16(mover + 68, 0x1F0);
     }
+    return 0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0608A70A(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x0608A712);
+    r0 = GCALL5(0x0606C8C0, 0, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
     return 0;
 }
 
@@ -1182,6 +1226,26 @@ int f0608B80C(void)
 
 void f0608B904(void)
 {
+}
+
+int f0608BE0E(void)
+{
+    int r0, r1;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    r1 = LD16(0x060C31E2);
+    if (!((r1 & r1) == 0)) {
+        SETSP((sp - 4));
+        SETPR(0x0608BE24);
+        r0 = GCALL0(0x0608C84C);
+    } else {
+        SETSP((sp - 4));
+        SETPR(0x0608BE1C);
+        r0 = GCALL0(0x0608C6C4);
+    }
+    SETPR(LD32((sp - 4)));
+    return 0;
 }
 
 void f0608BE1C(void)

@@ -470,27 +470,29 @@ unsigned char f060215A2(int code)
     return n;
 }
 
-void f06021604(int points, int who)
+void f06021604(int amount, int who)
 {
-    int rec = (OBJECTS + 0x30) + who * 124;
-    int total = 0x060C0690 + who * 4;
-    int round = 0x060C0698 + who * 4;
-    int team;
+    gaddr rec = REC(who);
+    gaddr total = 0x060C0690 + who * 4;
+    gaddr best = 0x060C0698 + who * 4;
+    gaddr cell;
 
-    if ((LD8(rec + 4) & 128) || points == 0)
+    if (LDU8(rec + 4) & 128)
         return;
-    ST32(total, LD32(total) + points);
-    ST32(round, LD32(round) + points);
-    if ((unsigned int)LD32(total) >= 9999999)
+    if (amount == 0)
+        return;
+    ST32(total, LD32(total) + amount);
+    ST32(best, LD32(best) + amount);
+    if ((unsigned)LD32(total) >= 9999999)
         ST32(total, 9999999);
-    if ((unsigned int)LD32(round) >= 9999999)
-        ST32(round, 9999999);
-    if (LDU16(rec + 46) & 0x800) {
-        team = 0x060D82DC + who * 20 + (LDU16(0x060D5F70 + LDU16(rec + 36) * 124) - 1) * 4;
-        ST32(team, LD32(team) + points);
-        if ((unsigned int)LD32(team) >= 9999999)
-            ST32(team, 9999999);
-    }
+    if ((unsigned)LD32(best) >= 9999999)
+        ST32(best, 9999999);
+    if (!(LDU16(rec + 46) & 0x800))
+        return;
+    cell = 0x060D82DC + who * 20 + ((LDU16(REC(LDU16(rec + 36)) + 64) - 1) << 2);
+    ST32(cell, LD32(cell) + amount);
+    if ((unsigned)LD32(cell) >= 9999999)
+        ST32(cell, 9999999);
 }
 
 void f0602168C(int points, int flags)
@@ -1384,6 +1386,52 @@ int f06024DF8(void)
     }
     ST16(obj + 68, LD16(obj + 68) + 4);
     return 68;
+}
+
+int f0602510C(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r4 = LD32(0x060D7E60);
+    r0 = LD16(r4 + 8);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068ACC, (r0 & 0xFFFF), 57);
+    return r0;
+}
+
+int f0602511A(void)
+{
+    int r0, r2;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06025120);
+    r0 = GCALL0(0x0602510C);
+    SETPR(LD32((sp - 4)));
+    r2 = LD32(0x060D7E64);
+    ST16(62 + r2, 0);
+    return 62;
+}
+
+int f0602543E(void)
+{
+    int r0, r2;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    r0 = GCALL0(0x060254C0);
+    SETSP((sp - 4));
+    r0 = GCALL2(0x0600CDC4, r0, 0x4000);
+    SETSP((sp - 4));
+    SETPR(0x06025450);
+    r0 = GCALL0(0x06025504);
+    r2 = LD32(0x060D7E60);
+    SETPR(LD32((sp - 4)));
+    ST32(r2, 0x06025374);
+    return r0;
 }
 
 int f060254C0(void)
@@ -3500,6 +3548,11 @@ void f0602D570(short n, short turn, short x, short y)
     dy = HELPER((int)(y * scale) >> 8);
     back = (ABS(128 - angle) >> 2) - 16;
     GCALL5(0x0602D45C, n, dx, dy, scale, back + 90);
+}
+
+void f0602D752(void)
+{
+    GJUMP0(0x0602D784);
 }
 
 void f0602D7C0(unsigned char n)

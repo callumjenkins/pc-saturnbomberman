@@ -69,6 +69,12 @@ def control_differences(lib: ctypes.CDLL, game: sh2emu.CPU) -> list[str]:
     return problems
 
 
+def callee_saved(vals: list[int]) -> list[int]:
+    """The r8 to r14 a trial starts with, drawn from its arguments as controls() does."""
+    r = random.Random("r8:" + repr(vals))
+    return [r.getrandbits(32) for _ in range(7)]
+
+
 def controls(vals: list[int]) -> tuple[int, int, int]:
     """The sr, gbr and vbr a trial starts with, drawn from its arguments so the trial's other draws stay as they were."""
     r = random.Random(repr(vals))

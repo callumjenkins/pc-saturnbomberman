@@ -57,6 +57,14 @@ def saved(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> fro
     return frozenset(r for r in _live(image, address, functions) if 8 <= r <= 14)
 
 
+def written(image: sh2.Image, code: set[int]) -> frozenset[int]:
+    """r8 to r14 that the instructions at `code`, delay slots included, write."""
+    found: set[int] = set()
+    for pc in code:
+        found |= _operands(image.insn(pc))[1]
+    return frozenset(r for r in found if 8 <= r <= 14)
+
+
 def writes(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> frozenset[int]:
     """r0 to r7 the function at address, or anything it calls or jumps to, may write. A function without
     code in `functions`, or one reached again while it is being read, writes all of them."""

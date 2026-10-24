@@ -229,6 +229,40 @@ int f060069C2(int a, int b, int c, int d)
     return GCALL5(0x06006AA0, a, b, c, d, 1);
 }
 
+int f060069D2(int entry, int stack, int words, int arg)
+{
+    FRAME(sp, 0);
+    int index = LD32(sp);
+    gaddr rec = RECS + (short)(index * 88);
+    int cpu = (VBR() >> 10) & 1;
+    gaddr top = stack + (words - 1) * 4;
+    int parent;
+
+    if (LD8(rec + 80))
+        return -1;
+    ST8(rec + 82, LD32(0x26006018 + cpu * 4));
+    ST8(rec + 83, 0);
+    ST8(rec + 84, arg);
+    ST32(rec + 4, 1);
+    ST32(rec, 1);
+    ST8(rec + 80, 1);
+    ST8(rec + 81, 0);
+    ST32(rec + 20, stack);
+    ST32(rec + 24, words);
+    ST32(rec + 28, words << 2);
+    ST32(rec + 12, 0x06006954);
+    ST32(rec + 16, 0);
+    ST32(rec + 68, entry);
+    ST32(rec + 64, top);
+    ST32(rec + 32, 1);
+    ST32(top, 0x06006954);
+    ST32(0x26006030, LD32(0x26006030) + 1);
+    parent = LD32(0x26006018 + cpu * 4);
+    if (parent != -1)
+        ST8(RECS + 83 + (short)(parent * 88), LD8(RECS + 83 + (short)(parent * 88)) + 1);
+    return index;
+}
+
 int f06006AA0(int a, gaddr buf, int size, int d)
 {
     FRAME(sp, 0);
@@ -342,6 +376,19 @@ int f06006E34(int n)
     return count;
 }
 
+void f06006EE6(int a, int b)
+{
+    gaddr rec = LD32(0x26006020 + (((VBR() >> 10) & 1) << 2));
+
+    ST32(rec + 12, a);
+    ST32(rec + 16, b);
+}
+
+int f06006EFC(gaddr dst)
+{
+    return COPYW(0x06094450, dst, LD32(0x26006020 + ((VBR() >> 10) & 1) * 4) + 12, 8);
+}
+
 int f06006F40(short n)
 {
     return RECS + (short)(n * 88);
@@ -433,6 +480,22 @@ int f060079B6(gaddr cursor, char c)
     ST8(LD32(cursor) + 1, 0);
     ST32(cursor, LD32(cursor) + 1);
     return 0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060079CC(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    ST32(sp - 44, r4);
+    ST32(sp - 40, 0x060079B6);
+    SETSP((sp - 44));
+    SETPR(0x060079DC);
+    r0 = GCALL6(0x060077FC, (sp - 44), r5, r6, r7, LD32((sp - 44)), LD32((sp - 40)));
+    SETPR(LD32((sp - 4)));
+    return r0;
 }
 
 void f06007A14(void)
@@ -1234,6 +1297,33 @@ int f06009EDA(void)
     return GCALL1(0x060A4AF4, LD32(0x060BF4E4)) != 5 && GCALL1(0x060A4AF4, LD32(0x060BF4E4)) != -1;
 }
 
+int f06009F02(int r4, int r5, int r6, int r7)
+{
+    int r0, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    r14 = 0x06006D36;
+    while (1) {
+        SETSP((sp - 8));
+        r0 = GCALL4(0x06009EDA, 0, 0, r6, r7);
+        if (!((r0 & r0) == 0)) {
+            POLL();
+            SETR(14, r14);
+            SETSP((sp - 8));
+            SETPR(0x06009F10);
+            r0 = GCALL1(r14, 2);
+            continue;
+        } else {
+            break;
+        }
+    }
+    SETPR(LD32((sp - 8)));
+    SETR(14, LD32((sp - 4)));
+    return r0;
+}
+
 void f06009FA8(void)
 {
     int i = 0;
@@ -1850,19 +1940,20 @@ void f0600AD62(int a, unsigned short b)
         ST16(0x060BF5DA + (off), w); \
     } while (0)
 
-void f0600B41A(int slot, unsigned short id)
+void f0600B41A(int index, unsigned short kind)
 {
-    int dst = 0x060BF5EC + slot * 16;
-    int src = 0x060B2EB0 + id * 16;
+    gaddr dst = 0x060BF5EC + index * 16;
+    gaddr src = 0x060B2EB0 + kind * 16;
+    int value;
 
-    ST16(dst, id);
-    COPY_KEEP(2);
-    COPY_KEEP(4);
-    COPY_KEEP(10);
-    COPY_KEEP(6);
-    COPY_KEEP(8);
-    COPY_KEEP(12);
-    COPY_KEEP(14);
+    ST16(dst, kind);
+    COPY_FIELD(2);
+    COPY_FIELD(4);
+    COPY_FIELD(10);
+    COPY_FIELD(6);
+    COPY_FIELD(8);
+    COPY_FIELD(12);
+    COPY_FIELD(14);
 }
 
 void f0600B67E(unsigned int w, unsigned int h)
@@ -1880,6 +1971,31 @@ void f0600B67E(unsigned int w, unsigned int h)
     ST16(0x060B2F7C, x);
     ST16(0x060B2F7E, h + y - 1);
     GJUMP3(0x060949E0, VDP1_VRAM, 0x060B2F04, 160);
+}
+
+int f0600B7C2(int a, int b, int c, int d)
+{
+    return GJUMP4(LD32(0x0600026C), a, b, c, d);
+}
+
+int f0600B7CA(int a, int b, int c, int d)
+{
+    return GJUMP4(LD32(0x0600026C), a, b, c, d);
+}
+
+int f0600B8A8(void)
+{
+    int r0, r4;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    r4 = LD32(0x060C0298);
+    SETSP((sp - 4));
+    SETPR(0x0600B8B2);
+    r0 = GCALL1(0x060A0C40, r4);
+    SETPR(LD32((sp - 4)));
+    ST32(0x060B2F00, -1);
+    return r0;
 }
 
 #undef COPY_KEEP
@@ -1959,6 +2075,16 @@ int f0600BD3C(void)
 void f0600BD74(void)
 {
     GCALL1(0x0600C9AA, GCALL0(0x0600BD3C));
+}
+
+int f0600C2E2(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP0(0x0602EB78);
+    return r0;
 }
 
 void f0600C364(void)
@@ -2670,6 +2796,11 @@ void f0600D8F8(void)
 void f0600D900(void)
 {
     ST16(0x060D82CA, 0);
+}
+
+void f0600DBFC(void)
+{
+    GJUMP0(0x0600DC5C);
 }
 
 int f0600E096(void)

@@ -18,8 +18,8 @@
  *   AGAIN(cond)     cond, with a POLL() when it holds: a do-while's condition.
  *   HELPER(expr)    expr, where SHC compiles its operator into a call to a runtime routine that takes r0
  *                   (a shift by a variable or a long way, a division): the call advances time once.
- *   DIVS/DIVU(a,b)  a / b, signed or unsigned, and MODS/MODU(a,b) a % b, as SHC's routines give them:
- *                   0 for a zero divisor. Each is a HELPER.
+ *   DIVS/DIVU(a,b)  a / b, signed or unsigned, and MODS/MODU(a,b) a % b, as SHC's routines give them: 0 for a
+ *                   zero divisor, and sr's M and Q bits changed. Each calls the routine, as SHL does.
  *                   The recompiled game advances time at each of those branches and at each call, so the C
  *                   has to reach the same number, and check.py counts both sides.
  *   SHL/SHR/SAR(x,n) x shifted left, right or right with its sign by a variable count, DIVS16(a,b) a
@@ -31,6 +31,12 @@
  *                   advances time, as the game's ldc does, and changes the interrupt mask.
  *   MAC_L/MAC_W(acc,a,b)  acc, a 64-bit MACH:MACL, plus the product of two words, as mac.l and mac.w add it
  *                   (with sr's S bit set, saturated).
+ *   ENTRY_SP(sp)    declares sp, the game's stack pointer on entry, in a function a task can park in. Its locals
+ *                   live on the game's stack below sp as the game's code puts them, and SETSP(v) sets r15 to
+ *                   v before each call that can switch tasks, as the code after it reads it.
+ *   R(n) SETR(n,v)  r8 to r14 in the context, which a task resumed after a call has: set before each call that
+ *                   can switch tasks, for the ones the code after the call reads, and by the pops of the epilogue.
+ *   PR() SETPR(v)   pr, which the prologue pushes and the epilogue pops.
  *   FRAME(sp, n)    declares sp, the game's stack pointer on entry, and reserves n bytes of the game's
  *                   stack below it, for locals whose address the function passes on. The arguments a
  *                   caller passed on the stack start at sp. The swap's wrapper and SHC free the frame on return.
@@ -71,9 +77,9 @@ typedef gaddr H16PTR;
  * any more on the stack, as SHC passes them. r8 to r15 and pr come back unchanged. */
 uint32_t g_call(uint32_t addr, const uint32_t *args, int n);
 uint32_t g_jump(uint32_t addr, const uint32_t *args, int n);
-void g_poll(void);
-#define POLL() g_poll()
-#define AGAIN(cond) ((cond) ? (g_poll(), 1) : 0)
+int g_poll(void);
+#define POLL() ((void)g_poll())
+#define AGAIN(cond) ((cond) ? g_poll() : 0)
 #define HELPER(expr) (g_poll(), (expr))
 /* Runs SHC's routine at addr with r0, r1 and r2 set, as a call: the routine's own loops advance time. */
 uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2);
@@ -88,6 +94,18 @@ uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2);
 #define BITSET(p, v, spec) g_routine(0x06094B08, (v), (spec), (p))
 uint32_t g_frame(int size);
 void g_unframe(uint32_t top);
+uint32_t g_entry_sp(void);
+void g_set_sp(uint32_t sp);
+uint32_t g_reg(int n);
+void g_reg_set(int n, uint32_t value);
+uint32_t g_pr(void);
+void g_pr_set(uint32_t value);
+#define ENTRY_SP(sp) gaddr sp = g_entry_sp()
+#define SETSP(v) g_set_sp((uint32_t)(v))
+#define R(n) ((int)g_reg(n))
+#define SETR(n, v) g_reg_set((n), (uint32_t)(v))
+#define PR() ((int)g_pr())
+#define SETPR(v) g_pr_set((uint32_t)(v))
 uint32_t g_cr(int reg);
 void g_cr_set(int reg, uint32_t value);
 long long g_mac_l(long long acc, int a, int b);
@@ -102,14 +120,10 @@ long long g_mac_w(long long acc, int a, int b);
 #define MAC_W(acc, a, b) g_mac_w((acc), (a), (b))
 #define FRAME(sp, size) gaddr sp = g_frame(size)
 #define UNFRAME(sp) g_unframe(sp)
-int32_t g_divs(int32_t a, int32_t b);
-uint32_t g_divu(uint32_t a, uint32_t b);
-int32_t g_mods(int32_t a, int32_t b);
-uint32_t g_modu(uint32_t a, uint32_t b);
-#define DIVS(a, b) HELPER(g_divs((a), (b)))
-#define DIVU(a, b) HELPER(g_divu((a), (b)))
-#define MODS(a, b) HELPER(g_mods((a), (b)))
-#define MODU(a, b) HELPER(g_modu((a), (b)))
+#define DIVS(a, b) ((int)g_routine(0x0609410C, (b), (a), 0))
+#define DIVU(a, b) ((unsigned)g_routine(0x060941C0, (b), (a), 0))
+#define MODS(a, b) ((int)g_routine(0x06094268, (b), (a), 0))
+#define MODU(a, b) ((unsigned)g_routine(0x06094330, (b), (a), 0))
 #define GCALL0(a) ((int)g_call((a), 0, 0))
 #define GCALL_(a, n, ...) ((int)g_call((a), (const uint32_t[]){__VA_ARGS__}, (n)))
 #define GCALL1(a, x1) GCALL_(a, 1, x1)
@@ -189,6 +203,12 @@ typedef volatile unsigned short *H16PTR;
 #define STRCMP(a, b) strcmp((char *)(a), (char *)(b))
 #define BITSET(p, v, spec) _bitset((p), (v), (spec))
 #define UNFRAME(sp) ((void)0)
+#define ENTRY_SP(sp) FRAME(sp, 0)
+#define SETSP(v) ((void)(v))
+#define R(n) (0)
+#define SETR(n, v) ((void)(v))
+#define PR() (0)
+#define SETPR(v) ((void)(v))
 #define SR() get_cr()
 #define GBR() get_gbr()
 #define VBR() get_vbr()

@@ -32,6 +32,7 @@ class Signature:
     address: int
     returns: str
     params: list[str]
+    parked: bool = False                    # it keeps what a task resumed after a call reads (ENTRY_SP), so a task can park in it
 
     @property
     def name(self) -> str:
@@ -70,7 +71,9 @@ def signatures(paths: list[str] | None = None) -> dict[int, Signature]:
     found = {}
     for m in _DEFINITION.finditer(text):
         address = int(m.group("address"), 16)
-        found[address] = Signature(address, host_type(m.group("ret")), [host_type(p) for p in split_params(m.group("params"))])
+        body = text[m.end():text.find("\n}\n", m.end())]
+        found[address] = Signature(address, host_type(m.group("ret")), [host_type(p) for p in split_params(m.group("params"))],
+                                   "ENTRY_SP(" in body)
     return found
 
 
@@ -93,9 +96,12 @@ def declaration(sig: Signature) -> str:
 
 def swapped(table: str = status.TABLE) -> list[int]:
     rows = status.previous(table).values()
-    parked = [r for r in rows if r.module == MODULE and r.state == "swapped" and r.yields]
+    defined = signatures()
+    parked = [r for r in rows if r.module == MODULE and r.state == "swapped" and r.yields
+              and not (r.address in defined and defined[r.address].parked)]
     if parked:
-        sys.exit("swapped, but a task can park inside: " + ", ".join("%08X" % r.address for r in parked))
+        sys.exit("swapped, but a task can park inside and its C does not keep what a resumed task reads: "
+                 + ", ".join("%08X" % r.address for r in parked))
     caught = [r for r in rows if r.module == MODULE and r.state == "swapped" and r.hooked]
     if caught:
         sys.exit("swapped, but a hook is on one of its instructions: " + ", ".join("%08X" % r.address for r in caught))

@@ -1215,13 +1215,6 @@ int f060342E8(REF(Stream) s)
 {
     return ring32(s, 64);
 }
-void f06034FC4(void)
-{
-    int b = SP(b1);
-
-    SP_SET(count, ((b >> 4) - (b & 15)) * 3);
-    SP_STATE(2);
-}
 
 /* Reads the next bit, least significant first, from the bytes at r->src. */
 int f060342F8(REF(BitReader) r)
@@ -1568,6 +1561,13 @@ void f06034F80(void)
         p += 10;
     } while (AGAIN(n != 0));
     ST32(0x060C1648, 0);
+}
+void f06034FC4(void)
+{
+    int b = SP(b1);
+
+    SP_SET(count, ((b >> 4) - (b & 15)) * 3);
+    SP_STATE(2);
 }
 
 void f06034FF6(void)
@@ -3702,6 +3702,30 @@ void f0603B7EA(short a, short b, short c)
     ST32(0x060D7E30, 0x0603B660);
 }
 
+int f0603B8E4(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32(sp - 4, 0x060D7E30);
+    r0 = LD16(0x060D7E3E);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, (r0 & 0xFFFF), 0x154);
+    return r0;
+}
+
+int f0603B8F8(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32(sp - 4, 0x060D7E30);
+    r0 = LD16(0x060D7E3E);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, (r0 & 0xFFFF), 0x150);
+    return r0;
+}
+
 int f0603BBD6(void)
 {
     return LD32(0x060D7E30) == 0x0603DDA6 ? -1 : 0;
@@ -3939,6 +3963,11 @@ void f0603CCA2(unsigned short a, unsigned short b)
 {
     ST16(0x060D7E28, a);
     ST16(0x060D7E2A, b * 20);
+}
+
+void f0603CD76(void)
+{
+    GJUMP0(0x0603CE9A);
 }
 
 void f0603CEAE(void)
@@ -4372,6 +4401,16 @@ void f0603F904(void)
     ST16(c + 32, LD16(c + 24));
     ST16(c + 30, LD16(c + 22));
     ST16(c + 34, LD16(c + 26));
+}
+
+int f0603FA30(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP3(0x0603FA36, r4, r5, 0x200);
+    return r0;
 }
 
 int f0603FB16(short n)

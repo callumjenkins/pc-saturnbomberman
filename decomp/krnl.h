@@ -319,5 +319,215 @@ static void ease(gaddr p, int d)
 #define CD_RETRIES 0x00030000
 #define CD_ENTRY(i) (LD32(DEV) + 92 + (i) * 16)
 
+#define CLOCK_ADJUST 0x060FC17C
+#define CLOCK_LAST   0x060FC180
+#define SOUND_BASE   0x25A00404
+#define SAMPLE_RATE  44100
+
+/* The middle 32 bits of x0 * y0 + x1 * y1, as two mac.l and an xtrct take them. */
+static int dot16(int x0, int y0, int x1, int y1)
+{
+    return (int)(MAC_L(MAC_L(0, x0, y0), x1, y1) >> 16);
+}
+
+/* Raises the interrupt mask to 15 and keeps the old one in mask; the second puts it back. */
+#define RAISE_MASK(mask)                           \
+    int mask = (SR() >> 4) & 15;                   \
+    SETSR((SR() & ~0xF0) | 0xF0)
+#define RESTORE_MASK(mask) SETSR(((mask) << 4) | (SR() & ~0xF0))
+
+#define COPY_FIELD(off)                       \
+    do {                                      \
+        value = LD16(src + (off));            \
+        ST16(dst + (off), value);             \
+        ST16(0x060BF5DA + (off), value);      \
+    } while (0)
+
+/* The middle 32 bits of the two products summed, as mac.l leaves them. */
+#define DOT(a, b, c, d) ((int)(MAC_L(MAC_L(0, (a), (b)), (c), (d)) >> 16))
+
+#define SMPC_CURSOR 0x060FA964
+#define CURSOR_BYTE LDU8(LD32(SMPC_CURSOR))
+#define REPORT_SLOT (LD32(0x060FA920) + (LDU8(0x060FA90C) + 2) * LD32(0x060FA914))
+
+static void smpc_answer(void)
+{
+    int state = LDU8(0x060FA970);
+
+    if (state < 5)
+        POLL();
+    if (state == 2) {
+        ST8(0x060FA906, ~LDU8(0x060FA906));
+        ST8(SMPC_IREG0, LDU8(0x060FA906) & 0x80);
+    } else if (state < 5) {
+        ST8(SMPC_IREG0, (LDU8(0x060FA906) & 0x80) | 0x40);
+    }
+}
+
+static void smpc_read_header(void)
+{
+    ST8(0x060FA8F4, LD8(SMPC_OREG8));
+    ST8(0x060FA8F5, LD8(SMPC_OREG9));
+    ST16(0x060FA8F6, (LDU8(SMPC_OREG10) << 8) | LDU8(SMPC_OREG11));
+    ST32(0x060FA8F8, (LDU8(SMPC_OREG12) << 24) | (LDU8(SMPC_OREG13) << 16) | (LDU8(SMPC_OREG14) << 8) | LDU8(SMPC_OREG15));
+    ST8(0x060FA8FC, LD8(SMPC_OREG0));
+    ST8(0x060FA900, 1);
+}
+
+static void smpc_parse(void)
+{
+    int flags = LDU8(SMPC_SR) & 0xC0;
+
+    if (flags == 0xC0 ? LD32(0x060FA96C) != 0 : flags != 0x80 || LD32(0x060FA96C) == 0) {
+        ST8(0x060FA970, 3);
+        return;
+    }
+    ST8(0x060FA970, 0);
+    ST32(SMPC_CURSOR, SMPC_OREG0);
+    while (LD32(0x060FA968) < 2) {
+        POLL();
+        if (LD32(0x060FA974) <= 0) {
+            ST32(0x060FA974, CURSOR_BYTE & 15);
+            ST8(LD32(0x060FA958) + LD32(0x060FA968) * 2, CURSOR_BYTE & 0xF0);
+            ST8(LD32(0x060FA958) + LD32(0x060FA968) * 2 + 1, CURSOR_BYTE & 15);
+            ST32(0x060FA96C, LD32(0x060FA96C) + 1);
+            if (LD32(0x060FA974))
+                ST8(0x060FA980, 1);
+            ST32(SMPC_CURSOR, LD32(SMPC_CURSOR) + 2);
+            GCALL0(0x060997BC);
+            if (LDU8(0x060FA970) == 2)
+                return;
+        }
+        ST32(0x060FA978, 0);
+        while (LD32(0x060FA974) > 0) {
+            POLL();
+            if (LD32(0x060FA974) == LD32(0x060FA978)) {
+                ST8(0x060FA970, 3);
+                break;
+            }
+            ST32(0x060FA978, LD32(0x060FA974));
+            if (LDU8(0x060FA980) == 1) {
+                ST8(0x060FA980, 0);
+                if ((CURSOR_BYTE & 0xF0) == 0xF0) {
+                    ST8(REPORT_SLOT, CURSOR_BYTE & 0xF0);
+                    GCALL1(0x06099A2E, CURSOR_BYTE & 15);
+                    ST32(0x060FA914, LD32(0x060FA914) + 1);
+                    if (LD32(0x060FA914) >= LDU16(0x060FA90A))
+                        ST8(0x060FA970, 1);
+                    if (LDU8(0x060FA970) == 1)
+                        break;
+                    ST8(0x060FA980, 1);
+                    ST32(0x060FA974, LD32(0x060FA974) - 1);
+                } else {
+                    ST8(REPORT_SLOT, CURSOR_BYTE == 0xE3 ? 32 : CURSOR_BYTE & 0xF0);
+                    if ((CURSOR_BYTE & 15) == 0)
+                        ST8(0x060FA981, 1);
+                    else
+                        ST8(0x060FA97D, CURSOR_BYTE & 15);
+                    ST8(0x060FA982, 1);
+                }
+                ST32(SMPC_CURSOR, LD32(SMPC_CURSOR) + 2);
+                GCALL0(0x060997BC);
+                if (LDU8(0x060FA970) == 2)
+                    break;
+            }
+            if (LDU8(0x060FA981) == 1) {
+                ST8(0x060FA981, 0);
+                ST8(0x060FA97D, CURSOR_BYTE);
+                ST32(SMPC_CURSOR, LD32(SMPC_CURSOR) + 2);
+                GCALL0(0x060997BC);
+                if (LDU8(0x060FA970) == 2)
+                    break;
+            }
+            if (LDU8(0x060FA982) == 1) {
+                ST8(0x060FA982, 0);
+                GCALL1(0x06099A2E, LDU8(0x060FA97D));
+                ST8(0x060FA97C, LDU8(0x060FA97D) < LDU8(0x060FA90C) ? LDU8(0x060FA97D) : LDU8(0x060FA90C));
+                if ((unsigned)(LDU8(0x060FA97D) * 2 + LD32(SMPC_CURSOR)) > SMPC_SR) {
+                    ST8(0x060FA985, 1);
+                    if ((unsigned)(LDU8(0x060FA97C) * 2 + LD32(SMPC_CURSOR)) > SMPC_SR) {
+                        ST8(0x060FA983, 1);
+                        ST8(0x060FA97F, LDU8(0x060FA97D) - LDU8(0x060FA97C));
+                        ST8(0x060FA97E, LDU8(0x060FA97C) - (SMPC_SR - LD32(SMPC_CURSOR)) / 2);
+                        GCALL1(0x060997F0, SMPC_SR);
+                        ST8(0x060FA970, 2);
+                        break;
+                    }
+                    ST8(0x060FA984, 1);
+                    ST8(0x060FA97F, LDU8(0x060FA97D) - (SMPC_SR - LD32(SMPC_CURSOR)) / 2);
+                    ST8(0x060FA92C, 2);
+                    ST32(0x060FA930, LD32(SMPC_CURSOR));
+                    ST32(SMPC_CURSOR, SMPC_SR);
+                } else {
+                    ST8(0x060FA92C, 2);
+                    ST32(0x060FA930, LD32(SMPC_CURSOR));
+                    ST32(SMPC_CURSOR, LD32(SMPC_CURSOR) + LDU8(0x060FA97D) * 2);
+                    ST8(0x060FA984, 1);
+                }
+            }
+            if (LDU8(0x060FA983) == 1) {
+                unsigned int end;
+
+                ST8(0x060FA983, 0);
+                if (LDU8(0x060FA97E) > 32) {
+                    ST8(0x060FA983, 1);
+                    ST8(0x060FA97E, LDU8(0x060FA97E) - 32);
+                    end = SMPC_SR;
+                } else {
+                    ST8(0x060FA984, 1);
+                    end = SMPC_OREG0 + LDU8(0x060FA97E) * 2;
+                    ST8(0x060FA97E, 0);
+                }
+                while ((unsigned int)LD32(SMPC_CURSOR) < end) {
+                    POLL();
+                    ST8(LD32(0x060FA934), CURSOR_BYTE);
+                    ST32(0x060FA934, LD32(0x060FA934) + 1);
+                    ST32(SMPC_CURSOR, LD32(SMPC_CURSOR) + 2);
+                }
+                if (LDU8(0x060FA983) == 1) {
+                    GCALL0(0x060997BC);
+                    if (LDU8(0x060FA970) == 2)
+                        break;
+                }
+            }
+            if (LDU8(0x060FA984) == 1) {
+                ST8(0x060FA984, 0);
+                GCALL0(0x06099828);
+                ST32(0x060FA914, LD32(0x060FA914) + 1);
+                if (LD32(0x060FA914) >= LDU16(0x060FA90A))
+                    ST8(0x060FA970, 1);
+                if (LDU8(0x060FA970) == 1)
+                    break;
+                if (LDU8(0x060FA985) == 0) {
+                    ST32(0x060FA974, LD32(0x060FA974) - 1);
+                    ST8(0x060FA980, 1);
+                }
+                GCALL0(0x060997BC);
+                if (LDU8(0x060FA970) == 2)
+                    break;
+            }
+            if (LDU8(0x060FA985) == 1) {
+                ST8(0x060FA985, 0);
+                if ((unsigned)(LDU8(0x060FA97F) * 2 + LD32(SMPC_CURSOR)) > SMPC_SR) {
+                    ST8(0x060FA985, 1);
+                    ST8(0x060FA97F, LDU8(0x060FA97F) - (SMPC_SR - LD32(SMPC_CURSOR)) / 2);
+                    ST32(SMPC_CURSOR, SMPC_SR);
+                } else {
+                    ST32(SMPC_CURSOR, LD32(SMPC_CURSOR) + LDU8(0x060FA97F) * 2);
+                    ST8(0x060FA980, 1);
+                    ST32(0x060FA974, LD32(0x060FA974) - 1);
+                    ST8(0x060FA97F, 0);
+                }
+                GCALL0(0x060997BC);
+                if (LDU8(0x060FA970) == 2)
+                    break;
+            }
+        }
+        if (LD32(0x060FA974) <= 0)
+            ST32(0x060FA968, LD32(0x060FA968) + 1);
+        if (LDU8(0x060FA970) != 0)
+            return;
+    }
+}
 
 #endif

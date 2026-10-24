@@ -1108,6 +1108,51 @@ int f0606725C(void)
     return pos;
 }
 
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06067DCC(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06067DD2);
+    r0 = GCALL5(0x06067F1E, 0, 0, 0, 0, LD32((sp - 4)));
+    SETSP((sp - 4));
+    SETPR(0x06067DD6);
+    r0 = GCALL5(0x06067F78, 0, 0, 0, 0, LD32((sp - 4)));
+    SETSP((sp - 4));
+    SETPR(0x06067DDA);
+    r0 = GCALL5(0x06067F78, 1, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    UNFRAME(sp);
+    r0 = GJUMP1(0x06008A96, 1);
+    return r0;
+}
+
+int f06067F1E(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r5 = LD8(0x060C063E);
+    r4 = LD16(0x060DFE54);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, r4, ((r5 & 255) + 59));
+    return r0;
+}
+
+int f06067F2E(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r4 = LD16(0x060DFE54);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, r4, 59);
+    return r0;
+}
+
 void f0606828C(int n)
 {
     gaddr obj = OBJ(LDU16(0x060DFE40 + (n + 11) * 2));
@@ -2993,6 +3038,11 @@ int f0606CF28(int n)
     return 0x060D5F34;
 }
 
+void f0606D1CE(void)
+{
+    GJUMP0(0x0606D1FC);
+}
+
 void f0606D208(void)
 {
     gaddr p;
@@ -3545,6 +3595,26 @@ int f0606FC60(void)
     ST16(LD32(MOVER_PTR) + 48, 12);
     GCALL0(0x0606B6BC);
     ST32(0x060E215C + (short)(LD16(0x060C062C) * 20), 0x0606FCAE);
+    return 1;
+}
+
+int f0606FCAE(void)
+{
+    gaddr cur;
+
+    if (LDU16(LD32(MOVER_PTR) + 60) < 0xFF00)
+        return 1;
+    cur = LD32(CURRENT);
+    ST16(cur + 18, LDU16(cur + 18) & ~0x10);
+    ST32(0x060E215C + (short)(LD16(0x060C062C) * 20), 0x0606B1EC);
+    ST16(LD32(CURRENT) + 12, 0);
+    ST16(LD32(CURRENT) + 10, 0x6000);
+    GCALL0(0x0606C7DE);
+    ST16(LD32(CURRENT) + 48, 17);
+    ST16(LD32(MOVER_PTR) + 48, 13);
+    GCALL0(0x0606B6BC);
+    ST16(LD32(CURRENT) + 40, 15);
+    GCALL1(0x0606D8E6, LDU16(LD32(CURRENT) + 40));
     return 1;
 }
 

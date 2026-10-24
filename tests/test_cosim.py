@@ -243,25 +243,12 @@ def test_the_image_keeps_a_jump_table_up_to_the_code_after_it():
     assert set(range(0x06027710, 0x06027736)) <= kept
 
 
-@pytest.mark.parametrize("routine, symbol, signed", [
-    pytest.param(0x0609410C, "g_divs", True, id="signed quotient"),
-    pytest.param(0x060941C0, "g_divu", False, id="unsigned quotient"),
-    pytest.param(0x06094268, "g_mods", True, id="signed remainder"),
-    pytest.param(0x06094330, "g_modu", False, id="unsigned remainder"),
+@pytest.mark.parametrize("name", [
+    pytest.param("f06010058", id="a signed division"),
+    pytest.param("f06010072", id="an unsigned one"),
 ])
-def test_the_host_divisions_give_what_the_games_routines_do(tmp_path, routine, symbol, signed):
-    path = tmp_path / "none.c"
-    path.write_text('#include "krnl.h"\n')
-    lib = check.build([str(path)])
-    fn = getattr(lib, symbol)
-    width = ctypes.c_int32 if signed else ctypes.c_uint32
-    fn.restype, fn.argtypes = width, [width, width]
-    pairs = [(0x80000000, 0xFFFFFFFF), (5, 0), (0xFFFFFFF9, 2), (7, 0xFFFFFFFE), (100, 7), (0xFFFFFFFF, 0x10)]
-    for dividend, divisor in pairs:
-        game, host = sh2emu.load(check.KRNL, BASE), sh2emu.load(check.KRNL, BASE)
-        keep = machine.point(lib, host)
-        got = fn(width(dividend).value, width(divisor).value) & 0xFFFFFFFF
-        want = game.call(routine, r0=divisor, r1=dividend)
-        assert (got, host.mem.read(0x060FA8B4, 4)) == (want, game.mem.read(0x060FA8B4, 4)), (hex(dividend), hex(divisor))
-        del keep
+def test_a_division_leaves_the_m_and_q_bits_of_sr_as_the_games_routine_does(name):
+    sig = gen.signatures()[int(name[1:], 16)]
+    fails, ran = check.run(check.build(), name, check.default_spec(sig), 40, 1, sig)
+    assert ran > 0 and not fails
 

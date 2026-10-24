@@ -87,11 +87,23 @@ def test_code_that_reads_a_register_its_caller_keeps_is_the_middle_of_a_function
     assert registers.saved(image, BASE, code) == needs
 
 
-def test_a_branch_into_the_middle_of_a_function_is_refused():
-    # caller: bra piece ; nop                piece: mov r14,r0 ; rts ; nop
-    image, code = program((0xA000, NOP), (encode("mov Rm,Rn", 0, 14), RTS, NOP))
+def test_a_call_into_the_middle_of_a_function_is_refused():
+    # caller: bsr piece ; nop ; rts ; nop                piece: mov r14,r0 ; rts ; nop
+    image, code = program((0xB002, NOP, RTS, NOP), (encode("mov Rm,Rn", 0, 14), RTS, NOP))
     with pytest.raises(lift.Unsupported, match="middle of a function that reads r14"):
         lift.lift(image, BASE, code[BASE], code)
+
+
+def test_a_branch_into_the_middle_of_a_function_leaves_it_the_registers_the_function_did_not_touch():
+    # caller: bra piece ; nop                piece: mov r14,r0 ; rts ; nop
+    image, code = program((0xA000, NOP), (encode("mov Rm,Rn", 0, 14), RTS, NOP))
+    assert "GJUMP0(0x06006004)" in lift.lift(image, BASE, code[BASE], code)
+
+
+def test_a_branch_into_the_middle_of_a_function_sets_the_registers_it_has_written():
+    # caller: mov #1,r14 ; bra piece ; nop           piece: mov r14,r0 ; rts ; nop
+    image, code = program((encode("mov #imm,Rn", 14, low=1), 0xA000, NOP), (encode("mov Rm,Rn", 0, 14), RTS, NOP))
+    assert "SETR(14, 1);" in lift.lift(image, BASE, code[BASE], code)
 
 
 def test_a_call_to_a_helper_that_takes_r0_is_refused():

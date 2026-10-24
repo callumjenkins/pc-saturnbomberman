@@ -551,6 +551,12 @@ void f06077870(void)
     GJUMP0(0x060778A0);
 }
 
+void f0607799E(void)
+{
+    ST16(0x060C27CE, 255);
+    GJUMP0(0x060779C4);
+}
+
 void f06077A20(void)
 {
     int i = 0;
@@ -891,12 +897,58 @@ int f0607CCBC(gaddr list)
     return 0;
 }
 
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0607D240(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    r0 = GCALL5(0x0607D2A4, 0, 0, 0, 0, LD32((sp - 4)));
+    SETSP((sp - 4));
+    SETPR(0x0607D24C);
+    r0 = GCALL5(0x0606C8C0, 0, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    return 0;
+}
+
 void f0607D2A4(void)
 {
     int d = GCALL1(0x060949D0, LDU16(LD32(CURRENT) + 28) - LDU16(LD32(CURRENT) + 68));
 
     ST16(LD32(MOVER_PTR) + 68, 0x100 + d);
     ST16(LD32(MOVER_PTR) + 70, d + 64);
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0607D60E(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x0607D616);
+    r0 = GCALL5(0x0606C8C0, 0, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    return 0;
+}
+
+int f0607D906(int r4, int r5)
+{
+    int r0, r6;
+    ENTRY_SP(sp);
+
+    r6 = r5;
+    ST32((sp - 4), PR());
+    ST32(sp - 12, r4);
+    ST32(sp - 8, r5);
+    r5 = LD32(sp - 12);
+    SETSP((sp - 12));
+    SETPR(0x0607D918);
+    r0 = GCALL3(0x0606AE6C, 92, r5, r6);
+    SETPR(LD32((sp - 4)));
+    return r0;
 }
 
 int f0607DA5A(void)
@@ -1100,6 +1152,17 @@ int f0607F83C(void)
         ST8(mover + 78, -LD8(mover + 78));
     }
     return 0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0607F9E4(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP0(0x0606D398);
+    return r0;
 }
 
 int f0607F9EA(void)

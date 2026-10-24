@@ -217,6 +217,17 @@ int f06042A9C(void)
     return y;
 }
 
+int f06042AD0(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r0 = LD16(0x060D7B80);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, (r0 & 0xFFFF), 71);
+    return r0;
+}
+
 int f06042C8C(void)
 {
     gaddr obj = LD32(TASK_OBJ);
@@ -1732,6 +1743,17 @@ void f0604F0A6(void)
 unsigned short f0604F1EE(void)
 {
     return (unsigned char)LD8(0x060C02A0) != 255;
+}
+
+int f0604F5C8(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r4 = LD16(0x060C1798);
+    UNFRAME(sp);
+    r0 = GJUMP1(0x0606B51C, (r4 & 0xFFFF));
+    return r0;
 }
 
 /* Folds the six bytes at 060C17A4 into four: their sum, OR, AND NOT and XOR. */

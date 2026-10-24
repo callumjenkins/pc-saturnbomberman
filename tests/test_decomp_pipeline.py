@@ -39,7 +39,7 @@ def test_a_hook_on_an_inner_instruction_marks_its_function():
 def test_batch_skips_a_hooked_function(monkeypatch):
     rows = table(status.Row("KRNL", HOOKED, 11, 0, True, hooked=True), status.Row("KRNL", PLAIN, 23, 0, True))
     monkeypatch.setattr(status, "previous", lambda *a, **k: rows)
-    args = argparse.Namespace(addresses=[], leaves=True, executed=False, limit=10)
+    args = argparse.Namespace(addresses=[], leaves=True, executed=False, limit=10, parked=False)
     assert batch.select(args) == [PLAIN]
 
 

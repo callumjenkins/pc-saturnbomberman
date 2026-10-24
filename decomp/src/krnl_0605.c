@@ -116,6 +116,16 @@ int f06050F4E(void)
     return GCALL1(0x06050F02, 3) | a;
 }
 
+int f06051066(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP4(0x060511EC, 0, 0, r6, r7);
+    return r0;
+}
+
 void f0605112C(void)
 {
     FRAME(sp, 56);
@@ -302,6 +312,15 @@ void f06051E4C(short stage, short n)
     ST16(obj + 18, 0);
     if (stage > 1)
         ST16(obj + 16, LD16(obj + 16) - 16);
+}
+
+int f06052024(void)
+{
+    FRAME(sp, 16);
+    gaddr buf = sp - 16;
+
+    GCALL1(0x06095868, buf);
+    return (LDU8(buf + 4) << 8) + (LDU8(buf + 5) << 8);
 }
 
 void f0605232C(void)
@@ -969,6 +988,11 @@ void f06057B40(void)
     ST16(0x060BB8FC, 1);
 }
 
+void f06057D56(void)
+{
+    GJUMP0(0x06057DBE);
+}
+
 void f06058274(void)
 {
     int row = 0;
@@ -1010,6 +1034,18 @@ void f06058598(gaddr list)
         list += 2;
         pair += 4;
     } while (AGAIN(i < 4));
+}
+
+int f06058DA6(int a, int b, int c, int d)
+{
+    if (LD32(0x060C0AA8) != 1)
+        return 0;
+    return GJUMP4(LD32(0x06002F68), a, b, c, d);
+}
+
+int f06058DBE(int a, int b, int c, int d)
+{
+    return GJUMP4(LD32(0x06002F3C), a, b, c, d);
 }
 
 void f06058EA0(void)
@@ -1825,6 +1861,20 @@ int f0605B960(void)
     ST16(obj + 40, LD16(obj + 40) | 0x400);
     SET(Fall, FALL_PTR, fn, 0x0605B9BC);
     return 40;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605B9BC(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r5 = LD8(0x060C18FB);
+    r4 = LD32(0x060C1658);
+    r0 = LD16(r4 + 10);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, r0, ((r5 & 255) + 0x1B2));
+    return r0;
 }
 
 void f0605BBEC(void)

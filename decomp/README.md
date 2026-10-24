@@ -8,18 +8,18 @@ agrees with the game's own code.
 |---|---|
 | `src/krnl_06XX.c` | The decompiled functions, one file per 0x10000 of address (`krnl_0600.c` holds 06006000 to 0600FFFF), so workers given different ranges edit different files |
 | `krnl.h` | Types and tables the files share |
-| `status.tsv` | A row per function the recompile found: size, calls, whether a route runs it, whether a task can park in it, and its state |
+| `status.tsv` | A row per function the recompile found: size, calls, whether a route runs it, whether a task can park in it, whether it starts inside another function (`piece`), and its state |
 | `status.py` | Rewrites `status.tsv` from the build, the coverage files and `src/` |
 | `lift.py` | A first draft of a function's C from its instructions (`state.py` turns each instruction into statements, `structure.py` rebuilds the if and while) |
 | `batch.py` | Lifts many functions and runs the cosim on each draft |
 | `run.py` | Runs the cosim on functions of `src/` and swaps those that agree |
+| `merge.py` | Puts a batch of workers' C into `src/` and their cases into `planted/` |
 | `gen.py` | Writes `swap_gen.inc` and the `[[replace]]` block in `game.toml` from `status.tsv` |
 | `check.py` | Runs each function against the game's own code and compares results and memory |
 | `machine.py`, `snapshots.py` | The memory a cosim trial runs on, and the route RAM dumps half the trials start from |
 | `cases.py`, `planted/` | Arguments and planted values that reach the branches default trials miss; one file in `planted/` per batch of workers |
 | `registers.py` | Which registers a function reads before writing them, and the runtime routines SHC calls for an operator |
 | `guest.h`, `host_mem.c` | Macros and memory that let one source compile for SHC and for the host |
-| `divide.c` | SHC's division routines in C, for the cosim and the game |
 | `swap.cpp`, `swap.cmake` | The runtime side: `g_rd`, `g_wr`, `g_call` and the build option |
 | `shc_compare.py` | Compiles `src/` with SHC and compares its instructions with the game's |
 
@@ -35,8 +35,7 @@ uv run tests/frames.py normal battle-round   # the game, with the swap
 
 `run.py` marks the row `swapped` and runs `gen.py`. Rebuild with `tests/frames.py` or `bomberman run`.
 It refuses a function a task can park inside (the `yields` column, from saturn-recomp's
-`analysis.resume`): a host function has no stack to resume on another fiber, and swapping two such
-functions changed the sound in `normal`.
+`analysis.resume`) unless its C keeps what a task resumed after a call reads; see "Functions a task can park in".
 
 The lifter reads straight from the instructions: registers become locals, stack slots become `v`
 locals, and calls go through `GCALL`, passing the registers the callee reads (`registers.py`). A call to
@@ -44,10 +43,13 @@ one of SHC's runtime routines becomes its operator: `DIVS`, `DIVU`, `MODS` or `M
 shift in `HELPER()`, or one of the library macros below. A function that passes a local's address on, or reads an argument from the stack,
 keeps its locals in a frame on the game's own stack: `FRAME(sp, n)` declares `sp`, r15 on entry, and
 the locals are loads and stores below it. A loop that leaves for several places gets its main exit after
-it and the others written out where it leaves for them. The lifter refuses a jump table, a
-control-register access, a register read after a call overwrote it, a call into the middle of a function
-(code that reads r8 to r14 from its caller), and code that reads a register it never set (a piece of a
-larger function or a task's entry). Its drafts are for reading and rewriting, and the cosim decides
+it and the others written out where it leaves for them. A jump through a register is a tail call, `GJUMPn`
+with the pointer; `SR()`, `GBR()` and `VBR()` read the control registers and `SETSR(x)` and the others write
+them (a write to sr advances time, as `ldc` does); `m0` is MACH:MACL as one `long long`, and `MAC_L` and `MAC_W`
+accumulate into it. The lifter refuses a jump table, a register read after a call that may have written it,
+a call into the middle of a function (code that reads r8 to r14 from its caller), and code that reads a
+register it never set (a piece of a larger function or a task's entry). A draft that would write its blocks out
+more than twelve times over is refused too. Its drafts are for reading and rewriting, and the cosim decides
 whether they are right.
 
 ## Checks
@@ -99,7 +101,7 @@ arguments go in r4 to r7 and later ones on the stack, lowest first. r8 to r15 an
 unchanged. Calls between functions of `src/` are ordinary C calls (`f0600942E` calls `f0600940A`).
 `FRAME` lowers r15 while its function runs, so a callee's frame sits below it, and the swap's wrapper puts
 r15 back on return. Before a `GJUMP`, `UNFRAME(sp)` gives the callee the stack its caller left.
-Calls with more than four arguments are tested on the host only. A callee that switches tasks is why `yields` functions are left alone.
+Calls with more than four arguments are tested on the host only.
 
 In the cosim, r0 to r7 that a call does not pass hold different values on the two sides, so C that
 leaves an argument to whatever a register held disagrees with the game. The game's function starts the
@@ -124,6 +126,29 @@ The build is the C in `src/` for the functions `status.tsv` marks `swapped`, and
 rest. A call from the C to a function that is not swapped runs the generated one (`GCALLn`), and a function
 is not swapped if the C jumps to an address inside another function, since the recompile has no entry there.
 `tests/test_targets.py` checks every call and jump target of the C is a function the recompile has.
+
+## Functions a task can park in
+
+A task parks inside a call to the game's yield and comes back at the call's return address, either on the
+host fiber that parked, where it returns as if nothing had happened, or on a stack the game built, where the
+runtime starts it over at that address (`06006C00` is such a resume point, entered millions of times in
+`normal`). Those addresses are entries of the recompile, rows of `status.tsv` with `piece` set, and the build
+keeps the generated code for them. The code at one reads the context's r8 to r14 and r15, and the words it
+pops from the game's stack, so the C of a function with a resume point leaves exactly those where the
+original does, at each call that can switch tasks:
+
+- `lift.py --parked` writes `ENTRY_SP(sp)`, which declares `sp`, r15 on entry. Every push and pop is a store or
+  load on the game's stack at the original's offset: `ST32(sp - 4, PR())` for the pr the prologue saves,
+  `ST32(sp - 8, R(14))` for a register of the caller's, and `SETR(14, LD32(sp - 8))` and `SETPR(...)` to put
+  them back.
+- Before a call whose return address is a resume point, `SETR(n, x)` sets each of r8 to r14 that code reads, and
+  `SETSP(sp - k)` sets r15. A tail call into the middle of another function sets the same for its target.
+- `check.py` compares, at every such call, those registers, r15 and the stack words from r15 up to where the
+  function was entered, with the game's. At the end it compares r8 to r14 and pr. Both sides start with random
+  values in r8 to r14.
+- `ENTRY_SP(` in a definition is what lets `gen.py` and `run.py` swap a row whose `yields` is set.
+
+`batch.py --parked` drafts and checks the rows that task can park in and are not resume points.
 
 ## Library names
 

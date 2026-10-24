@@ -551,9 +551,19 @@ int f060A1D3E(gaddr task, int lo, int limit, int wait)
     return 0x103;
 }
 
+void f060A2312(void)
+{
+    GJUMP0(0x060A23DC);
+}
+
 void f060A2378(void)
 {
     GJUMP0(0x060A23DC);
+}
+
+void f060A28BA(void)
+{
+    GJUMP0(0x060A28F8);
 }
 
 void f060A2EE0(int a, int b)
@@ -655,6 +665,24 @@ int f060A3464(void)
         return 2;
     GCALL2(0x060A5180, LD32(0x060FC024), LD32(0x060FC028));
     return 0;
+}
+
+int f060A3658(void)
+{
+    FRAME(sp, 12);
+    int mask = (SR() >> 4) & 15;
+    int result = 0;
+
+    SETSR(SR() | 0xF0);
+    if (LDU8(0x060FC034) == 1) {
+        GCALL2(0x060A5468, sp - 12, 0);
+        if (LD32(sp - 12) == 1)
+            result = 2;
+        else
+            GCALL2(0x060A5180, LD32(0x060FC02C), LD32(0x060FC030));
+    }
+    SETSR((mask << 4) | (SR() & ~0xF0));
+    return result;
 }
 
 void f060A3900(void)
@@ -858,6 +886,16 @@ void f060A3D00(gaddr ctx, int a, int b)
     ST32(rec + 16, b);
 }
 
+int f060A3D3E(gaddr obj, int n, int c, int d)
+{
+    if (!obj)
+        return GJUMP4(0x060AAE08, 0x504, 0, c, d);
+    if (n <= 0)
+        return GJUMP4(0x060AAE08, 0x503, 0, c, d);
+    POLL();
+    return GJUMP4(LD32(LD32(obj) + 0x178), obj, n, c, d);
+}
+
 int f060A3D7C(gaddr obj, int b, int c, int d)
 {
     if (obj == 0) {
@@ -953,6 +991,20 @@ int f060A3F06(gaddr obj, int value, int c, int d)
     return GJUMP4(0x060AAE08, 0x503, value, c, d);
 }
 
+int f060A3F32(gaddr obj, int n, int c, int d)
+{
+    if (obj == 0) {
+        GCALL4(0x060AAE08, 0x504, 0, c, d);
+        return 0;
+    }
+    if (n <= 0) {
+        GCALL4(0x060AAE08, 0x503, 0, c, d);
+        return 0;
+    }
+    POLL();
+    return GJUMP4(LD32(LD32(obj) + 0x174), obj, n, c, d);
+}
+
 int f060A3F84(void)
 {
     return 0;
@@ -985,6 +1037,14 @@ void f060A4074(int a, int b, int c, int d)
         GJUMP4(0x060AAE52, a, b, c, d);
     else
         GJUMP4(0x060AAE08, 0x504, b, c, d);
+}
+
+int f060A4088(gaddr obj, int b, int c, int d)
+{
+    if (!obj)
+        return GJUMP4(0x060AAE08, 0x504, 0, c, d);
+    POLL();
+    return GJUMP4(LD32(LD32(obj) + 0x17C), obj, b, c, d);
 }
 
 void f060A40C0(void)
@@ -1226,6 +1286,16 @@ void f060A4A02(int a, int b, int c, int d)
     }
 }
 
+int f060A4ABA(gaddr obj, int n, int c, int d)
+{
+    if (obj == 0)
+        return GJUMP4(0x060AD62C, 0x504, 0, c, d);
+    if (n <= 0)
+        return GJUMP4(0x060AD62C, 0x503, 0, c, d);
+    POLL();
+    return GJUMP4(LD32(LD32(obj) + 0x1C8), obj, n, c, d);
+}
+
 int f060A4AF4(gaddr ctx)
 {
     if (!ctx) {
@@ -1245,6 +1315,20 @@ int f060A4B24(gaddr obj, int b, int c, int d)
     }
     GCALL4(0x060ADBA8, obj, sp - 16, b, c);
     return LD32(sp - 16);
+}
+
+int f060A4B86(gaddr obj, int n, int c, int d)
+{
+    if (!obj) {
+        GCALL4(0x060AD62C, 0x504, 0, c, d);
+        return 0;
+    }
+    if (n <= 0) {
+        GCALL4(0x060AD62C, 0x503, 0, c, d);
+        return 0;
+    }
+    POLL();
+    return GJUMP4(LD32(LD32(obj) + 0x1C4), obj, n, c, d);
 }
 
 void f060A4BDE(void)
@@ -1284,6 +1368,11 @@ int f060A4C0C(gaddr obj, int b, int c, int d)
 int f060A4CA2(int a, int b, int c, int d)
 {
     return GJUMP4(0x060A4CB4, a, b, c, d);
+}
+
+int f060A4CE4(int unused, int b, int c, int d)
+{
+    return GJUMP4(LD32(0x06000320), 0, b, c, d);
 }
 
 int f060A4CEC(void)
@@ -1437,6 +1526,34 @@ int f060A4FAC(int flags, gaddr cmd)
     FRAME(sp, 12);
 
     return GCALL4(0x060A4FBE, flags, cmd, sp - 12, 1);
+}
+
+int f060A4FBE(int flags, gaddr cmd, gaddr resp, int raw)
+{
+    int status = GCALL3(0x06095992, flags, cmd, resp);
+
+    if (status != 0)
+        return status;
+    {
+        RAISE_MASK(mask);
+
+        if (raw == 0)
+            ST8(0x060FC044, LD8(resp));
+        else
+            GCALL2(0x060A5058, resp, 0x060FC044);
+        RESTORE_MASK(mask);
+    }
+    return status;
+}
+
+int f060A5020(gaddr dst)
+{
+    int mask = (SR() >> 4) & 15;
+
+    SETSR(SR() | 0xF0);
+    COPYW(0x0609445C, dst, 0x060FC044, 12);
+    SETSR((mask << 4) | (SR() & ~0xF0));
+    return 0;
 }
 
 void f060A5058(gaddr src, gaddr dst)
@@ -1610,6 +1727,14 @@ void f060A5338(gaddr desc, int ch)
     ST32(regs + 20, (LD32(desc + 24) << 16) | LD32(desc + 20) | (LD32(desc + 28) << 8) | LD32(desc + 32));
 }
 
+void f060A5468(gaddr dst, int index)
+{
+    RAISE_MASK(mask);
+
+    ST32(dst, LDU8(index + 0x060FC068));
+    RESTORE_MASK(mask);
+}
+
 int f060A5676(gaddr table, gaddr key, int count)
 {
     int i = 0;
@@ -1647,6 +1772,16 @@ unsigned char f060A56FA(int a, int b)
     return LD8(a * 24 + b + 11);
 }
 
+int f060A570E(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP1(0x060A5712, -1);
+    return r0;
+}
+
 void f060A589C(gaddr dst, gaddr src)
 {
     ST32(dst, src);
@@ -1664,6 +1799,14 @@ void f060A5E26(gaddr dst, gaddr src)
     ST8(dst + 11, LD8(src + 9));
     ST8(dst + 8, LD8(src + 10));
     ST8(dst + 9, LD8(src + 11));
+}
+
+int f060A5E44(gaddr obj, int b, int c, int d)
+{
+    gaddr rec = obj + 12;
+
+    POLL();
+    return GJUMP4(LD32(0x060B1220 + LD32(rec + 28) * 16), rec, b, c, d);
 }
 
 int f060A5E62(gaddr obj, int ignored1, int ignored2, int arg)
@@ -3517,6 +3660,14 @@ void f060AADF8(void)
     ST32(0x060BB998, 0);
 }
 
+int f060AAE08(int code, int unused, int c, int d)
+{
+    ST32(0x060BB990, code);
+    if (LD32(0x060BB994) == 0)
+        return 0;
+    return GJUMP4(LD32(0x060BB994), LD32(0x060BB998), code, c, d);
+}
+
 int f060AAE30(void)
 {
     return LD32(0x060BB990);
@@ -3831,6 +3982,48 @@ void f060AB4C6(gaddr h)
     ST32(st + 4, 1);
 }
 
+void f060AB6BE(gaddr obj, int cmd, int c, int d)
+{
+    gaddr rec = LD32(obj) + 52;
+    int mask;
+    int clock;
+
+    switch (LD32(rec + 4)) {
+    case 1:
+        POLL();
+        if (cmd != 2)
+            return;
+        POLL();
+        mask = (SR() >> 4) & 15;
+        SETSR(SR() | 0xF0);
+        if (LDU16(VDP2_TVSTAT) & 1)
+            clock = LD32(0x06000324) ? 0x01B1EBFC : 0x0197380C;
+        else
+            clock = LD32(0x06000324) ? 0x01B4F4F0 : 0x019A10F4;
+        ST32(rec + 152, ((clock >> 14) + 1) >> 1);
+        GCALL4(0x060AFC74, obj, cmd, rec, d);
+        GCALL1(0x060ACB74, obj);
+        ST32(rec + 4, 4);
+        ST32(rec + 128, 0);
+        ST32(rec + 224, LD32(rec + 224) + (LD32(0x060FC0E4) - LD32(rec + 228)));
+        SETSR((mask << 4) | (SR() & ~0xF0));
+        return;
+    case 4:
+        POLL();
+        if (cmd == 0) {
+            GJUMP4(0x060AB4C6, obj, cmd, rec, d);
+            return;
+        }
+        if (cmd == 1)
+            ST32(rec + 56, 1);
+        return;
+    default:
+        POLL();
+        GJUMP4(0x060AAE08, 0x701, 0, rec, d);
+        return;
+    }
+}
+
 void f060AB726(gaddr obj, int mode)
 {
     gaddr o = LD32(obj);
@@ -3918,6 +4111,31 @@ int f060AB804(gaddr ctx)
     ST32(s + 84, LD32(s + 84) + LD32(s + 20));
     ST32(s + 4, 3);
     return 0;
+}
+
+void f060ABA0E(gaddr handle, int unused, int c, int d)
+{
+    gaddr obj = LD32(handle);
+    gaddr ch = obj + 52;
+    int clock;
+
+    if ((unsigned)LD32(ch + 72) < (unsigned)LD32(obj + 8))
+        return;
+    {
+        RAISE_MASK(mask);
+
+        if (LDU16(VDP2_TVSTAT) & 1)
+            clock = LD32(0x06000324) ? 0x01B1EBFC : 0x0197380C;
+        else
+            clock = LD32(0x06000324) ? 0x01B4F4F0 : 0x019A10F4;
+        ST32(ch + 152, ((clock >> 14) + 1) >> 1);
+        GCALL4(0x060AFC74, handle, obj, c, d);
+        GCALL1(0x060ACB74, handle);
+        ST32(ch + 4, 4);
+        ST32(ch + 128, 0);
+        ST32(ch + 224, LD32(0x060FC0E4));
+        RESTORE_MASK(mask);
+    }
 }
 
 void f060ABB16(gaddr obj, int mode)
@@ -4132,6 +4350,28 @@ int f060ACB2C(void)
     return (v >> 8) + LD32(0x060FC174);
 }
 
+void f060ACB74(gaddr obj)
+{
+    gaddr rec = LD32(obj) + 52;
+    int mask = (SR() >> 4) & 15;
+
+    SETSR(SR() | 0xF0);
+    ST32(rec + 148, GCALL0(0x060ACB2C));
+    SETSR((mask << 4) | (SR() & ~0xF0));
+}
+
+int f060ACBB8(gaddr handle)
+{
+    gaddr ch = LD32(handle) + 52;
+    int now, elapsed;
+    RAISE_MASK(mask);
+
+    now = GCALL0(0x060ACB2C);
+    elapsed = now - LD32(ch + 148);
+    RESTORE_MASK(mask);
+    return elapsed;
+}
+
 int f060ACC02(gaddr ctx)
 {
     gaddr s = LD32(ctx) + 52;
@@ -4232,6 +4472,42 @@ void f060AD39C(void)
     ST16(0x060FC180, 0);
 }
 
+/* The free-running timer, with the wraps counted in CLOCK_ADJUST; the result is in units of 256 ticks. */
+int f060AD3B8(void)
+{
+    int mask = (SR() >> 4) & 15;
+    int ticks;
+
+    SETSR(SR() | 0xF0);
+    ticks = (LDU8(SH2_FRCH) << 8) | LDU8(SH2_FRCL);
+    if (ticks < LDU16(CLOCK_LAST))
+        ST32(CLOCK_ADJUST, LD32(CLOCK_ADJUST) + 0x100);
+    ST16(CLOCK_LAST, ticks);
+    SETSR((mask << 4) | (SR() & ~0xF0));
+    return LD32(CLOCK_ADJUST) + (ticks >> 8);
+}
+
+void f060AD428(gaddr handle)
+{
+    gaddr ch = LD32(handle) + 48;
+    RAISE_MASK(mask);
+
+    ST32(ch + 120, GCALL0(0x060AD3B8));
+    RESTORE_MASK(mask);
+}
+
+int f060AD46C(gaddr obj)
+{
+    gaddr rec = LD32(obj) + 48;
+    int mask = (SR() >> 4) & 15;
+    int elapsed;
+
+    SETSR(SR() | 0xF0);
+    elapsed = GCALL0(0x060AD3B8) - LD32(rec + 120);
+    SETSR((mask << 4) | (SR() & ~0xF0));
+    return elapsed;
+}
+
 int f060AD4B8(gaddr ctx)
 {
     gaddr s = LD32(ctx) + 48;
@@ -4300,6 +4576,14 @@ void f060AD61C(void)
     ST32(0x060FC224, 0);
     ST32(0x060FC228, 0);
     ST32(0x060FC22C, 0);
+}
+
+int f060AD62C(int code, int unused, int c, int d)
+{
+    ST32(0x060FC224, code);
+    if (LD32(0x060FC228) == 0)
+        return 0;
+    return GJUMP4(LD32(0x060FC228), LD32(0x060FC22C), code, c, d);
 }
 
 int f060AD650(void)
@@ -4598,6 +4882,34 @@ void f060ADC8C(gaddr ctx)
         GCALL1(0x060B070E, ctx);
     ST32(s + 4, 5);
     ST32(s + 16, 0);
+}
+
+void f060ADFAA(gaddr obj)
+{
+    gaddr rec = LD32(obj) + 48;
+    int mask;
+    int clock;
+    int start;
+
+    if (LD32(rec + 60) < LD32(LD32(obj) + 36))
+        return;
+    if (LD32(rec + 108) < LD32(LD32(obj) + 40))
+        return;
+    mask = (SR() >> 4) & 15;
+    SETSR(SR() | 0xF0);
+    if (LDU16(VDP2_TVSTAT) & 1)
+        clock = LD32(0x06000324) ? 0x01B1EBFC : 0x0197380C;
+    else
+        clock = LD32(0x06000324) ? 0x01B4F4F0 : 0x019A10F4;
+    ST32(rec + 124, (HELPER(clock >> 14) + 1) >> 1);
+    GCALL1(0x060B05B8, obj);
+    GCALL1(0x060AD428, obj);
+    ST32(rec + 4, 4);
+    ST32(rec + 100, 0);
+    start = LD32(0x060FC184);
+    ST32(rec + 0x134, start);
+    ST32(rec + 0x12C, start);
+    SETSR((mask << 4) | (SR() & ~0xF0));
 }
 
 void f060AE0E0(gaddr p, int v)
@@ -5424,6 +5736,115 @@ void f060AFAC4(gaddr dst, gaddr src, int n)
         }
         d++;
         s++;
+    }
+}
+
+void f060AFB0E(gaddr handle, int send, int pan, int arg)
+{
+    FRAME(sp, 44);
+    gaddr obj = LD32(handle);
+    gaddr ch = obj + 52;
+    gaddr buf = sp - 40;
+    gaddr flag;
+    int rate, octave, base, fns;
+
+    if (LD32(ch + 108) == 0)
+        return;
+    {
+        RAISE_MASK(mask);
+
+        flag = SCSP_RAM + LD32(SCSP_RAM + 0x404) + (LD32(obj + 24) << 4);
+        while (LDU8(flag)) {
+            POLL();
+            RESTORE_MASK(mask);
+            GCALL1(0x060AF9A8, 100);
+            SETSR((SR() & ~0xF0) | 0xF0);
+        }
+        rate = LD32(ch + 124);
+        octave = LD8(0x060BB99C + DIVU(44100, rate + 1));
+        base = SAR(44100, octave);
+        fns = DIVU((rate - base) << 10, base);
+        ST8(buf + 2, LD32(obj + 28) & 7);
+        if (send == -1)
+            ST8(buf + 3, ((LD32(obj + 44) & 7) << 5) | (LD32(obj + 40) & 31));
+        else
+            ST8(buf + 3, ((send & 7) << 5) | (pan & 31));
+        ST16(buf + 4, (((-octave) & 15) << 11) | (fns & 0x3FF));
+        ST8(buf + 6, 0);
+        ST8(buf + 7, 0);
+        GCALL4(0x060AFAC4, flag, buf, 8, arg);
+        ST8(flag, 138);
+        RESTORE_MASK(mask);
+    }
+}
+
+void f060AFC74(gaddr obj, int b, int c, int d)
+{
+    FRAME(sp, 40);
+    gaddr player = LD32(obj);
+    gaddr rec = player + 52;
+    gaddr other = LD32(player + 0x140);
+    gaddr slot;
+    gaddr packet = sp - 40;
+    int mask;
+    int rate;
+    int shift;
+    int base;
+    int fine;
+    int flags;
+
+    if (LD32(rec + 108) == 0)
+        return;
+    mask = (SR() >> 4) & 15;
+    SETSR(SR() | 0xF0);
+    slot = SCSP_RAM + LD32(SOUND_BASE) + LD32(player + 24) * 16;
+    while (LDU8(slot) != 0) {
+        POLL();
+        SETSR((mask << 4) | (SR() & ~0xF0));
+        GCALL1(0x060AF9A8, 100);
+        SETSR(SR() | 0xF0);
+    }
+    rate = LD32(rec + 124);
+    shift = LD8(0x060BB99C + DIVU(SAMPLE_RATE, rate + 1));
+    base = SAR(SAMPLE_RATE, shift);
+    fine = DIVU((rate - base) << 10, base);
+    flags = (LDU8(other + 37) == 1 ? 0 : 128) | (LDU8(other + 38) == 16 ? 0 : 16);
+    ST8(packet + 2, flags | (LD32(player + 28) & 7));
+    ST8(packet + 3, ((LD32(player + 44) & 7) << 5) | (LD32(player + 40) & 31));
+    ST16(packet + 4, (unsigned int)LD32(player + 32) >> 4);
+    ST16(packet + 6, LD32(player + 36));
+    ST16(packet + 8, ((-shift & 15) << 11) | (fine & 0x3FF));
+    ST8(packet + 10, 0);
+    ST8(packet + 11, 0);
+    GCALL4(0x060AFAC4, slot, packet, 12, d);
+    ST8(slot, 0x85);
+    GCALL1(0x060AFA28, LD32(player + 28));
+    SETSR((mask << 4) | (SR() & ~0xF0));
+}
+
+void f060AFDF0(gaddr handle, int b, int c, int arg)
+{
+    FRAME(sp, 24);
+    gaddr obj = LD32(handle);
+    gaddr buf = sp - 24;
+    gaddr flag;
+
+    if (LD32(obj + 52 + 108) == 0)
+        return;
+    {
+        RAISE_MASK(mask);
+
+        flag = SCSP_RAM + LD32(SCSP_RAM + 0x404) + (LD32(obj + 24) << 4);
+        while (LDU8(flag)) {
+            POLL();
+            RESTORE_MASK(mask);
+            GCALL1(0x060AF9A8, 100);
+            SETSR((SR() & ~0xF0) | 0xF0);
+        }
+        ST8(buf + 2, LD32(obj + 28) & 7);
+        GCALL4(0x060AFAC4, flag, buf, 3, arg);
+        ST8(flag, 134);
+        RESTORE_MASK(mask);
     }
 }
 

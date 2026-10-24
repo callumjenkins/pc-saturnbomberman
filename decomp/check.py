@@ -24,6 +24,7 @@ sys.path.insert(0, HERE)
 import cases  # noqa: E402
 import gen  # noqa: E402
 import machine  # noqa: E402
+import registers  # noqa: E402
 import status  # noqa: E402
 from saturnrecomp import sh2emu  # noqa: E402
 
@@ -45,6 +46,7 @@ EDGES = (0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7F
          0xFFFFFFFE, 0xFFFFFF80, 0xFFFF8000)
 KRNL = os.path.join(ROOT, "build", "extract", "BOMSS", "0KRNL.BIN")
 TABLE_MAX = 0x100                # bytes of a jump table code_runs keeps, at most
+FRAME_MAX = 0x400                # bytes of a function's stack check.py compares at a call, at most
 
 
 class Counting(sh2emu.CPU):
@@ -59,7 +61,13 @@ class Counting(sh2emu.CPU):
     def call(self, entry: int, max_steps: int = 10_000_000, **regs: int) -> int:
         self.code, self.outer = self._body(entry), []
         self.own = self.code
+        self.entry_sp = regs.get("r15", self.r[15])
+        self.calls: list[tuple[int, list[int], list[int]]] = []
         return super().call(entry, max_steps, **regs)
+
+    def frame(self, sp: int) -> list[int]:
+        """The words of the stack from sp up to where the function was entered."""
+        return [self.rl(at) for at in range(sp, min(self.entry_sp, sp + FRAME_MAX), 4)]
 
     def step(self) -> None:
         pc = self.pc
@@ -69,6 +77,8 @@ class Counting(sh2emu.CPU):
         if self.seen is not None and op in CONDITIONAL and pc in self.own and self.code is self.own:
             self.seen.add((pc, self.pc != pc + (4 if ins.delay else 2)))
         if op in ("bsr", "jsr", "bsrf"):
+            if self.code is self.own and pc in self.own:
+                self.calls.append((self.pr, self.r[8:16], self.frame(self.r[15])))
             self.polls += 1
             self.outer.append(self.code)
             self.code = self._body(self.pc)
@@ -115,13 +125,12 @@ def build(sources: list[str] | None = None) -> ctypes.CDLL:
     with tempfile.TemporaryDirectory(prefix="decomp-") as where:
         out = os.path.join(where, "libdecomp.so")
         subprocess.check_call(["clang", "-std=gnu11", "-O1", "-Wall", "-shared", "-fPIC", "-fwrapv", "-DDECOMP_HOST",
-                               "-I", HERE, "-o", out, *(sources or status.sources()), os.path.join(HERE, "host_mem.c"),
-                               os.path.join(HERE, "divide.c")])
+                               "-I", HERE, "-o", out, *(sources or status.sources()), os.path.join(HERE, "host_mem.c")])
         return ctypes.CDLL(out)
 
 
 # SHC's runtime library. A literal that points into it names a table the routines read, or one of the routines.
-LIBRARY = (0x06094400, 0x06094D80)
+LIBRARY = (0x06094100, 0x06094D80)
 
 
 def code_runs() -> list[list[int]]:
@@ -151,6 +160,7 @@ def code_runs() -> list[list[int]]:
                 tables.add(ins.target)
             elif ins.op == "mov.l" and ins.target is not None and LIBRARY[0] <= image.u32(ins.target) < LIBRARY[1]:
                 tables.add(image.u32(ins.target))
+    used.update(range(*LIBRARY))    # the routines' tables sit between them, as SAR's byte table does
     for start in tables:            # a jump table runs on to the next instruction, as SHC places it
         end = start + 4
         while end - start < TABLE_MAX and end not in used:
@@ -190,6 +200,12 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
     the game, whose registers hold something else."""
     @CALL_HOOK
     def hook(addr, args, n):
+        regs = (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")
+        at = ctypes.c_uint32.in_dll(lib, "g_sp").value - 4 * max(n - 4, 0)         # r15 as the callee gets it
+        state.setdefault("snaps", []).append(
+            (list(regs[8:15]), at, [cpu.rl(a) for a in range(at, min(state.get("entry_sp", at), at + FRAME_MAX), 4)],
+             ctypes.c_uint32.in_dll(lib, "g_pr_value").value))
+        cpu.r[8:15] = regs[8:15]
         keep = (cpu.r[8:], cpu.pr)
         controls = (ctypes.c_uint32 * 3).in_dll(lib, "g_ctl")
         cpu.sr, cpu.gbr, cpu.vbr = controls[0] | cpu.t, controls[1], controls[2]
@@ -208,6 +224,9 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
             state["error"] = str(e)
             return 0
         finally:
+            if ctypes.c_int.in_dll(lib, "g_tail").value:        # a tail call: what it leaves is the function's own
+                regs[8:15] = cpu.r[8:15]
+                ctypes.c_uint32.in_dll(lib, "g_pr_value").value = cpu.pr
             cpu.r[8:], cpu.pr = keep
             controls[:] = [cpu.sr & ~1, cpu.gbr, cpu.vbr]
             state["calls"].append(addr)
@@ -252,7 +271,13 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
         side.sr, side.gbr, side.vbr = sr, gbr, vbr
     (ctypes.c_uint32 * 3).in_dll(lib, "g_ctl")[:] = [sr, gbr, vbr]
 
-    state = {"calls": []}
+    saved_start = machine.callee_saved(vals)
+    for side in (cpu, host):
+        side.r[8:15] = saved_start
+    (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")[8:15] = saved_start
+    ctypes.c_uint32.in_dll(lib, "g_pr_value").value = sh2emu.RETURN_SENTINEL
+
+    state = {"calls": [], "snaps": [], "entry_sp": host.r[15]}
     keep = machine.point(lib, host)
     hook = hook_for(host, state, [value(("any",), r) & 0xFFFFFFFF for _ in range(8)], lib)
     ctypes.c_uint32.in_dll(lib, "g_sp").value = host.r[15]
@@ -290,7 +315,52 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
         problems.append("returned %08X, the game's code %08X" % (got & 0xFFFFFFFF, want))
     problems += machine.differences(host, cpu)
     problems += machine.control_differences(lib, cpu)
+    problems += call_differences(state["snaps"], cpu.calls, sig is not None and sig.parked)
+    problems += register_differences(lib, cpu)
     return vals, problems, False
+
+
+def call_differences(host: list[tuple[list[int], int, list[int], int]],
+                     game: list[tuple[int, list[int], list[int]]], parked: bool) -> list[str]:
+    """How the host build and the game's code stand at each call of a function that keeps its frame on the game's
+    stack: r15 and the stack above it, which the callee's frame must not run into. At a call that can switch tasks,
+    also the registers the code after it reads and pr, which is where the callee returns to. A function that does
+    not keep them cannot make such a call."""
+    image, code = status.krnl_image(), status.function_code()
+    problems = []
+    if not parked:
+        resumes = [i + 1 for i, (after, _, _) in enumerate(game) if after in code]
+        return ["call %d can switch tasks, so the C has to keep what a resumed task reads (ENTRY_SP)" % resumes[0]] if resumes else []
+    for i, (after, theirs, frame) in enumerate(game):
+        if i >= len(host):
+            problems.append("made %d calls, the game's code at least %d" % (len(host), i + 1))
+            break
+        regs, sp, words, pr = host[i]
+        resumes = after in code
+        if resumes and pr != after:
+            problems.append("call %d: pr is %08X, the game's code %08X" % (i + 1, pr, after))
+        if sp != theirs[7]:
+            problems.append("call %d: r15 is %08X, the game's code %08X" % (i + 1, sp, theirs[7]))
+            continue
+        for reg in sorted(registers.saved(image, after, code)) if resumes else []:
+            if regs[reg - 8] != theirs[reg - 8]:
+                problems.append("call %d: r%d is %08X, the game's code %08X" % (i + 1, reg, regs[reg - 8], theirs[reg - 8]))
+        if words != frame:
+            at = next(k for k in range(len(frame)) if words[k] != frame[k])
+            problems.append("call %d: the stack at %08X holds %08X, the game's code %08X" % (i + 1, sp + 4 * at, words[at], frame[at]))
+    return problems
+
+
+def register_differences(lib: ctypes.CDLL, game: sh2emu.CPU) -> list[str]:
+    """r8 to r14 and pr as the host build leaves them against the game's: a function gives its caller's back."""
+    problems = []
+    regs = (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")
+    for reg in range(8, 15):
+        if regs[reg] != game.r[reg]:
+            problems.append("r%d is %08X, the game's code %08X" % (reg, regs[reg], game.r[reg]))
+    if ctypes.c_uint32.in_dll(lib, "g_pr_value").value != game.pr:
+        problems.append("pr is %08X, the game's code %08X" % (ctypes.c_uint32.in_dll(lib, "g_pr_value").value, game.pr))
+    return problems
 
 
 def value(kind, r):

@@ -55,8 +55,8 @@ SPINS = [plant(0x060C164C, 4, [SPIN], 1.0), plant(SPIN, 1, [0x10, 0x25, 0xF0, 0x
          plant(SPIN + 6, 1, [1, 2, 5, 9, 0]), plant(SPIN + 7, 1, [1, 2, 5, 9, 0, 3]), plant(SPIN + 8, 2, [0, 8, 40, 4, 100])]
 for _a in ("06034FC4", "06034FF6", "060350AC", "060350CA", "060351A4", "060353A2", "060353C0"):
     case("f" + _a, [], False, SPINS)
-# DIVS and its kin store 0x44E at 060FA8B4 when the divisor is 0 (the routine at 060941AA), which divide.c does not
-# do, so the divisor 3541C takes from the byte at +7 stays between 1 and 35.
+# DIVS and its kin store 0x44E at 060FA8B4 when the divisor is 0 (the routine at 060941AA), which SHC's routine does
+# too; the plants keep the divisor 3541C takes from the byte at +7 stays between 1 and 35.
 case("f0603541C", [], False, SPINS[:-3] + [plant(SPIN + 7, 1, [1, 2, 5, 9, 3, 35, 20], 1.0), plant(SPIN + 8, 2, [0, 8, 40, 4, 100])])
 
 def brain(off, size, values, chance=0.8):

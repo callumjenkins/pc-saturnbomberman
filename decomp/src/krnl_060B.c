@@ -176,6 +176,113 @@ void f060B0426(gaddr dst, gaddr src, int n)
     }
 }
 
+void f060B047E(gaddr obj, int a, int b)
+{
+    gaddr player = LD32(obj);
+    gaddr rec = player + 4;
+    gaddr state = player + 48;
+    gaddr packet = state + 192;
+    gaddr slot;
+    int mask = (SR() >> 4) & 15;
+    int rate;
+    int shift;
+    int base;
+    int fine;
+    int voice;
+    int level;
+
+    SETSR(SR() | 0xF0);
+    slot = SCSP_RAM + LD32(SOUND_BASE) + LD32(rec + 16) * 16;
+    while (LD8(slot) != 0) {
+        POLL();
+        SETSR((mask << 4) | (SR() & ~0xF0));
+        GCALL1(0x060B02F0, 100);
+        SETSR(SR() | 0xF0);
+    }
+    rate = LD32(state + 44);
+    shift = LD8(0x060B1380 + DIVS(SAMPLE_RATE, rate + 1));
+    base = SAR(SAMPLE_RATE, shift);
+    fine = DIVS((rate - base) << 10, base);
+    ST8(packet + 2, LD32(rec + 20) & 7);
+    if (a == -1) {
+        voice = LD32(rec + 28);
+        level = LD32(rec + 24);
+    } else {
+        voice = a;
+        level = b;
+    }
+    ST8(packet + 3, ((voice & 7) << 5) | (level & 31));
+    ST16(packet + 4, ((-shift & 15) << 11) | (fine & 0x3FF));
+    ST8(packet + 6, 0);
+    ST8(packet + 7, 0);
+    GCALL3(0x060B0426, slot, packet, 16);
+    ST8(packet, 0x8A);
+    ST8(slot, 0x8A);
+    SETSR((mask << 4) | (SR() & ~0xF0));
+}
+
+void f060B05B8(gaddr handle)
+{
+    gaddr obj = LD32(handle);
+    gaddr a = obj + 4;
+    gaddr b = obj + 48;
+    gaddr cmd = b + 160;
+    gaddr flag;
+    int rate, octave, base, fns, mix, level;
+    RAISE_MASK(mask);
+
+    flag = SCSP_RAM + LD32(SCSP_RAM + 0x404) + (LD32(a + 16) << 4);
+    while (LD8(flag)) {
+        POLL();
+        RESTORE_MASK(mask);
+        GCALL1(0x060B02F0, 100);
+        SETSR((SR() & ~0xF0) | 0xF0);
+    }
+    rate = LD32(b + 44);
+    octave = LD8(0x060B1380 + DIVS(44100, rate + 1));
+    base = SAR(44100, octave);
+    fns = DIVS((rate - base) << 10, base);
+    mix = LD32(b + 36) == 1 ? 0 : 128;
+    level = LD32(b + 40);
+    if (level > 16 || level <= 8)
+        mix |= 16;
+    ST8(cmd + 2, mix | (LD32(a + 20) & 7));
+    ST8(cmd + 3, ((LD32(a + 28) & 7) << 5) | (LD32(a + 24) & 31));
+    ST16(cmd + 4, (unsigned)LD32(a + 8) >> 4);
+    ST16(cmd + 6, LD32(a + 12));
+    ST16(cmd + 8, (((-octave) & 15) << 11) | (fns & 0x3FF));
+    ST8(cmd + 10, 0);
+    ST8(cmd + 11, 0);
+    GCALL3(0x060B0426, flag, cmd, 16);
+    ST8(cmd, -123);
+    ST8(flag, -123);
+    GCALL1(0x060B0392, LD32(a + 20));
+    RESTORE_MASK(mask);
+}
+
+void f060B070E(gaddr obj)
+{
+    gaddr player = LD32(obj);
+    gaddr rec = player + 4;
+    gaddr packet = player + 48 + 176;
+    gaddr slot;
+    int mask = (SR() >> 4) & 15;
+
+    SETSR(SR() | 0xF0);
+    slot = SCSP_RAM + LD32(SOUND_BASE) + LD32(rec + 16) * 16;
+    while (LD8(slot) != 0) {
+        POLL();
+        SETSR((mask << 4) | (SR() & ~0xF0));
+        GCALL1(0x060B02F0, 100);
+        SETSR(SR() | 0xF0);
+    }
+    ST8(packet + 2, LD32(rec + 20) & 7);
+    GCALL3(0x060B0426, slot, packet, 16);
+    ST8(packet, 0x86);
+    ST8(slot, 0x86);
+    SETSR((mask << 4) | (SR() & ~0xF0));
+}
+
 void f060B07B4(gaddr obj, gaddr desc)
 {
     gaddr rec = LD32(obj) + 48;
@@ -211,7 +318,7 @@ void f060B086C(gaddr ctx, int value)
 
 int f060B087E(int a, int b, int c, int d)
 {
-    return GJUMP4(0x060AD62C, 0x308, b, c, d);
+    return GJUMP4(0x060AD62C, 0x308, 0, c, d);
 }
 
 void f060B0B08(gaddr dst, int limit, int a, int b)

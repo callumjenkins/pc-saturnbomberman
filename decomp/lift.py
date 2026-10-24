@@ -51,10 +51,18 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
     step(slot, st, image)
     if through_register and ins.pc in status.polling_jumps():
         st.effect("POLL();")
+    if st.parked and not tail:
+        spill(ins, st, image, functions)
     known = functions is not None and number(where) is not None
     needs = sorted(registers.saved(image, number(where), functions)) if known else []
     if needs:
-        raise Unsupported("goes to %s, the middle of a function that reads r%d from its caller" % (where, needs[0]))
+        if not tail or not (st.parked or st.sp == 0):
+            raise Unsupported("goes to %s, the middle of a function that reads r%d from its caller" % (where, needs[0]))
+        for reg in needs:
+            if reg in st.touched:
+                st.effect("SETR(%d, %s);" % (reg, strip(st.get(reg))))
+        if st.sp:
+            st.effect("SETSP(%s);" % st.get(15))
     helper = registers.routine(image, number(where), functions) if known and not tail else None
     if helper:
         text, changes = helper
@@ -79,11 +87,11 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         while args and not args[-1]:
             args.pop()
         args = [a or "0" for a in args]
-    extra = stack_arguments(st) if not tail else []
+    extra = stack_arguments(st) if not tail and not st.parked else []   # a parked function's are in its frame already
     if extra:
         args += ["0"] * (4 - len(args)) + extra
     text = "%s%d(%s%s)" % ("GJUMP" if tail else "GCALL", len(args), where, "".join(", " + a for a in args))
-    if tail and st.framed:
+    if tail and st.framed and not st.sp:
         st.effect("UNFRAME(sp);")
     written = registers.writes(image, number(where), functions) - {0} if known else registers.EVERY - {0}
     st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in written}))
@@ -99,8 +107,25 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
     return tail
 
 
-def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None) -> dict[int, int]:
-    """Entry plus every branch target and instruction that follows a branch, with r15's offset at each."""
+def spill(ins: "sh2.Insn", st: State, image: "sh2.Image", functions: dict[int, set[int]] | None) -> None:
+    """Before a call in a function a task can park in, sets r15 where the game's code has it, so the callee's frame
+    sits below this one's words. If the call can switch tasks, its return address is a resume point, which the
+    recompile seeds, and a task resumed there has only the registers and stack the code after it reads, so those
+    are set too. pr is that address, as the call's bsr or jsr leaves it: the runtime tells a task that comes back
+    where it parked from one resumed elsewhere by the address the callee returns to."""
+    after = ins.pc + 4
+    resumes = functions is None or after in functions
+    if resumes and functions is not None:
+        for reg in sorted(registers.saved(image, after, functions)):
+            st.effect("SETR(%d, %s);" % (reg, strip(st.get(reg))))
+    st.effect("SETSP(%s);" % st.get(15))
+    if resumes:
+        st.effect("SETPR(0x%08X);" % after)
+
+
+def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None, parked: bool = False) -> dict[int, int]:
+    """Entry plus every branch target and instruction that follows a branch, with r15's offset at each. A parked
+    function may leave with its frame still down, by a jump to code that pops it."""
     found = {entry: 0}
     seen: set[int] = set()
     work = [(entry, 0)]
@@ -129,7 +154,7 @@ def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None) -> dic
                     reach(target, sp)
                 break
             if ins.op in ("rts", "jmp") or leaves and ins.op == "bra":
-                if sp:
+                if sp and not (parked and ins.op != "rts"):
                     raise Unsupported("returns with the stack %d bytes off at %08X: a piece of a larger function"
                                       % (sp, at))
                 break
@@ -137,21 +162,25 @@ def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None) -> dic
     return found
 
 
-def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions: dict[int, set[int]] | None = None) -> str:
+def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions: dict[int, set[int]] | None = None,
+         parked: bool = False) -> str:
     """A draft of the function at entry. With its `code`, the recompiler's boundary, a `bra` outside
     that code is a tail call and a conditional branch outside it is refused; without, the draft follows
-    every branch. With `functions`, every function's code, a call passes the registers its callee reads."""
-    stops = leaders(image, entry, code)
+    every branch. With `functions`, every function's code, a call passes the registers its callee reads.
+    With `parked`, the function is one a task can park in, and the draft keeps in the guest's registers and
+    stack what the code after each call that can switch tasks reads."""
+    stops = leaders(image, entry, code, parked)
     params: set[int] = set()
-    try:
-        read_blocks(image, entry, stops, params, code, functions)
-        framed = False
-    except Unsupported as e:
-        if "address of a local" not in str(e) and "argument passed on the stack" not in str(e):
-            raise
-        framed = True
+    framed = parked
+    if not parked:
+        try:
+            read_blocks(image, entry, stops, params, code, functions)
+        except Unsupported as e:
+            if "address of a local" not in str(e) and "argument passed on the stack" not in str(e):
+                raise
+            framed = True
     for attempt in range(2):
-        reads, slots = read_blocks(image, entry, stops, params, code, functions, framed)
+        reads, slots = read_blocks(image, entry, stops, params, code, functions, framed, parked)
         returns = any(s.var == "r0" for r in reads.values() for s in r.stmts)
         live_in, live_out = liveness(reads, returns)
         if returns and "r0" in live_in[entry]:
@@ -183,7 +212,7 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
     decl = ["    int %s;" % ", ".join(n for n in names if n[0] in "rc")] if any(n[0] in "rc" for n in names) else []
     decl += ["    long long %s;" % MAC] if MAC in names else []
     decl += ["    %s v%d;" % (LOCAL_TYPES[size], -offset) for offset, size in sorted(slots.items(), reverse=True)]
-    decl += ["    FRAME(sp, %d);" % frame_size(image, stops)] if framed else []
+    decl += ["    ENTRY_SP(sp);"] if parked else ["    FRAME(sp, %d);" % frame_size(image, stops)] if framed else []
     decl += [""] if decl else []
     return "\n".join([head, "{"] + decl + ["    " + line for line in lines] + ["}"]) + "\n"
 
@@ -231,8 +260,9 @@ def stack_arguments(st: State) -> list[str]:
 def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: set[int], flags: int,
                slots: dict[int, int], fresh: set[int], code: set[int] | None,
                functions: dict[int, set[int]] | None = None, framed: bool = False,
-               stored: set[int] | None = None, saved: set[int] | None = None) -> tuple[Read, int]:
-    st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh), framed=framed,
+               stored: set[int] | None = None, saved: set[int] | None = None, parked: bool = False) -> tuple[Read, int]:
+    st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh), framed=framed, parked=parked,
+               touched=registers.written(image, code) if code is not None else frozenset(range(8, 15)),
                stored=stored if stored is not None else set(), saved=saved if saved is not None else set())
     block = structure.Block(start)
     term = ""
@@ -283,7 +313,8 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
 
 
 def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: set[int], code: set[int] | None,
-                functions: dict[int, set[int]] | None = None, framed: bool = False) -> tuple[dict[int, Read], dict[int, int]]:
+                functions: dict[int, set[int]] | None = None, framed: bool = False,
+                parked: bool = False) -> tuple[dict[int, Read], dict[int, int]]:
     """Every block, read until the registers a call may pass settle: those written since the last call
     on every path into a block, so an argument set before a branch reaches the call after it."""
     fresh = {at: set() if at == entry else set(range(16)) for at in stops}
@@ -295,7 +326,7 @@ def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: s
         saved: set[int] = set()
         for at in sorted(stops):
             reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions, framed,
-                                          stored, saved)
+                                          stored, saved, parked)
         into: dict[int, list[set[int]]] = {at: [] for at in stops}
         for read in reads.values():
             for target in read.block.targets:
@@ -365,13 +396,14 @@ def main() -> None:
     parser.add_argument("address", help="hex entry address")
     parser.add_argument("--module", default="KRNL", choices=sorted(IMAGES))
     parser.add_argument("--append", action="store_true", help="add the draft to its file in src/ instead of printing it")
+    parser.add_argument("--parked", action="store_true", help="the function is one a task can park in")
     args = parser.parse_args()
     path, base = IMAGES[args.module]
     with open(os.path.join(ROOT, path), "rb") as f:
         image = sh2.Image(f.read(), base)
     functions = status.function_code() if args.module == "KRNL" else {}
     try:
-        draft = lift(image, int(args.address, 16), functions.get(int(args.address, 16)), functions or None)
+        draft = lift(image, int(args.address, 16), functions.get(int(args.address, 16)), functions or None, args.parked)
     except (Unsupported, structure.Unstructured) as error:
         sys.exit("%s: %s" % (args.address, error))
     if not args.append:

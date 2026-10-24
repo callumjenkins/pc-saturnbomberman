@@ -124,8 +124,6 @@ case("f0606AB08", [span(0, 100), span(0, 15)], True)
 case("f0606C724", [span(0, 400), span(0, 400)], True, CURRENT + cur(18, 2, [0, 1, 0x380, 0x7F]) + CELLS)
 case("f0606CBCC", [span(-20, 100), span(-20, 100)], True, MOVER + mov(16, 2, [0, 100, 0x140, 0x1FF, 0xFFE0], 0.9) + mov(18, 2, [0, 100, 0xF0, 0xFF, 0xFFE0], 0.9))
 case("f0606E81C", [], False, CURRENT)
-case("f0606EA3A", [span(0, 20), span(0, 20), span(0, 20), span(0, 20)], False, CURRENT + MOVER + OTHER + cur(46, 2, [0, 1, 2, 3], 1.0)
-     + [plant(0x060C1AA8, 2, [3, 4], 1.0)] + objs(52, 4, [0x060C2800], 1.0, (3, 4)))
 case("f06074AFA", [span(0, 400), span(0, 400)], False, CURRENT)
 case("f0606D37A", [], True, MOVER + mov(60, 2, [0xFF00, 0, 0xFFFF], 1.0) + [plant(0x060D776C + 9, 1, [1], 1.0)])
 

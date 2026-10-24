@@ -31,9 +31,42 @@ void g_wr(uint32_t addr, int size, uint32_t value)
     else st32(addr, value);
 }
 
-void g_poll(void)
+int g_poll(void)
 {
     SH2_POLL(*g_cur);
+    return 1;
+}
+
+// r15, r8 to r14 and pr as the context holds them: a function a task can park in sets them before a call
+// that can switch tasks, so that a task resumed after the call finds what the game's own code would leave.
+uint32_t g_entry_sp(void)
+{
+    return g_cur->r[15];
+}
+
+void g_set_sp(uint32_t sp)
+{
+    g_cur->r[15] = sp;
+}
+
+uint32_t g_reg(int n)
+{
+    return g_cur->r[n];
+}
+
+void g_reg_set(int n, uint32_t value)
+{
+    g_cur->r[n] = value;
+}
+
+uint32_t g_pr(void)
+{
+    return g_cur->pr;
+}
+
+void g_pr_set(uint32_t value)
+{
+    g_cur->pr = value;
 }
 
 // The control registers, in the order guest.h numbers them. A write to sr keeps what ldc keeps and
@@ -97,8 +130,9 @@ void g_unframe(uint32_t top)
 
 // Arguments beyond the fourth go on the stack, lowest first, as SHC passes them. The callee may use
 // r0 to r7 freely; r8 to r15 and pr are put back, since the C that called has no registers to lose.
-// A call advances time where the generated code's jsr would; a tail call, a branch, does not.
-static uint32_t enter(uint32_t addr, const uint32_t* args, int n, bool poll)
+// A call advances time where the generated code's jsr would; a tail call, a branch, does not. A tail call leaves
+// r8 to r15 as the callee does: a callee that pops the frame its caller built has restored them already.
+static uint32_t enter(uint32_t addr, const uint32_t* args, int n, bool tail)
 {
     SH2Context& c = *g_cur;
     const uint32_t ret = c.pr, sp = c.r[15], keep[7] = {c.r[8], c.r[9], c.r[10], c.r[11], c.r[12], c.r[13], c.r[14]};
@@ -108,13 +142,16 @@ static uint32_t enter(uint32_t addr, const uint32_t* args, int n, bool poll)
         c.r[15] = sp - 4 * (n - 4);
         for (int i = 4; i < n; i++) st32(c.r[15] + 4 * (i - 4), args[i]);
     }
-    if (poll)
+    if (!tail)
         SH2_POLL(c);
     sh2_call(c, addr);
+    g_cur = &c;                 // a task that parked in the callee comes back after others have run swaps of their own
     SH2_RET(c, ret);
     const uint32_t result = c.r[0];
-    for (int i = 0; i < 7; i++) c.r[8 + i] = keep[i];
-    c.r[15] = sp;
+    if (!tail) {
+        for (int i = 0; i < 7; i++) c.r[8 + i] = keep[i];
+        c.r[15] = sp;
+    }
     c.pr = ret;
     return result;
 }
@@ -129,6 +166,7 @@ uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2)
     c.r[2] = r2;
     SH2_POLL(c);
     sh2_call(c, addr);
+    g_cur = &c;
     SH2_RET(c, ret);
     const uint32_t result = c.r[0];
     for (int i = 0; i < 7; i++) c.r[8 + i] = keep[i];
@@ -139,12 +177,12 @@ uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2)
 
 uint32_t g_call(uint32_t addr, const uint32_t* args, int n)
 {
-    return enter(addr, args, n, true);
+    return enter(addr, args, n, false);
 }
 
 uint32_t g_jump(uint32_t addr, const uint32_t* args, int n)
 {
-    return enter(addr, args, n, false);
+    return enter(addr, args, n, true);
 }
 }
 

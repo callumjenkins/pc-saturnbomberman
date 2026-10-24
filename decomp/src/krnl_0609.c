@@ -17,6 +17,16 @@ int f060906E4(void)
     return GJUMP1(0x060144F4, 0x0606D2C8);
 }
 
+int f06090888(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP3(0x0606AE6C, 141, 0x200, 0x360);
+    return r0;
+}
+
 int f06090894(int n)
 {
     return (GCALL1(0x0600A0EC, 17 - (n << 1)) << 4) + (n << 4) + 0x1A0;
@@ -118,6 +128,11 @@ void f06091968(void)
             p += 2;
         } while (AGAIN(++col <= 12));
     } while (AGAIN(++row <= 10));
+}
+
+void f06092840(void)
+{
+    GJUMP0(0x0609288C);
 }
 
 void f0609360C(void)
@@ -373,6 +388,27 @@ int f06095474(gaddr dst)
         }
     }
     return status;
+}
+
+/* Reads the eight bytes at dst until two reads agree, at most 100 times. */
+int f060954B8(gaddr dst)
+{
+    FRAME(sp, 40);
+    gaddr second = sp - 40;
+    int tries = 0;
+    int mask;
+
+    do {
+        mask = (SR() >> 4) & 15;
+        SETSR(SR() | 0xF0);
+        GCALL1(0x06095ACE, dst);
+        GCALL1(0x06095ACE, second);
+        SETSR((mask << 4) | (SR() & ~0xF0));
+        if (LD32(dst) == LD32(second) && LD32(dst + 4) == LD32(second + 4))
+            return 0;
+        tries++;
+    } while (AGAIN(tries < 100));
+    return -3;
 }
 
 int f0609553A(gaddr dst)
@@ -634,6 +670,16 @@ int f0609593A(int count, gaddr dst)
     return status;
 }
 
+int f06095992(int a, int b, int c)
+{
+    int result;
+    RAISE_MASK(mask);
+
+    result = GCALL5(0x060959CA, a, b, c, 0, mask);
+    RESTORE_MASK(mask);
+    return result;
+}
+
 int f060959CA(int mask, gaddr cmd, gaddr resp)
 {
     FRAME(sp, 28);
@@ -705,6 +751,20 @@ int f06096596(gaddr p)
             ST32(p + 8, 1);
     }
     return LD32(p + 8);
+}
+
+int f0609696C(int r4, int r5, int r6, int r7)
+{
+    int r0, r3;
+    ENTRY_SP(sp);
+
+    r3 = LD32(0x060FA8BC);
+    ST32(184 + r3, r4);
+    r3 = LD32(0x060FA8BC);
+    ST32(188 + r3, r5);
+    UNFRAME(sp);
+    r0 = GJUMP4(0x06096C60, 0, 0, 0x060FA8BC, r7);
+    return r0;
 }
 
 void f0609697E(gaddr dst)
@@ -1255,6 +1315,51 @@ int f0609816C(int angle)
     return neg ? -angle : angle;
 }
 
+/* The angle in 16.16 degrees of the point (x, y), found in the table of tangents at 06098428. */
+int f06098348(int y, int x)
+{
+    int ay = ABS(y);
+    int ax = ABS(x);
+    int ratio;
+    int lo = 0;
+    int hi = 90;
+    int mid;
+    int angle;
+    gaddr entry;
+
+    if (ax >= 65) {
+        ST32(SH2_DVSR, ax);
+        ST32(SH2_DVDNTH, (short)((unsigned int)ay >> 16));
+        ST32(SH2_DVDNTL, ay << 16);
+        ratio = LD32(SH2_DVDNTL);
+    } else {
+        ratio = 0x7FFF0000;
+    }
+    for (;;) {
+        mid = (lo + hi) >> 1;
+        if (LD32(0x06098428 + mid * 8) > ratio) {
+            hi = mid;
+        } else {
+            lo = mid + 1;
+            if (ratio < LD32(0x06098428 + lo * 8))
+                break;
+        }
+        if (lo >= hi)
+            break;
+        POLL();
+    }
+    entry = 0x06098428 + mid * 8;
+    angle = (int)(((long long)LD32(entry + 4) * (ratio - LD32(entry))) >> 16);
+    if (angle > 0x00010000)
+        angle = 0x00010000;
+    angle += mid << 16;
+    if (y < 0)
+        angle = -angle;
+    if (x < 0)
+        angle = (y < 0 ? -0x00B40000 : 0x00B40000) - angle;
+    return angle;
+}
+
 void f06098700(gaddr dst, short tag, gaddr p)
 {
     ST16(dst, tag);
@@ -1274,6 +1379,88 @@ void f0609870C(gaddr obj)
         src += 4;
         dst += 4;
     } while (AGAIN(++i < 12));
+}
+
+int f0609879E(int ctx, int angle)
+{
+    int sine = GCALL1(0x0609812C, angle);
+    int cosine = GCALL1(0x0609816C, angle);
+    gaddr m = LD32(ctx + 4);
+    int x, y;
+
+    x = LD32(m + 4);
+    y = LD32(m + 8);
+    ST32(m + 4, DOT(cosine, x, sine, y));
+    ST32(m + 8, DOT(-sine, x, cosine, y));
+    x = LD32(m + 20);
+    y = LD32(m + 24);
+    ST32(m + 20, DOT(cosine, x, sine, y));
+    ST32(m + 24, DOT(-sine, x, cosine, y));
+    x = LD32(m + 36);
+    y = LD32(m + 40);
+    ST32(m + 36, DOT(cosine, x, sine, y));
+    x = DOT(-sine, x, cosine, y);
+    ST32(m + 40, x);
+    return x;
+}
+
+/* Rotates the first and third words of the three 16-byte rows at LD32(rec + 4) by angle. */
+void f0609886C(gaddr rec, int angle)
+{
+    int sine = GCALL1(0x0609812C, angle);
+    int cosine = GCALL1(0x0609816C, angle);
+    gaddr row = LD32(rec + 4);
+    int x;
+    int z;
+    int i;
+
+    for (i = 0; i < 3; i++) {
+        x = LD32(row);
+        z = LD32(row + 8);
+        ST32(row, dot16(x, cosine, z, -sine));
+        ST32(row + 8, dot16(x, sine, z, cosine));
+        row += 16;
+    }
+}
+
+int f0609893C(int ctx, int angle)
+{
+    int sine = GCALL1(0x0609812C, angle);
+    int cosine = GCALL1(0x0609816C, angle);
+    gaddr m = LD32(ctx + 4);
+    int x, y;
+
+    x = LD32(m);
+    y = LD32(m + 4);
+    ST32(m, DOT(cosine, x, sine, y));
+    ST32(m + 4, DOT(-sine, x, cosine, y));
+    x = LD32(m + 16);
+    y = LD32(m + 20);
+    ST32(m + 16, DOT(cosine, x, sine, y));
+    ST32(m + 20, DOT(-sine, x, cosine, y));
+    x = LD32(m + 32);
+    y = LD32(m + 36);
+    ST32(m + 32, DOT(cosine, x, sine, y));
+    x = DOT(-sine, x, cosine, y);
+    ST32(m + 36, x);
+    return x;
+}
+
+/* Stores a[0] * b[0] and a[1] * b[1], each divided by a[2], as the two halfwords at out. */
+void f06098BEC(gaddr a, gaddr b, gaddr out)
+{
+    int x;
+    int y;
+    int recip;
+
+    ST32(SH2_DVSR, LD32(a + 8));
+    ST32(SH2_DVDNTH, 1);
+    ST32(SH2_DVDNTL, 0);
+    x = (int)(((long long)LD32(a) * LD32(b)) >> 16);
+    y = (int)(((long long)LD32(a + 4) * LD32(b + 4)) >> 16);
+    recip = LD32(SH2_DVDNTL);
+    ST16(out, (int)(((long long)x * recip) >> 32));
+    ST16(out + 2, (int)(((long long)y * recip) >> 32));
 }
 
 int f06098EA4(gaddr first, gaddr second)
@@ -1357,7 +1544,45 @@ int f06098EA4(gaddr first, gaddr second)
     return 0;
 }
 
-/* 20100061 is SMPC's status register. */
+void f060990AA(void)
+{
+    int state, mode, i;
+    RAISE_MASK(mask);
+
+    state = LDU8(0x060FA970);
+    if (state == 0 || state == 1 || state == 3) {
+        ST8(0x060FA970, 3);
+    } else if (state != 4) {
+        mode = LDU8(0x060FA907);
+        if (mode == 0) {
+            POLL();
+            smpc_read_header();
+            RESTORE_MASK(mask);
+            return;
+        }
+        if (mode == 1) {
+            POLL();
+            smpc_parse();
+        } else if (mode == 2) {
+            POLL();
+            if (LDU8(0x060FA938) != 0) {
+                smpc_parse();
+            } else if ((LDU8(SMPC_SR) & 0x80) == 0x80) {
+                ST8(0x060FA970, 3);
+            } else {
+                for (i = 0; i < 7; i++) {
+                    POLL();
+                    ST8(LD32(0x060FA948) + i, LD8(SMPC_OREG0 + (7 - i) * 2));
+                }
+                ST8(0x060FA938, 1);
+                ST8(0x060FA970, 2);
+            }
+        }
+    }
+    smpc_answer();
+    RESTORE_MASK(mask);
+}
+
 void f060997BC(void)
 {
     if ((unsigned int)LD32(0x060FA964) >= SMPC_SR && (LD8(SMPC_SR) & 0x20))
@@ -2588,6 +2813,65 @@ void f0609E020(int sel)
     SET_FIELD(1, 0x060FB8A8, 0x8FFF, field);
 }
 
+void f0609E27E(int mode)
+{
+    int bit;
+
+    POLL();
+    if (mode == 1)
+        bit = 4;
+    else if (mode == 2 || mode == 4)
+        bit = 0;
+    else if (mode == 8 || mode == 128)
+        bit = 1;
+    else if (mode == 16)
+        bit = 2;
+    else if (mode == 32)
+        bit = 3;
+    else if (mode == 0x100)
+        bit = 5;
+    else
+        return;
+    POLL();
+    LATCH(1);
+    ST16(0x060FB8A4, LDU16(0x060FB8A4) | (1 << bit));
+}
+
+/* Clears the bit that flag names in the halfword at 060FB8A4. */
+void f0609E282(int flag)
+{
+    int cleared;
+
+    POLL();
+    switch (flag) {
+    case 1:
+        cleared = ~0x10;
+        break;
+    case 2:
+    case 4:
+        cleared = ~0x01;
+        break;
+    case 8:
+    case 128:
+        cleared = ~0x02;
+        break;
+    case 16:
+        cleared = ~0x04;
+        break;
+    case 32:
+        cleared = ~0x08;
+        break;
+    case 256:
+        cleared = ~0x20;
+        break;
+    default:
+        return;
+    }
+    POLL();
+    BITSET(0x060FB8DC, 1, 1);
+    ST16(0x060FB8A4, LDU16(0x060FB8A4) & cleared);
+}
+
 void f0609E28C(gaddr sound)
 {
     gaddr state;
@@ -3132,6 +3416,25 @@ int f0609F15A(void)
     ST16(LD32(0x060FBF64), 0x1300);
     ST32(0x060FBF40, 0);
     return 0;
+}
+
+void f0609F1A8(gaddr cmd)
+{
+    RAISE_MASK(mask);
+
+    GCALL1(0x0609F448, 0);
+    GCALL3(0x0609F274, 0, 0, 0);
+    ST16(VDP1_FBCR, LD16(0x060FBF72));
+    ST16(VDP1_PTMR, 2);
+    ST16(VDP1_EWDR, 0x8000);
+    ST16(VDP1_EWLR, 0);
+    ST16(VDP1_EWRR, 0xFFFF);
+    GCALL5(0x0609F354, 0x8000, 0, 0, (LD32(0x060FBF68) - 1) & 0xFFFF, (LD32(0x060FBF6C) - 1) & 0xFFFF);
+    ST32(cmd, VDP1_VRAM);
+    ST8(VDP1_VRAM, 128);
+    ST8(LD32(cmd) + 1, 0);
+    RESTORE_MASK(mask);
+    ST32(0x060BB938, 1);
 }
 
 void f0609F274(unsigned short mode, unsigned short idx, unsigned short wide)
