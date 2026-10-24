@@ -275,6 +275,9 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     for side in (cpu, host):
         side.r[8:15] = saved_start
     (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")[8:15] = saved_start
+    mach, macl = machine.mac_start(vals)
+    cpu.mach, cpu.macl = host.mach, host.macl = mach, macl
+    (ctypes.c_uint32 * 2).in_dll(lib, "g_mac_regs")[:] = [macl, mach]
     ctypes.c_uint32.in_dll(lib, "g_pr_value").value = sh2emu.RETURN_SENTINEL
 
     state = {"calls": [], "snaps": [], "entry_sp": host.r[15]}
@@ -316,7 +319,7 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     problems += machine.differences(host, cpu)
     problems += machine.control_differences(lib, cpu)
     problems += call_differences(state["snaps"], cpu.calls, sig is not None and sig.parked)
-    problems += register_differences(lib, cpu)
+    problems += register_differences(lib, cpu, machine.mac_start(vals))
     return vals, problems, False
 
 
@@ -351,13 +354,19 @@ def call_differences(host: list[tuple[list[int], int, list[int], int]],
     return problems
 
 
-def register_differences(lib: ctypes.CDLL, game: sh2emu.CPU) -> list[str]:
-    """r8 to r14 and pr as the host build leaves them against the game's: a function gives its caller's back."""
+def register_differences(lib: ctypes.CDLL, game: sh2emu.CPU, mac_start: tuple[int, int]) -> list[str]:
+    """r8 to r14 and pr as the host build leaves them against the game's: a function gives its caller's back.
+    MACH and MACL too where the game's code gives them back, as one that saves them does; one that leaves them changed
+    does not promise them, and the C never sets them."""
     problems = []
     regs = (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")
     for reg in range(8, 15):
         if regs[reg] != game.r[reg]:
             problems.append("r%d is %08X, the game's code %08X" % (reg, regs[reg], game.r[reg]))
+    macs = (ctypes.c_uint32 * 2).in_dll(lib, "g_mac_regs")
+    for name, mine, theirs, start in (("macl", macs[0], game.macl, mac_start[1]), ("mach", macs[1], game.mach, mac_start[0])):
+        if theirs == start and mine != theirs:
+            problems.append("%s is %08X, the game's code %08X" % (name, mine, theirs))
     if ctypes.c_uint32.in_dll(lib, "g_pr_value").value != game.pr:
         problems.append("pr is %08X, the game's code %08X" % (ctypes.c_uint32.in_dll(lib, "g_pr_value").value, game.pr))
     return problems

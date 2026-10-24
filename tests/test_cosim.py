@@ -2,6 +2,7 @@ import ctypes
 import os
 import shutil
 import sys
+import types
 
 import pytest
 
@@ -252,3 +253,17 @@ def test_a_division_leaves_the_m_and_q_bits_of_sr_as_the_games_routine_does(name
     fails, ran = check.run(check.build(), name, check.default_spec(sig), 40, 1, sig)
     assert ran > 0 and not fails
 
+
+
+@pytest.mark.parametrize("game_macl, host_macl, expected", [
+    pytest.param(5, 5, [], id="a MACL the function gives back and the C leaves alone"),
+    pytest.param(5, 9, ["macl is 00000009, the game's code 00000005"], id="a MACL the game's code gives back and the C changed"),
+    pytest.param(9, 5, [], id="a MACL the game's code leaves changed is not promised"),
+])
+def test_mach_and_macl_are_compared_where_the_games_code_gives_them_back(game_macl, host_macl, expected):
+    lib = check.build()
+    (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")[:] = [0] * 16
+    ctypes.c_uint32.in_dll(lib, "g_pr_value").value = 0
+    (ctypes.c_uint32 * 2).in_dll(lib, "g_mac_regs")[:] = [host_macl, 7]
+    game = types.SimpleNamespace(r=[0] * 16, pr=0, macl=game_macl, mach=7)
+    assert check.register_differences(lib, game, (7, 5)) == expected

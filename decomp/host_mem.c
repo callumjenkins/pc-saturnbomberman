@@ -16,6 +16,7 @@ uint32_t g_sp;              /* the game's r15, which check.py sets before each t
 
 uint32_t g_regs[16];        /* r8 to r14 in the context, which check.py sets from the game's side and compares afterwards */
 uint32_t g_pr_value;        /* pr, the same */
+uint32_t g_mac_regs[2];     /* MACL and MACH, the same */
 uint32_t g_ctl[3];          /* sr, gbr and vbr, which check.py sets before each trial and compares afterwards */
 
 /* Runs the game's function at addr with the arguments; check.py sets it. */
@@ -60,6 +61,16 @@ uint32_t g_pr(void)
 void g_pr_set(uint32_t value)
 {
     g_pr_value = value;
+}
+
+uint32_t g_mac_reg(int high)
+{
+    return g_mac_regs[high];
+}
+
+void g_mac_reg_set(int high, uint32_t value)
+{
+    g_mac_regs[high] = value;
 }
 
 uint32_t g_cr(int reg)

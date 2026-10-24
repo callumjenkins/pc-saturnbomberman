@@ -69,6 +69,16 @@ void g_pr_set(uint32_t value)
     g_cur->pr = value;
 }
 
+uint32_t g_mac_reg(int high)
+{
+    return high ? g_cur->mach : g_cur->macl;
+}
+
+void g_mac_reg_set(int high, uint32_t value)
+{
+    (high ? g_cur->mach : g_cur->macl) = value;
+}
+
 // The control registers, in the order guest.h numbers them. A write to sr keeps what ldc keeps and
 // advances time, as the generated ldc does.
 uint32_t g_cr(int reg)

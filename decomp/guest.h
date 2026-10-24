@@ -37,6 +37,8 @@
  *   R(n) SETR(n,v)  r8 to r14 in the context, which a task resumed after a call has: set before each call that
  *                   can switch tasks, for the ones the code after the call reads, and by the pops of the epilogue.
  *   PR() SETPR(v)   pr, which the prologue pushes and the epilogue pops.
+ *   MACH() MACL()   MACH and MACL in the context, which a function a task can park in saves and restores as it does pr.
+ *   SETMACH(v) SETMACL(v)
  *   FRAME(sp, n)    declares sp, the game's stack pointer on entry, and reserves n bytes of the game's
  *                   stack below it, for locals whose address the function passes on. The arguments a
  *                   caller passed on the stack start at sp. The swap's wrapper and SHC free the frame on return.
@@ -106,6 +108,12 @@ void g_pr_set(uint32_t value);
 #define SETR(n, v) g_reg_set((n), (uint32_t)(v))
 #define PR() ((int)g_pr())
 #define SETPR(v) g_pr_set((uint32_t)(v))
+uint32_t g_mac_reg(int high);
+void g_mac_reg_set(int high, uint32_t value);
+#define MACH() ((int)g_mac_reg(1))
+#define MACL() ((int)g_mac_reg(0))
+#define SETMACH(v) g_mac_reg_set(1, (uint32_t)(v))
+#define SETMACL(v) g_mac_reg_set(0, (uint32_t)(v))
 uint32_t g_cr(int reg);
 void g_cr_set(int reg, uint32_t value);
 long long g_mac_l(long long acc, int a, int b);
@@ -209,6 +217,10 @@ typedef volatile unsigned short *H16PTR;
 #define SETR(n, v) ((void)(v))
 #define PR() (0)
 #define SETPR(v) ((void)(v))
+#define MACH() (0)
+#define MACL() (0)
+#define SETMACH(v) ((void)(v))
+#define SETMACL(v) ((void)(v))
 #define SR() get_cr()
 #define GBR() get_gbr()
 #define VBR() get_vbr()

@@ -75,6 +75,12 @@ def callee_saved(vals: list[int]) -> list[int]:
     return [r.getrandbits(32) for _ in range(7)]
 
 
+def mac_start(vals: list[int]) -> tuple[int, int]:
+    """The MACH and MACL a trial starts with, drawn from its arguments as controls() does."""
+    r = random.Random("mac:" + repr(vals))
+    return r.getrandbits(32), r.getrandbits(32)
+
+
 def controls(vals: list[int]) -> tuple[int, int, int]:
     """The sr, gbr and vbr a trial starts with, drawn from its arguments so the trial's other draws stay as they were."""
     r = random.Random(repr(vals))

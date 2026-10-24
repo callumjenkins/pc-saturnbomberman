@@ -56,12 +56,19 @@ def test_the_same_function_not_parked_keeps_its_locals_in_c():
     assert not any(token in " ".join(lines) for token in ("ENTRY_SP", "SETSP", "PR()", "R(14)"))
 
 
-@pytest.mark.parametrize("push", [
-    pytest.param(encode("sts.l macl,@-Rn", 15), id="macl"),
-    pytest.param(encode("sts.l mach,@-Rn", 15), id="mach"),
+@pytest.mark.parametrize("name, accessor", [
+    pytest.param("macl", "MACL", id="macl"),
+    pytest.param("mach", "MACH", id="mach"),
 ])
-def test_saving_mach_or_macl_in_a_parked_function_is_refused(push):
-    words = [push, encode("lds.l @Rm+,macl", 0, 15), RTS, NOP]
+def test_saving_mach_or_macl_in_a_parked_function_is_a_store_and_a_load_of_the_context_register(name, accessor):
+    words = [encode("sts.l %s,@-Rn" % name, 15), encode("lds.l @Rm+,%s" % name, 0, 15), RTS, NOP]
     image = sh2.Image(b"".join(struct.pack(">H", w) for w in words), BASE)
-    with pytest.raises(lift.Unsupported, match="park"):
-        lift.lift(image, BASE, None, None, True)
+    code = lift.lift(image, BASE, None, None, True)
+    lines = [line.strip() for line in code.splitlines()]
+    assert "ST32((sp - 4), %s());" % accessor in lines and "SET%s(LD32((sp - 4)));" % accessor in lines
+
+
+def test_saving_mach_or_macl_where_a_task_cannot_park_still_leaves_the_registers_to_the_caller():
+    words = [encode("sts.l macl,@-Rn", 15), encode("lds.l @Rm+,macl", 0, 15), RTS, NOP]
+    image = sh2.Image(b"".join(struct.pack(">H", w) for w in words), BASE)
+    assert "MACL" not in lift.lift(image, BASE, None, None, False)

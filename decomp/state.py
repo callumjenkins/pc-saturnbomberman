@@ -15,6 +15,7 @@ _NUMBER = re.compile(r"^-?(?:0x[0-9A-Fa-f]+|\d+)$")
 _SIZES = {"b": 1, "w": 2, "l": 4}
 _STORE = {1: "ST8", 2: "ST16", 4: "ST32"}
 _CONTROL = {"sr": "SR", "gbr": "GBR", "vbr": "VBR"}
+_SAVED = {"mach": "MACH", "macl": "MACL", "pr": "PR"}      # what a parked function pushes with sts.l
 MAC = "m0"                                  # MACH:MACL as one 64-bit variable
 _FRAMED = re.compile(r"sp|\(sp ([-+]) (\d+)\)")
 _SP_SUM = re.compile(r"\(\(sp ([-+]) (\d+)\) ([-+]) (\d+)\)")
@@ -252,12 +253,12 @@ def parked_frame(ins: "sh2.Insn", st: State) -> bool:
     op, fmt, n, m = ins.op, ins.fmt, ins.n, ins.m
     if op in ("sts.l", "lds.l"):
         reg = fmt.split(" ")[1].split(",")[0] if op == "sts.l" else fmt.rsplit(",", 1)[1]
-        if reg != "pr":
+        if reg not in _SAVED:
             raise Unsupported("%s in a function a task can park in" % ins.text)
         if op == "sts.l":
-            push(st, "PR()")
+            push(st, "%s()" % _SAVED[reg])
         else:
-            pop(st, "SETPR(LD32(%s));")
+            pop(st, "SET%s(LD32(%%s));" % _SAVED[reg])
         return True
     if op == "mov.l" and fmt == "mov.l Rm,@-Rn" and n == 15 and 8 <= m <= 14 and m not in st.saved:
         st.saved.add(m)
