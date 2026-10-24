@@ -419,6 +419,11 @@ symbol = "swap_f060073B8"
 
 [[replace]]
 module = "KRNL"
+at = 0x060073F8
+symbol = "swap_f060073F8"
+
+[[replace]]
+module = "KRNL"
 at = 0x060074E8
 symbol = "swap_f060074E8"
 
@@ -431,6 +436,11 @@ symbol = "swap_f060075D4"
 module = "KRNL"
 at = 0x0600794E
 symbol = "swap_f0600794E"
+
+[[replace]]
+module = "KRNL"
+at = 0x060079A4
+symbol = "swap_f060079A4"
 
 [[replace]]
 module = "KRNL"
@@ -454,6 +464,11 @@ symbol = "swap_f06008214"
 
 [[replace]]
 module = "KRNL"
+at = 0x06008234
+symbol = "swap_f06008234"
+
+[[replace]]
+module = "KRNL"
 at = 0x060086E2
 symbol = "swap_f060086E2"
 
@@ -471,6 +486,11 @@ symbol = "swap_f060086EA"
 module = "KRNL"
 at = 0x06008810
 symbol = "swap_f06008810"
+
+[[replace]]
+module = "KRNL"
+at = 0x06008814
+symbol = "swap_f06008814"
 
 [[replace]]
 module = "KRNL"
@@ -511,6 +531,16 @@ symbol = "swap_f06008ADC"
 module = "KRNL"
 at = 0x06008AEC
 symbol = "swap_f06008AEC"
+
+[[replace]]
+module = "KRNL"
+at = 0x06008BD2
+symbol = "swap_f06008BD2"
+
+[[replace]]
+module = "KRNL"
+at = 0x06008C5C
+symbol = "swap_f06008C5C"
 
 [[replace]]
 module = "KRNL"
@@ -1279,6 +1309,16 @@ symbol = "swap_f0600DBFC"
 
 [[replace]]
 module = "KRNL"
+at = 0x0600DC72
+symbol = "swap_f0600DC72"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600E018
+symbol = "swap_f0600E018"
+
+[[replace]]
+module = "KRNL"
 at = 0x0600E096
 symbol = "swap_f0600E096"
 
@@ -1291,6 +1331,11 @@ symbol = "swap_f0600E140"
 module = "KRNL"
 at = 0x0600E1BC
 symbol = "swap_f0600E1BC"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600E250
+symbol = "swap_f0600E250"
 
 [[replace]]
 module = "KRNL"
@@ -1319,6 +1364,16 @@ symbol = "swap_f0600E5CC"
 
 [[replace]]
 module = "KRNL"
+at = 0x0600E6EE
+symbol = "swap_f0600E6EE"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600E788
+symbol = "swap_f0600E788"
+
+[[replace]]
+module = "KRNL"
 at = 0x0600E94C
 symbol = "swap_f0600E94C"
 
@@ -1339,6 +1394,11 @@ symbol = "swap_f0600E9B0"
 
 [[replace]]
 module = "KRNL"
+at = 0x0600EA3C
+symbol = "swap_f0600EA3C"
+
+[[replace]]
+module = "KRNL"
 at = 0x0600F104
 symbol = "swap_f0600F104"
 
@@ -1346,6 +1406,11 @@ symbol = "swap_f0600F104"
 module = "KRNL"
 at = 0x0600F1C6
 symbol = "swap_f0600F1C6"
+
+[[replace]]
+module = "KRNL"
+at = 0x0600F1F2
+symbol = "swap_f0600F1F2"
 
 [[replace]]
 module = "KRNL"
@@ -1401,6 +1466,11 @@ symbol = "swap_f06010132"
 module = "KRNL"
 at = 0x060101E4
 symbol = "swap_f060101E4"
+
+[[replace]]
+module = "KRNL"
+at = 0x060103F2
+symbol = "swap_f060103F2"
 
 [[replace]]
 module = "KRNL"
@@ -1729,6 +1799,11 @@ symbol = "swap_f060126E4"
 
 [[replace]]
 module = "KRNL"
+at = 0x06012748
+symbol = "swap_f06012748"
+
+[[replace]]
+module = "KRNL"
 at = 0x060127CA
 symbol = "swap_f060127CA"
 
@@ -1974,6 +2049,11 @@ symbol = "swap_f060139AC"
 
 [[replace]]
 module = "KRNL"
+at = 0x06013B90
+symbol = "swap_f06013B90"
+
+[[replace]]
+module = "KRNL"
 at = 0x06013C24
 symbol = "swap_f06013C24"
 
@@ -2116,6 +2196,11 @@ symbol = "swap_f06014B54"
 module = "KRNL"
 at = 0x06014BD2
 symbol = "swap_f06014BD2"
+
+[[replace]]
+module = "KRNL"
+at = 0x06014C42
+symbol = "swap_f06014C42"
 
 [[replace]]
 module = "KRNL"
@@ -2374,6 +2459,16 @@ symbol = "swap_f06018494"
 
 [[replace]]
 module = "KRNL"
+at = 0x06018508
+symbol = "swap_f06018508"
+
+[[replace]]
+module = "KRNL"
+at = 0x06018542
+symbol = "swap_f06018542"
+
+[[replace]]
+module = "KRNL"
 at = 0x06018C72
 symbol = "swap_f06018C72"
 
@@ -2381,6 +2476,11 @@ symbol = "swap_f06018C72"
 module = "KRNL"
 at = 0x06018D0C
 symbol = "swap_f06018D0C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06018D60
+symbol = "swap_f06018D60"
 
 [[replace]]
 module = "KRNL"
@@ -2404,6 +2504,16 @@ symbol = "swap_f06018F54"
 
 [[replace]]
 module = "KRNL"
+at = 0x06018FB2
+symbol = "swap_f06018FB2"
+
+[[replace]]
+module = "KRNL"
+at = 0x06019088
+symbol = "swap_f06019088"
+
+[[replace]]
+module = "KRNL"
 at = 0x0601917C
 symbol = "swap_f0601917C"
 
@@ -2424,6 +2534,11 @@ symbol = "swap_f06019BB4"
 
 [[replace]]
 module = "KRNL"
+at = 0x06019C32
+symbol = "swap_f06019C32"
+
+[[replace]]
+module = "KRNL"
 at = 0x06019D48
 symbol = "swap_f06019D48"
 
@@ -2436,6 +2551,16 @@ symbol = "swap_f06019ED2"
 module = "KRNL"
 at = 0x06019EDE
 symbol = "swap_f06019EDE"
+
+[[replace]]
+module = "KRNL"
+at = 0x0601A05A
+symbol = "swap_f0601A05A"
+
+[[replace]]
+module = "KRNL"
+at = 0x0601A0E4
+symbol = "swap_f0601A0E4"
 
 [[replace]]
 module = "KRNL"
@@ -2599,6 +2724,11 @@ symbol = "swap_f0601BC9E"
 
 [[replace]]
 module = "KRNL"
+at = 0x0601BCE6
+symbol = "swap_f0601BCE6"
+
+[[replace]]
+module = "KRNL"
 at = 0x0601BED4
 symbol = "swap_f0601BED4"
 
@@ -2676,6 +2806,11 @@ symbol = "swap_f0601C534"
 module = "KRNL"
 at = 0x0601C620
 symbol = "swap_f0601C620"
+
+[[replace]]
+module = "KRNL"
+at = 0x0601C964
+symbol = "swap_f0601C964"
 
 [[replace]]
 module = "KRNL"
@@ -3079,6 +3214,11 @@ symbol = "swap_f060222D8"
 
 [[replace]]
 module = "KRNL"
+at = 0x06022486
+symbol = "swap_f06022486"
+
+[[replace]]
+module = "KRNL"
 at = 0x0602251C
 symbol = "swap_f0602251C"
 
@@ -3149,6 +3289,11 @@ symbol = "swap_f060230AE"
 
 [[replace]]
 module = "KRNL"
+at = 0x060230B8
+symbol = "swap_f060230B8"
+
+[[replace]]
+module = "KRNL"
 at = 0x060231FA
 symbol = "swap_f060231FA"
 
@@ -3161,6 +3306,11 @@ symbol = "swap_f0602336E"
 module = "KRNL"
 at = 0x06023390
 symbol = "swap_f06023390"
+
+[[replace]]
+module = "KRNL"
+at = 0x060234DE
+symbol = "swap_f060234DE"
 
 [[replace]]
 module = "KRNL"
@@ -3214,6 +3364,11 @@ symbol = "swap_f06023BC2"
 
 [[replace]]
 module = "KRNL"
+at = 0x06023BD4
+symbol = "swap_f06023BD4"
+
+[[replace]]
+module = "KRNL"
 at = 0x06023D8E
 symbol = "swap_f06023D8E"
 
@@ -3244,8 +3399,18 @@ symbol = "swap_f06023EB0"
 
 [[replace]]
 module = "KRNL"
+at = 0x06023EBC
+symbol = "swap_f06023EBC"
+
+[[replace]]
+module = "KRNL"
 at = 0x06023EF8
 symbol = "swap_f06023EF8"
+
+[[replace]]
+module = "KRNL"
+at = 0x06023FA2
+symbol = "swap_f06023FA2"
 
 [[replace]]
 module = "KRNL"
@@ -3299,6 +3464,21 @@ symbol = "swap_f060247D8"
 
 [[replace]]
 module = "KRNL"
+at = 0x060248E0
+symbol = "swap_f060248E0"
+
+[[replace]]
+module = "KRNL"
+at = 0x06024A0C
+symbol = "swap_f06024A0C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06024C76
+symbol = "swap_f06024C76"
+
+[[replace]]
+module = "KRNL"
 at = 0x06024D78
 symbol = "swap_f06024D78"
 
@@ -3309,6 +3489,11 @@ symbol = "swap_f06024DF8"
 
 [[replace]]
 module = "KRNL"
+at = 0x06024FEE
+symbol = "swap_f06024FEE"
+
+[[replace]]
+module = "KRNL"
 at = 0x0602510C
 symbol = "swap_f0602510C"
 
@@ -3316,6 +3501,16 @@ symbol = "swap_f0602510C"
 module = "KRNL"
 at = 0x0602511A
 symbol = "swap_f0602511A"
+
+[[replace]]
+module = "KRNL"
+at = 0x06025208
+symbol = "swap_f06025208"
+
+[[replace]]
+module = "KRNL"
+at = 0x06025374
+symbol = "swap_f06025374"
 
 [[replace]]
 module = "KRNL"
@@ -3351,6 +3546,11 @@ symbol = "swap_f06025716"
 module = "KRNL"
 at = 0x0602574E
 symbol = "swap_f0602574E"
+
+[[replace]]
+module = "KRNL"
+at = 0x060257A0
+symbol = "swap_f060257A0"
 
 [[replace]]
 module = "KRNL"
@@ -3469,6 +3669,16 @@ symbol = "swap_f06026E04"
 
 [[replace]]
 module = "KRNL"
+at = 0x06027064
+symbol = "swap_f06027064"
+
+[[replace]]
+module = "KRNL"
+at = 0x060270CE
+symbol = "swap_f060270CE"
+
+[[replace]]
+module = "KRNL"
 at = 0x0602719C
 symbol = "swap_f0602719C"
 
@@ -3544,6 +3754,11 @@ symbol = "swap_f060279E2"
 
 [[replace]]
 module = "KRNL"
+at = 0x06027A48
+symbol = "swap_f06027A48"
+
+[[replace]]
+module = "KRNL"
 at = 0x060285EA
 symbol = "swap_f060285EA"
 
@@ -3586,6 +3801,11 @@ symbol = "swap_f060292AE"
 module = "KRNL"
 at = 0x060292E8
 symbol = "swap_f060292E8"
+
+[[replace]]
+module = "KRNL"
+at = 0x06029430
+symbol = "swap_f06029430"
 
 [[replace]]
 module = "KRNL"
@@ -3929,6 +4149,11 @@ symbol = "swap_f0602E43C"
 
 [[replace]]
 module = "KRNL"
+at = 0x0602E4E8
+symbol = "swap_f0602E4E8"
+
+[[replace]]
+module = "KRNL"
 at = 0x0602E53E
 symbol = "swap_f0602E53E"
 
@@ -3961,6 +4186,11 @@ symbol = "swap_f0602E656"
 module = "KRNL"
 at = 0x0602E674
 symbol = "swap_f0602E674"
+
+[[replace]]
+module = "KRNL"
+at = 0x0602E686
+symbol = "swap_f0602E686"
 
 [[replace]]
 module = "KRNL"
@@ -4069,6 +4299,11 @@ symbol = "swap_f0602EE3A"
 
 [[replace]]
 module = "KRNL"
+at = 0x0602F1C0
+symbol = "swap_f0602F1C0"
+
+[[replace]]
+module = "KRNL"
 at = 0x0602F322
 symbol = "swap_f0602F322"
 
@@ -4114,6 +4349,11 @@ symbol = "swap_f0602FCCE"
 
 [[replace]]
 module = "KRNL"
+at = 0x0602FD10
+symbol = "swap_f0602FD10"
+
+[[replace]]
+module = "KRNL"
 at = 0x0602FF0A
 symbol = "swap_f0602FF0A"
 
@@ -4124,8 +4364,18 @@ symbol = "swap_f060300C2"
 
 [[replace]]
 module = "KRNL"
+at = 0x060306BA
+symbol = "swap_f060306BA"
+
+[[replace]]
+module = "KRNL"
 at = 0x060306F0
 symbol = "swap_f060306F0"
+
+[[replace]]
+module = "KRNL"
+at = 0x06030768
+symbol = "swap_f06030768"
 
 [[replace]]
 module = "KRNL"
@@ -4241,6 +4491,11 @@ symbol = "swap_f06031C3C"
 module = "KRNL"
 at = 0x06032034
 symbol = "swap_f06032034"
+
+[[replace]]
+module = "KRNL"
+at = 0x06032088
+symbol = "swap_f06032088"
 
 [[replace]]
 module = "KRNL"
@@ -4729,6 +4984,11 @@ symbol = "swap_f0603461C"
 
 [[replace]]
 module = "KRNL"
+at = 0x0603469E
+symbol = "swap_f0603469E"
+
+[[replace]]
+module = "KRNL"
 at = 0x06034A8C
 symbol = "swap_f06034A8C"
 
@@ -4811,6 +5071,16 @@ symbol = "swap_f0603541C"
 module = "KRNL"
 at = 0x060354C0
 symbol = "swap_f060354C0"
+
+[[replace]]
+module = "KRNL"
+at = 0x06035726
+symbol = "swap_f06035726"
+
+[[replace]]
+module = "KRNL"
+at = 0x06035752
+symbol = "swap_f06035752"
 
 [[replace]]
 module = "KRNL"
@@ -4899,8 +5169,33 @@ symbol = "swap_f0603666E"
 
 [[replace]]
 module = "KRNL"
+at = 0x060366B2
+symbol = "swap_f060366B2"
+
+[[replace]]
+module = "KRNL"
+at = 0x06036722
+symbol = "swap_f06036722"
+
+[[replace]]
+module = "KRNL"
 at = 0x06036778
 symbol = "swap_f06036778"
+
+[[replace]]
+module = "KRNL"
+at = 0x060367F2
+symbol = "swap_f060367F2"
+
+[[replace]]
+module = "KRNL"
+at = 0x06036850
+symbol = "swap_f06036850"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603689C
+symbol = "swap_f0603689C"
 
 [[replace]]
 module = "KRNL"
@@ -5069,6 +5364,11 @@ symbol = "swap_f06038334"
 
 [[replace]]
 module = "KRNL"
+at = 0x06038370
+symbol = "swap_f06038370"
+
+[[replace]]
+module = "KRNL"
 at = 0x06038392
 symbol = "swap_f06038392"
 
@@ -5086,6 +5386,11 @@ symbol = "swap_f060383DA"
 module = "KRNL"
 at = 0x0603840E
 symbol = "swap_f0603840E"
+
+[[replace]]
+module = "KRNL"
+at = 0x06038458
+symbol = "swap_f06038458"
 
 [[replace]]
 module = "KRNL"
@@ -5214,6 +5519,11 @@ symbol = "swap_f06039FBC"
 
 [[replace]]
 module = "KRNL"
+at = 0x06039FC4
+symbol = "swap_f06039FC4"
+
+[[replace]]
+module = "KRNL"
 at = 0x06039FE8
 symbol = "swap_f06039FE8"
 
@@ -5304,8 +5614,23 @@ symbol = "swap_f0603A82E"
 
 [[replace]]
 module = "KRNL"
+at = 0x0603A8E4
+symbol = "swap_f0603A8E4"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603A97A
+symbol = "swap_f0603A97A"
+
+[[replace]]
+module = "KRNL"
 at = 0x0603AA2C
 symbol = "swap_f0603AA2C"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603AA84
+symbol = "swap_f0603AA84"
 
 [[replace]]
 module = "KRNL"
@@ -5391,6 +5716,16 @@ symbol = "swap_f0603B660"
 module = "KRNL"
 at = 0x0603B7EA
 symbol = "swap_f0603B7EA"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603B81A
+symbol = "swap_f0603B81A"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603B870
+symbol = "swap_f0603B870"
 
 [[replace]]
 module = "KRNL"
@@ -5514,8 +5849,43 @@ symbol = "swap_f0603D374"
 
 [[replace]]
 module = "KRNL"
+at = 0x0603D432
+symbol = "swap_f0603D432"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603D58A
+symbol = "swap_f0603D58A"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603D690
+symbol = "swap_f0603D690"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603D7F8
+symbol = "swap_f0603D7F8"
+
+[[replace]]
+module = "KRNL"
 at = 0x0603D86E
 symbol = "swap_f0603D86E"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603D8E8
+symbol = "swap_f0603D8E8"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603D9B0
+symbol = "swap_f0603D9B0"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603DCCA
+symbol = "swap_f0603DCCA"
 
 [[replace]]
 module = "KRNL"
@@ -5544,6 +5914,21 @@ symbol = "swap_f0603E11C"
 
 [[replace]]
 module = "KRNL"
+at = 0x0603E1AC
+symbol = "swap_f0603E1AC"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603E1CE
+symbol = "swap_f0603E1CE"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603E1F0
+symbol = "swap_f0603E1F0"
+
+[[replace]]
+module = "KRNL"
 at = 0x0603E212
 symbol = "swap_f0603E212"
 
@@ -5561,6 +5946,16 @@ symbol = "swap_f0603E366"
 module = "KRNL"
 at = 0x0603E436
 symbol = "swap_f0603E436"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603E462
+symbol = "swap_f0603E462"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603E46E
+symbol = "swap_f0603E46E"
 
 [[replace]]
 module = "KRNL"
@@ -5619,6 +6014,21 @@ symbol = "swap_f0603E9B6"
 
 [[replace]]
 module = "KRNL"
+at = 0x0603EA48
+symbol = "swap_f0603EA48"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603EBE4
+symbol = "swap_f0603EBE4"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603EC14
+symbol = "swap_f0603EC14"
+
+[[replace]]
+module = "KRNL"
 at = 0x0603ECFE
 symbol = "swap_f0603ECFE"
 
@@ -5634,13 +6044,48 @@ symbol = "swap_f0603EE1E"
 
 [[replace]]
 module = "KRNL"
+at = 0x0603EEB0
+symbol = "swap_f0603EEB0"
+
+[[replace]]
+module = "KRNL"
 at = 0x0603EFDA
 symbol = "swap_f0603EFDA"
 
 [[replace]]
 module = "KRNL"
+at = 0x0603F02C
+symbol = "swap_f0603F02C"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603F05C
+symbol = "swap_f0603F05C"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603F08C
+symbol = "swap_f0603F08C"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603F0BC
+symbol = "swap_f0603F0BC"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603F0EC
+symbol = "swap_f0603F0EC"
+
+[[replace]]
+module = "KRNL"
 at = 0x0603F380
 symbol = "swap_f0603F380"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603F44C
+symbol = "swap_f0603F44C"
 
 [[replace]]
 module = "KRNL"
@@ -5669,8 +6114,18 @@ symbol = "swap_f0603FB16"
 
 [[replace]]
 module = "KRNL"
+at = 0x0603FC0C
+symbol = "swap_f0603FC0C"
+
+[[replace]]
+module = "KRNL"
 at = 0x0603FCCC
 symbol = "swap_f0603FCCC"
+
+[[replace]]
+module = "KRNL"
+at = 0x0603FD30
+symbol = "swap_f0603FD30"
 
 [[replace]]
 module = "KRNL"
@@ -5699,8 +6154,18 @@ symbol = "swap_f06040918"
 
 [[replace]]
 module = "KRNL"
+at = 0x06040AEE
+symbol = "swap_f06040AEE"
+
+[[replace]]
+module = "KRNL"
 at = 0x06040BD4
 symbol = "swap_f06040BD4"
+
+[[replace]]
+module = "KRNL"
+at = 0x06040CE0
+symbol = "swap_f06040CE0"
 
 [[replace]]
 module = "KRNL"
@@ -5711,6 +6176,21 @@ symbol = "swap_f06040DEE"
 module = "KRNL"
 at = 0x06040E4A
 symbol = "swap_f06040E4A"
+
+[[replace]]
+module = "KRNL"
+at = 0x06040F7C
+symbol = "swap_f06040F7C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06041128
+symbol = "swap_f06041128"
+
+[[replace]]
+module = "KRNL"
+at = 0x06041264
+symbol = "swap_f06041264"
 
 [[replace]]
 module = "KRNL"
@@ -5734,6 +6214,51 @@ symbol = "swap_f0604144E"
 
 [[replace]]
 module = "KRNL"
+at = 0x060417D0
+symbol = "swap_f060417D0"
+
+[[replace]]
+module = "KRNL"
+at = 0x06041AE4
+symbol = "swap_f06041AE4"
+
+[[replace]]
+module = "KRNL"
+at = 0x06041B92
+symbol = "swap_f06041B92"
+
+[[replace]]
+module = "KRNL"
+at = 0x06041C5E
+symbol = "swap_f06041C5E"
+
+[[replace]]
+module = "KRNL"
+at = 0x06041D8C
+symbol = "swap_f06041D8C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06041E6A
+symbol = "swap_f06041E6A"
+
+[[replace]]
+module = "KRNL"
+at = 0x0604203E
+symbol = "swap_f0604203E"
+
+[[replace]]
+module = "KRNL"
+at = 0x06042124
+symbol = "swap_f06042124"
+
+[[replace]]
+module = "KRNL"
+at = 0x06042402
+symbol = "swap_f06042402"
+
+[[replace]]
+module = "KRNL"
 at = 0x0604271C
 symbol = "swap_f0604271C"
 
@@ -5741,6 +6266,11 @@ symbol = "swap_f0604271C"
 module = "KRNL"
 at = 0x060429A8
 symbol = "swap_f060429A8"
+
+[[replace]]
+module = "KRNL"
+at = 0x060429B0
+symbol = "swap_f060429B0"
 
 [[replace]]
 module = "KRNL"
@@ -5784,8 +6314,18 @@ symbol = "swap_f0604327A"
 
 [[replace]]
 module = "KRNL"
+at = 0x06043342
+symbol = "swap_f06043342"
+
+[[replace]]
+module = "KRNL"
 at = 0x06043454
 symbol = "swap_f06043454"
+
+[[replace]]
+module = "KRNL"
+at = 0x06043480
+symbol = "swap_f06043480"
 
 [[replace]]
 module = "KRNL"
@@ -5799,6 +6339,11 @@ symbol = "swap_f060437A6"
 
 [[replace]]
 module = "KRNL"
+at = 0x0604380C
+symbol = "swap_f0604380C"
+
+[[replace]]
+module = "KRNL"
 at = 0x06043B78
 symbol = "swap_f06043B78"
 
@@ -5809,8 +6354,33 @@ symbol = "swap_f06043BFC"
 
 [[replace]]
 module = "KRNL"
+at = 0x06043C7A
+symbol = "swap_f06043C7A"
+
+[[replace]]
+module = "KRNL"
+at = 0x06043CB0
+symbol = "swap_f06043CB0"
+
+[[replace]]
+module = "KRNL"
+at = 0x06043D76
+symbol = "swap_f06043D76"
+
+[[replace]]
+module = "KRNL"
+at = 0x06043DAC
+symbol = "swap_f06043DAC"
+
+[[replace]]
+module = "KRNL"
 at = 0x06043F48
 symbol = "swap_f06043F48"
+
+[[replace]]
+module = "KRNL"
+at = 0x06044176
+symbol = "swap_f06044176"
 
 [[replace]]
 module = "KRNL"
@@ -5834,8 +6404,58 @@ symbol = "swap_f06044A7E"
 
 [[replace]]
 module = "KRNL"
+at = 0x06044C60
+symbol = "swap_f06044C60"
+
+[[replace]]
+module = "KRNL"
 at = 0x06045208
 symbol = "swap_f06045208"
+
+[[replace]]
+module = "KRNL"
+at = 0x06045358
+symbol = "swap_f06045358"
+
+[[replace]]
+module = "KRNL"
+at = 0x0604539C
+symbol = "swap_f0604539C"
+
+[[replace]]
+module = "KRNL"
+at = 0x060454F0
+symbol = "swap_f060454F0"
+
+[[replace]]
+module = "KRNL"
+at = 0x06045552
+symbol = "swap_f06045552"
+
+[[replace]]
+module = "KRNL"
+at = 0x060455C0
+symbol = "swap_f060455C0"
+
+[[replace]]
+module = "KRNL"
+at = 0x06045690
+symbol = "swap_f06045690"
+
+[[replace]]
+module = "KRNL"
+at = 0x060456DE
+symbol = "swap_f060456DE"
+
+[[replace]]
+module = "KRNL"
+at = 0x06045760
+symbol = "swap_f06045760"
+
+[[replace]]
+module = "KRNL"
+at = 0x060457F8
+symbol = "swap_f060457F8"
 
 [[replace]]
 module = "KRNL"
@@ -5859,8 +6479,28 @@ symbol = "swap_f06045CBC"
 
 [[replace]]
 module = "KRNL"
+at = 0x06045CFA
+symbol = "swap_f06045CFA"
+
+[[replace]]
+module = "KRNL"
 at = 0x06045E00
 symbol = "swap_f06045E00"
+
+[[replace]]
+module = "KRNL"
+at = 0x06045E48
+symbol = "swap_f06045E48"
+
+[[replace]]
+module = "KRNL"
+at = 0x06045F4A
+symbol = "swap_f06045F4A"
+
+[[replace]]
+module = "KRNL"
+at = 0x0604604A
+symbol = "swap_f0604604A"
 
 [[replace]]
 module = "KRNL"
@@ -5874,8 +6514,18 @@ symbol = "swap_f06046174"
 
 [[replace]]
 module = "KRNL"
+at = 0x060462A8
+symbol = "swap_f060462A8"
+
+[[replace]]
+module = "KRNL"
 at = 0x0604655A
 symbol = "swap_f0604655A"
+
+[[replace]]
+module = "KRNL"
+at = 0x0604656E
+symbol = "swap_f0604656E"
 
 [[replace]]
 module = "KRNL"
@@ -6011,6 +6661,11 @@ symbol = "swap_f0604AF5C"
 module = "KRNL"
 at = 0x0604AFE2
 symbol = "swap_f0604AFE2"
+
+[[replace]]
+module = "KRNL"
+at = 0x0604B1B4
+symbol = "swap_f0604B1B4"
 
 [[replace]]
 module = "KRNL"
@@ -6239,6 +6894,11 @@ symbol = "swap_f06050594"
 
 [[replace]]
 module = "KRNL"
+at = 0x060505EE
+symbol = "swap_f060505EE"
+
+[[replace]]
+module = "KRNL"
 at = 0x060506B4
 symbol = "swap_f060506B4"
 
@@ -6284,6 +6944,16 @@ symbol = "swap_f0605112C"
 
 [[replace]]
 module = "KRNL"
+at = 0x060511EC
+symbol = "swap_f060511EC"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605121E
+symbol = "swap_f0605121E"
+
+[[replace]]
+module = "KRNL"
 at = 0x060512C0
 symbol = "swap_f060512C0"
 
@@ -6291,6 +6961,11 @@ symbol = "swap_f060512C0"
 module = "KRNL"
 at = 0x060516B0
 symbol = "swap_f060516B0"
+
+[[replace]]
+module = "KRNL"
+at = 0x06051998
+symbol = "swap_f06051998"
 
 [[replace]]
 module = "KRNL"
@@ -6359,6 +7034,11 @@ symbol = "swap_f06053934"
 
 [[replace]]
 module = "KRNL"
+at = 0x06053BF0
+symbol = "swap_f06053BF0"
+
+[[replace]]
+module = "KRNL"
 at = 0x06053C58
 symbol = "swap_f06053C58"
 
@@ -6384,6 +7064,11 @@ symbol = "swap_f06053F5C"
 
 [[replace]]
 module = "KRNL"
+at = 0x06053F92
+symbol = "swap_f06053F92"
+
+[[replace]]
+module = "KRNL"
 at = 0x0605401C
 symbol = "swap_f0605401C"
 
@@ -6406,6 +7091,11 @@ symbol = "swap_f06054086"
 module = "KRNL"
 at = 0x0605417A
 symbol = "swap_f0605417A"
+
+[[replace]]
+module = "KRNL"
+at = 0x060541E0
+symbol = "swap_f060541E0"
 
 [[replace]]
 module = "KRNL"
@@ -6509,6 +7199,26 @@ symbol = "swap_f06057048"
 
 [[replace]]
 module = "KRNL"
+at = 0x060571AC
+symbol = "swap_f060571AC"
+
+[[replace]]
+module = "KRNL"
+at = 0x06057300
+symbol = "swap_f06057300"
+
+[[replace]]
+module = "KRNL"
+at = 0x06057500
+symbol = "swap_f06057500"
+
+[[replace]]
+module = "KRNL"
+at = 0x06057594
+symbol = "swap_f06057594"
+
+[[replace]]
+module = "KRNL"
 at = 0x0605788A
 symbol = "swap_f0605788A"
 
@@ -6539,6 +7249,11 @@ symbol = "swap_f06058598"
 
 [[replace]]
 module = "KRNL"
+at = 0x06058A6C
+symbol = "swap_f06058A6C"
+
+[[replace]]
+module = "KRNL"
 at = 0x06058DA6
 symbol = "swap_f06058DA6"
 
@@ -6559,6 +7274,31 @@ symbol = "swap_f06059040"
 
 [[replace]]
 module = "KRNL"
+at = 0x0605950C
+symbol = "swap_f0605950C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06059850
+symbol = "swap_f06059850"
+
+[[replace]]
+module = "KRNL"
+at = 0x06059A0C
+symbol = "swap_f06059A0C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06059A32
+symbol = "swap_f06059A32"
+
+[[replace]]
+module = "KRNL"
+at = 0x06059A72
+symbol = "swap_f06059A72"
+
+[[replace]]
+module = "KRNL"
 at = 0x06059AE8
 symbol = "swap_f06059AE8"
 
@@ -6566,6 +7306,11 @@ symbol = "swap_f06059AE8"
 module = "KRNL"
 at = 0x06059BF2
 symbol = "swap_f06059BF2"
+
+[[replace]]
+module = "KRNL"
+at = 0x06059CC8
+symbol = "swap_f06059CC8"
 
 [[replace]]
 module = "KRNL"
@@ -6594,8 +7339,23 @@ symbol = "swap_f06059F0E"
 
 [[replace]]
 module = "KRNL"
+at = 0x06059F32
+symbol = "swap_f06059F32"
+
+[[replace]]
+module = "KRNL"
 at = 0x06059F98
 symbol = "swap_f06059F98"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605A09E
+symbol = "swap_f0605A09E"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605A124
+symbol = "swap_f0605A124"
 
 [[replace]]
 module = "KRNL"
@@ -6744,8 +7504,53 @@ symbol = "swap_f0605BC9A"
 
 [[replace]]
 module = "KRNL"
+at = 0x0605BDCC
+symbol = "swap_f0605BDCC"
+
+[[replace]]
+module = "KRNL"
 at = 0x0605BEB0
 symbol = "swap_f0605BEB0"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605BFC8
+symbol = "swap_f0605BFC8"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605C0BC
+symbol = "swap_f0605C0BC"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605C1FA
+symbol = "swap_f0605C1FA"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605C2B6
+symbol = "swap_f0605C2B6"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605C416
+symbol = "swap_f0605C416"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605C56E
+symbol = "swap_f0605C56E"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605C688
+symbol = "swap_f0605C688"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605C8E2
+symbol = "swap_f0605C8E2"
 
 [[replace]]
 module = "KRNL"
@@ -6784,13 +7589,43 @@ symbol = "swap_f0605CCE0"
 
 [[replace]]
 module = "KRNL"
+at = 0x0605CDD6
+symbol = "swap_f0605CDD6"
+
+[[replace]]
+module = "KRNL"
 at = 0x0605D366
 symbol = "swap_f0605D366"
 
 [[replace]]
 module = "KRNL"
+at = 0x0605D488
+symbol = "swap_f0605D488"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605D4A0
+symbol = "swap_f0605D4A0"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605D5F4
+symbol = "swap_f0605D5F4"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605D60C
+symbol = "swap_f0605D60C"
+
+[[replace]]
+module = "KRNL"
 at = 0x0605D724
 symbol = "swap_f0605D724"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605D72C
+symbol = "swap_f0605D72C"
 
 [[replace]]
 module = "KRNL"
@@ -6826,6 +7661,11 @@ symbol = "swap_f0605DE8C"
 module = "KRNL"
 at = 0x0605DF9C
 symbol = "swap_f0605DF9C"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605E17A
+symbol = "swap_f0605E17A"
 
 [[replace]]
 module = "KRNL"
@@ -6889,6 +7729,11 @@ symbol = "swap_f0605F86A"
 
 [[replace]]
 module = "KRNL"
+at = 0x0605F872
+symbol = "swap_f0605F872"
+
+[[replace]]
+module = "KRNL"
 at = 0x0605F88A
 symbol = "swap_f0605F88A"
 
@@ -6906,6 +7751,21 @@ symbol = "swap_f0605F92C"
 module = "KRNL"
 at = 0x0605FBF0
 symbol = "swap_f0605FBF0"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605FC30
+symbol = "swap_f0605FC30"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605FED2
+symbol = "swap_f0605FED2"
+
+[[replace]]
+module = "KRNL"
+at = 0x0605FF10
+symbol = "swap_f0605FF10"
 
 [[replace]]
 module = "KRNL"
@@ -6934,8 +7794,58 @@ symbol = "swap_f06060440"
 
 [[replace]]
 module = "KRNL"
+at = 0x0606047C
+symbol = "swap_f0606047C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06060636
+symbol = "swap_f06060636"
+
+[[replace]]
+module = "KRNL"
+at = 0x06060772
+symbol = "swap_f06060772"
+
+[[replace]]
+module = "KRNL"
+at = 0x06060A26
+symbol = "swap_f06060A26"
+
+[[replace]]
+module = "KRNL"
+at = 0x06060BB6
+symbol = "swap_f06060BB6"
+
+[[replace]]
+module = "KRNL"
+at = 0x06060E0E
+symbol = "swap_f06060E0E"
+
+[[replace]]
+module = "KRNL"
 at = 0x06060E80
 symbol = "swap_f06060E80"
+
+[[replace]]
+module = "KRNL"
+at = 0x06060F10
+symbol = "swap_f06060F10"
+
+[[replace]]
+module = "KRNL"
+at = 0x06060FE4
+symbol = "swap_f06060FE4"
+
+[[replace]]
+module = "KRNL"
+at = 0x06061142
+symbol = "swap_f06061142"
+
+[[replace]]
+module = "KRNL"
+at = 0x06061280
+symbol = "swap_f06061280"
 
 [[replace]]
 module = "KRNL"
@@ -6951,6 +7861,11 @@ symbol = "swap_f060614A4"
 module = "KRNL"
 at = 0x060614F8
 symbol = "swap_f060614F8"
+
+[[replace]]
+module = "KRNL"
+at = 0x06061516
+symbol = "swap_f06061516"
 
 [[replace]]
 module = "KRNL"
@@ -6999,6 +7914,16 @@ symbol = "swap_f06061CE0"
 
 [[replace]]
 module = "KRNL"
+at = 0x06061F3C
+symbol = "swap_f06061F3C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06062130
+symbol = "swap_f06062130"
+
+[[replace]]
+module = "KRNL"
 at = 0x06062168
 symbol = "swap_f06062168"
 
@@ -7006,6 +7931,11 @@ symbol = "swap_f06062168"
 module = "KRNL"
 at = 0x060621B0
 symbol = "swap_f060621B0"
+
+[[replace]]
+module = "KRNL"
+at = 0x0606222E
+symbol = "swap_f0606222E"
 
 [[replace]]
 module = "KRNL"
@@ -7049,6 +7979,16 @@ symbol = "swap_f060626D0"
 
 [[replace]]
 module = "KRNL"
+at = 0x060626EE
+symbol = "swap_f060626EE"
+
+[[replace]]
+module = "KRNL"
+at = 0x060626FA
+symbol = "swap_f060626FA"
+
+[[replace]]
+module = "KRNL"
 at = 0x0606281E
 symbol = "swap_f0606281E"
 
@@ -7084,6 +8024,11 @@ symbol = "swap_f06062FF0"
 
 [[replace]]
 module = "KRNL"
+at = 0x060631AE
+symbol = "swap_f060631AE"
+
+[[replace]]
+module = "KRNL"
 at = 0x06063370
 symbol = "swap_f06063370"
 
@@ -7094,8 +8039,23 @@ symbol = "swap_f060633F2"
 
 [[replace]]
 module = "KRNL"
+at = 0x06063406
+symbol = "swap_f06063406"
+
+[[replace]]
+module = "KRNL"
+at = 0x06063494
+symbol = "swap_f06063494"
+
+[[replace]]
+module = "KRNL"
 at = 0x060635B4
 symbol = "swap_f060635B4"
+
+[[replace]]
+module = "KRNL"
+at = 0x060636C4
+symbol = "swap_f060636C4"
 
 [[replace]]
 module = "KRNL"
@@ -7139,8 +8099,18 @@ symbol = "swap_f06063D92"
 
 [[replace]]
 module = "KRNL"
+at = 0x06063E90
+symbol = "swap_f06063E90"
+
+[[replace]]
+module = "KRNL"
 at = 0x06063F58
 symbol = "swap_f06063F58"
+
+[[replace]]
+module = "KRNL"
+at = 0x06063F7A
+symbol = "swap_f06063F7A"
 
 [[replace]]
 module = "KRNL"
@@ -7149,13 +8119,33 @@ symbol = "swap_f06063FA2"
 
 [[replace]]
 module = "KRNL"
+at = 0x06063FF8
+symbol = "swap_f06063FF8"
+
+[[replace]]
+module = "KRNL"
+at = 0x06064056
+symbol = "swap_f06064056"
+
+[[replace]]
+module = "KRNL"
 at = 0x0606453C
 symbol = "swap_f0606453C"
 
 [[replace]]
 module = "KRNL"
+at = 0x06064696
+symbol = "swap_f06064696"
+
+[[replace]]
+module = "KRNL"
 at = 0x060647BA
 symbol = "swap_f060647BA"
+
+[[replace]]
+module = "KRNL"
+at = 0x060647EC
+symbol = "swap_f060647EC"
 
 [[replace]]
 module = "KRNL"
@@ -7169,8 +8159,43 @@ symbol = "swap_f06064AAC"
 
 [[replace]]
 module = "KRNL"
+at = 0x06064C36
+symbol = "swap_f06064C36"
+
+[[replace]]
+module = "KRNL"
 at = 0x06064D12
 symbol = "swap_f06064D12"
+
+[[replace]]
+module = "KRNL"
+at = 0x06064DD4
+symbol = "swap_f06064DD4"
+
+[[replace]]
+module = "KRNL"
+at = 0x06064E02
+symbol = "swap_f06064E02"
+
+[[replace]]
+module = "KRNL"
+at = 0x06064E74
+symbol = "swap_f06064E74"
+
+[[replace]]
+module = "KRNL"
+at = 0x06064F04
+symbol = "swap_f06064F04"
+
+[[replace]]
+module = "KRNL"
+at = 0x060650B2
+symbol = "swap_f060650B2"
+
+[[replace]]
+module = "KRNL"
+at = 0x06065170
+symbol = "swap_f06065170"
 
 [[replace]]
 module = "KRNL"
@@ -7179,8 +8204,28 @@ symbol = "swap_f060651D0"
 
 [[replace]]
 module = "KRNL"
+at = 0x060651D8
+symbol = "swap_f060651D8"
+
+[[replace]]
+module = "KRNL"
 at = 0x0606523A
 symbol = "swap_f0606523A"
+
+[[replace]]
+module = "KRNL"
+at = 0x06065258
+symbol = "swap_f06065258"
+
+[[replace]]
+module = "KRNL"
+at = 0x060652E6
+symbol = "swap_f060652E6"
+
+[[replace]]
+module = "KRNL"
+at = 0x0606534A
+symbol = "swap_f0606534A"
 
 [[replace]]
 module = "KRNL"
@@ -7191,6 +8236,11 @@ symbol = "swap_f06065386"
 module = "KRNL"
 at = 0x060653E0
 symbol = "swap_f060653E0"
+
+[[replace]]
+module = "KRNL"
+at = 0x06065400
+symbol = "swap_f06065400"
 
 [[replace]]
 module = "KRNL"
@@ -7211,6 +8261,56 @@ symbol = "swap_f06065468"
 module = "KRNL"
 at = 0x06065470
 symbol = "swap_f06065470"
+
+[[replace]]
+module = "KRNL"
+at = 0x0606552C
+symbol = "swap_f0606552C"
+
+[[replace]]
+module = "KRNL"
+at = 0x0606554C
+symbol = "swap_f0606554C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06065566
+symbol = "swap_f06065566"
+
+[[replace]]
+module = "KRNL"
+at = 0x060655D0
+symbol = "swap_f060655D0"
+
+[[replace]]
+module = "KRNL"
+at = 0x060655EA
+symbol = "swap_f060655EA"
+
+[[replace]]
+module = "KRNL"
+at = 0x06065604
+symbol = "swap_f06065604"
+
+[[replace]]
+module = "KRNL"
+at = 0x0606561E
+symbol = "swap_f0606561E"
+
+[[replace]]
+module = "KRNL"
+at = 0x06065638
+symbol = "swap_f06065638"
+
+[[replace]]
+module = "KRNL"
+at = 0x06065652
+symbol = "swap_f06065652"
+
+[[replace]]
+module = "KRNL"
+at = 0x0606566A
+symbol = "swap_f0606566A"
 
 [[replace]]
 module = "KRNL"
@@ -7244,6 +8344,11 @@ symbol = "swap_f06065F2C"
 
 [[replace]]
 module = "KRNL"
+at = 0x06066274
+symbol = "swap_f06066274"
+
+[[replace]]
+module = "KRNL"
 at = 0x0606646A
 symbol = "swap_f0606646A"
 
@@ -7251,6 +8356,11 @@ symbol = "swap_f0606646A"
 module = "KRNL"
 at = 0x06066AC0
 symbol = "swap_f06066AC0"
+
+[[replace]]
+module = "KRNL"
+at = 0x06066AC8
+symbol = "swap_f06066AC8"
 
 [[replace]]
 module = "KRNL"
@@ -7314,6 +8424,11 @@ symbol = "swap_f06066F4A"
 
 [[replace]]
 module = "KRNL"
+at = 0x06067006
+symbol = "swap_f06067006"
+
+[[replace]]
+module = "KRNL"
 at = 0x0606707C
 symbol = "swap_f0606707C"
 
@@ -7331,6 +8446,16 @@ symbol = "swap_f0606714E"
 module = "KRNL"
 at = 0x0606725C
 symbol = "swap_f0606725C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06067DE2
+symbol = "swap_f06067DE2"
+
+[[replace]]
+module = "KRNL"
+at = 0x06067E9E
+symbol = "swap_f06067E9E"
 
 [[replace]]
 module = "KRNL"
@@ -7634,6 +8759,11 @@ symbol = "swap_f0606AC10"
 
 [[replace]]
 module = "KRNL"
+at = 0x0606AC8E
+symbol = "swap_f0606AC8E"
+
+[[replace]]
+module = "KRNL"
 at = 0x0606B060
 symbol = "swap_f0606B060"
 
@@ -7681,6 +8811,11 @@ symbol = "swap_f0606B34A"
 module = "KRNL"
 at = 0x0606B36C
 symbol = "swap_f0606B36C"
+
+[[replace]]
+module = "KRNL"
+at = 0x0606B51C
+symbol = "swap_f0606B51C"
 
 [[replace]]
 module = "KRNL"
@@ -8089,6 +9224,11 @@ symbol = "swap_f0606D410"
 
 [[replace]]
 module = "KRNL"
+at = 0x0606D588
+symbol = "swap_f0606D588"
+
+[[replace]]
+module = "KRNL"
 at = 0x0606D648
 symbol = "swap_f0606D648"
 
@@ -8304,8 +9444,23 @@ symbol = "swap_f0606F482"
 
 [[replace]]
 module = "KRNL"
+at = 0x0606F698
+symbol = "swap_f0606F698"
+
+[[replace]]
+module = "KRNL"
 at = 0x0606F770
 symbol = "swap_f0606F770"
+
+[[replace]]
+module = "KRNL"
+at = 0x0606F88C
+symbol = "swap_f0606F88C"
+
+[[replace]]
+module = "KRNL"
+at = 0x0606FBF0
+symbol = "swap_f0606FBF0"
 
 [[replace]]
 module = "KRNL"
@@ -8319,8 +9474,18 @@ symbol = "swap_f0606FCAE"
 
 [[replace]]
 module = "KRNL"
+at = 0x0606FDA4
+symbol = "swap_f0606FDA4"
+
+[[replace]]
+module = "KRNL"
 at = 0x0606FE7C
 symbol = "swap_f0606FE7C"
+
+[[replace]]
+module = "KRNL"
+at = 0x0606FFDE
+symbol = "swap_f0606FFDE"
 
 [[replace]]
 module = "KRNL"
@@ -8329,8 +9494,23 @@ symbol = "swap_f06070024"
 
 [[replace]]
 module = "KRNL"
+at = 0x06070660
+symbol = "swap_f06070660"
+
+[[replace]]
+module = "KRNL"
+at = 0x06070A04
+symbol = "swap_f06070A04"
+
+[[replace]]
+module = "KRNL"
 at = 0x06070E2E
 symbol = "swap_f06070E2E"
+
+[[replace]]
+module = "KRNL"
+at = 0x06070F7A
+symbol = "swap_f06070F7A"
 
 [[replace]]
 module = "KRNL"
@@ -8349,8 +9529,28 @@ symbol = "swap_f06071AEE"
 
 [[replace]]
 module = "KRNL"
+at = 0x06071B9C
+symbol = "swap_f06071B9C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06071F0C
+symbol = "swap_f06071F0C"
+
+[[replace]]
+module = "KRNL"
+at = 0x0607217C
+symbol = "swap_f0607217C"
+
+[[replace]]
+module = "KRNL"
 at = 0x060723D8
 symbol = "swap_f060723D8"
+
+[[replace]]
+module = "KRNL"
+at = 0x060728F8
+symbol = "swap_f060728F8"
 
 [[replace]]
 module = "KRNL"
@@ -8359,8 +9559,23 @@ symbol = "swap_f06072AC8"
 
 [[replace]]
 module = "KRNL"
+at = 0x06072BBA
+symbol = "swap_f06072BBA"
+
+[[replace]]
+module = "KRNL"
+at = 0x06072C22
+symbol = "swap_f06072C22"
+
+[[replace]]
+module = "KRNL"
 at = 0x06072E5E
 symbol = "swap_f06072E5E"
+
+[[replace]]
+module = "KRNL"
+at = 0x06073242
+symbol = "swap_f06073242"
 
 [[replace]]
 module = "KRNL"
@@ -8396,6 +9611,16 @@ symbol = "swap_f06073B32"
 module = "KRNL"
 at = 0x06073F74
 symbol = "swap_f06073F74"
+
+[[replace]]
+module = "KRNL"
+at = 0x06073FF8
+symbol = "swap_f06073FF8"
+
+[[replace]]
+module = "KRNL"
+at = 0x0607421E
+symbol = "swap_f0607421E"
 
 [[replace]]
 module = "KRNL"
@@ -8479,6 +9704,11 @@ symbol = "swap_f060757DE"
 
 [[replace]]
 module = "KRNL"
+at = 0x0607581A
+symbol = "swap_f0607581A"
+
+[[replace]]
+module = "KRNL"
 at = 0x06075C58
 symbol = "swap_f06075C58"
 
@@ -8519,6 +9749,11 @@ symbol = "swap_f06076BBC"
 
 [[replace]]
 module = "KRNL"
+at = 0x06076C66
+symbol = "swap_f06076C66"
+
+[[replace]]
+module = "KRNL"
 at = 0x06077024
 symbol = "swap_f06077024"
 
@@ -8531,6 +9766,11 @@ symbol = "swap_f060770A4"
 module = "KRNL"
 at = 0x0607745C
 symbol = "swap_f0607745C"
+
+[[replace]]
+module = "KRNL"
+at = 0x060774A8
+symbol = "swap_f060774A8"
 
 [[replace]]
 module = "KRNL"
@@ -8569,6 +9809,11 @@ symbol = "swap_f06077C08"
 
 [[replace]]
 module = "KRNL"
+at = 0x06077E20
+symbol = "swap_f06077E20"
+
+[[replace]]
+module = "KRNL"
 at = 0x06077F9A
 symbol = "swap_f06077F9A"
 
@@ -8576,6 +9821,11 @@ symbol = "swap_f06077F9A"
 module = "KRNL"
 at = 0x060780A4
 symbol = "swap_f060780A4"
+
+[[replace]]
+module = "KRNL"
+at = 0x06078164
+symbol = "swap_f06078164"
 
 [[replace]]
 module = "KRNL"
@@ -8601,6 +9851,11 @@ symbol = "swap_f06078DB0"
 module = "KRNL"
 at = 0x06078DEC
 symbol = "swap_f06078DEC"
+
+[[replace]]
+module = "KRNL"
+at = 0x06079416
+symbol = "swap_f06079416"
 
 [[replace]]
 module = "KRNL"
@@ -8704,6 +9959,11 @@ symbol = "swap_f0607BCB6"
 
 [[replace]]
 module = "KRNL"
+at = 0x0607BCCA
+symbol = "swap_f0607BCCA"
+
+[[replace]]
+module = "KRNL"
 at = 0x0607BD28
 symbol = "swap_f0607BD28"
 
@@ -8716,6 +9976,11 @@ symbol = "swap_f0607BD78"
 module = "KRNL"
 at = 0x0607C1A0
 symbol = "swap_f0607C1A0"
+
+[[replace]]
+module = "KRNL"
+at = 0x0607C7D6
+symbol = "swap_f0607C7D6"
 
 [[replace]]
 module = "KRNL"
@@ -8774,6 +10039,11 @@ symbol = "swap_f0607EBB4"
 
 [[replace]]
 module = "KRNL"
+at = 0x0607F14C
+symbol = "swap_f0607F14C"
+
+[[replace]]
+module = "KRNL"
 at = 0x0607F3BE
 symbol = "swap_f0607F3BE"
 
@@ -8801,6 +10071,11 @@ symbol = "swap_f0607F83C"
 module = "KRNL"
 at = 0x0607F9EA
 symbol = "swap_f0607F9EA"
+
+[[replace]]
+module = "KRNL"
+at = 0x0607FC00
+symbol = "swap_f0607FC00"
 
 [[replace]]
 module = "KRNL"
@@ -9004,6 +10279,11 @@ symbol = "swap_f06084ACC"
 
 [[replace]]
 module = "KRNL"
+at = 0x06084B12
+symbol = "swap_f06084B12"
+
+[[replace]]
+module = "KRNL"
 at = 0x06084BD0
 symbol = "swap_f06084BD0"
 
@@ -9019,6 +10299,11 @@ symbol = "swap_f06084E7E"
 
 [[replace]]
 module = "KRNL"
+at = 0x06084FC8
+symbol = "swap_f06084FC8"
+
+[[replace]]
+module = "KRNL"
 at = 0x06085184
 symbol = "swap_f06085184"
 
@@ -9031,6 +10316,11 @@ symbol = "swap_f060854F4"
 module = "KRNL"
 at = 0x0608589C
 symbol = "swap_f0608589C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06085A70
+symbol = "swap_f06085A70"
 
 [[replace]]
 module = "KRNL"
@@ -9066,6 +10356,11 @@ symbol = "swap_f06085FB4"
 module = "KRNL"
 at = 0x0608661C
 symbol = "swap_f0608661C"
+
+[[replace]]
+module = "KRNL"
+at = 0x06086858
+symbol = "swap_f06086858"
 
 [[replace]]
 module = "KRNL"
@@ -9139,6 +10434,11 @@ symbol = "swap_f060877B0"
 
 [[replace]]
 module = "KRNL"
+at = 0x060879BA
+symbol = "swap_f060879BA"
+
+[[replace]]
+module = "KRNL"
 at = 0x06087ACC
 symbol = "swap_f06087ACC"
 
@@ -9184,6 +10484,11 @@ symbol = "swap_f06088A6C"
 
 [[replace]]
 module = "KRNL"
+at = 0x06088BBE
+symbol = "swap_f06088BBE"
+
+[[replace]]
+module = "KRNL"
 at = 0x06088C7E
 symbol = "swap_f06088C7E"
 
@@ -9216,6 +10521,11 @@ symbol = "swap_f0608905E"
 module = "KRNL"
 at = 0x06089080
 symbol = "swap_f06089080"
+
+[[replace]]
+module = "KRNL"
+at = 0x060893FE
+symbol = "swap_f060893FE"
 
 [[replace]]
 module = "KRNL"
@@ -9434,6 +10744,11 @@ symbol = "swap_f06090266"
 
 [[replace]]
 module = "KRNL"
+at = 0x06090654
+symbol = "swap_f06090654"
+
+[[replace]]
+module = "KRNL"
 at = 0x060906E4
 symbol = "swap_f060906E4"
 
@@ -9471,6 +10786,11 @@ symbol = "swap_f06091968"
 module = "KRNL"
 at = 0x06092840
 symbol = "swap_f06092840"
+
+[[replace]]
+module = "KRNL"
+at = 0x0609306E
+symbol = "swap_f0609306E"
 
 [[replace]]
 module = "KRNL"
@@ -9686,6 +11006,11 @@ symbol = "swap_f06095AB4"
 module = "KRNL"
 at = 0x06095ACE
 symbol = "swap_f06095ACE"
+
+[[replace]]
+module = "KRNL"
+at = 0x06095B04
+symbol = "swap_f06095B04"
 
 [[replace]]
 module = "KRNL"
@@ -9939,6 +11264,11 @@ symbol = "swap_f06099CDC"
 
 [[replace]]
 module = "KRNL"
+at = 0x06099D58
+symbol = "swap_f06099D58"
+
+[[replace]]
+module = "KRNL"
 at = 0x06099F0C
 symbol = "swap_f06099F0C"
 
@@ -9966,6 +11296,16 @@ symbol = "swap_f0609AFCC"
 module = "KRNL"
 at = 0x0609AFF4
 symbol = "swap_f0609AFF4"
+
+[[replace]]
+module = "KRNL"
+at = 0x0609B336
+symbol = "swap_f0609B336"
+
+[[replace]]
+module = "KRNL"
+at = 0x0609B488
+symbol = "swap_f0609B488"
 
 [[replace]]
 module = "KRNL"
@@ -10489,8 +11829,18 @@ symbol = "swap_f060A0A0A"
 
 [[replace]]
 module = "KRNL"
+at = 0x060A0A22
+symbol = "swap_f060A0A22"
+
+[[replace]]
+module = "KRNL"
 at = 0x060A0CB2
 symbol = "swap_f060A0CB2"
+
+[[replace]]
+module = "KRNL"
+at = 0x060A0CB6
+symbol = "swap_f060A0CB6"
 
 [[replace]]
 module = "KRNL"
@@ -10506,6 +11856,16 @@ symbol = "swap_f060A11E2"
 module = "KRNL"
 at = 0x060A11EA
 symbol = "swap_f060A11EA"
+
+[[replace]]
+module = "KRNL"
+at = 0x060A1200
+symbol = "swap_f060A1200"
+
+[[replace]]
+module = "KRNL"
+at = 0x060A1256
+symbol = "swap_f060A1256"
 
 [[replace]]
 module = "KRNL"
@@ -10526,6 +11886,11 @@ symbol = "swap_f060A1300"
 module = "KRNL"
 at = 0x060A1356
 symbol = "swap_f060A1356"
+
+[[replace]]
+module = "KRNL"
+at = 0x060A1558
+symbol = "swap_f060A1558"
 
 [[replace]]
 module = "KRNL"
@@ -10561,6 +11926,11 @@ symbol = "swap_f060A1B68"
 module = "KRNL"
 at = 0x060A1D3E
 symbol = "swap_f060A1D3E"
+
+[[replace]]
+module = "KRNL"
+at = 0x060A21B2
+symbol = "swap_f060A21B2"
 
 [[replace]]
 module = "KRNL"
@@ -10621,6 +11991,11 @@ symbol = "swap_f060A3464"
 module = "KRNL"
 at = 0x060A3658
 symbol = "swap_f060A3658"
+
+[[replace]]
+module = "KRNL"
+at = 0x060A3700
+symbol = "swap_f060A3700"
 
 [[replace]]
 module = "KRNL"
@@ -10821,6 +12196,11 @@ symbol = "swap_f060A45FE"
 module = "KRNL"
 at = 0x060A46C0
 symbol = "swap_f060A46C0"
+
+[[replace]]
+module = "KRNL"
+at = 0x060A47DC
+symbol = "swap_f060A47DC"
 
 [[replace]]
 module = "KRNL"
@@ -11109,6 +12489,11 @@ symbol = "swap_f060A570E"
 
 [[replace]]
 module = "KRNL"
+at = 0x060A5712
+symbol = "swap_f060A5712"
+
+[[replace]]
+module = "KRNL"
 at = 0x060A589C
 symbol = "swap_f060A589C"
 
@@ -11319,6 +12704,11 @@ symbol = "swap_f060A6938"
 
 [[replace]]
 module = "KRNL"
+at = 0x060A69A2
+symbol = "swap_f060A69A2"
+
+[[replace]]
+module = "KRNL"
 at = 0x060A6BA0
 symbol = "swap_f060A6BA0"
 
@@ -11346,6 +12736,11 @@ symbol = "swap_f060A6CE6"
 module = "KRNL"
 at = 0x060A6DA6
 symbol = "swap_f060A6DA6"
+
+[[replace]]
+module = "KRNL"
+at = 0x060A6DE6
+symbol = "swap_f060A6DE6"
 
 [[replace]]
 module = "KRNL"
@@ -11491,6 +12886,11 @@ symbol = "swap_f060A7E66"
 module = "KRNL"
 at = 0x060A802C
 symbol = "swap_f060A802C"
+
+[[replace]]
+module = "KRNL"
+at = 0x060A805C
+symbol = "swap_f060A805C"
 
 [[replace]]
 module = "KRNL"
