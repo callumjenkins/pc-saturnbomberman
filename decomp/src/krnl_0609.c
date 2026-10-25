@@ -1,7 +1,392 @@
 #include "krnl.h"
 
+
+int f060900AC(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), PR());
+    ST32((sp - 16), MACL());
+    SETSP((sp - 16));
+    SETPR(0x060900BA);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 16)));
+        SETPR(LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        SETSP((sp - 16));
+        r0 = GCALL0(0x0606C79A);
+        SETSP((sp - 16));
+        r0 = GCALL1(0x060144F4, 0x060901CC);
+        r3 = LD32(0x060D7B3C);
+        r2 = LD16(38 + r3);
+        ST16(38 + r3, (r2 - 24));
+        r5 = LD32(0x060D7768);
+        r4 = LD16(0x060C1AA8);
+        r5 = LD16(80 + r5);
+        SETR(14, 0x060D7B3C);
+        SETSP((sp - 16));
+        SETPR(0x060900EE);
+        r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 7));
+        ST32((sp - 20), 0);
+        ST32((sp - 24), 0);
+        r2 = LD32(0x060D7B3C);
+        r0 = LD16(r2 + 18);
+        ST32((sp - 28), r0);
+        r3 = LD32(0x060D7B3C);
+        r0 = LD16(r3 + 16);
+        ST32((sp - 32), r0);
+        r3 = LD32(0x060D7768);
+        r1 = LD16(80 + r3);
+        ST32((sp - 36), ((r1 & 0xFFFF) + 8));
+        r3 = LD32(0x060D7B3C);
+        r1 = LD16(40 + r3);
+        ST32((sp - 40), (r1 & 0xFFFF));
+        r7 = LD32(0x060D7B3C);
+        r6 = LD32(0x060D7B3C);
+        r7 = LD16(46 + r7);
+        r6 = LD16(44 + r6);
+        SETR(13, 0);
+        SETR(14, 0x060D7B3C);
+        SETSP((sp - 40));
+        SETPR(0x06090130);
+        r0 = GCALL4(0x0606CAE4, 0, 10, (r6 & 0xFFFF), (r7 & 0xFFFF));
+        ST16(0x060C3238, r0);
+        SETSP((sp - 16));
+        r0 = GCALL2(0x0606AB08, (r0 & 0xFFFF), 3);
+        r2 = LD16(0x060C1AAA);
+        ST16(0x060C3866 + (((r2 & 0xFFFF) * 84) & 0xFFFF), 0);
+        r4 = LD32(0x060D7B3C);
+        SETSP((sp - 16));
+        r0 = GCALL2(0x0606AAC8, r4, 3);
+        SETMACL(LD32((sp - 16)));
+        SETPR(LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f060901CC(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r3, r8, r9, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(9));
+    ST32((sp - 12), R(8));
+    ST32((sp - 16), PR());
+    ST32((sp - 20), MACL());
+    SETSP((sp - 20));
+    SETPR(0x060901DC);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 20)));
+        SETPR(LD32((sp - 16)));
+        SETR(8, LD32((sp - 12)));
+        SETR(9, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r14 = 0x060D7B3C;
+        r4 = LD32(0x060D7B3C);
+        r3 = LD16(38 + r4);
+        if (!(r3 > -128)) {
+            SETSP((sp - 20));
+            SETPR(0x0609023C);
+            r0 = GCALL0(0x06090888);
+            SETSP((sp - 20));
+            r0 = GCALL1(0x060144F4, 0x0606D23C);
+            SETSP((sp - 20));
+            r0 = GCALL1(0x0606CC12, 0x060C3238);
+        } else {
+            r1 = LD16(38 + r4);
+            ST16(38 + r4, (r1 - 1));
+            r9 = LD32(r14);
+            r8 = LD32(r14);
+            r4 = LD32(r14);
+            r4 = LD16(38 + r4);
+            SETSP((sp - 20));
+            r0 = GCALL1(0x060949D0, (r4 << 1));
+            r0 = r0 + 0x100;
+            ST16((r8 + 70), r0);
+            ST16((r9 + 68), r0);
+            r5 = LD32(r14);
+            r5 = LD16(38 + r5);
+            r5 = (r5 << 1) + 0x100;
+            r1 = LD16(0x060C3238);
+            r4 = (((r1 & 0xFFFF) * 84) & 0xFFFF) + 0x060C381C;
+            ST16(70 + r4, r5);
+            ST16(68 + r4, r5);
+        }
+        SETMACL(LD32((sp - 20)));
+        SETPR(LD32((sp - 16)));
+        SETR(8, LD32((sp - 12)));
+        SETR(9, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
 void f06090266(void)
 {
+}
+
+int f0609026A(int r4)
+{
+    int r0, r2, r3, r5, r6, r8, r9, r10, r11, r12, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    r14 = r4;
+    ST32((sp - 12), R(12));
+    ST32((sp - 16), R(11));
+    ST32((sp - 20), R(10));
+    ST32((sp - 24), R(9));
+    ST32((sp - 28), R(8));
+    ST32((sp - 32), PR());
+    ST32((sp - 36), MACL());
+    SETSP((sp - 60));
+    r0 = GCALL1(0x0600996A, 235);
+    r13 = -96;
+    r9 = 0x060D5F30;
+    r8 = 0;
+    r10 = 0x060D7768;
+    r11 = 0;
+    ST16(0x060C3242 + (r14 << 1), 0);
+    ST32(sp - 60, (0x060C3248 + ((signed char)((short)r14 * (short)14))));
+    r0 = (r14 << 2) << 2;
+    ST32(sp - 56, (((r14 << 2) << 2) << 1));
+    ST16(sp - 52, r0);
+    r12 = 124;
+    while (!(r13 > 96)) {
+        POLL();
+        r3 = r11 << 1;
+        ST32(sp - 40, r3);
+        r2 = LD32(sp - 60);
+        ST16((r3 + r2), r8);
+        r3 = LD32(r10);
+        r0 = LD16(r3 + 24);
+        ST32(sp - 48, ((r0 & 0xFFFF) + r13));
+        r3 = LD32(r10);
+        r0 = LD16(r3 + 28);
+        r3 = LD32(sp - 56);
+        ST32(sp - 44, (((r0 & 0xFFFF) - 32) + r3));
+        r0 = r14;
+        if (!(r0 == 1)) {
+            r6 = LD32(sp - 44);
+            r5 = LD32(sp - 48);
+            SETR(8, r8);
+            SETR(9, r9);
+            SETR(10, r10);
+            SETR(11, r11);
+            SETR(12, r12);
+            SETR(13, r13);
+            SETR(14, r14);
+            SETSP((sp - 60));
+            SETPR(0x0609033A);
+            r0 = GCALL3(0x0606AE6C, 138, r5, r6);
+            r4 = r0;
+            if (!((r4 & r4) == 0)) {
+                r5 = (r4 * r12) + r9;
+                ST16(66 + r5, r14);
+                ST16(68 + r5, r11);
+                r2 = LD16(0x060C1AAA);
+                r3 = (((r2 & 0xFFFF) * 84) & 0xFFFF) + 0x060C384A;
+                r0 = LD16(sp - 52);
+                r2 = LD16(r3);
+                ST16(r3, (r2 + r0));
+                if ((r14 & r14) == 0) {
+                    r0 = 1;
+                    ST8(((r4 * r12) + r9) + 7, 1);
+                }
+            }
+            r3 = LD32(sp - 60);
+            r11 = r11 + 1;
+            r2 = LD32(sp - 40);
+            ST16((r2 + r3), r4);
+        } else {
+            if (!((r13 & r13) == 0)) {
+                r6 = LD32(sp - 44);
+                r5 = LD32(sp - 48);
+                SETR(8, r8);
+                SETR(9, r9);
+                SETR(10, r10);
+                SETR(11, r11);
+                SETR(12, r12);
+                SETR(13, r13);
+                SETR(14, r14);
+                SETSP((sp - 60));
+                SETPR(0x0609033A);
+                r0 = GCALL3(0x0606AE6C, 138, r5, r6);
+                r4 = r0;
+                if (!((r4 & r4) == 0)) {
+                    r5 = (r4 * r12) + r9;
+                    ST16(66 + r5, r14);
+                    ST16(68 + r5, r11);
+                    r2 = LD16(0x060C1AAA);
+                    r3 = (((r2 & 0xFFFF) * 84) & 0xFFFF) + 0x060C384A;
+                    r0 = LD16(sp - 52);
+                    r2 = LD16(r3);
+                    ST16(r3, (r2 + r0));
+                    if ((r14 & r14) == 0) {
+                        r0 = 1;
+                        ST8(((r4 * r12) + r9) + 7, 1);
+                    }
+                }
+                r3 = LD32(sp - 60);
+                r11 = r11 + 1;
+                r2 = LD32(sp - 40);
+                ST16((r2 + r3), r4);
+            }
+        }
+        r13 = r13 + 32;
+    }
+    ST16(0x060C3272, 1);
+    SETMACL(LD32((sp - 36)));
+    SETPR(LD32((sp - 32)));
+    SETR(8, LD32((sp - 28)));
+    SETR(9, LD32((sp - 24)));
+    SETR(10, LD32((sp - 20)));
+    SETR(11, LD32((sp - 16)));
+    SETR(12, LD32((sp - 12)));
+    SETR(13, LD32((sp - 8)));
+    SETR(14, LD32((sp - 4)));
+    return r0;
+}
+
+int f060903A2(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x060903AE);
+    r0 = GCALL3(0x0606B0DE, 0x060BB71E, 241, 12);
+    r3 = LD32(0x060D7768);
+    r2 = LD16(42 + r3);
+    ST16(42 + r3, (r2 | 32));
+    r3 = LD16(0x060C062C);
+    ST32((((short)(((r3 << 2) + r3) << 2)) + 0x060E2154) + 8, 0x06090654);
+    r3 = LD16(0x060C062C);
+    ST32((((short)(((r3 << 2) + r3) << 2)) + 0x060E2154) + 12, 0x060906E4);
+    SETSP((sp - 4));
+    r0 = GCALL1(0x060144F4, 0x06090478);
+    r5 = LD32(0x060D7768);
+    r4 = LD16(0x060C1AA8);
+    r5 = LD16(80 + r5);
+    SETSP((sp - 4));
+    SETPR(0x06090400);
+    r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), (r5 & 0xFFFF));
+    SETSP((sp - 4));
+    r0 = GCALL2(0x0609BE40, 0, 2);
+    r4 = LD32(0x060D7B3C);
+    SETSP((sp - 4));
+    r0 = GCALL2(0x060695B0, r4, 2);
+    ST16(0x060C3274, 31);
+    SETPR(LD32((sp - 4)));
+    UNFRAME(sp);
+    r0 = GJUMP2(0x0609C0B4, 0x400, 31);
+    return r0;
+}
+
+int f06090478(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), PR());
+    SETSP((sp - 12));
+    SETPR(0x06090484);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r13 = 0x060D7768;
+        r14 = 0x060C3274;
+        r0 = LD16(0x060C3274);
+        if ((r0 & r0) == 0) {
+            r4 = LD32(0x060D7B3C);
+            SETSP((sp - 12));
+            r0 = GCALL2(0x060695B0, r4, 0);
+            r3 = LD32(r13);
+            r1 = LD16(42 + r3);
+            ST16(42 + r3, (r1 & 0xFFDF));
+            SETSP((sp - 12));
+            r0 = GCALL1(0x060144F4, 0x060904EE);
+            r2 = LD32(r13);
+            r3 = LD16(68 + r2);
+            if ((r3 & r3) == 0) {
+                ST16(0x060C3272, 0);
+            }
+        } else {
+            r3 = LD32(r13);
+            r2 = LD16(68 + r3);
+            if ((r2 & r2) == 0) {
+                r3 = LD16(r14);
+                ST16(r14, (r3 - 1));
+            }
+            r5 = LD16(r14);
+            SETSP((sp - 12));
+            r0 = GCALL2(0x0609C0B4, 0x400, r5);
+        }
+        SETPR(LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f060905D8(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x060905E0);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r3 = LD32(0x060D7B3C);
+        r1 = LD16(60 + r3);
+        if ((r1 & 0xFFFF) >= 0xFF00) {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x06090618);
+            r5 = LD32(0x060D7768);
+            r4 = LD32(0x060D7768);
+            r0 = LD16(r5 + 28);
+            r5 = r0 & 0xFFFF;
+            r0 = LD16(r4 + 24);
+            SETSP((sp - 4));
+            SETPR(0x0609060C);
+            r0 = GCALL2(0x06090736, (r0 & 0xFFFF), r5);
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
 }
 
 int f06090654(void)
@@ -74,6 +459,69 @@ int f06090736(int r4, int r5)
     SETMACL(LD32((sp - 8)));
     SETPR(LD32((sp - 4)));
     return r0;
+}
+
+int f0609076A(void)
+{
+    int r0, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06090776);
+    r0 = GCALL3(0x0606B0DE, 0x060BB742, 241, 12);
+    SETSP((sp - 4));
+    r0 = GCALL1(0x060144F4, 0x06090796);
+    r3 = LD16(0x060C062C);
+    SETPR(LD32((sp - 4)));
+    ST32(0x060E2154 + ((short)(((r3 << 2) + r3) << 2)), 0x06090858);
+    return 0x060E2154;
+}
+
+int f06090796(int r4, int r5, int r6, int r7)
+{
+    int r0, r2;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x0609079E);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x060907C6);
+        r2 = LD32(0x060D7768);
+        ST8(r2 + 6, 2);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x06014516, 0x0606E7F4);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06090858(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06090860);
+    r0 = GCALL0(0x0606C8C0);
+    if ((r0 & r0) == 0) {
+        SETPR(LD32((sp - 4)));
+        return 0;
+    } else {
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x0606D23C);
+        SETPR(LD32((sp - 4)));
+        return 1;
+    }
 }
 
 int f06090888(int r4, int r5, int r6, int r7)
@@ -173,6 +621,583 @@ int f060908FA(int r4, int r5, int r6, int r7)
     return r0;
 }
 
+int f060909F2(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r3, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    SETSP((sp - 8));
+    SETPR(0x060909FC);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r14 = 0x060D7768;
+        r4 = LD32(0x060D7768);
+        r0 = LD16(r4 + 28);
+        if (!((r0 & 0xFFFF) > 192)) {
+            r0 = LD16(r4 + 28);
+            r5 = r0 & 0xFFFF;
+            ST16(r4 + 28, 0x220);
+            r2 = LD32(0x060D7B3C);
+            r0 = LD32(r14);
+            r0 = LD16(r0 + 28);
+            ST16(38 + r2, (r5 - r0));
+            ST16(0x060C327E, 1);
+            r3 = LD32(r14);
+            r2 = LD16(42 + r3);
+            ST16(42 + r3, (r2 & 0xFF7F));
+            r5 = LD32(r14);
+            r5 = LD16(80 + r5);
+            r4 = LD16(0x060C1AA8);
+            SETSP((sp - 8));
+            SETPR(0x06090AC0);
+            r0 = GCALL2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 7));
+            r3 = LD16(0x060C062C);
+            ST32(0x060E2158 + ((short)(((r3 << 2) + r3) << 2)), 0x06092556);
+            SETSP((sp - 8));
+            r0 = GCALL1(0x060144F4, 0x06090AEA);
+        } else {
+            r0 = LD16(r4 + 28);
+            ST16(r4 + 28, (r0 - 4));
+        }
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06090AEA(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06090AF2);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r4 = LD32(0x060D7B3C);
+        r2 = LD16(38 + r4);
+        if (r2 >= 0) {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x0600996A, 216);
+            r3 = LD32(0x060D7B3C);
+            ST16(38 + r3, 0);
+            ST16(0x060C327E, 0);
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x06090B84);
+            SETSP((sp - 4));
+            r0 = GCALL1(0x06014516, 0x0609289A);
+        } else {
+            r1 = LD16(38 + r4);
+            ST16(38 + r4, (r1 + 4));
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06090CC0(void)
+{
+    int r0, r1, r2, r3, r4, r5, r8, r9, r10, r11, r12, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), R(12));
+    ST32((sp - 16), R(11));
+    ST32((sp - 20), R(10));
+    ST32((sp - 24), R(9));
+    ST32((sp - 28), R(8));
+    ST32((sp - 32), PR());
+    SETSP((sp - 64));
+    r0 = COPYW(0x06094450, (sp - 64), 0x060B2D00, 32);
+    SETSP((sp - 64));
+    SETPR(0x06090CE2);
+    r0 = GCALL0(0x0606CF3E);
+    if ((r0 & r0) == 0) {
+        ST16(0x060C3284, 0);
+        r3 = LD32(0x060E2150);
+        r1 = LD32(r3 + 8);
+        SETSP((sp - 64));
+        SETPR(0x06090CF6);
+        r0 = GCALL0(r1);
+        if ((r0 & r0) == 0) {
+            SETSP((sp - 64));
+            r0 = GCALL0(0x0606DA9E);
+            r9 = 0x0606B648;
+            r10 = 4;
+            r12 = 0x060D7768;
+            r13 = 1;
+            r14 = 0x060C1F24;
+            r11 = 0;
+            while (1) {
+                r1 = LD16(r14);
+                r3 = LD32(r12);
+                if (((r1 & 0xFFFF) & r13) == 0) {
+                    r2 = 0;
+                } else {
+                    r2 = r13;
+                }
+                ST16(44 + r3, r2);
+                SETSP((sp - 64));
+                r0 = GCALL0(r9);
+                if (!((r0 & r0) == 0)) {
+                    break;
+                } else {
+                    r11 = r11 + 1;
+                    r0 = LD16(r14);
+                    ST16(r14, ((r0 & 3) + 1));
+                    if (!((unsigned)r11 >= (unsigned)r10)) {
+                        POLL();
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+                POLL();
+            }
+            if (!((unsigned)r11 >= (unsigned)r10)) {
+                r2 = LD32(r12);
+                r0 = LD8(r14 + 1);
+                ST8(r2 + 6, r0);
+                SETSP((sp - 64));
+                r0 = GCALL0(0x0606B620);
+                r2 = LD32(r12);
+                r0 = LD8(r2 + 6);
+                if (((r0 & 255) & r13) == 0) {
+                    r5 = LD32(r12);
+                    r0 = LD8(r5 + 6);
+                    r3 = LD32(r12);
+                    r5 = LD16(0x060BB7BC + ((r0 & 255) << 1));
+                    r2 = LD16(80 + r3);
+                    r4 = LD16(0x060C1AA8);
+                    SETR(12, r12);
+                    SETSP((sp - 64));
+                    SETPR(0x06090D7A);
+                    r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + (r2 & 0xFFFF)));
+                    r3 = LD32(r12);
+                    ST32((sp - 68), (56 + r3));
+                    r8 = LD32(r12);
+                    SETSP((sp - 68));
+                    r0 = GCALL0(0x0600A0B8);
+                    r0 = LD16((((r0 & 7) << 2) + (sp - 64)) + 2);
+                    ST16((r8 + 54), r0);
+                    r1 = LD32((sp - 68));
+                    ST16(r1, ((r0 + 0xFFFF) & 240));
+                    SETSP((sp - 64));
+                    r0 = GCALL1(0x06014516, 0x0606E70E);
+                } else {
+                    SETSP((sp - 64));
+                    r0 = GCALL1(0x06014516, 0x06090DC4);
+                }
+            }
+        }
+        SETSP((sp - 64));
+        r0 = GCALL0(0x0606D410);
+    }
+    SETPR(LD32((sp - 32)));
+    SETR(8, LD32((sp - 28)));
+    SETR(9, LD32((sp - 24)));
+    SETR(10, LD32((sp - 20)));
+    SETR(11, LD32((sp - 16)));
+    SETR(12, LD32((sp - 12)));
+    SETR(13, LD32((sp - 8)));
+    SETR(14, LD32((sp - 4)));
+    return r0;
+}
+
+int f06090DC4(int r4, int r5, int r6, int r7)
+{
+    int r0, r2;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06090DCC);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x06090E04);
+        r5 = LD32(0x060D7768);
+        r4 = LD16(0x060C1AA8);
+        r5 = LD16(80 + r5);
+        SETSP((sp - 4));
+        SETPR(0x06090DEE);
+        r0 = GCALL2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 2));
+        r2 = LD32(0x060D7768);
+        ST16(62 + r2, 30);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06090E04(int r4, int r5, int r6, int r7)
+{
+    int r0, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06090E0C);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r3 = LD32(0x060D7768);
+        r0 = LD16(62 + r3);
+        if ((r0 & r0) == 0) {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x06090E40);
+            SETSP((sp - 4));
+            r0 = GCALL1(0x0608AAEE, 0x060BB7C6);
+            SETSP((sp - 4));
+            r0 = GCALL1(0x06014516, 0x0608ABA2);
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06090E40(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    SETSP((sp - 8));
+    SETPR(0x06090E4A);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r4 = LD16(0x060C1AA8);
+        r5 = LD32(0x060D7768);
+        r5 = LD16(80 + r5);
+        SETR(14, 0x060D7768);
+        SETSP((sp - 8));
+        SETPR(0x06090E64);
+        r0 = GCALL2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 7));
+        r3 = LD32(0x060D7768);
+        r0 = LD16(r3 + 18);
+        ST16(r3 + 18, (r0 & 0xFFDF));
+        SETSP((sp - 8));
+        r0 = GCALL0(0x0606C776);
+        r1 = LD32(0x060D7768);
+        ST16((54 + r1), 32);
+        ST16((56 + r1), 16);
+        SETSP((sp - 8));
+        r0 = GCALL1(0x060144F4, 0x06090F20);
+        SETSP((sp - 8));
+        r0 = GCALL1(0x0600996A, 217);
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06090F20(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r3, r8, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), R(8));
+    ST32((sp - 16), PR());
+    SETSP((sp - 16));
+    SETPR(0x06090F2E);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 16)));
+        SETR(8, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r14 = 0x060D7B3C;
+        r4 = LD32(0x060D7B3C);
+        SETSP((sp - 16));
+        r0 = GCALL3(0x0606CC30, r4, 0x100, 8);
+        r4 = LD32(0x060D7B3C);
+        SETSP((sp - 16));
+        r0 = GCALL3(0x0606CC7A, r4, 0x100, 8);
+        r13 = 0x060D7768;
+        r3 = LD32(0x060D7768);
+        r8 = 54 + r3;
+        SETSP((sp - 16));
+        r0 = GCALL2(0x0606D7A6, 0, 0x100);
+        r2 = LD16(r8);
+        ST16(r8, (r2 - r0));
+        r3 = LD32(0x060D7768);
+        r0 = LD16(54 + r3);
+        if ((r0 & r0) == 0) {
+            SETSP((sp - 16));
+            r0 = GCALL1(0x0600996A, 216);
+            r3 = LD32(r13);
+            r0 = LD16(r3 + 18);
+            ST16(r3 + 18, (r0 | 32));
+            SETSP((sp - 16));
+            r0 = GCALL0(0x0606C7AA);
+            SETR(14, r14);
+            SETSP((sp - 16));
+            SETPR(0x06090FA4);
+            r0 = GCALL0(0x0606C8C0);
+            r3 = LD32(r14);
+            ST16(38 + r3, 0);
+            SETSP((sp - 16));
+            r0 = GCALL1(0x060144F4, 0x0609289A);
+        } else {
+            r4 = LD32(r13);
+            r4 = LD16(54 + r4);
+            SETSP((sp - 16));
+            r0 = GCALL1(0x0606CE8C, ((r4 & 0xFFFF) << 2));
+            r2 = LD32(r14);
+            ST16(38 + r2, (-((short)((int)((unsigned)(((r0 << 2) << 2) << 1) >> 16)))));
+        }
+        SETPR(LD32((sp - 16)));
+        SETR(8, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06090FCA(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(8));
+    ST32((sp - 12), PR());
+    SETSP((sp - 16));
+    SETPR(0x06090FD8);
+    r0 = GCALL0(0x0606CF3E);
+    if ((r0 & r0) == 0) {
+        ST16(0x060C3284, 1);
+        SETSP((sp - 16));
+        r0 = GCALL0(0x0606B620);
+        r14 = 0x060D7768;
+        r2 = LD32(0x060D7768);
+        r0 = LD16(r2 + 28);
+        if ((r0 & 0xFFFF) > 0x1E0) {
+            r3 = 0;
+        } else {
+            r3 = 1;
+        }
+        ST32(sp - 16, r3);
+        if (!((r3 & r3) == 0)) {
+            r2 = 16;
+        } else {
+            SETSP((sp - 16));
+            r0 = GCALL0(0x0600A0B8);
+            if ((r0 & 1) == 0) {
+                r2 = 32;
+            } else {
+                r2 = 16;
+            }
+        }
+        ST32(sp - 16, (r2 + 0x1C0));
+        SETSP((sp - 16));
+        r0 = GCALL1(0x060144F4, 0x060910F6);
+        ST16(0x060C1F24, 4);
+        SETSP((sp - 16));
+        r0 = GCALL0(0x0606B648);
+        if (!((r0 & r0) == 0)) {
+            r0 = LD32(r14);
+            r3 = LD8(0x060C1F25);
+            ST8((6 + r0), r3);
+            r5 = LD32(r14);
+            r0 = LD8(r5 + 6);
+            r3 = LD32(r14);
+            r5 = LD16(0x060BB7BC + ((r0 & 255) << 1));
+            r1 = LD16(80 + r3);
+            r4 = LD16(0x060C1AA8);
+            SETR(14, r14);
+            SETSP((sp - 16));
+            SETPR(0x060910A8);
+            r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + (r1 & 0xFFFF)));
+            r3 = LD32(r14);
+            ST16(r3 + 12, 1);
+            r3 = LD32(r14);
+            ST16(r3 + 10, 0x4000);
+            r3 = LD32(0x060D7B3C);
+            ST16(62 + r3, 0x200);
+            r3 = LD32(r14);
+            r2 = LD32(sp - 16);
+            r0 = LD16(r3 + 28);
+            r0 = r0 - r2;
+            ST16((r3 + 54), r0);
+            ST16((56 + r3), ((r0 + 0xFFFF) & 240));
+            SETSP((sp - 16));
+            r0 = GCALL1(0x06014516, 0x0606E70E);
+        }
+        SETPR(LD32((sp - 12)));
+        SETR(8, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    } else {
+        SETPR(LD32((sp - 12)));
+        SETR(8, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    }
+}
+
+int f060910F6(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r3, r8, r9, r10, r11, r12, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), R(12));
+    ST32((sp - 16), R(11));
+    ST32((sp - 20), R(10));
+    ST32((sp - 24), R(9));
+    ST32((sp - 28), R(8));
+    ST32((sp - 32), PR());
+    SETSP((sp - 32));
+    SETPR(0x0609110C);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 32)));
+        SETR(8, LD32((sp - 28)));
+        SETR(9, LD32((sp - 24)));
+        SETR(10, LD32((sp - 20)));
+        SETR(11, LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        SETSP((sp - 32));
+        r0 = GCALL1(0x060144F4, 0x060911FA);
+        r12 = 0x060D7768;
+        r13 = 1;
+        r10 = 0;
+        r14 = 0x060C1F24;
+        r2 = LD32(0x060D7768);
+        ST16(r2 + 12, 1);
+        r3 = LD32(0x060D7768);
+        ST16(r3 + 10, 0);
+        r3 = LD32(0x060D7B3C);
+        ST16(62 + r3, 0x100);
+        SETSP((sp - 32));
+        r0 = GCALL0(0x0600A0B8);
+        if ((r0 & 1) == 0) {
+            r3 = 3;
+        } else {
+            r3 = 1;
+        }
+        r8 = 0x060B90B4;
+        r11 = 2;
+        ST16(r14, r3);
+        r2 = LD32(r12);
+        r9 = 0x0606B648;
+        ST16(44 + r2, r13);
+        r13 = r10;
+        while (1) {
+            SETSP((sp - 32));
+            r0 = GCALL0(r9);
+            if (!((r0 & r0) == 0)) {
+                break;
+            } else {
+                r13 = r13 + 1;
+                r0 = LD16(r14);
+                r3 = LD16(((r0 & 0xFFFF) << 1) + r8);
+                ST16(r14, r3);
+                if (!((unsigned)r13 >= (unsigned)r11)) {
+                    POLL();
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            POLL();
+        }
+        if ((unsigned)r13 >= (unsigned)r11) {
+            r3 = LD32(r12);
+            ST16(44 + r3, r10);
+        } else {
+            r2 = LD32(r12);
+            r0 = LD8(r14 + 1);
+            ST8(r2 + 6, r0);
+            SETSP((sp - 32));
+            r0 = GCALL1(0x06014516, 0x06090DC4);
+        }
+        SETPR(LD32((sp - 32)));
+        SETR(8, LD32((sp - 28)));
+        SETR(9, LD32((sp - 24)));
+        SETR(10, LD32((sp - 20)));
+        SETR(11, LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f060911FA(int r4, int r5, int r6, int r7)
+{
+    int r0, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091202);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r3 = LD16(0x060C3280);
+        if (!((r3 & r3) == 0)) {
+            r4 = 0x06091C22;
+        } else {
+            r4 = 0x0609172A;
+        }
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, r4);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
 int f06091228(void)
 {
     int pick;
@@ -215,6 +1240,377 @@ int f06091228(void)
     ST16(0x060C3280, 1);
     GCALL1(0x06014516, 0x06090FCA);
     return 1;
+}
+
+int f0609137A(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091382);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        ST16(0x060C3284, 1);
+        ST16(0x060C3292, 0);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x060913AC);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x06014516, 0x06091D28);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f060913AC(int r4, int r5, int r6, int r7)
+{
+    int r0, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x060913B4);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r5 = LD32(0x060D7768);
+        r4 = LD16(0x060C1AA8);
+        r5 = LD16(80 + r5);
+        SETSP((sp - 4));
+        SETPR(0x060913CE);
+        r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 2));
+        SETSP((sp - 4));
+        r0 = GCALL1(0x0606CC12, 0x060C328A);
+        r3 = LD32(0x060D7768);
+        ST16(62 + r3, 120);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x060913F4);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091468(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091470);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        ST16(0x060C3284, 1);
+        ST16(0x060C3292, 1);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x0609149A);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x06014516, 0x06091D28);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f0609149A(int r4, int r5, int r6, int r7)
+{
+    int r0, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x060914A2);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r3 = LD32(0x060D7768);
+        ST16(62 + r3, 10);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x060914C4);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f060914C4(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r3, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), PR());
+    SETSP((sp - 12));
+    SETPR(0x060914D0);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r14 = 0x060D7768;
+        r3 = LD32(0x060D7768);
+        r2 = LD16(62 + r3);
+        if ((r2 & r2) == 0) {
+            SETSP((sp - 12));
+            r0 = GCALL1(0x0600996A, 219);
+            r5 = LD32(r14);
+            r5 = LD16(80 + r5);
+            r4 = LD16(0x060C328E);
+            SETR(14, r14);
+            SETSP((sp - 12));
+            SETPR(0x060914FC);
+            r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 29));
+            SETSP((sp - 12));
+            r0 = GCALL0(0x0606BF8C);
+            r13 = r0;
+            r7 = LD32(r14);
+            r0 = LD16(r7 + 28);
+            r6 = LD32(r14);
+            r7 = r0 & 0xFFFF;
+            r0 = LD16(r6 + 24);
+            SETR(13, r13);
+            SETR(14, r14);
+            SETSP((sp - 12));
+            SETPR(0x0609151A);
+            r0 = GCALL4(0x060932B4, 0, r13, ((r0 & 0xFFFF) - 32), r7);
+            r7 = LD32(r14);
+            r6 = LD32(r14);
+            r0 = LD16(r7 + 28);
+            r7 = r0 & 0xFFFF;
+            r0 = LD16(r6 + 24);
+            SETR(13, r13);
+            SETR(14, r14);
+            SETSP((sp - 12));
+            SETPR(0x06091530);
+            r0 = GCALL4(0x060932B4, 1, r13, ((r0 & 0xFFFF) - 32), r7);
+            r7 = LD32(r14);
+            r0 = LD16(r7 + 28);
+            r6 = LD32(r14);
+            r7 = r0 & 0xFFFF;
+            r0 = LD16(r6 + 24);
+            SETR(13, r13);
+            SETR(14, r14);
+            SETSP((sp - 12));
+            SETPR(0x06091546);
+            r0 = GCALL4(0x060932B4, 2, r13, ((r0 & 0xFFFF) - 32), r7);
+            r7 = LD32(r14);
+            r6 = LD32(r14);
+            r0 = LD16(r7 + 28);
+            r7 = r0 & 0xFFFF;
+            r0 = LD16(r6 + 24);
+            SETR(13, r13);
+            SETR(14, r14);
+            SETSP((sp - 12));
+            SETPR(0x0609155C);
+            r0 = GCALL4(0x060932B4, 3, r13, ((r0 & 0xFFFF) - 32), r7);
+            r7 = LD32(r14);
+            r0 = LD16(r7 + 28);
+            r6 = LD32(r14);
+            r7 = r0 & 0xFFFF;
+            r0 = LD16(r6 + 24);
+            SETSP((sp - 12));
+            SETPR(0x06091572);
+            r0 = GCALL4(0x060932B4, 4, r13, ((r0 & 0xFFFF) - 32), r7);
+            SETSP((sp - 12));
+            r0 = GCALL1(0x060144F4, 0x060915D0);
+        }
+        SETPR(LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f060915D0(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    ST32((sp - 12), MACL());
+    SETSP((sp - 12));
+    SETPR(0x060915DC);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 12)));
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r14 = 0x060C328E;
+        r2 = LD16(0x060C328E);
+        r2 = LD16(0x060C3858 + (((r2 & 0xFFFF) * 84) & 0xFFFF));
+        if ((r2 & 0xFFFF) >= 0xFF00) {
+            SETSP((sp - 12));
+            r0 = GCALL1(0x060144F4, 0x0609162C);
+            r4 = LD16(r14);
+            SETSP((sp - 12));
+            r0 = GCALL2(0x0606AB08, (r4 & 0xFFFF), 3);
+            r2 = LD16(r14);
+            ST16(0x060C3860 + (((r2 & 0xFFFF) * 84) & 0xFFFF), 0x100);
+        }
+        SETMACL(LD32((sp - 12)));
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f0609162C(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    ST32((sp - 8), MACL());
+    SETSP((sp - 8));
+    SETPR(0x06091636);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 8)));
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r2 = LD16(0x060C328E);
+        r4 = (((r2 & 0xFFFF) * 84) & 0xFFFF) + 0x060C381C;
+        r1 = LD16(68 + r4);
+        if ((r1 & r1) == 0) {
+            SETSP((sp - 8));
+            r0 = GCALL1(0x0606CC12, 0x060C328E);
+            SETSP((sp - 8));
+            r0 = GCALL1(0x060144F4, 0x060916D0);
+            r5 = LD32(0x060D7768);
+            r4 = LD16(0x060C328A);
+            r5 = LD16(80 + r5);
+            SETSP((sp - 8));
+            SETPR(0x06091682);
+            r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 14));
+        } else {
+            r3 = LD16(68 + r4);
+            ST16(68 + r4, (r3 - 16));
+        }
+        SETMACL(LD32((sp - 8)));
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f060916D0(int r4, int r5, int r6, int r7)
+{
+    int r0, r2;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    ST32((sp - 8), MACL());
+    SETSP((sp - 8));
+    SETPR(0x060916DA);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 8)));
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r2 = LD16(0x060C328A);
+        r2 = LD16(0x060C3858 + (((r2 & 0xFFFF) * 84) & 0xFFFF));
+        if ((r2 & 0xFFFF) >= 0xFF00) {
+            SETSP((sp - 8));
+            r0 = GCALL0(0x060145A8);
+            SETSP((sp - 8));
+            r0 = GCALL1(0x0606CC12, 0x060C328A);
+            r5 = LD32(0x060D7768);
+            r4 = LD16(0x060C1AA8);
+            r5 = LD16(80 + r5);
+            SETSP((sp - 8));
+            SETPR(0x0609171A);
+            r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 2));
+        }
+        SETMACL(LD32((sp - 8)));
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f0609172A(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091732);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        ST16(0x060C3284, 1);
+        ST16(0x060C3292, 2);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x0609175C);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x06014516, 0x06091D28);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f0609175C(int r4, int r5, int r6, int r7)
+{
+    int r0, r2;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091764);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        SETSP((sp - 4));
+        r0 = GCALL0(0x06091848);
+        r2 = LD32(0x060D7768);
+        ST16(62 + r2, 0x1E0);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x060917E0);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x0600996A, 236);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
 }
 
 void f06091848(void)
@@ -264,6 +1660,867 @@ void f06091968(void)
             p += 2;
         } while (AGAIN(++col <= 12));
     } while (AGAIN(++row <= 10));
+}
+
+int f060919B0(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x060919B8);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        ST16(0x060C3284, 1);
+        ST16(0x060C3286, 1);
+        r5 = LD32(0x060D7768);
+        r5 = LD16(80 + r5);
+        r4 = LD16(0x060C1AA8);
+        SETSP((sp - 4));
+        SETPR(0x060919DC);
+        r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 7));
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x06091A28);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091A28(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r3, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    ST32((sp - 12), MACL());
+    SETSP((sp - 12));
+    SETPR(0x06091A34);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 12)));
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r0 = LD16(0x060C3286);
+        if ((r0 & 0xFFFF) == 2) {
+            ST32((sp - 16), 1);
+            r2 = LD16(0x060C3288);
+            ST32((sp - 20), (r2 & 0xFFFF));
+            r3 = LD32(0x060D7B3C);
+            r0 = LD16(r3 + 18);
+            ST32((sp - 24), (r0 - 27));
+            r3 = LD32(0x060D7B3C);
+            r0 = LD16(r3 + 16);
+            ST32((sp - 28), r0);
+            r3 = LD32(0x060D7768);
+            r0 = LD16(80 + r3);
+            ST32((sp - 32), ((r0 & 0xFFFF) + 42));
+            r3 = LD32(0x060D7B3C);
+            r2 = LD16(40 + r3);
+            ST32((sp - 36), (r2 & 0xFFFF));
+            r7 = LD32(0x060D7B3C);
+            r7 = LD16(46 + r7);
+            r6 = LD32(0x060D7B3C);
+            r6 = LD16(44 + r6);
+            r5 = LD32(0x060D7B3C);
+            r0 = LD16(r5 + 4);
+            SETSP((sp - 36));
+            SETPR(0x06091A92);
+            r0 = GCALL4(0x0606CAE4, 0, r0, (r6 & 0xFFFF), (r7 & 0xFFFF));
+            ST16(0x060C328A, r0);
+            r14 = (((r0 & 0xFFFF) * 84) & 0xFFFF) + 0x060C381C;
+            SETSP((sp - 12));
+            r0 = GCALL2(0x0606AAC8, r14, 3);
+            ST16(74 + r14, 0);
+            ST16(68 + r14, 0x100);
+            ST16(70 + r14, 0);
+            SETSP((sp - 12));
+            r0 = GCALL1(0x060144F4, 0x06091AD6);
+        }
+        SETMACL(LD32((sp - 12)));
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091BAC(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091BB4);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r3 = LD32(0x060D7768);
+        r1 = LD16(62 + r3);
+        if ((r1 & r1) == 0) {
+            ST16(0x060C3286, 3);
+            SETSP((sp - 4));
+            r0 = GCALL1(0x0606CC12, 0x060C328A);
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x06091BE6);
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091C22(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091C2A);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        ST16(0x060C3284, 1);
+        ST16(0x060C3286, 1);
+        r5 = LD32(0x060D7768);
+        r4 = LD16(0x060C1AA8);
+        r5 = LD16(80 + r5);
+        SETSP((sp - 4));
+        SETPR(0x06091C4E);
+        r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 7));
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x06091C62);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091C62(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r12, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), R(12));
+    ST32((sp - 16), PR());
+    SETSP((sp - 16));
+    SETPR(0x06091C70);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r0 = LD16(0x060C3286);
+        if ((r0 & 0xFFFF) == 2) {
+            r14 = 0x060D7768;
+            r1 = LD32(0x060D7768);
+            ST16(62 + r1, 60);
+            SETSP((sp - 16));
+            r0 = GCALL1(0x060144F4, 0x06091CFC);
+            r5 = 10;
+            r2 = LD32(0x060D7768);
+            r4 = LD16(0x060C3298);
+            r0 = LD8(r2 + 7);
+            r13 = 0x060C3294;
+            r4 = (r4 & 0xFFFF) - (r0 & 255);
+            ST16(0x060C3294, (r4 + 5));
+            r1 = LD16(0x060C3294);
+            if ((r1 & 0xFFFF) > 10) {
+                ST16(r13, r5);
+            }
+            r5 = 0x060C3296;
+            ST16(0x060C3296, (r4 + 2));
+            r3 = LD16(0x060C3296);
+            r4 = 5;
+            r12 = 0;
+            if ((r3 & 0xFFFF) > 5) {
+                ST16(r5, r4);
+            }
+            while (1) {
+                r2 = LD16(r13);
+                if (!((unsigned)r12 >= (unsigned)(r2 & 0xFFFF))) {
+                    POLL();
+                    r6 = LD32(r14);
+                    r5 = LD32(r14);
+                    r0 = LD16(r6 + 28);
+                    r6 = r0 & 0xFFFF;
+                    r0 = LD16(r5 + 24);
+                    SETR(12, r12);
+                    SETR(13, r13);
+                    SETR(14, r14);
+                    SETSP((sp - 16));
+                    SETPR(0x06091CDC);
+                    r0 = GCALL3(0x06093A6A, r12, (r0 & 0xFFFF), r6);
+                    r12 = r12 + 1;
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        }
+        SETPR(LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091CFC(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091D04);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r3 = LD32(0x060D7768);
+        r1 = LD16(62 + r3);
+        if ((r1 & r1) == 0) {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x0609172A);
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091D28(int r4, int r5, int r6, int r7)
+{
+    int r0, r2;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091D30);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r0 = LD16(0x060C3286);
+        if (!((r0 & 0xFFFF) == 2)) {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x06091DE0);
+            r4 = LD16(0x060C1AA8);
+            r5 = LD32(0x060D7768);
+            r5 = LD16(80 + r5);
+            SETSP((sp - 4));
+            SETPR(0x06091D68);
+            r0 = GCALL2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 2));
+            r2 = LD32(0x060D7768);
+            ST16(62 + r2, 30);
+        } else {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x06091E28);
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091DE0(int r4, int r5, int r6, int r7)
+{
+    int r0, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091DE8);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r3 = LD32(0x060D7768);
+        r0 = LD16(62 + r3);
+        if ((r0 & r0) == 0) {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x06091E28);
+            ST16(0x060C3286, 1);
+            r5 = LD32(0x060D7768);
+            r5 = LD16(80 + r5);
+            r4 = LD16(0x060C1AA8);
+            SETSP((sp - 4));
+            SETPR(0x06091E1C);
+            r0 = GCALL2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 7));
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091E28(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    SETSP((sp - 8));
+    SETPR(0x06091E32);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r0 = LD16(0x060C3286);
+        if ((r0 & 0xFFFF) == 2) {
+            SETSP((sp - 8));
+            r0 = GCALL1(0x060144F4, 0x06091ECE);
+            SETSP((sp - 8));
+            SETPR(0x06091E4C);
+            r0 = GCALL0(0x060928F8);
+            if ((r0 & r0) == 0) {
+                ST16(0x060C3278, 1);
+            }
+            r4 = LD16(0x060C1AA8);
+            r5 = LD32(0x060D7768);
+            r5 = LD16(80 + r5);
+            SETSP((sp - 8));
+            SETPR(0x06091E6C);
+            r0 = GCALL2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 6));
+            ST32((sp - 12), 1);
+            r2 = LD16(0x060C3290);
+            ST32((sp - 16), (r2 & 0xFFFF));
+            r0 = LD32(0x060D7B3C);
+            r0 = LD16(r0 + 18);
+            ST32((sp - 20), r0);
+            r2 = LD32(0x060D7B3C);
+            r0 = LD16(r2 + 16);
+            ST32((sp - 24), r0);
+            r2 = LD32(0x060D7768);
+            r3 = LD16(80 + r2);
+            ST32((sp - 28), ((r3 & 0xFFFF) + 8));
+            r2 = LD32(0x060D7B3C);
+            r3 = LD16(40 + r2);
+            ST32((sp - 32), (r3 & 0xFFFF));
+            r7 = LD32(0x060D7B3C);
+            r7 = LD16(46 + r7);
+            r6 = LD32(0x060D7B3C);
+            r6 = LD16(44 + r6);
+            r5 = LD32(0x060D7B3C);
+            r0 = LD16(r5 + 4);
+            SETSP((sp - 32));
+            SETPR(0x06091EBA);
+            r0 = GCALL4(0x0606CAE4, 0, r0, (r6 & 0xFFFF), (r7 & 0xFFFF));
+            ST16(0x060C328A, r0);
+        }
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091ECE(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06091ED6);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r0 = LD16(0x060C3278);
+        if ((r0 & 0xFFFF) == 1) {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x06091EFE);
+            ST16(0x060C3286, 3);
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091EFE(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), PR());
+    ST32((sp - 16), MACL());
+    SETSP((sp - 16));
+    SETPR(0x06091F0C);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 16)));
+        SETPR(LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r2 = LD16(0x060C328A);
+        r2 = LD16(0x060C3858 + (((r2 & 0xFFFF) * 84) & 0xFFFF));
+        if ((r2 & 0xFFFF) >= 0xFF00) {
+            SETSP((sp - 16));
+            r0 = GCALL1(0x060144F4, 0x06091FB6);
+            r5 = LD32(0x060D7768);
+            r4 = LD16(0x060C328A);
+            r5 = LD16(80 + r5);
+            SETR(13, 0x060D7768);
+            SETSP((sp - 16));
+            SETPR(0x06091F46);
+            r0 = GCALL2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 9));
+            ST32((sp - 20), -1);
+            r2 = LD16(0x060C3290);
+            ST32((sp - 24), (r2 & 0xFFFF));
+            r0 = LD32(0x060D7B3C);
+            r0 = LD16(r0 + 18);
+            ST32((sp - 28), r0);
+            r2 = LD32(0x060D7B3C);
+            r0 = LD16(r2 + 16);
+            ST32((sp - 32), r0);
+            r2 = LD32(0x060D7768);
+            r0 = LD16(80 + r2);
+            ST32((sp - 36), ((r0 & 0xFFFF) + 10));
+            r3 = LD32(0x060D7B3C);
+            r2 = LD16(40 + r3);
+            ST32((sp - 40), (r2 & 0xFFFF));
+            r7 = LD32(0x060D7B3C);
+            r7 = LD16(46 + r7);
+            r6 = LD32(0x060D7B3C);
+            r6 = LD16(44 + r6);
+            r5 = LD32(0x060D7B3C);
+            r0 = LD16(r5 + 4);
+            SETR(13, 0x060D7768);
+            SETSP((sp - 40));
+            SETPR(0x06091F92);
+            r0 = GCALL4(0x0606CAE4, 0, r0, (r6 & 0xFFFF), (r7 & 0xFFFF));
+            ST16(0x060C328C, r0);
+            r3 = LD32(0x060D7768);
+            ST16(62 + r3, 60);
+        }
+        SETMACL(LD32((sp - 16)));
+        SETPR(LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06091FB6(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    ST32((sp - 8), MACL());
+    SETSP((sp - 8));
+    SETPR(0x06091FC0);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 8)));
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r2 = LD16(0x060C328A);
+        r2 = LD16(0x060C3858 + (((r2 & 0xFFFF) * 84) & 0xFFFF));
+        if ((r2 & 0xFFFF) >= 0xFF00) {
+            SETSP((sp - 8));
+            r0 = GCALL1(0x060144F4, 0x06092074);
+            r5 = LD32(0x060D7768);
+            r4 = LD16(0x060C328A);
+            r5 = LD16(80 + r5);
+            SETSP((sp - 8));
+            SETPR(0x06092006);
+            r0 = GCALL2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 11));
+            SETSP((sp - 8));
+            r0 = GCALL1(0x0606CC12, 0x060C328C);
+        } else {
+            r1 = LD32(0x060D7768);
+            r3 = LD16(62 + r1);
+            if ((r3 & r3) == 0) {
+                SETSP((sp - 8));
+                r0 = GCALL1(0x060144F4, 0x06092074);
+                r5 = LD32(0x060D7768);
+                r4 = LD16(0x060C328A);
+                r5 = LD16(80 + r5);
+                SETSP((sp - 8));
+                SETPR(0x06092006);
+                r0 = GCALL2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 11));
+                SETSP((sp - 8));
+                r0 = GCALL1(0x0606CC12, 0x060C328C);
+            }
+        }
+        SETMACL(LD32((sp - 8)));
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06092074(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r11, r12, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), R(12));
+    ST32((sp - 16), R(11));
+    ST32((sp - 20), PR());
+    ST32((sp - 24), MACL());
+    SETSP((sp - 24));
+    SETPR(0x06092086);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 24)));
+        SETPR(LD32((sp - 20)));
+        SETR(11, LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r14 = 0x060C328A;
+        r2 = LD16(0x060C328A);
+        r2 = LD16(0x060C3858 + (((r2 & 0xFFFF) * 84) & 0xFFFF));
+        if ((r2 & 0xFFFF) >= 0xFF00) {
+            r5 = 0x060C3278;
+            r11 = 0x060D7768;
+            r12 = 0x06068ACC;
+            r13 = 0x060144F4;
+            r4 = LD16(0x060C3292);
+            r0 = r4 & 0xFFFF;
+            r4 = r0;
+            if (!(r0 == 1)) {
+                if (!(r4 == 2)) {
+                    r4 = 0x06092228;
+                } else {
+                    ST16(r5, 7);
+                    r5 = LD32(r11);
+                    r4 = LD16(r14);
+                    r5 = LD16(80 + r5);
+                    SETR(13, r13);
+                    SETSP((sp - 24));
+                    SETPR(0x06092100);
+                    r0 = GCALL2(r12, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 15));
+                    r4 = 0x0609212A;
+                }
+                SETSP((sp - 24));
+                r0 = GCALL1(r13, r4);
+            } else {
+                ST16(r5, 2);
+                r5 = LD32(r11);
+                r4 = LD16(0x060C1AA8);
+                r5 = LD16(80 + r5);
+                SETR(11, r11);
+                SETR(12, r12);
+                SETR(13, r13);
+                SETR(14, r14);
+                SETSP((sp - 24));
+                SETPR(0x060920CC);
+                r0 = GCALL2(r12, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 6));
+                r5 = LD32(r11);
+                r4 = LD16(r14);
+                r5 = LD16(80 + r5);
+                SETR(13, r13);
+                SETSP((sp - 24));
+                SETPR(0x060920DC);
+                r0 = GCALL2(r12, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 12));
+                SETSP((sp - 24));
+                r0 = GCALL1(r13, 0x0609212A);
+            }
+        }
+        SETMACL(LD32((sp - 24)));
+        SETPR(LD32((sp - 20)));
+        SETR(11, LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f0609212A(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    SETSP((sp - 8));
+    SETPR(0x06092134);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r5 = LD16(0x060C3292);
+        r5 = r5 & 0xFFFF;
+        r6 = LD16(0x060C3278);
+        r14 = LD32(0x060D7768);
+        r6 = r6 & 0xFFFF;
+        r4 = LD16(0x060C328A);
+        r4 = r4 & 0xFFFF;
+        if (!(r5 == 1)) {
+            if (r5 == 2) {
+                if (r6 == 6) {
+                    r5 = LD16(80 + r14);
+                    SETSP((sp - 8));
+                    SETPR(0x0609219A);
+                    r0 = GCALL2(0x06068ACC, r4, ((r5 & 0xFFFF) + 16));
+                    SETSP((sp - 8));
+                    r0 = GCALL1(0x060144F4, 0x06092228);
+                } else {
+                    r2 = LD16(0x060C3290);
+                    if ((r2 & r2) == 0) {
+                        r5 = LD16(80 + r14);
+                        SETSP((sp - 8));
+                        SETPR(0x0609219A);
+                        r0 = GCALL2(0x06068ACC, r4, ((r5 & 0xFFFF) + 16));
+                        SETSP((sp - 8));
+                        r0 = GCALL1(0x060144F4, 0x06092228);
+                    }
+                }
+            }
+        } else {
+            if (r6 == 5) {
+                r5 = LD16(80 + r14);
+                SETSP((sp - 8));
+                SETPR(0x0609216E);
+                r0 = GCALL2(0x06068A8E, r4, ((r5 & 0xFFFF) + 13));
+                SETSP((sp - 8));
+                r0 = GCALL1(0x060144F4, 0x060921B0);
+            } else {
+                r2 = LD16(0x060C3290);
+                if ((r2 & r2) == 0) {
+                    r5 = LD16(80 + r14);
+                    SETSP((sp - 8));
+                    SETPR(0x0609216E);
+                    r0 = GCALL2(0x06068A8E, r4, ((r5 & 0xFFFF) + 13));
+                    SETSP((sp - 8));
+                    r0 = GCALL1(0x060144F4, 0x060921B0);
+                }
+            }
+        }
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f060921B0(int r4, int r5, int r6, int r7)
+{
+    int r0, r1;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x060921B8);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r0 = LD16(0x060C3278);
+        if ((r0 & 0xFFFF) == 6) {
+            r0 = LD16(0x060C3292);
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x06092228);
+        } else {
+            r1 = LD16(0x060C3290);
+            if ((r1 & r1) == 0) {
+                r0 = LD16(0x060C3292);
+                SETSP((sp - 4));
+                r0 = GCALL1(0x060144F4, 0x06092228);
+            }
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f060923B4(int r4, int r5, int r6, int r7)
+{
+    int r0, r2;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    ST32((sp - 8), MACL());
+    SETSP((sp - 8));
+    SETPR(0x060923BE);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 8)));
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r7 = 0x060D7768;
+        r5 = LD32(0x060D7768);
+        r0 = LD16(62 + r5);
+        if ((r0 & r0) == 0) {
+            SETSP((sp - 8));
+            r0 = GCALL1(0x0606CC12, 0x060C328A);
+            SETSP((sp - 8));
+            r0 = GCALL1(0x060144F4, 0x06092458);
+            r4 = LD16(0x060C328C);
+            SETSP((sp - 8));
+            r0 = GCALL2(0x0606AB08, (r4 & 0xFFFF), 7);
+            r2 = LD16(0x060C328C);
+            ST16(0x060C386E + (((r2 & 0xFFFF) * 84) & 0xFFFF), -92);
+        } else {
+            r2 = LD16(0x060C328A);
+            r4 = (((r2 & 0xFFFF) * 84) & 0xFFFF) + 0x060C381C;
+            r6 = LD16(62 + r5);
+            SETSP((sp - 8));
+            r0 = DIVS((r6 & 0xFFFF), 16);
+            SETSP((sp - 8));
+            r0 = MODU((r6 & 0xFFFF), (r0 + 1));
+            if ((r0 & r0) == 0) {
+                ST16(38 + r4, 0x200);
+            } else {
+                ST16(38 + r4, 0);
+            }
+            r0 = LD32(r7);
+            r0 = LD16(r0 + 62);
+            if (((r0 & 0xFFFF) & 7) == 0) {
+                r0 = LD16(r4 + 18);
+                ST16(r4 + 18, (r0 + 1));
+            }
+        }
+        SETMACL(LD32((sp - 8)));
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06092458(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    ST32((sp - 8), MACL());
+    SETSP((sp - 8));
+    SETPR(0x06092462);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETMACL(LD32((sp - 8)));
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r2 = LD16(0x060C328C);
+        r4 = (((r2 & 0xFFFF) * 84) & 0xFFFF) + 0x060C381C;
+        r3 = LD16(38 + r4);
+        if (!(r3 > -196)) {
+            SETSP((sp - 8));
+            r0 = GCALL1(0x060144F4, 0x060924F4);
+            r2 = LD32(0x060D7768);
+            ST16(62 + r2, 128);
+        } else {
+            r1 = LD16(38 + r4);
+            ST16(38 + r4, (r1 - 2));
+            r3 = LD8(78 + r4);
+            ST8(78 + r4, (r3 - 8));
+        }
+        SETMACL(LD32((sp - 8)));
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f060924F4(int r4, int r5, int r6, int r7)
+{
+    int r0, r2;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x060924FC);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r4 = LD32(0x060D7768);
+        r0 = LD16(62 + r4);
+        if ((r0 & r0) == 0) {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x0606D398);
+            SETSP((sp - 4));
+            r0 = GCALL0(0x06039FAC);
+            SETSP((sp - 4));
+            r0 = GCALL0(0x06039FB4);
+        } else {
+            r5 = LD16(62 + r4);
+            SETSP((sp - 4));
+            r0 = DIVS((r5 & 0xFFFF), 16);
+            SETSP((sp - 4));
+            r0 = MODU((r5 & 0xFFFF), (r0 + 1));
+            r4 = LD32(0x060D7B3C);
+            if ((r0 & r0) == 0) {
+                r2 = 0x200;
+            } else {
+                r2 = 0;
+            }
+            ST16(38 + r4, r2);
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
 }
 
 int f060925D4(int r4, int r5, int r6, int r7)
@@ -371,6 +2628,23 @@ void f06092840(void)
     GJUMP0(0x0609288C);
 }
 
+int f0609289A(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    r0 = GCALL1(0x0608AAEE, 0x060BB7E0);
+    SETSP((sp - 4));
+    r0 = GCALL1(0x060144F4, 0x0608ABA2);
+    SETSP((sp - 4));
+    SETPR(0x060928B2);
+    r0 = GCALL0(0x0608ABA2);
+    SETPR(LD32((sp - 4)));
+    return r0;
+}
+
 int f060928F8(void)
 {
     int r0, r2, r3, r4, r5, r6, r14;
@@ -447,6 +2721,313 @@ int f0609297A(void)
     SETPR(LD32((sp - 8)));
     SETR(14, LD32((sp - 4)));
     return 62;
+}
+
+int f060929D8(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), PR());
+    SETSP((sp - 12));
+    SETPR(0x060929E4);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        r14 = 0x060D7B3C;
+        r13 = LD32(0x060D7768);
+        r0 = LD16(62 + r13);
+        if ((r0 & r0) == 0) {
+            r5 = LD16(80 + r13);
+            r4 = LD16(0x060C1AA8);
+            SETR(14, r14);
+            SETSP((sp - 12));
+            SETPR(0x06092A7A);
+            r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 19));
+            ST16(0x060C3278, 1);
+            r2 = LD32(r14);
+            ST16(68 + r2, 0x100);
+            r2 = LD32(r14);
+            ST16(70 + r2, 0x100);
+            SETSP((sp - 12));
+            r0 = GCALL1(0x060144F4, 0x06092AB0);
+            SETSP((sp - 12));
+            r0 = GCALL1(0x0600996A, 234);
+        } else {
+            r0 = LD16(r13 + 28);
+            ST16(r13 + 28, (r0 + 1));
+            r2 = LD32(r14);
+            r1 = LD16(68 + r2);
+            ST16(68 + r2, (r1 + 8));
+            r2 = LD32(r14);
+            r1 = LD16(70 + r2);
+            ST16(70 + r2, (r1 + 8));
+        }
+        SETPR(LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06092AB0(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), R(12));
+    ST32((sp - 16), R(11));
+    ST32((sp - 20), R(10));
+    ST32((sp - 24), R(9));
+    ST32((sp - 28), R(8));
+    ST32((sp - 32), PR());
+    ST32((sp - 36), MACL());
+    SETSP((sp - 40));
+    SETPR(0x06092ACA);
+    r0 = GCALL0(0x0606CF3E);
+    if ((r0 & r0) == 0) {
+        r13 = 0x060C3278;
+        r14 = 0x060D7B3C;
+        r5 = LD16(0x060C3278);
+        r0 = r5 & 0xFFFF;
+        r5 = r0;
+        if (!(r0 == 1)) {
+            r10 = LD16(0x060C328A);
+            r4 = LD16(0x060C1AA8);
+            r10 = r10 & 0xFFFF;
+            r4 = r4 & 0xFFFF;
+            if (!(r5 == 2)) {
+                r12 = 0x060C328E;
+                r6 = LD16(0x060C3292);
+                r6 = r6 & 0xFFFF;
+                r11 = LD32(0x060D7768);
+                if (!(r5 == 3)) {
+                    r9 = 0x06068ACC;
+                    r10 = 2;
+                    if (!(r5 == 4)) {
+                        if (!(r5 == 5)) {
+                            if (!(r5 == 6)) {
+                                if (!(r5 == 7)) {
+                                    if (r5 == 255) {
+                                        if (!((r6 & r6) == 0)) {
+                                            SETSP((sp - 40));
+                                            SETPR(0x06092DE6);
+                                            r0 = GCALL3(r9, r4, 0, r6);
+                                            SETSP((sp - 40));
+                                            r0 = GCALL1(0x060144F4, 0x0606D23C);
+                                        } else {
+                                            SETSP((sp - 40));
+                                            SETPR(0x06092D92);
+                                            r0 = GCALL3(r9, r4, 0, r6);
+                                            SETSP((sp - 40));
+                                            r0 = GCALL1(0x060144F4, 0x0606D23C);
+                                            r6 = LD16(0x060C327A);
+                                            r6 = ((r6 & 0xFFFF) * 124) + 0x060D5F30;
+                                            ST32(sp - 40, r6);
+                                            r0 = LD16(r6 + 28);
+                                            r6 = r0 & 0xFFFF;
+                                            r5 = LD32(sp - 40);
+                                            r0 = LD16(r5 + 24);
+                                            SETSP((sp - 40));
+                                            SETPR(0x06092DBC);
+                                            r0 = GCALL3(0x06092E1C, 0, ((r0 & 0xFFFF) - 16), r6);
+                                            r6 = LD16(0x060C327A);
+                                            r6 = ((r6 & 0xFFFF) * 124) + 0x060D5F30;
+                                            ST32(sp - 40, r6);
+                                            r0 = LD16(r6 + 28);
+                                            r5 = LD32(sp - 40);
+                                            r6 = r0 & 0xFFFF;
+                                            r0 = LD16(r5 + 24);
+                                            SETSP((sp - 40));
+                                            SETPR(0x06092DDE);
+                                            r0 = GCALL3(0x06092E1C, 0, ((r0 & 0xFFFF) + 16), r6);
+                                        }
+                                    }
+                                } else {
+                                    r0 = LD32(r14);
+                                    r2 = LD16(r0 + 36);
+                                    r4 = 0;
+                                    if (r2 >= 25) {
+                                        r4 = r4 + 1;
+                                    } else {
+                                        r0 = LD32(r14);
+                                        r1 = LD16(r0 + 36);
+                                        ST16(r0 + 36, (r1 + 5));
+                                    }
+                                    r3 = LD32(r14);
+                                    r2 = LD16(38 + r3);
+                                    if (!(r2 > -9)) {
+                                        r4 = r4 + 1;
+                                    } else {
+                                        r1 = LD32(r14);
+                                        r2 = LD16(38 + r1);
+                                        ST16(38 + r1, (r2 - 3));
+                                    }
+                                    if ((unsigned)r4 >= (unsigned)r10) {
+                                        r2 = LD32(r14);
+                                        r1 = LD16(36 + r2);
+                                        ST16(72 + r2, r1);
+                                        ST16(r13, r10);
+                                    }
+                                }
+                            }
+                        } else {
+                            if (r6 == 1) {
+                                r0 = LD16(r12);
+                                r3 = LD16(0x060C3858 + (((r0 & 0xFFFF) * 84) & 0xFFFF));
+                                if ((r3 & 0xFFFF) >= 0xFF00) {
+                                    r4 = LD16(r12);
+                                    r5 = LD16(80 + r11);
+                                    SETR(13, r13);
+                                    SETSP((sp - 40));
+                                    SETPR(0x06092CEE);
+                                    r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 28));
+                                    ST16(r13, 6);
+                                }
+                            }
+                        }
+                    } else {
+                        SETR(10, r10);
+                        SETR(12, r12);
+                        SETR(13, r13);
+                        SETSP((sp - 40));
+                        SETPR(0x06092C46);
+                        r0 = GCALL3(r9, r4, 0, r6);
+                        r0 = LD16(0x060C3292);
+                        if (!((r0 & 0xFFFF) == 1)) {
+                            ST16(r13, 6);
+                        } else {
+                            r1 = LD16(r12);
+                            r4 = (((r1 & 0xFFFF) * 84) & 0xFFFF) + 0x060C381C;
+                            r3 = LD16(36 + r4);
+                            r5 = 0;
+                            if (!(r3 > -32)) {
+                                r5 = r5 + 1;
+                            } else {
+                                r1 = LD16(36 + r4);
+                                ST16(36 + r4, (r1 - 4));
+                            }
+                            r2 = LD16(38 + r4);
+                            if (!(r2 > -8)) {
+                                r5 = r5 + 1;
+                            } else {
+                                r1 = LD16(38 + r4);
+                                ST16(38 + r4, (r1 - 1));
+                            }
+                            if ((unsigned)r5 >= (unsigned)r10) {
+                                r4 = LD16(r12);
+                                r5 = LD32(0x060D7768);
+                                r5 = LD16(80 + r5);
+                                SETR(13, r13);
+                                SETSP((sp - 40));
+                                SETPR(0x06092CA8);
+                                r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 27));
+                                ST16(r13, 5);
+                            }
+                        }
+                    }
+                } else {
+                    if (r6 == 1) {
+                        ST32((sp - 44), 1);
+                        ST32((sp - 48), r10);
+                        r3 = LD32(r14);
+                        r0 = LD16(r3 + 18);
+                        ST32((sp - 52), r0);
+                        r3 = LD32(r14);
+                        r0 = LD16(r3 + 16);
+                        ST32((sp - 56), r0);
+                        r3 = LD16(80 + r11);
+                        ST32((sp - 60), ((r3 & 0xFFFF) + 26));
+                        r1 = LD32(r14);
+                        r3 = LD16(40 + r1);
+                        ST32((sp - 64), (r3 & 0xFFFF));
+                        r7 = LD32(r14);
+                        r7 = LD16(46 + r7);
+                        r6 = LD32(r14);
+                        r5 = LD32(r14);
+                        r6 = LD16(44 + r6);
+                        r0 = LD16(r5 + 4);
+                        SETR(12, r12);
+                        SETR(13, r13);
+                        SETSP((sp - 64));
+                        SETPR(0x06092C1E);
+                        r0 = GCALL4(0x0606CAE4, 0, r0, (r6 & 0xFFFF), (r7 & 0xFFFF));
+                        ST16(r12, r0);
+                    }
+                    SETSP((sp - 40));
+                    r0 = GCALL1(0x0608AAEE, 0x060BB820);
+                    SETSP((sp - 40));
+                    r0 = GCALL1(0x06014516, 0x0608ABA2);
+                    ST16(r13, 4);
+                }
+            } else {
+                SETSP((sp - 40));
+                r0 = GCALL3(0x060693DC, r4, r10, 1);
+                SETSP((sp - 40));
+                r0 = GCALL1(0x0608AAEE, 0x060BB812);
+                SETSP((sp - 40));
+                r0 = GCALL1(0x06014516, 0x0608ABA2);
+                ST16(r13, 3);
+            }
+        } else {
+            r1 = LD32(0x26006034);
+            SETSP((sp - 40));
+            r0 = MODU(((int)((unsigned)r1 >> 2)), 24);
+            SETSP((sp - 40));
+            r0 = DIVU((r0 << 8), 23);
+            r13 = r0;
+            SETSP((sp - 40));
+            r0 = GCALL1(0x0606CE8C, r0);
+            SETSP((sp - 40));
+            r0 = HELPER((int)r0 >> 9);
+            r2 = LD32(r14);
+            ST32((sp - 44), (68 + r2));
+            r8 = LD32(r14);
+            SETSP((sp - 44));
+            r0 = GCALL1(0x060949D0, r0);
+            r0 = r0 + 128;
+            ST16((r8 + 70), r0);
+            r2 = LD32((sp - 44));
+            ST16(r2, r0);
+            if ((r13 & r13) == 0) {
+                SETSP((sp - 40));
+                r0 = GCALL1(0x0600996A, 234);
+            }
+        }
+        SETMACL(LD32((sp - 36)));
+        SETPR(LD32((sp - 32)));
+        SETR(8, LD32((sp - 28)));
+        SETR(9, LD32((sp - 24)));
+        SETR(10, LD32((sp - 20)));
+        SETR(11, LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    } else {
+        SETMACL(LD32((sp - 36)));
+        SETPR(LD32((sp - 32)));
+        SETR(8, LD32((sp - 28)));
+        SETR(9, LD32((sp - 24)));
+        SETR(10, LD32((sp - 20)));
+        SETR(11, LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    }
 }
 
 int f06092E1C(int r4, int r5, int r6)
@@ -582,6 +3163,156 @@ int f0609306E(void)
     return r0;
 }
 
+int f060930DA(void)
+{
+    int r0, r1, r2, r3, r4, r5, r6, r7, r8, r11, r12, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), R(12));
+    ST32((sp - 16), R(11));
+    ST32((sp - 20), R(8));
+    ST32((sp - 24), PR());
+    ST32((sp - 28), MACL());
+    r13 = 0x060D7B3C;
+    r14 = 0x060D7768;
+    r3 = LD32(0x060D7B3C);
+    r0 = LD16(r3 + 4);
+    ST16(r3 + 4, (r0 + 1));
+    r2 = LD32(0x060D7768);
+    r3 = LD16(66 + r2);
+    if (!((r3 & r3) == 0)) {
+        r3 = 12;
+    } else {
+        r3 = 11;
+    }
+    ST32(sp - 32, r3);
+    r0 = LD32(r14);
+    r0 = LD16(r0 + 54);
+    SETSP((sp - 32));
+    r0 = GCALL1(0x0606CE8C, (((15 & (r0 & 0xFFFF)) << 2) << 1));
+    r2 = LD32(r13);
+    r1 = LD32(sp - 32);
+    SETSP((sp - 32));
+    r0 = SAR(r0, r1);
+    r11 = 0x06068A8E;
+    r12 = 0x060C1AA8;
+    ST16((38 + r2), (-r0));
+    r3 = LD32(r14);
+    r2 = LD16(54 + r3);
+    if (!((r2 & 0xFFFF) > 8)) {
+        r2 = LD32(r14);
+        r1 = LD16(54 + r2);
+        if (!((r1 & 0xFFFF) > 2)) {
+            SETSP((sp - 32));
+            r0 = GCALL1(0x0600996A, 230);
+            SETSP((sp - 32));
+            r0 = GCALL0(0x0606C7AA);
+            SETR(11, r11);
+            SETR(12, r12);
+            SETR(13, r13);
+            SETR(14, r14);
+            SETSP((sp - 32));
+            SETPR(0x060931C0);
+            r0 = GCALL0(0x0606C8C0);
+            r5 = LD32(r14);
+            r5 = LD16(80 + r5);
+            r5 = (r5 & 0xFFFF) + 32;
+        } else {
+            r5 = LD32(r14);
+            r5 = LD16(80 + r5);
+            r5 = (r5 & 0xFFFF) + 30;
+        }
+        r4 = LD16(r12);
+        SETR(13, r13);
+        SETR(14, r14);
+        SETSP((sp - 32));
+        SETPR(0x060931D0);
+        r0 = GCALL2(r11, (r4 & 0xFFFF), r5);
+    } else {
+        r1 = LD32(r14);
+        r2 = LD16(66 + r1);
+        if ((r2 & r2) == 0) {
+            SETSP((sp - 32));
+            r0 = GCALL0(0x0606C776);
+        }
+        r4 = LD16(r12);
+        r5 = LD32(r14);
+        r5 = LD16(80 + r5);
+        SETR(13, r13);
+        SETR(14, r14);
+        SETSP((sp - 32));
+        SETPR(0x0609318E);
+        r0 = GCALL2(r11, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 31));
+    }
+    r3 = LD32(r14);
+    r0 = LD16(68 + r3);
+    if (!((r0 & r0) == 0)) {
+        r4 = LD32(r14);
+        r4 = LD16(68 + r4);
+        r0 = LD32(r13);
+        r0 = LD16(r0 + 16);
+        r4 = ((((r4 & 0xFFFF) & 0xFFFF) * 84) & 0xFFFF) + 0x060C381C;
+        ST16(r4 + 16, r0);
+        r0 = LD32(r13);
+        r0 = LD16(r0 + 18);
+        ST16(r4 + 18, r0);
+    } else {
+        r8 = LD32(r14);
+        ST32((sp - 36), 0);
+        r8 = r8 + 68;
+        ST32((sp - 40), 0);
+        r2 = LD32(r13);
+        r0 = LD16(r2 + 18);
+        ST32((sp - 44), r0);
+        r3 = LD32(r13);
+        r0 = LD16(r3 + 16);
+        ST32((sp - 48), r0);
+        r3 = LD32(r14);
+        r2 = LD16(80 + r3);
+        ST32((sp - 52), ((r2 & 0xFFFF) + 33));
+        r3 = LD32(r13);
+        r2 = LD16(40 + r3);
+        ST32((sp - 56), (r2 & 0xFFFF));
+        r7 = LD32(r13);
+        r7 = LD16(46 + r7);
+        r6 = LD32(r13);
+        r6 = LD16(44 + r6);
+        SETR(8, r8);
+        SETSP((sp - 56));
+        SETPR(0x0609321E);
+        r0 = GCALL4(0x0606CAE4, 0, 10, (r6 & 0xFFFF), (r7 & 0xFFFF));
+        ST16(r8, r0);
+    }
+    SETMACL(LD32((sp - 28)));
+    SETPR(LD32((sp - 24)));
+    SETR(8, LD32((sp - 20)));
+    SETR(11, LD32((sp - 16)));
+    SETR(12, LD32((sp - 12)));
+    SETR(13, LD32((sp - 8)));
+    SETR(14, LD32((sp - 4)));
+    return r0;
+}
+
+int f06093256(void)
+{
+    int r0, r4;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    r4 = LD32(0x060D7768);
+    SETSP((sp - 4));
+    r0 = GCALL1(0x0606CC12, (r4 + 68));
+    SETSP((sp - 4));
+    r0 = GCALL1(0x060144F4, 0x0606D2C8);
+    SETSP((sp - 4));
+    SETPR(0x06093270);
+    r0 = GCALL0(0x0606D2C8);
+    SETPR(LD32((sp - 4)));
+    return r0;
+}
+
 int f060932B4(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
@@ -609,6 +3340,191 @@ int f060932B4(int r4, int r5, int r6, int r7)
         ST16(68 + r4, r2);
     }
     SETMACL(LD32((sp - 8)));
+    SETPR(LD32((sp - 4)));
+    return r0;
+}
+
+int f060932FA(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06093306);
+    r0 = GCALL3(0x0606B0DE, 0x060BB83A, 250, 14);
+    r2 = LD32(0x060D7768);
+    ST16(r2 + 18, 0);
+    SETSP((sp - 4));
+    r0 = GCALL0(0x0606C78E);
+    r3 = LD32(0x060D7768);
+    r2 = LD16(42 + r3);
+    ST16(42 + r3, (r2 | 0x102));
+    r3 = LD16(0x060C062C);
+    ST32((((short)(((r3 << 2) + r3) << 2)) + 0x060E2154) + 4, 0x060934EC);
+    r3 = LD16(0x060C062C);
+    ST32((((short)(((r3 << 2) + r3) << 2)) + 0x060E2154) + 12, 0x06093528);
+    SETPR(LD32((sp - 4)));
+    UNFRAME(sp);
+    r0 = GJUMP1(0x060144F4, 0x0609338C);
+    return r0;
+}
+
+int f0609338C(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r11, r13;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), R(12));
+    ST32((sp - 16), R(11));
+    ST32((sp - 20), R(8));
+    ST32((sp - 24), PR());
+    ST32((sp - 28), MACL());
+    SETSP((sp - 44));
+    SETPR(0x060933A0);
+    r0 = GCALL0(0x06093542);
+    r13 = 0x060D7768;
+    r2 = LD32(0x060D7768);
+    r3 = LD16(66 + r2);
+    ST32(sp - 44, (r3 & 0xFFFF));
+    r2 = LD32(0x060D7768);
+    r3 = LD16(68 + r2);
+    ST32(sp - 32, (r3 & 0xFFFF));
+    SETSP((sp - 44));
+    r0 = GCALL1(0x060144F4, 0x0606D23C);
+    SETSP((sp - 44));
+    r0 = GCALL0(0x06074770);
+    r4 = r0;
+    if (!((unsigned)r4 >= (unsigned)8)) {
+        r1 = LD32(r13);
+        ST16(90 + r1, r4);
+        r4 = ((short)((short)r4 * (short)220)) + 0x060C1F78;
+        ST32(0x060C2658, r4);
+        r8 = r4 + 12;
+        r4 = LD32(r13);
+        r0 = LD16(r4 + 24);
+        SETSP((sp - 44));
+        r0 = GCALL1(0x060980DC, (r0 & 0xFFFF));
+        ST32(r8, r0);
+        r8 = LD32(0x060C2658);
+        r4 = LD32(r13);
+        r0 = LD16(r4 + 28);
+        SETSP((sp - 44));
+        r0 = GCALL1(0x060980DC, (r0 & 0xFFFF));
+        ST32((r8 + 16), r0);
+        r8 = LD32(0x060C2658);
+        r4 = LD32(r13);
+        r11 = LD32(sp - 32);
+        r0 = LD16(r4 + 24);
+        r2 = LD32(sp - 44);
+        r11 = (((signed char)((short)r11 * (short)60)) + 0x060BB846) + ((signed char)(((r2 << 1) + r2) << 2));
+        r4 = r11;
+        ST32(sp - 40, r11);
+        ST32(sp - 36, r4);
+        r4 = LD16(r4);
+        SETSP((sp - 44));
+        r0 = GCALL1(0x060980DC, (r4 + (r0 & 0xFFFF)));
+        ST32((r8 + 20), r0);
+        r8 = LD32(0x060C2658);
+        r4 = LD32(r13);
+        r0 = LD16(r4 + 28);
+        r4 = LD32(sp - 36);
+        r4 = LD16((r4 + 2));
+        SETSP((sp - 44));
+        r0 = GCALL1(0x060980DC, (r4 + (r0 & 0xFFFF)));
+        ST32((r8 + 24), r0);
+        r8 = LD32(0x060C2658);
+        r4 = LD32(r13);
+        r0 = LD16(r4 + 24);
+        r4 = r11 + 4;
+        ST32(sp - 44, r4);
+        r4 = LD16(r4);
+        SETSP((sp - 44));
+        r0 = GCALL1(0x060980DC, (r4 + (r0 & 0xFFFF)));
+        ST32((r8 + 28), r0);
+        r8 = LD32(0x060C2658);
+        r4 = LD32(r13);
+        r0 = LD16(r4 + 28);
+        r4 = LD32(sp - 44);
+        r4 = LD16((r4 + 2));
+        SETSP((sp - 44));
+        r0 = GCALL1(0x060980DC, (r4 + (r0 & 0xFFFF)));
+        ST32((r8 + 32), r0);
+        r8 = LD32(0x060C2658);
+        r4 = LD32(r13);
+        r0 = LD16(r4 + 24);
+        r4 = r11 + 8;
+        ST32(sp - 44, r4);
+        r4 = LD16(r4);
+        SETSP((sp - 44));
+        r0 = GCALL1(0x060980DC, (r4 + (r0 & 0xFFFF)));
+        ST32((r8 + 36), r0);
+        r8 = LD32(0x060C2658);
+        r4 = LD32(r13);
+        r0 = LD16(r4 + 28);
+        r4 = LD32(sp - 44);
+        r4 = LD16((r4 + 2));
+        SETSP((sp - 44));
+        r0 = GCALL1(0x060980DC, (r4 + (r0 & 0xFFFF)));
+        ST32((r8 + 40), r0);
+        r3 = LD32(0x060C2658);
+        ST32(r3 + 8, 4);
+        r3 = LD32(0x060C2658);
+        ST32(76 + r3, 16);
+        r3 = LD32(0x060C2658);
+        r1 = LD16(212 + r3);
+        ST16(212 + r3, (r1 | 1));
+        SETMACL(LD32((sp - 28)));
+        SETPR(LD32((sp - 24)));
+        SETR(8, LD32((sp - 20)));
+        SETR(11, LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP1(0x06014516, 0x060747C0);
+        return r0;
+    } else {
+        SETMACL(LD32((sp - 28)));
+        SETPR(LD32((sp - 24)));
+        SETR(8, LD32((sp - 20)));
+        SETR(11, LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    }
+}
+
+int f060934EC(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    r0 = GCALL0(0x0609360C);
+    SETPR(LD32((sp - 4)));
+    UNFRAME(sp);
+    r0 = GJUMP0(0x0606C8C0);
+    return r0;
+}
+
+int f06093528(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    r0 = GCALL0(0x060936AE);
+    SETSP((sp - 4));
+    r0 = GCALL1(0x060144F4, 0x0606D2C8);
+    SETSP((sp - 4));
+    SETPR(0x0609353C);
+    r0 = GCALL0(0x0606D2C8);
     SETPR(LD32((sp - 4)));
     return r0;
 }
@@ -684,6 +3600,69 @@ int f06093718(int r4, int r5, int r6)
     return r0;
 }
 
+int f06093784(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r3, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    SETSP((sp - 8));
+    SETPR(0x06093792);
+    r0 = GCALL3(0x0606B0DE, 0x060BB8BE, 250, 14);
+    SETSP((sp - 8));
+    r0 = GCALL0(0x0606C776);
+    r3 = LD16(0x060C062C);
+    ST32(0x060E2160 + ((short)(((r3 << 2) + r3) << 2)), 0x06093A42);
+    SETSP((sp - 8));
+    r0 = GCALL1(0x060144F4, 0x060937EA);
+    r4 = LD32(0x060D7B3C);
+    SETSP((sp - 8));
+    r0 = GCALL2(0x0606AAC8, r4, 3);
+    r0 = 74;
+    r1 = LD32(0x060D7B3C);
+    ST16(74 + r1, 0);
+    r14 = LD16(0x060C328A);
+    if (((r14 & 0xFFFF) & (r14 & 0xFFFF)) == 0) {
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return r0;
+    } else {
+        SETPR(LD32((sp - 8)));
+        r4 = LD16(0x060C1AA8);
+        SETR(14, LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP3(0x060693DC, (r4 & 0xFFFF), (r14 & 0xFFFF), 1);
+        return r0;
+    }
+}
+
+int f060937EA(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x060937F2);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r3 = LD32(0x060D7768);
+        r1 = LD16(62 + r3);
+        if ((r1 & r1) == 0) {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x06093874);
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
 int f060939C0(void)
 {
     int r0, r1, r3, r4, r5, r14;
@@ -741,6 +3720,26 @@ int f060939C0(void)
     SETMACL(LD32((sp - 12)));
     SETPR(LD32((sp - 8)));
     SETR(14, LD32((sp - 4)));
+    return r0;
+}
+
+int f06093A42(void)
+{
+    int r0, r4;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    r4 = LD32(0x060D7768);
+    r0 = LD16(r4 + 20);
+    SETSP((sp - 4));
+    SETPR(0x06093A56);
+    r0 = GCALL4(0x0606CBFE, (r0 & 0xFFFF), 1, 3, 0);
+    SETSP((sp - 4));
+    r0 = GCALL1(0x060144F4, 0x0606D2C8);
+    SETSP((sp - 4));
+    SETPR(0x06093A64);
+    r0 = GCALL0(0x0606D2C8);
+    SETPR(LD32((sp - 4)));
     return r0;
 }
 
@@ -812,6 +3811,148 @@ int f06093B20(void)
     SETPR(LD32((sp - 8)));
     SETR(14, LD32((sp - 4)));
     return 68;
+}
+
+int f06093CA2(int r4, int r5, int r6, int r7)
+{
+    int r0, r3, c1;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06093CAA);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x06093D0A);
+        SETSP((sp - 4));
+        r0 = GCALL0(0x0600A0B8);
+        r4 = LD32(0x060D7768);
+        r5 = (((r0 & 3) + 1) << 2) << 2;
+        r0 = LD16(r4 + 28);
+        r5 = r5 << 1;
+        c1 = ((r0 & 0xFFFF) & 16) == 0;
+        r0 = 66;
+        if (!(c1)) {
+            r5 = r5 + 16;
+        }
+        r4 = LD16(r0 + r4);
+        r3 = LD16(0x060C3294);
+        r4 = (r4 & 0xFFFF) - ((int)((unsigned)(r3 & 0xFFFF) >> 1));
+        if (r4 >= 0) {
+            r4 = r4 + 1;
+        }
+        SETSP((sp - 4));
+        r0 = GCALL2(0x06074B2C, ((r4 << 2) << 2), r5);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x06014516, 0x06074CB4);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06093D0A(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06093D12);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        SETSP((sp - 4));
+        r0 = GCALL1(0x0600996A, 229);
+        SETSP((sp - 4));
+        r0 = GCALL1(0x060144F4, 0x06093D50);
+        r4 = LD16(0x060C1AA8);
+        r5 = LD32(0x060D7768);
+        r5 = LD16(80 + r5);
+        SETSP((sp - 4));
+        SETPR(0x06093D3C);
+        r0 = GCALL2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 40));
+        SETSP((sp - 4));
+        r0 = GCALL1(0x06014516, 0x0606D88C);
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06093D50(int r4, int r5, int r6, int r7)
+{
+    int r0, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x06093D58);
+    r0 = GCALL0(0x0606CF3E);
+    if (!((r0 & r0) == 0)) {
+        SETPR(LD32((sp - 4)));
+        return r0;
+    } else {
+        r5 = LD32(0x060D7768);
+        r4 = LD16(0x060C1AA8);
+        r5 = LD16(80 + r5);
+        SETSP((sp - 4));
+        SETPR(0x06093D72);
+        r0 = GCALL2(0x06068A8E, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 36));
+        r4 = LD32(0x060D7B3C);
+        r0 = LD16(38 + r4);
+        if ((r0 & r0) == 0) {
+            SETSP((sp - 4));
+            r0 = GCALL1(0x060144F4, 0x0606D23C);
+        } else {
+            r3 = LD16(38 + r4);
+            ST16(38 + r4, (r3 + 2));
+        }
+        SETPR(LD32((sp - 4)));
+        UNFRAME(sp);
+        r0 = GJUMP0(0x0606D410);
+        return r0;
+    }
+}
+
+int f06093D9C(void)
+{
+    int r0, r4, r6, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    r14 = 0x060D7768;
+    r4 = LD32(0x060D7768);
+    SETSP((sp - 8));
+    r0 = GCALL1(0x0606CC12, (r4 + 68));
+    r0 = LD32(0x060D7768);
+    r0 = LD16(r0 + 20);
+    r0 = LD16(((r0 & 0xFFFF) << 1) + 0x060EC8B0);
+    if (((r0 & 0xFFFF) & 128) == 0) {
+        r4 = LD32(r14);
+        r6 = LD16(0x060C3296);
+        r0 = LD16(r4 + 20);
+        SETSP((sp - 8));
+        SETPR(0x06093DD0);
+        r0 = GCALL4(0x0606CBFE, (r0 & 0xFFFF), 1, (r6 & 0xFFFF), 0);
+    }
+    SETSP((sp - 8));
+    r0 = GCALL1(0x060144F4, 0x0606D2C8);
+    SETSP((sp - 8));
+    SETPR(0x06093DDE);
+    r0 = GCALL0(0x0606D2C8);
+    SETPR(LD32((sp - 8)));
+    SETR(14, LD32((sp - 4)));
+    return r0;
 }
 
 int f06093DE4(void)
@@ -1722,6 +4863,73 @@ int f06095B04(int r4, int r5, int r6, int r7)
     }
 }
 
+int f06095D34(int r4, int r5, int r6, int r7)
+{
+    int r0, r3, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    r14 = LD32(0x060FA8BC);
+    r14 = r14 + 152;
+    r0 = LD32(r14 + 8);
+    if ((r0 & r0) == 0) {
+        SETSP((sp - 12));
+        SETPR(0x06095D52);
+        r0 = GCALL4(0x06096C60, -8, 0, r6, r7);
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return 0;
+    } else {
+        r0 = LD32(r14);
+        if (r0 == 1) {
+            if (!(r4 >= 0)) {
+                SETSP((sp - 12));
+                SETPR(0x06095D6A);
+                r0 = GCALL4(0x06096C60, -9, 0, r6, r7);
+                SETPR(LD32((sp - 8)));
+                SETR(14, LD32((sp - 4)));
+                return 0;
+            } else {
+                r3 = LD32(r14 + 12);
+                if (r3 > r4) {
+                    r5 = LD32(r14 + 8);
+                    SETSP((sp - 12));
+                    r0 = GCALL2(0x060A56D8, r4, r5);
+                    ST32(sp - 12, r0);
+                    SETSP((sp - 12));
+                    SETPR(0x06095D80);
+                    r0 = GCALL4(0x06096C60, 0, 0, r6, r7);
+                    if (r0 >= 0) {
+                        r0 = LD32(sp - 12);
+                        SETPR(LD32((sp - 8)));
+                        SETR(14, LD32((sp - 4)));
+                        return r0 + 12;
+                    } else {
+                        SETPR(LD32((sp - 8)));
+                        SETR(14, LD32((sp - 4)));
+                        return 0;
+                    }
+                } else {
+                    SETSP((sp - 12));
+                    SETPR(0x06095D6A);
+                    r0 = GCALL4(0x06096C60, -9, 0, r6, r7);
+                    SETPR(LD32((sp - 8)));
+                    SETR(14, LD32((sp - 4)));
+                    return 0;
+                }
+            }
+        } else {
+            SETSP((sp - 12));
+            SETPR(0x06095D52);
+            r0 = GCALL4(0x06096C60, -8, 0, r6, r7);
+            SETPR(LD32((sp - 8)));
+            SETR(14, LD32((sp - 4)));
+            return 0;
+        }
+    }
+}
+
 int f06096498(int r4, int r5, int r6, int r7)
 {
     int r0, r1;
@@ -1765,6 +4973,41 @@ int f06096596(gaddr p)
             ST32(p + 8, 1);
     }
     return LD32(p + 8);
+}
+
+int f060968E0(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), PR());
+    ST32(sp - 16, r5);
+    if (!((r4 & r4) == 0)) {
+        r13 = (r4 + 12) + 28;
+        r1 = LD32(r13);
+        r14 = LD32(120 + r4);
+        if ((r1 & r1) == 0) {
+            SETR(14, r14);
+            SETSP((sp - 16));
+            SETPR(0x06096910);
+            r0 = GCALL2(0x060A7400, r14, r13);
+        }
+        r2 = LD32(sp - 16);
+        r3 = LD32(r14 + 4);
+        ST32(r2, r3);
+        r0 = LD32(r14);
+    } else {
+        SETSP((sp - 16));
+        SETPR(0x060968F2);
+        r0 = GCALL4(0x06096C60, -11, 0, r6, r7);
+        r0 = 0;
+    }
+    SETPR(LD32((sp - 12)));
+    SETR(13, LD32((sp - 8)));
+    SETR(14, LD32((sp - 4)));
+    return r0;
 }
 
 int f0609696C(int r4, int r5, int r6, int r7)
@@ -1868,6 +5111,123 @@ void f06096BCE(gaddr p)
     ST32(p, 0);
 }
 
+int f06096BEC(int r4, int r5, int r6, int r7)
+{
+    int r0, r2, r3, r11, r12, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), R(12));
+    r13 = r4;
+    ST32((sp - 16), R(11));
+    r14 = r13 + 12;
+    ST32((sp - 20), PR());
+    r11 = 0x060FA8BC;
+    ST32(sp - 28, r5);
+    r4 = LD32(0x060FA8BC);
+    r3 = LD32(180 + r4);
+    r12 = 0;
+    if (r3 == r13) {
+        ST32(180 + r4, r12);
+        SETR(11, r11);
+        SETR(12, r12);
+        SETR(13, r13);
+        SETR(14, r14);
+        SETSP((sp - 28));
+        SETPR(0x06096C1A);
+        r0 = GCALL4(0x060A5F8E, r13, -1, r6, r7);
+    }
+    r5 = LD32(r11);
+    r0 = 168;
+    r5 = LD32(168 + r5);
+    r4 = LD32(r14 + 28);
+    if (r5 == r13) {
+        r3 = LD32(r11);
+        ST32(168 + r3, r12);
+        r2 = LD32(r11);
+        r4 = ((r4 << 2) << 2) + (r2 + 4);
+        ST32(sp - 24, r4);
+        r2 = LD32(r4 + 4);
+        r5 = LD32(sp - 28);
+        SETR(12, r12);
+        SETR(14, r14);
+        SETSP((sp - 28));
+        SETPR(0x06096C4A);
+        r0 = GCALL2(r2, r14, r5);
+        ST32(80 + r14, r12);
+        r0 = 88;
+        ST32(88 + r14, r12);
+    } else {
+        if (!((r4 & r4) == 0)) {
+            if ((r5 & r5) == 0) {
+                r3 = LD32(r11);
+                ST32(168 + r3, r12);
+                r2 = LD32(r11);
+                r4 = ((r4 << 2) << 2) + (r2 + 4);
+                ST32(sp - 24, r4);
+                r2 = LD32(r4 + 4);
+                r5 = LD32(sp - 28);
+                SETR(12, r12);
+                SETR(14, r14);
+                SETSP((sp - 28));
+                SETPR(0x06096C4A);
+                r0 = GCALL2(r2, r14, r5);
+                ST32(80 + r14, r12);
+                r0 = 88;
+                ST32(88 + r14, r12);
+            }
+        }
+    }
+    SETPR(LD32((sp - 20)));
+    SETR(11, LD32((sp - 16)));
+    SETR(12, LD32((sp - 12)));
+    SETR(13, LD32((sp - 8)));
+    SETR(14, LD32((sp - 4)));
+    return r0;
+}
+
+int f06096C60(int r4)
+{
+    int r0, r1, r3, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), PR());
+    r0 = LD32(0x060FC080);
+    r14 = r4;
+    if (r0 == -16) {
+        r14 = -25;
+    } else {
+        if (r0 == -14) {
+            r14 = -2;
+        } else {
+            if (r0 == -13) {
+                r14 = -23;
+            }
+        }
+    }
+    r13 = LD32(0x060FA8BC);
+    r13 = r13 + 184;
+    ST32(r13 + 8, r14);
+    if (!((r14 & r14) == 0)) {
+        r1 = LD32(r13);
+        if (!((r1 & r1) == 0)) {
+            r3 = LD32(r13);
+            r4 = LD32(r13 + 4);
+            SETR(14, r14);
+            SETSP((sp - 12));
+            SETPR(0x06096CA6);
+            r0 = GCALL2(r3, r4, r14);
+        }
+    }
+    SETPR(LD32((sp - 12)));
+    SETR(13, LD32((sp - 8)));
+    SETR(14, LD32((sp - 4)));
+    return r14;
+}
+
 int f06096CB0(int key)
 {
     gaddr list = LD32(0x060FA8BC) + 52;
@@ -1912,6 +5272,79 @@ void f06096D28(int key)
         } while (AGAIN(++i < last));
     }
     ST32(list + i * 4, 0);
+}
+
+int f06096D74(int r4, int r5, int r6)
+{
+    int r0, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    r14 = r4;
+    ST32((sp - 8), PR());
+    ST32(sp - 16, r5);
+    ST32(sp - 12, r6);
+    if (!((r14 & r14) == 0)) {
+        SETSP((sp - 16));
+        r0 = GCALL1(0x060A5EEC, (r14 + 108));
+        r6 = LD32(sp - 12);
+        r5 = LD32(sp - 16);
+        SETR(14, r14);
+        SETSP((sp - 16));
+        SETPR(0x06096DA2);
+        r0 = GCALL3(0x060A681A, (r14 + 12), r5, r6);
+        if (!((r0 & r0) == 0)) {
+            ST32(r14 + 4, 0);
+            ST32(r14 + 8, 0);
+            SETPR(LD32((sp - 8)));
+            SETR(14, LD32((sp - 4)));
+            return r14;
+        } else {
+            SETPR(LD32((sp - 8)));
+            SETR(14, LD32((sp - 4)));
+            return 0;
+        }
+    } else {
+        SETPR(LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+        return 0;
+    }
+}
+
+int f060970DA(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r3;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    ST32(sp - 20, r5);
+    SETSP((sp - 20));
+    SETPR(0x060970EA);
+    r0 = GCALL4(0x06095D9C, r4, (sp - 16), r6, r7);
+    r4 = r0;
+    if (r4 >= 0) {
+        r0 = LD8(sp - 8);
+        r4 = r0 & 255;
+        if (!((r4 & r4) == 0)) {
+            r1 = LD32(sp - 20);
+            SETSP((sp - 20));
+            r0 = DIVS(r1, r4);
+            r3 = r0;
+            r0 = LD8(sp - 7);
+            r3 = r3 * ((r0 & 255) + r4);
+            r0 = LD32((sp - 16));
+            SETPR(LD32((sp - 4)));
+            return r0 + r3;
+        } else {
+            r3 = LD32(sp - 20);
+            r0 = LD32((sp - 16));
+            SETPR(LD32((sp - 4)));
+            return r0 + r3;
+        }
+    } else {
+        SETPR(LD32((sp - 4)));
+        return r4;
+    }
 }
 
 int f0609713C(int r4, int r5)
@@ -2499,6 +5932,166 @@ void f06098BEC(gaddr a, gaddr b, gaddr out)
     recip = LD32(SH2_DVDNTL);
     ST16(out, (int)(((long long)x * recip) >> 32));
     ST16(out + 2, (int)(((long long)y * recip) >> 32));
+}
+
+int f06098C6C(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r10, r11, r12, r13, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), R(13));
+    ST32((sp - 12), R(12));
+    ST32((sp - 16), R(11));
+    ST32((sp - 20), R(10));
+    ST32((sp - 24), PR());
+    ST32((sp - 28), MACL());
+    r10 = 240;
+    r11 = 0x060FA90C;
+    r12 = 0x060FA910;
+    r13 = 0x060FA903;
+    r14 = 0;
+    ST8(0x060FA901, 0);
+    ST8(0x060FA8EC, 0);
+    ST32(0x060FA960, 0);
+    ST8(0x060FA903, 0);
+    ST8(0x060FA904, 0);
+    ST8(0x060FA905, 240);
+    ST8(SMPC_DDR1, 0);
+    ST8(SMPC_DDR2, 0);
+    ST8(SMPC_EXLE, 0);
+    ST8(SMPC_IOSEL, 0);
+    ST8(0x060FA907, r4);
+    r4 = 1;
+    r0 = LD8(0x060FA907);
+    r0 = r0 & 255;
+    if (r0 == 0) {
+        POLL();
+        ST8(r13, (r4 & 255));
+        ST8(r13 + 1, (r14 & 255));
+        ST8(0x060FA900, r14);
+        r0 = SR();
+        ST32(sp - 32, (((int)((unsigned)((int)((unsigned)r0 >> 2)) >> 2)) & 15));
+        r0 = SR();
+        SETSR(((r0 & -241) | 240));
+        r1 = LD32(0x06000300);
+        SETR(14, r14);
+        SETSP((sp - 32));
+        SETPR(0x06098CEA);
+        r0 = GCALL4(r1, 71, 0x060990AA, r6, r7);
+        r3 = LD32(0x06000344);
+        SETR(14, r14);
+        SETSP((sp - 32));
+        SETPR(0x06098CF4);
+        r0 = GCALL2(r3, -129, 0);
+        ST8(0x060FA970, r14);
+        r0 = LD32(sp - 32);
+        r1 = SR();
+        SETSR(((((r0 & 15) << 2) << 2) | (r1 & -241)));
+        SETMACL(LD32((sp - 28)));
+        SETPR(LD32((sp - 24)));
+        SETR(10, LD32((sp - 20)));
+        SETR(11, LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+    } else {
+        if (r0 == 1) {
+            POLL();
+            ST8(r13, (r14 & 255));
+            ST8(r13 + 1, 8);
+        } else {
+            if (r0 == 2) {
+                POLL();
+                ST8(r13, (r4 & 255));
+                ST8(r13 + 1, 8);
+                ST8(0x060FA938, (r14 & 255));
+            }
+        }
+        ST8(r11, r6);
+        ST16(0x060FA90A, r5);
+        r2 = LD8(35 + (sp - 32));
+        ST8(0x060FA908, r2);
+        ST32(r12, r7);
+        ST32(0x060FA918, r14);
+        r2 = LD8(r11);
+        if ((r2 & 255) > 15) {
+            r0 = LD8(r13 + 1);
+            ST8(r13 + 1, (r0 | 80));
+        }
+        ST32(0x060FA948, 0x060FA939);
+        ST32(0x060FA8F0, 0x060FA940);
+        ST32(0x060FA958, 0x060FA94C);
+        ST32(0x060FA954, 0x060FA950);
+        ST8(0x060FA950, r10);
+        r2 = LD32(0x060FA954);
+        ST8(r2 + 1, (r14 & 255));
+        r3 = LD32(0x060FA954);
+        ST8((r3 + 2), r10);
+        r3 = LD32(0x060FA954);
+        ST8((r3 + 2) + 1, (r14 & 255));
+        r3 = LD32(r12);
+        ST32(0x060FA91C, r3);
+        r4 = LD8(r11);
+        r3 = LD16(0x060FA90A);
+        r2 = LD32(r12);
+        r4 = ((r4 & 255) + 2) * (r3 & 0xFFFF);
+        ST32(0x060FA920, (r2 + r4));
+        r1 = LD32(r12);
+        ST32(0x060FA928, ((r4 << 1) + r1));
+        ST8(0x060FA902, r14);
+        SETSP((sp - 32));
+        r0 = GCALL0(0x060998A0);
+        r0 = SR();
+        ST32(sp - 32, (((int)((unsigned)((int)((unsigned)r0 >> 2)) >> 2)) & 15));
+        r0 = SR();
+        SETSR(((r0 & -241) | 240));
+        r2 = LD32(0x06000300);
+        SETR(14, r14);
+        SETSP((sp - 32));
+        SETPR(0x06098E2A);
+        r0 = GCALL4(r2, 71, 0x060990AA, 0, r7);
+        r3 = LD32(0x06000344);
+        SETR(14, r14);
+        SETSP((sp - 32));
+        SETPR(0x06098E34);
+        r0 = GCALL2(r3, -129, 0);
+        ST8(0x060FA970, r14);
+        r0 = LD32(sp - 32);
+        r1 = SR();
+        SETSR(((((r0 & 15) << 2) << 2) | (r1 & -241)));
+        SETMACL(LD32((sp - 28)));
+        SETPR(LD32((sp - 24)));
+        SETR(10, LD32((sp - 20)));
+        SETR(11, LD32((sp - 16)));
+        SETR(12, LD32((sp - 12)));
+        SETR(13, LD32((sp - 8)));
+        SETR(14, LD32((sp - 4)));
+    }
+    r4 = 0x060FA970;
+    r0 = LD8(0x060FA970);
+    if (!((r0 & 255) == 4)) {
+        r5 = 1;
+        ST8(r4, 3);
+        r6 = SMPC_SF;
+        r3 = LD8(SMPC_SF);
+        if (!(((r3 & 255) & 1) == 1)) {
+            ST8(r6, (r5 & 255));
+            r3 = LD8(0x060FA903);
+            ST8(SMPC_IREG0, r3);
+            r0 = LD8(0x060FA904);
+            ST8(SMPC_IREG1, r0);
+            r0 = LD8(0x060FA905);
+            ST8(SMPC_IREG2, r0);
+            ST8(SMPC_COMREG, 16);
+            ST8(r4, 2);
+            return 0;
+        } else {
+            return 1;
+        }
+    } else {
+        return 1;
+    }
 }
 
 int f06098EA4(gaddr first, gaddr second)
