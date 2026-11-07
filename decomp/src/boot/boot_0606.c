@@ -13476,3 +13476,259 @@ int f0606F5EC(int r4, int r5)
     r0 = GCALL2(r0, r4, r5);
     return r0;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0606AF44(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, r10, r11;
+    FRAME(sp, 24);
+
+    r8 = r5;
+    r11 = r6;
+    r10 = r7;
+    r0 = GCALL4(0x0606ABB0, r4, 0, r6, r7);
+    r9 = r0;
+    r6 = 0;
+    if (!((r9 & r9) == 0)) {
+        r0 = GCALL3(0x0606AC9C, r9, r8, r6);
+        if (r0 >= 0) {
+            r5 = LD32(r9 + 28);
+            r2 = r5;
+            if ((r5 & r5) == 0) {
+                r2 = 0x914;
+                r5 = 0x800;
+            }
+            r1 = LD32(r9 + 32);
+            r8 = r1 - r8;
+            if (r10 == -1) {
+                r10 = r8 * r2;
+            }
+            r0 = GCALL2(0x0607286C, ((r10 + r2) - 1), r5);
+            r7 = r0;
+            r6 = r11;
+            if (r8 > r7) {
+                r8 = r7;
+            }
+            r0 = GCALL4(0x0606B008, r9, r8, r6, r10);
+            r8 = r0;
+            r0 = GCALL1(0x0606AC64, r9);
+            r0 = r8;
+            if (r8 >= 0) {
+                r0 = GCALL1(0x0606BB88, 0);
+                r0 = r8;
+            }
+        } else {
+            r0 = GCALL1(0x0606BB88, -15);
+        }
+    } else {
+        r1 = LD32(0x0608F444);
+        r0 = LD32((r1 + 184) + 8);
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0606C0CC(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r14;
+    FRAME(sp, 24);
+
+    r14 = sp - 24;
+    r8 = r5;
+    r0 = GCALL4(0x0606AABC, r4, r14, r6, r7);
+    r1 = r14;
+    if (r0 >= 0) {
+        r1 = LD8((r1 + 8));
+        r6 = r1 & 255;
+        r4 = r8;
+        if ((r6 & r6) == 0) {
+            r1 = LD32(r14);
+            r0 = r8;
+        } else {
+            r0 = GCALL2(0x0607286C, r4, r6);
+            r1 = LD8((r14 + 9));
+            r2 = r0 * ((r1 & 255) + r6);
+            r1 = LD32(r14);
+            r0 = r2;
+        }
+        r0 = r0 + r1;
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0606DE04(int r4, int r5)
+{
+    int r0, r1, r2, r8, r9, r10, r14, c0, c4, c5;
+    FRAME(sp, 32);
+
+    r14 = sp - 32;
+    r8 = r4;
+    r10 = r5;
+    r0 = GCALL2(0x0606DEF4, 0, 0);
+    c0 = (r0 & r0) == 0;
+    r0 = -20;
+    if (c0) {
+        r9 = r8 + 28;
+        r0 = GCALL1(0x0606FBEC, r9);
+        r2 = 1;
+        if (!((r0 & r0) == 0)) {
+            ST32(r14, r2);
+            r0 = GCALL2(0x0606DEA0, r8, r10);
+            r1 = LD32(r8 + 4);
+            ST32(r14 + 4, (r1 + r0));
+            r0 = GCALL2(0x0606FB9C, r9, r14);
+            r1 = -9;
+            if (r0 == -9) {
+                r0 = -20;
+            } else {
+                c4 = r0 == -13;
+                if (r0 > r1) {
+                    c5 = (r0 & r0) == 0;
+                    r0 = -1;
+                    if (c5) {
+                        r0 = 0;
+                    }
+                } else {
+                    r0 = -23;
+                    if (!(c4)) {
+                        r0 = -1;
+                    }
+                }
+            }
+            ST32(r14 + 8, r0);
+            r0 = GCALL1(0x0606FC2C, (r8 + 28));
+            r0 = LD32(r14 + 8);
+        } else {
+            r0 = -20;
+        }
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0606DEA0(int r4, int r5)
+{
+    int r0, r1, r6, r8, r9;
+    FRAME(sp, 16);
+
+    r8 = r4;
+    r1 = LD8((r8 + 12));
+    r6 = r1 & 255;
+    r9 = r5;
+    if ((r6 & r6) == 0) {
+        r0 = r9;
+    } else {
+        r0 = GCALL2(0x0607286C, r9, r6);
+        r1 = LD8((r8 + 13));
+        r0 = (r9 - (r0 * r6)) + (r0 * ((r1 & 255) + r6));
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0606ED34(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9, c3;
+    FRAME(sp, 16);
+
+    r9 = r4;
+    r8 = r9 + 108;
+    r1 = LD32(r8 + 24);
+    if (r1 > 0) {
+        r1 = LD32(r8 + 48);
+        if ((r1 & r1) == 0) {
+            r0 = LD32(r8 + 52);
+        } else {
+            r0 = LD32(r8 + 52);
+            c3 = r0 == 5;
+            if ((r0 & r0) == 0) {
+                r0 = GCALL4(0x0606EEB4, r9, 0, r6, r7);
+                r1 = LD32(r8 + 12);
+                r3 = 5;
+                if (!((r1 & r1) == 0)) {
+                    ST32(r8 + 52, r3);
+                    r5 = LD32(r8 + 12);
+                    r0 = GCALL3(0x0606F610, r9, r5, -1);
+                    r2 = LD32(r8 + 12);
+                    r1 = LD32(r8 + 28);
+                    r2 = LD32(r2 + 12);
+                    ST32(r8 + 28, (r1 + r2));
+                    r2 = LD32(r8 + 28);
+                    r3 = 0;
+                    r1 = LD32(r8 + 24);
+                    ST32(r8 + 12, 0);
+                    if (r2 >= r1) {
+                        r3 = 6;
+                    }
+                    ST32(r8 + 52, r3);
+                }
+                r0 = LD32(r8 + 52);
+            } else {
+                if (c3) {
+                    r5 = LD32(r8 + 12);
+                    r0 = GCALL3(0x0606F610, r9, r5, -1);
+                    r2 = LD32(r8 + 12);
+                    r1 = LD32(r8 + 28);
+                    r2 = LD32(r2 + 12);
+                    ST32(r8 + 28, (r1 + r2));
+                    r2 = LD32(r8 + 28);
+                    r3 = 0;
+                    r1 = LD32(r8 + 24);
+                    ST32(r8 + 12, 0);
+                    if (r2 >= r1) {
+                        r3 = 6;
+                    }
+                    ST32(r8 + 52, r3);
+                    r0 = LD32(r8 + 52);
+                }
+            }
+        }
+    } else {
+        r0 = 6;
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f0606EEB4(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, r10;
+    FRAME(sp, 20);
+
+    r10 = r4;
+    r8 = r10 + 108;
+    r2 = LD32(r8 + 24);
+    r1 = LD32(r8 + 28);
+    r9 = r2 - r1;
+    r1 = LD32(r8 + 20);
+    if (r9 > r1) {
+        r9 = r1;
+    }
+    r5 = LD32(r8 + 44);
+    if (r5 > 1) {
+        r1 = LD32(r8 + 12);
+        if (!((r1 & r1) == 0)) {
+            r4 = LD32(r1 + 8);
+            r1 = LD32(r8 + 32);
+            r0 = GCALL2(0x0607286C, (r4 - r1), r5);
+            r9 = r0;
+        }
+        r0 = GCALL1(0x0606F498, r8);
+        r5 = LD32(r8 + 44);
+        r0 = GCALL2(0x0607286C, r0, r5);
+        r7 = r0;
+        if (r9 > r7) {
+            r9 = r7;
+        }
+    }
+    r1 = LD32(r8 + 12);
+    r5 = r9;
+    if ((r1 & r1) == 0) {
+        r0 = GCALL4(0x0606F5C4, r10, r5, r6, r7);
+        ST32(r8 + 12, r0);
+        if (!((r0 & r0) == 0)) {
+            ST32(r8 + 32, 0);
+        }
+    }
+}
