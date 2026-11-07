@@ -76,6 +76,17 @@ is saved to `settings.ini` as it is made, so the next launch opens with the same
 session records the multitaps for `replay`. Rebinding takes one key or button per Saturn button;
 gamepads share one set. The disc is still `prepare`'s, as for every run.
 
+### Online
+
+`uv run bomberman play --room` plays the NetLink battle against another tester through a playtest
+room: it makes the room, shows its four-letter code in the window, and waits for the call.
+`uv run bomberman play --room CODE` joins that room and dials. Either way the runtime presses through
+the NetLink menus to the call (`[online.classic]` in `game.toml`), and after each match Start offers a
+rematch. `SATURN_PLAYTEST_TOKEN` or `SATURN_PLAYTEST_TESTER` says which tester you are, and both sides
+need the same build. `replay` plays such a session again from what its line heard, without the room.
+`uv run tests/netlink.py --room` checks a match, a rematch, and both replays through a room on this
+machine, under the playtest Worker's `wrangler dev`.
+
 The port supports one disc: Saturn Bomberman (USA), MK-81070 V1.003. `disc.json` lists every
 file on it with its size and SHA-1, and `prepare` stops before extracting anything if a file
 differs, is missing or is extra, naming each one. The check reads the disc's contents rather than

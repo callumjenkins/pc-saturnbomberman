@@ -71,6 +71,9 @@ def main(argv=None):
     sub.add_parser("prepare")
     pl = sub.add_parser("play")
     pl.add_argument("--launcher", action="store_true", help="choose the players, controls and display in a menu first")
+    pl.add_argument("--room", nargs="?", const="new", metavar="CODE",
+                    help="play the NetLink battle through a playtest room: make one, or join CODE "
+                         "(SATURN_PLAYTEST_TOKEN or SATURN_PLAYTEST_TESTER names the tester)")
     rp = sub.add_parser("replay")
     rp.add_argument("session", nargs="?", default="latest")
     rp.add_argument("--video", action="store_true", help="record it as replay/video.mp4 in the session")
@@ -179,6 +182,8 @@ def main(argv=None):
     elif args.command == "play":
         prepare.check_prepared()
         run.build.ensure(run.GAME)
+        if args.room:
+            more = session.room_args(None if args.room == "new" else args.room.upper()) + more
         raise SystemExit(session.play(more, launcher=args.launcher))
     elif args.command == "replay":
         prepare.check_prepared()

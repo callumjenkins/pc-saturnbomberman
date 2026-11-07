@@ -70,6 +70,22 @@ show = [["Stage {}", "stage_2", "world-stage"], ["{} pts", "score", "u32"], ["Li
         ["Hearts +{}", "objects+0x37", "u8?"], ["{}", "objects+0x70", "bits:01=Kick,02=Glove?"],
         ["{} dino", "dino_colours", "names:,Pink,Blue,Green,Yellow,Purple?", "objects+0x5E&08"]]
 
+# The XBAND client's call through a playtest room (--modem session), as a launcher steers a player to it and
+# tests/netlink.py plays it: the NetLink loader's choice of the client, then QuickLink's Wait, or a dial of "1"
+# on its keyboard. The game hangs up and starts the client again after each match, for the rematch.
+[online.classic]
+boot = ["1500:UP", "1530:", "1550:A", "1556:"]   # from power-on
+program = "XS"
+starts = 1559                                   # the VBlank the client first starts at
+wait = ["741:A", "747:", "941:RIGHT", "947:", "971:A", "977:"]   # from each start of the client
+dial = ["741:A", "747:", "941:A", "947:", "1141:LEFT", "1147:", "1155:LEFT", "1161:", "1169:LEFT", "1175:",
+        "1183:LEFT", "1189:", "1197:LEFT", "1203:", "1211:LEFT", "1217:", "1225:LEFT", "1231:", "1239:LEFT",
+        "1245:", "1253:LEFT", "1259:", "1267:LEFT", "1273:", "1281:LEFT", "1287:", "1295:LEFT", "1301:",
+        "1309:A", "1315:", "1323:RIGHT", "1329:", "1337:RIGHT", "1343:", "1351:RIGHT", "1357:", "1365:RIGHT",
+        "1371:", "1379:RIGHT", "1385:", "1393:RIGHT", "1399:", "1407:RIGHT", "1413:", "1421:RIGHT", "1427:",
+        "1435:RIGHT", "1441:", "1449:RIGHT", "1455:", "1463:RIGHT", "1469:", "1477:RIGHT", "1483:",
+        "1491:DOWN", "1497:", "1505:DOWN", "1511:", "1519:DOWN", "1525:", "1553:A", "1559:"]
+
 [symbols]
 krnl_setjmp = 0x060061C4
 krnl_longjmp = 0x060061E6

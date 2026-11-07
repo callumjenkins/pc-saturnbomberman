@@ -14,6 +14,9 @@ import subprocess
 import sys
 import time
 
+from saturnrecomp.playtest import session as playtest_session
+from saturnrecomp.playtest.__main__ import replay_args
+
 from . import run
 from .paths import BUILD
 
@@ -72,6 +75,12 @@ def play(more=(), launcher=False):
     return code
 
 
+def room_args(code=None):
+    """saturn's arguments for the NetLink battle through a playtest room: a new one, or the room `code`."""
+    info = {"endpoint": run.GAME.playtest.endpoint, "classic": run.GAME.classic.steers()}
+    return playtest_session.classic_args(info, code)
+
+
 def replay(name="latest", video=False, window=False, more=()):
     session = os.path.realpath(os.path.join(PLAYS, name))
     recorded = f"{session}/input.txt"
@@ -86,6 +95,7 @@ def replay(name="latest", video=False, window=False, more=()):
         save = shutil.copy(f"{session}/backup-at-start.bin", f"{out}/backup.bin")
     played = [line for name in ("args.txt", "launch.txt") if os.path.exists(f"{session}/{name}")
               for line in open(f"{session}/{name}").read().split("\n")[:-1]]
+    played = replay_args(run.GAME, played, session)
     args = [run.GAME.saturn, "--cue", run.cue(), "--out", out, "--save", save, *played,
             "--clock", open(f"{session}/clock.txt").read().strip(),
             *(["--input", f"@{recorded}"] if presses else []), "--vblanks", str(last + 600),
