@@ -26,6 +26,7 @@ from state import (LOCAL_TYPES, MAC, NO_FLAG, VAR, Copies, State, Stmt, Unsuppor
                    number, restored, sp_change, step, strip, track)
 
 _CALLS = ("bsr", "jsr")
+TABLE_LOAD = re.compile(r"mov\.w @\(r0,r\d+\),r(\d+)$")     # the load of an entry of a jump table of words
 MAX_ROUNDS = 12                         # times read_blocks reads every block again before it gives up
 
 
@@ -166,6 +167,7 @@ def walk(image: "sh2.Image", entry: int, code: set[int] | None,
     """`leaders`, the lowest offset r15 has at any instruction, its offsets at the jumps out of the function, and the
     registers that copy it. A `mov Rm,r15` of a copy sets it back to the offset the copy was made at."""
     found = {entry: 0}
+    tables = status.jump_targets()
     copies = Copies()
     lowest = 0
     tails: set[int] = set()
@@ -201,6 +203,12 @@ def walk(image: "sh2.Image", entry: int, code: set[int] | None,
                 raise Unsupported("a conditional branch out of the function at %08X" % at)
             if ins.op in ("bt", "bf", "bt/s", "bf/s", "bra") and not leaves:
                 for target in ([ins.target] if ins.op == "bra" else [ins.target, nxt]):
+                    reach(target, sp)
+                break
+            if ins.op == "jmp" and at in tables:
+                if code is not None and (not set(tables[at]) <= code or set(tables[at]) & set(status.function_code())):
+                    raise Unsupported("a jump table at %08X to code the game's build enters as functions" % at)
+                for target in dict.fromkeys(tables[at]):
                     reach(target, sp)
                 break
             if ins.op in ("rts", "jmp") or leaves and ins.op == "bra":
@@ -251,7 +259,9 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
         simplify(read, live_out[at], returns)
         block = read.block
         block.stmts = [s.text() for s in read.stmts]
-        if block.kind == "branch":
+        if block.kind == "switch":
+            block.value = strip(read.term)
+        elif block.kind == "branch":
             block.value = strip(read.term) if not read.term.startswith("!") else "!(%s)" % strip(read.term[1:])
         elif block.kind == "return":
             block.value = strip(read.term) or ("r0" if returns else "")
@@ -329,6 +339,7 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
     block = structure.Block(start)
     term = ""
     tail = False
+    table: tuple[int | None, int] | None = None     # the table address and the register of the last word loaded from it
     taken_flag = None
     at = start
     while True:
@@ -363,6 +374,18 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
             step(slot, st, image)
             block.kind = "return"
             break
+        if ins.op == "jmp" and ins.pc in status.jump_targets():
+            targets = status.jump_targets()[ins.pc]
+            if table is None or table[0] is None or image.insn(ins.pc - 2).text != "add r%d,r0" % table[1] or any(
+                    table[0] + image.u16(table[0] + 2 * k) != target for k, target in enumerate(targets)):
+                raise Unsupported("a jump table at %08X that is not words added to its address" % ins.pc)
+            step(slot, st, image)
+            if ins.pc in status.polling_jumps():
+                st.effect("POLL();")
+            term = st.get(table[1])
+            block.kind, block.targets = "switch", list(dict.fromkeys(targets))
+            block.cases = [(image.u16(table[0] + 2 * k), target) for k, target in enumerate(targets)]
+            break
         if ins.op == "jmp":
             tail = call(ins, slot, st, params, image, functions)
             block.kind = "return"
@@ -371,6 +394,9 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
             call(ins, slot, st, params, image, functions)
             st.flag = None
         else:
+            loads = TABLE_LOAD.match(ins.text)
+            if loads:
+                table = (number(st.get(0)), int(loads[1]))
             step(ins, st, image)
             if slot:
                 step(slot, st, image)

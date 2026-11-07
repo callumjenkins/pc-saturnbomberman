@@ -14,9 +14,10 @@ class Unstructured(Exception):
 class Block:
     start: int
     stmts: list[str] = field(default_factory=list)
-    kind: str = "return"                    # return, goto, or branch
-    value: str = ""                         # the returned expression, or the branch condition
-    targets: list[int] = field(default_factory=list)   # goto: [next]; branch: [taken, fallthrough]
+    kind: str = "return"                    # return, goto, branch, or switch
+    value: str = ""                         # the returned expression, the branch condition, or the switch's index
+    targets: list[int] = field(default_factory=list)   # goto: [next]; branch: [taken, fallthrough]; switch: each target once
+    cases: list[tuple[int, int]] = field(default_factory=list)   # switch: each value of the index and where it goes
     polls: list[int] = field(default_factory=list)     # targets the branch reaches by going back, where the game advances time
 
 
@@ -143,6 +144,7 @@ class Structurer:
         self.ipdom = postdominators(blocks, self.order)
         self.bodies = loops(blocks, self.order)
         self.active: list[tuple[int, int | None]] = []          # (header, exit) of the loops being written
+        self.breaks = 0                                         # breaks written out of a loop so far
         self.sides: dict[int, set[int]] = {}                    # each loop's exits other than its exit
         self.room = REPEATS * sum(len(block.stmts) + 1 for block in blocks.values()) + 100   # lines left before it is a blowup
 
@@ -189,6 +191,7 @@ class Structurer:
                 raise Unstructured("a loop inside the loop at %08X goes to %08X, which needs a goto" % (header, at))
             if at == header:
                 return [BACK]
+            self.breaks += at == leave
             return ["break;"] if at == leave else self.sequence(at, None, first=True)
         return None
 
@@ -216,7 +219,7 @@ class Structurer:
                 at = block.targets[0]
                 out += self.poll(block, at)
                 continue
-            at = self.branch(block, out)
+            at = self.switch(block, out) if block.kind == "switch" else self.branch(block, out)
         return out
 
     def branch(self, block: Block, out: list[str]) -> int | None:
@@ -232,6 +235,25 @@ class Structurer:
             out += ["if (%s) {" % condition] + ["    " + line for line in then]
             out += (["} else {"] + ["    " + line for line in other]) if other else []
             out.append("}")
+        return join
+
+    def switch(self, block: Block, out: list[str]) -> int | None:
+        """Writes a switch for the block and returns where its arms join. A `break` in an arm would leave the switch
+        rather than the loop around it, so an arm that has one is refused."""
+        merge = self.ipdom[block.start]
+        in_loop = not self.active or merge in self.bodies[self.active[-1][0]]
+        join = merge if in_loop else None
+        lines = ["switch (%s) {" % block.value]
+        for target in block.targets:
+            before = self.breaks
+            arm = self.sequence(target, join)
+            if self.breaks != before:
+                raise Unstructured("an arm of the switch at %08X leaves a loop, which a switch would catch" % block.start)
+            lines += ["case %d:" % value for value in dict.fromkeys(v for v, to in block.cases if to == target)]
+            lines += ["    " + line for line in arm]
+            if not arm or not (arm[-1].startswith("return") or arm[-1] == BACK):
+                lines.append("    break;")
+        out += lines + ["}"]
         return join
 
     def loop(self, header: int) -> list[str]:

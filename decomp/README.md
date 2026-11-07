@@ -60,7 +60,8 @@ registers its callee reads; one whose last registers an earlier call overwrote l
 there what that call left, as it does in the game's code. A jump through a register is a tail call, `GJUMPn`
 with the pointer; `SR()`, `GBR()` and `VBR()` read the control registers and `SETSR(x)` and the others write
 them (a write to sr advances time, as `ldc` does); `m0` is MACH:MACL as one `long long`, and `MAC_L` and `MAC_W`
-accumulate into it. The lifter refuses a jump table (`jmp` through a table of offsets), a register read after a call that may have written it,
+accumulate into it. A `jmp` through a table of word offsets inside the function is a `switch` on the loaded offset; the lifter refuses one whose arm
+leaves a loop, or whose table goes to other functions. It also refuses a register read after a call that may have written it,
 a call into the middle of a function (code that reads r8 to r14 from its caller), and code that reads a
 register it never set (a piece of a larger function or a task's entry). A draft that would write its blocks out
 more than twelve times over is refused too. Its drafts are for reading and rewriting, and the cosim decides

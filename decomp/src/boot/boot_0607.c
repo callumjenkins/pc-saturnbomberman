@@ -4727,3 +4727,89 @@ int f0607596C(int r4)
     }
     return r0;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06070974(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2;
+    FRAME(sp, 8);
+
+    r2 = r4;
+    r4 = r5;
+    if (!((unsigned)r2 > (unsigned)7)) {
+        r1 = LD16(0x06070994 + (r2 + r2));
+        switch (r1) {
+        case 16:
+            r0 = GCALL4(0x06070A68, r4, 0, r6, r7);
+            break;
+        case 26:
+            r0 = GCALL1(0x06070C2C, r4);
+            break;
+        case 36:
+            r0 = GCALL1(0x06070CBC, r4);
+            break;
+        case 46:
+            r0 = GCALL1(0x06070E10, r4);
+            break;
+        case 56:
+            r0 = GCALL1(0x06070EB0, r4);
+            break;
+        case 66:
+            r0 = GCALL1(0x06070FE4, r4);
+            break;
+        case 76:
+            r0 = GCALL1(0x06071344, r4);
+            break;
+        case 86:
+            r0 = GCALL1(0x06071148, r4);
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06072224(int r4, int r5)
+{
+    int r0, r1, r2;
+    FRAME(sp, 4);
+
+    r2 = LD32(r4);
+    if ((unsigned)r2 > (unsigned)3) {
+        r1 = 0;
+        ST8(r5, r1);
+        ST8((r5 + 1), r1);
+        r2 = r5;
+    } else {
+        r1 = LD16(0x06072240 + (r2 + r2));
+        switch (r1) {
+        case 70:
+            r1 = 0;
+            ST8(r5, r1);
+            ST8((r5 + 1), r1);
+            r2 = r5;
+            break;
+        case 34:
+            r0 = LD8((r4 + 5));
+            ST8(r5, (r0 | 128));
+            r1 = LD8((r4 + 6));
+            ST8((r5 + 1), r1);
+            r2 = r5;
+            r1 = LD8((r4 + 7));
+            break;
+        case 8:
+            ST8(r5, 0);
+            r1 = LD8((r4 + 4));
+            ST8((r5 + 1), r1);
+            r2 = r5;
+            r1 = LD8((r4 + 5));
+            break;
+        case 66:
+            r1 = -1;
+            ST8(r5, r1);
+            ST8((r5 + 1), r1);
+            r2 = r5;
+            break;
+        }
+    }
+    ST8((r2 + 2), r1);
+}

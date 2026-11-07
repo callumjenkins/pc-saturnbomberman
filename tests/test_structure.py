@@ -63,3 +63,30 @@ def test_a_draft_that_writes_a_shared_tail_out_for_every_path_to_it_is_refused()
     blocks += [stop(100), stop(101)]
     with pytest.raises(structure.Unstructured, match="blowup"):
         structure.Structurer(graph(*blocks), 1).run()
+
+
+def switch(start: int, cases: list[tuple[int, int]]) -> structure.Block:
+    return structure.Block(start, kind="switch", value="v", targets=list(dict.fromkeys(t for _, t in cases)), cases=cases)
+
+
+def test_a_switch_writes_each_target_once_with_every_value_that_goes_there_and_joins_after_the_arms():
+    # 0 switches to 1 on 4 or 8, to 2 on 6; both go to 3, which returns
+    blocks = graph(switch(0, [(4, 1), (6, 2), (8, 1)]), goto(1, 3), goto(2, 3), stop(3))
+    blocks[1].stmts, blocks[2].stmts = ["a();"], ["b();"]
+    assert structure.Structurer(blocks, 0).run() == [
+        "switch (v) {", "case 4:", "case 8:", "    a();", "    break;", "case 6:", "    b();", "    break;", "}", "return;"]
+
+
+def test_an_arm_that_returns_needs_no_break():
+    blocks = graph(switch(0, [(0, 1), (2, 2)]), stop(1), stop(2))
+    blocks[1].value = "1"
+    assert structure.Structurer(blocks, 0).run() == [
+        "switch (v) {", "case 0:", "    return 1;", "case 2:", "    return;", "}"]
+
+
+def test_an_arm_that_leaves_a_loop_is_refused_because_a_switch_would_catch_the_break():
+    # 1 is a loop header whose body switches: one arm goes back to 1, the other leaves the loop for 4
+    blocks = graph(goto(0, 1), switch(1, [(0, 2), (2, 4)]), goto(2, 1, True), stop(4))
+    blocks[1].stmts = ["x();"]
+    with pytest.raises(structure.Unstructured, match="leaves a loop"):
+        structure.Structurer(blocks, 0).run()

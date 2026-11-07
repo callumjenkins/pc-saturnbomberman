@@ -199,6 +199,11 @@ def jump_kinds(root: str = ROOT) -> dict[int, str]:
     return {int(a): kind for a, kind in _discovery(root, modules.current().name)["jumps"].items()}
 
 
+def jump_targets(root: str = ROOT) -> dict[int, list[int]]:
+    """The target of each entry of each `switch` jump of the module, in table order."""
+    return {int(a): targets for a, targets in _discovery(root, modules.current().name)["switches"].items()}
+
+
 def polling_jumps(root: str = ROOT) -> set[int]:
     """The jmp and braf instructions of the module whose generated code advances time before it jumps, wherever the
     jump then goes: one that may go back within its function."""
@@ -293,7 +298,7 @@ def _discovery(root: str, module: str) -> dict:
     try:
         with open(cache, encoding="utf-8") as f:
             saved = json.load(f)
-        if saved["stamp"] == stamp and "polling" in saved and "jumps" in saved:
+        if saved["stamp"] == stamp and "polling" in saved and "jumps" in saved and "switches" in saved:
             return saved
     except (OSError, ValueError, KeyError):
         pass
@@ -301,22 +306,23 @@ def _discovery(root: str, module: str) -> dict:
     _, path, base, seeds = next(s for s in recomp_build.specs(game) if s[0] == module)
     with open(path, "rb") as f:
         program = discover.Program(sh2.Image(f.read(), base), [base, *seeds])
-    polling, jumps = _polling_jumps(program)
+    polling, jumps, switches = _polling_jumps(program)
     saved = {"stamp": stamp, "code": {e: sorted(fn.code) for e, fn in program.funcs.items()},
-             "polling": polling, "jumps": jumps}
+             "polling": polling, "jumps": jumps, "switches": switches}
     os.makedirs(os.path.dirname(cache), exist_ok=True)
     with open(cache, "w", encoding="utf-8") as f:
         json.dump(saved, f)
     return json.loads(json.dumps(saved))
 
 
-def _polling_jumps(program: discover.Program) -> tuple[list[int], dict[int, str]]:
+def _polling_jumps(program: discover.Program) -> tuple[list[int], dict[int, str], dict[int, list[int]]]:
     """The generator's own rule: a jump table advances time when any target it may take is in its function
     at or before the jump, and an unresolved one may take any instruction of its function. Also how each
-    jump was resolved."""
+    jump was resolved, and the targets of each jump table."""
     entries, volatile = set(program.funcs), recomp_main.volatile_literals(program)
     polling = []
     kinds = {}
+    switches = {}
     for fn in program.funcs.values():
         jumps = [a for a in fn.code if program.img.insn(a).op in ("jmp", "braf")]
         if not jumps:
@@ -326,10 +332,12 @@ def _polling_jumps(program: discover.Program) -> tuple[list[int], dict[int, str]
         for a in jumps:
             candidates, how = body._targets[a]
             kinds[a] = how
+            if how == "switch":
+                switches[a] = list(program.switches[a])
             reach = anywhere if how == "unresolved" else candidates
             if any(v in fn.code and v <= a for v in reach):
                 polling.append(a)
-    return sorted(polling), kinds
+    return sorted(polling), kinds, switches
 
 
 def main() -> None:

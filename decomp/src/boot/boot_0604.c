@@ -5666,3 +5666,33 @@ void f06044340(int r4, int r5, int r6)
         }
     }
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06046D54(int r4)
+{
+    int r1;
+
+    r4 = ((signed char)r4) - 65;
+    r1 = r4;
+    if ((unsigned)r4 > (unsigned)24) {
+        return 0;
+    } else {
+        r1 = LD16(0x06046D6C + (r1 + r1));
+        switch (r1) {
+        case 84:
+            return 0;
+        case 50:
+            return -900;
+        case 56:
+            return -901;
+        case 80:
+            return -1;
+        case 74:
+            return -903;
+        case 62:
+            return -902;
+        case 68:
+            return -905;
+        }
+    }
+}

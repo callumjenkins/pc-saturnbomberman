@@ -6260,3 +6260,64 @@ int f0602FFD0(int r4)
     r0 = GCALL2(0x0607286C, (((r8 - r0) << 8) << 2), r0);
     return (0x3FF & r0) | (((((-r9) & 15) << 8) + (((-r9) & 15) << 8)) << 2);
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0602A150(int r4)
+{
+    int r0, r1, r2, r6, r7, c1;
+
+    r6 = LD32(0x060769C8);
+    c1 = (r4 & r4) == 0;
+    if ((r6 & r6) == 0) {
+        return 0;
+    } else {
+        r1 = r4;
+        if (!(c1)) {
+            r1 = LD32((r1 + 68));
+            r2 = LD32((r4 + 64));
+            r1 = r1 - r2;
+            r2 = LD32(r6 + 28);
+            r2 = r1 - r2;
+            r0 = LD32((r6 + 124));
+            r1 = 4;
+            if (r0 == -1) {
+                r0 = LD32((r4 + 104));
+                r1 = 4;
+            }
+            r7 = r0 + 1;
+            if ((unsigned)r7 > (unsigned)r1) {
+                r1 = LD32((r4 + 64));
+            } else {
+                r1 = LD16(0x0602A1A0 + (r7 + r7));
+                switch (r1) {
+                case 10:
+                    r1 = LD32((r4 + 64));
+                    break;
+                case 18:
+                    r1 = r4;
+                    if (r2 > 1) {
+                        r1 = LD32((r4 + 64));
+                        r2 = (r2 + ((int)((unsigned)r2 >> 31))) >> 1;
+                        r1 = r1 + r2;
+                    } else {
+                        r1 = LD32((r1 + 64));
+                    }
+                    break;
+                case 50:
+                    r1 = r4;
+                    if (r2 > 0) {
+                        r1 = LD32((r1 + 64));
+                        r1 = r1 + r2;
+                    } else {
+                        r1 = LD32((r1 + 64));
+                    }
+                    break;
+                }
+            }
+            ST32(r6, r1);
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+}

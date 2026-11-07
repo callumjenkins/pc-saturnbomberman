@@ -10942,3 +10942,1144 @@ int f060596D8(int r4, int r5, int r6, int r7)
     }
     return r10;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06054FBC(int r4, int r5)
+{
+    int r1, r2;
+
+    r2 = LD32(0x0608D854);
+    r4 = r4 - 1;
+    r1 = r4;
+    if ((unsigned)r4 > (unsigned)3) {
+        return;
+    } else {
+        r1 = LD16(0x06054FD8 + (r1 + r1));
+        switch (r1) {
+        case 8:
+            ST32(r2 + 52, r5);
+            return;
+        case 12:
+            ST8((r2 + 14), r5);
+            return;
+        case 20:
+            ST32(r2 + 56, r5);
+            return;
+        case 24:
+            ST8((r2 + 13), r5);
+            return;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060558B8(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r8;
+
+    r5 = r5 - 1;
+    r8 = r4;
+    if (!((unsigned)r5 > (unsigned)12)) {
+        r1 = LD16(0x060558D4 + (r5 + r5));
+        switch (r1) {
+        case 26:
+            r1 = 0x06055038;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 88:
+            break;
+        case 56:
+            r0 = GCALL1(0x06055210, r8);
+            break;
+        case 32:
+            r0 = GCALL4(0x06055594, r8, r5, r6, r7);
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055074, r8);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+            }
+            break;
+        case 66:
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055230, r8);
+            r1 = 0x06055038;
+            r5 = 2;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06055948(int r4, int r5)
+{
+    int r0, r1, r8;
+
+    r5 = r5 - 1;
+    r8 = r4;
+    if (!((unsigned)r5 > (unsigned)13)) {
+        r1 = LD16(0x06055964 + (r5 + r5));
+        switch (r1) {
+        case 28:
+            r1 = 0x06055038;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 64:
+            break;
+        case 46:
+            r0 = GCALL1(0x06055230, r8);
+            break;
+        case 34:
+            r0 = GCALL1(0x06055210, r8);
+            r1 = 0x06055038;
+            r5 = 1;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 56:
+            r1 = 0x06055038;
+            r5 = 10;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060559B8(int r4, int r5)
+{
+    int r0, r1, r8;
+
+    r5 = r5 - 1;
+    r8 = r4;
+    if (!((unsigned)r5 > (unsigned)12)) {
+        r1 = LD16(0x060559D4 + (r5 + r5));
+        switch (r1) {
+        case 26:
+            r1 = 0x06055038;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 68:
+            break;
+        case 32:
+            r0 = GCALL1(0x06055230, r8);
+            break;
+        case 42:
+            r0 = GCALL1(0x06055210, r8);
+            r1 = 0x06055038;
+            r5 = 1;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 54:
+            r0 = GCALL1(0x06055230, r8);
+            r1 = 0x06055038;
+            r5 = 3;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06055A2C(int r4, int r5)
+{
+    int r0, r1, r8;
+
+    r5 = r5 - 1;
+    r8 = r4;
+    if (!((unsigned)r5 > (unsigned)13)) {
+        r1 = LD16(0x06055A48 + (r5 + r5));
+        switch (r1) {
+        case 28:
+            r1 = 0x06055038;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 66:
+            break;
+        case 34:
+            r0 = GCALL1(0x06055230, r8);
+            r1 = 0x06055038;
+            r5 = 2;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 46:
+            r0 = GCALL1(0x06055210, r8);
+            r1 = 0x06055038;
+            r5 = 1;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 58:
+            r1 = 0x06055038;
+            r5 = 11;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06055C3C(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r8;
+
+    r5 = r5 - 1;
+    r8 = r4;
+    if (!((unsigned)r5 > (unsigned)12)) {
+        r1 = LD16(0x06055C58 + (r5 + r5));
+        switch (r1) {
+        case 26:
+            r1 = 0x06055038;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 108:
+            break;
+        case 76:
+            r0 = GCALL1(0x060552F0, r8);
+            break;
+        case 32:
+            ST8((r8 + 1), 10);
+            r0 = GCALL4(0x06055074, r8, r5, r6, r7);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+                r1 = 0x06055038;
+                r5 = 1;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        case 62:
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055260, r8);
+            r0 = GCALL1(0x060552F0, r8);
+            break;
+        case 86:
+            ST8((r8 + 1), 10);
+            r0 = GCALL4(0x06055440, r8, r5, r6, r7);
+            r1 = 0x06055038;
+            r5 = 5;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06055CE4(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r8;
+
+    r5 = r5 - 1;
+    r8 = r4;
+    if (!((unsigned)r5 > (unsigned)12)) {
+        r1 = LD16(0x06055D00 + (r5 + r5));
+        switch (r1) {
+        case 26:
+            r0 = GCALL4(0x06055594, r8, r5, r6, r7);
+            r1 = 0x06055038;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 128:
+            break;
+        case 46:
+            r0 = GCALL1(0x06055410, r8);
+            r0 = GCALL1(0x06055440, r8);
+            break;
+        case 70:
+            r0 = GCALL1(0x06055410, r8);
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055074, r8);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+                r1 = 0x06055038;
+                r5 = 1;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        case 106:
+            r0 = GCALL4(0x060556FC, r8, 30, r6, r7);
+            r0 = GCALL1(0x060556B0, r8);
+            r1 = 0x06055038;
+            r5 = 6;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 38:
+            r0 = GCALL4(0x060556FC, r8, 30, r6, r7);
+            r0 = GCALL1(0x06055410, r8);
+            r0 = GCALL1(0x06055440, r8);
+            break;
+        case 62:
+            r0 = GCALL4(0x060556FC, r8, 30, r6, r7);
+            r0 = GCALL1(0x06055410, r8);
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055074, r8);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+                r1 = 0x06055038;
+                r5 = 1;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06055DA8(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9;
+
+    r9 = r5;
+    r2 = r9 - 1;
+    r8 = r4;
+    if (!((unsigned)r2 > (unsigned)14)) {
+        r1 = LD16(0x06055DCC + (r2 + r2));
+        switch (r1) {
+        case 30:
+            r0 = GCALL1(0x060556D8, r8);
+            r0 = GCALL1(0x06055594, r8);
+            r1 = 0x06055038;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 150:
+            break;
+        case 48:
+            r1 = 0x060556FC;
+            r5 = 30;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 54:
+            r0 = GCALL4(0x06055594, r8, r5, r6, r7);
+            r0 = GCALL1(0x06055410, r8);
+            r0 = GCALL1(0x060556D8, r8);
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055074, r8);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+                r1 = 0x06055038;
+                r5 = 1;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        case 60:
+            r0 = GCALL1(0x06055410, r8);
+            r0 = GCALL1(0x060556D8, r8);
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055074, r8);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+                r1 = 0x06055038;
+                r5 = 1;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        case 102:
+            r0 = GCALL1(0x06053BA8, r8);
+            r1 = 0x06055038;
+            r5 = 9;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 114:
+            r0 = GCALL1(0x060556D8, r8);
+            ST8((r8 + 1), 10);
+            ST32((r8 + 68), r9);
+            r0 = GCALL2(0x06055124, r8, 5);
+            r1 = 0x06055038;
+            r5 = 12;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06055E90(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, c2, c3;
+
+    r2 = r5 - 1;
+    r8 = r4;
+    if (!((unsigned)r2 > (unsigned)14)) {
+        r1 = LD16(0x06055EB0 + (r2 + r2));
+        switch (r1) {
+        case 30:
+            r0 = GCALL1(0x060556D8, r8);
+            r0 = GCALL1(0x06055594, r8);
+            r1 = 0x06055038;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 176:
+            break;
+        case 110:
+            r0 = GCALL1(0x06055410, r8);
+            ST8((r8 + 1), 10);
+            r0 = GCALL4(0x06055074, r8, r5, r6, r7);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+                r1 = 0x06055038;
+                r5 = 1;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        case 146:
+            r0 = GCALL1(0x060556B0, r8);
+            r0 = GCALL1(0x06053BA8, r8);
+            r1 = 0x06055038;
+            r5 = 9;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 170:
+            ST32((r8 + 68), r5);
+            break;
+        case 48:
+            ST8((r8 + 1), 10);
+            r0 = LD32((r8 + 68));
+            c2 = r0 == 11;
+            if (!(r0 == 10)) {
+                c3 = r0 == 15;
+                if (!(c2)) {
+                    if (c3) {
+                        r0 = GCALL1(0x0605580C, r8);
+                        r1 = 0x06055038;
+                        r5 = 7;
+                        r0 = GCALL2(r1, r8, r5);
+                    }
+                } else {
+                    r0 = GCALL1(0x060557A8, r8);
+                    r1 = 0x06055038;
+                    r5 = 7;
+                    r0 = GCALL2(r1, r8, r5);
+                }
+            } else {
+                r0 = GCALL1(0x06055740, r8);
+                r1 = 0x06055038;
+                r5 = 8;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06055F94(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r8;
+
+    r5 = r5 - 1;
+    r8 = r4;
+    if (!((unsigned)r5 > (unsigned)14)) {
+        r1 = LD16(0x06055FB0 + (r5 + r5));
+        switch (r1) {
+        case 30:
+            r0 = GCALL4(0x06055594, r8, r5, r6, r7);
+            r1 = 0x06055038;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 166:
+            break;
+        case 42:
+            r1 = 0x06055740;
+            r0 = GCALL4(r1, r8, r5, r6, r7);
+            break;
+        case 48:
+            r0 = GCALL4(0x06055594, r8, r5, r6, r7);
+            r0 = GCALL1(0x06055410, r8);
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055074, r8);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+                r1 = 0x06055038;
+                r5 = 1;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        case 54:
+            r0 = GCALL1(0x06055410, r8);
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055074, r8);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+                r1 = 0x06055038;
+                r5 = 1;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        case 90:
+            r0 = GCALL1(0x060556B0, r8);
+            r0 = GCALL1(0x06053BA8, r8);
+            r1 = 0x06055038;
+            r5 = 9;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 108:
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055740, r8);
+            r1 = 0x06055038;
+            r5 = 8;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 134:
+            ST8((r8 + 1), 10);
+            r1 = 0x060557A8;
+            r0 = GCALL4(r1, r8, r5, r6, r7);
+            break;
+        case 152:
+            r0 = GCALL1(0x0605580C, r8);
+            ST8((r8 + 1), 10);
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06056084(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r8;
+
+    r5 = r5 - 1;
+    r8 = r4;
+    if (!((unsigned)r5 > (unsigned)14)) {
+        r1 = LD16(0x060560A0 + (r5 + r5));
+        switch (r1) {
+        case 30:
+            r0 = GCALL4(0x06055594, r8, r5, r6, r7);
+            r1 = 0x06055038;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 172:
+            break;
+        case 42:
+            r1 = 0x060557A8;
+            r0 = GCALL4(r1, r8, r5, r6, r7);
+            break;
+        case 48:
+            r0 = GCALL4(0x06055594, r8, r5, r6, r7);
+            r0 = GCALL1(0x06055410, r8);
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055074, r8);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+                r1 = 0x06055038;
+                r5 = 1;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        case 54:
+            r0 = GCALL1(0x06055410, r8);
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x06055074, r8);
+            if ((r0 & r0) == 0) {
+                r0 = GCALL1(0x06055210, r8);
+                r1 = 0x06055038;
+                r5 = 1;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        case 90:
+            r0 = GCALL1(0x060556B0, r8);
+            r0 = GCALL1(0x06053BA8, r8);
+            r1 = 0x06055038;
+            r5 = 9;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 108:
+            ST8((r8 + 1), 10);
+            r1 = 0x06055740;
+            r0 = GCALL4(r1, r8, r5, r6, r7);
+            break;
+        case 126:
+            ST8((r8 + 1), 10);
+            r0 = GCALL1(0x060557A8, r8);
+            r0 = GCALL1(0x060556B0, r8);
+            r1 = 0x06055038;
+            r5 = 6;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 158:
+            r0 = GCALL1(0x0605580C, r8);
+            ST8((r8 + 1), 10);
+            break;
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605C270(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9;
+
+    r3 = LD32(0x0608D9C8);
+    r8 = r4;
+    r1 = LD16((r8 + 12));
+    if ((r1 & 0xFFFF) == 0xC021) {
+        r0 = LD8(r3);
+        r1 = 1;
+        if (r0 == 1) {
+            ST8(r3, 2);
+            r0 = GCALL4(0x0605DC0C, 4, r5, r6, r7);
+            r1 = 1;
+        }
+        ST32(r8 + 32, r1);
+    }
+    r2 = LD8(r8);
+    r9 = 0;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605C2B8 + (r2 + r2));
+        switch (r1) {
+        case 20:
+            r1 = 0x0605BBC4;
+            r5 = 2;
+            break;
+        case 26:
+            ST8((r8 + 3), 30);
+            r0 = GCALL1(0x06060E64, r8);
+            r9 = r0;
+            r1 = 0x0605BBC4;
+            r5 = 6;
+            break;
+        case 48:
+            r1 = 0x0605C250;
+            r5 = 0;
+            break;
+        }
+        r0 = GCALL2(r1, r8, r5);
+    }
+    return r9;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605C420(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, c2;
+
+    r8 = r4;
+    r2 = LD8(r8);
+    r9 = 0;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605C440 + (r2 + r2));
+        switch (r1) {
+        case 68:
+            break;
+        case 20:
+            r0 = GCALL1(0x0605C040, r8);
+            r1 = 0x0605BBC4;
+            r5 = 0;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 32:
+            r1 = 0x0605BBC4;
+            r5 = 2;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 60:
+            r1 = 0x0605BBC4;
+            r5 = 4;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 44:
+            ST8((r8 + 3), 3);
+            r0 = GCALL1(0x0605BC88, r8);
+            r9 = r0;
+            r1 = 0x0605BBC4;
+            r5 = 4;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 38:
+            r0 = GCALL4(0x0605BDEC, r8, 0, r6, r7);
+            ST8((r8 + 3), 3);
+            r0 = GCALL1(0x0605BC88, r8);
+            r9 = r0;
+            r1 = 0x0605BBC4;
+            r5 = 4;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        }
+    }
+    r1 = LD16((r8 + 12));
+    c2 = r9 >= 0;
+    if ((r1 & 0xFFFF) == 0x8021) {
+        if (c2) {
+            r9 = -1;
+        }
+    }
+    return r9;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605C4B8(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9;
+
+    r8 = r4;
+    r2 = LD8(r8);
+    r9 = 0;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605C4D8 + (r2 + r2));
+        switch (r1) {
+        case 20:
+            r1 = 0x0605C250;
+            r5 = 4;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 26:
+            r0 = 0x0605BC88;
+            r0 = GCALL4(r0, r8, r5, r6, r7);
+            r9 = r0;
+            break;
+        case 32:
+            r0 = 0x0605BC88;
+            r0 = GCALL4(r0, r8, r5, r6, r7);
+            r9 = r0;
+            break;
+        case 38:
+            r0 = 0x06060E64;
+            r0 = GCALL4(r0, r8, r5, r6, r7);
+            r9 = r0;
+            break;
+        case 48:
+            r0 = GCALL4(0x06060E64, r8, r5, r6, r7);
+            r9 = r0;
+            r1 = 0x0605BBC4;
+            r5 = 6;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        }
+    }
+    return r9;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605C534(int r4)
+{
+    int r0, r1, r2, r5, r8;
+
+    r8 = r4;
+    r2 = LD8(r8);
+    r1 = r2;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605C550 + (r1 + r1));
+        switch (r1) {
+        case 20:
+            r1 = 0x0605C250;
+            r5 = 5;
+            break;
+        case 26:
+            r0 = GCALL1(0x0605C040, r8);
+            r1 = 0x0605BBC4;
+            r5 = 2;
+            break;
+        case 38:
+            r0 = GCALL1(0x0605C040, r8);
+            r1 = 0x0605BBC4;
+            r5 = 3;
+            break;
+        }
+        r0 = GCALL2(r1, r8, r5);
+    }
+    return 0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605C67C(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, r10;
+
+    r8 = r4;
+    r2 = LD8(r8);
+    r10 = 0;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605C6A0 + (r2 + r2));
+        switch (r1) {
+        case 20:
+            r1 = 0x0605C250;
+            r5 = 7;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 26:
+            r0 = 0x0605BD7C;
+            r0 = GCALL4(r0, r8, r5, r6, r7);
+            r10 = r0;
+            break;
+        case 32:
+            ST8((r8 + 3), 30);
+            r0 = GCALL4(0x06060E64, r8, r5, r6, r7);
+            r10 = r0;
+            if ((r10 & r10) == 0) {
+                r0 = GCALL1(0x0605C14C, r8);
+                r10 = r0;
+            }
+            r1 = 0x0605BBC4;
+            r5 = 6;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 128:
+            break;
+        case 56:
+            r0 = 0x0605C14C;
+            r0 = GCALL4(r0, r8, r5, r6, r7);
+            r10 = r0;
+            break;
+        case 66:
+            r0 = GCALL1(0x0605C14C, r8);
+            r10 = r0;
+            r1 = 0x0605BBC4;
+            r5 = 6;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 86:
+            r0 = GCALL4(0x0605BDEC, r8, 0, r6, r7);
+            r10 = r0;
+            r0 = GCALL1(0x06060E64, r8);
+            r9 = r0;
+            if ((r9 & r9) == 0) {
+                r0 = GCALL1(0x0605C14C, r8);
+                r9 = r0;
+            }
+            r0 = GCALL2(0x0605BBC4, r8, 6);
+            if ((r10 & r10) == 0) {
+                r10 = r9;
+            }
+            break;
+        }
+    }
+    return r10;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605C744(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, r10;
+
+    r8 = r4;
+    r2 = LD8(r8);
+    r9 = 0;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605C768 + (r2 + r2));
+        switch (r1) {
+        case 20:
+            r1 = 0x0605C250;
+            r5 = 7;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 26:
+            r0 = GCALL4(0x0605BD7C, r8, r5, r6, r7);
+            r9 = r0;
+            break;
+        case 122:
+            break;
+        case 36:
+            ST8((r8 + 3), 30);
+            r1 = 0x0605BBC4;
+            r5 = 7;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 50:
+            r0 = GCALL4(0x06060E64, r8, r5, r6, r7);
+            r9 = r0;
+            r1 = 0x0605BBC4;
+            r5 = 6;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 64:
+            ST8((r8 + 3), 30);
+            r0 = GCALL4(0x0605BE88, r8, r5, r6, r7);
+            r9 = r0;
+            r1 = 0x0605BBC4;
+            r5 = 9;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 92:
+            r0 = GCALL4(0x0605BDEC, r8, 0, r6, r7);
+            r9 = r0;
+            r0 = GCALL1(0x06060E64, r8);
+            r10 = r0;
+            r0 = GCALL2(0x0605BBC4, r8, 6);
+            if ((r9 & r9) == 0) {
+                r9 = r10;
+            }
+            break;
+        }
+    }
+    return r9;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605C808(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, r10;
+
+    r8 = r4;
+    r2 = LD8(r8);
+    r9 = 0;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605C82C + (r2 + r2));
+        switch (r1) {
+        case 20:
+            r1 = 0x0605C250;
+            r5 = 7;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 26:
+            r0 = 0x0605BD7C;
+            r0 = GCALL4(r0, r8, r5, r6, r7);
+            r9 = r0;
+            break;
+        case 100:
+            break;
+        case 52:
+            ST8((r8 + 3), 30);
+            r0 = 0x06060E64;
+            r0 = GCALL4(r0, r8, r5, r6, r7);
+            r9 = r0;
+            break;
+        case 32:
+            r0 = GCALL4(0x06060E64, r8, r5, r6, r7);
+            r9 = r0;
+            r1 = 0x0605BBC4;
+            r5 = 6;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 70:
+            r0 = GCALL4(0x0605BDEC, r8, 0, r6, r7);
+            r9 = r0;
+            r0 = GCALL1(0x06060E64, r8);
+            r10 = r0;
+            r0 = GCALL2(0x0605BBC4, r8, 6);
+            if ((r9 & r9) == 0) {
+                r9 = r10;
+            }
+            break;
+        }
+    }
+    return r9;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605C8B0(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, r10;
+
+    r8 = r4;
+    r2 = LD8(r8);
+    r9 = 0;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605C8D4 + (r2 + r2));
+        switch (r1) {
+        case 20:
+            r1 = 0x0605C250;
+            r5 = 10;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 26:
+            r0 = GCALL4(0x0605BD7C, r8, r5, r6, r7);
+            r9 = r0;
+            break;
+        case 36:
+            r0 = GCALL4(0x0605BD7C, r8, r5, r6, r7);
+            r9 = r0;
+            r1 = 0x0605BBC4;
+            r5 = 6;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 56:
+            r0 = GCALL4(0x0605BDEC, r8, 0, r6, r7);
+            r9 = r0;
+            ST8((r8 + 3), 0);
+            r0 = LD32(0x0608D39C);
+            r0 = GCALL0(r0);
+            r2 = LD32(r8 + 32);
+            r1 = LD32(0x0608D394);
+            ST32(r8 + 28, ((r2 * r1) + r0));
+            ST8((r8 + 4), 1);
+            r0 = GCALL1(0x0605BD7C, r8);
+            r10 = r0;
+            r0 = GCALL2(0x0605BBC4, r8, 5);
+            if ((r9 & r9) == 0) {
+                r9 = r10;
+            }
+            break;
+        }
+    }
+    return r9;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605C974(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, r10;
+
+    r8 = r4;
+    r2 = LD8(r8);
+    r10 = 0;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605C998 + (r2 + r2));
+        switch (r1) {
+        case 20:
+            r1 = 0x0605C250;
+            r5 = 10;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 92:
+            break;
+        case 26:
+            r0 = GCALL1(0x0605C040, r8);
+            r1 = 0x0605BBC4;
+            r5 = 2;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 38:
+            r0 = GCALL1(0x0605C040, r8);
+            r1 = 0x0605BBC4;
+            r5 = 3;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 50:
+            r1 = 0x0605BBC4;
+            r5 = 6;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 62:
+            r0 = GCALL4(0x0605BDEC, r8, 0, r6, r7);
+            r10 = r0;
+            r0 = GCALL1(0x06060E64, r8);
+            r9 = r0;
+            r0 = GCALL2(0x0605BBC4, r8, 6);
+            if ((r10 & r10) == 0) {
+                r10 = r9;
+            }
+            break;
+        }
+    }
+    return r10;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605CA64(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9;
+
+    r8 = r4;
+    r2 = LD8(r8);
+    r9 = 0;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605CA84 + (r2 + r2));
+        switch (r1) {
+        case 20:
+            r1 = 0x0605C250;
+            r5 = 14;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 26:
+            r0 = GCALL1(0x0605C040, r8);
+            break;
+        case 36:
+            r0 = GCALL1(0x0605C040, r8);
+            r1 = 0x0605BBC4;
+            r5 = 2;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 48:
+            r0 = GCALL1(0x0605C040, r8);
+            r1 = 0x0605BBC4;
+            r5 = 3;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 60:
+            r0 = GCALL4(0x0605BDEC, r8, 0, r6, r7);
+            r9 = r0;
+            ST8((r8 + 3), 3);
+            r0 = GCALL1(0x0605BC88, r8);
+            if ((r9 & r9) == 0) {
+                r9 = r0;
+            }
+            r1 = 0x0605BBC4;
+            r5 = 5;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        }
+    }
+    return r9;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605CB08(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, c1;
+
+    r8 = r4;
+    r2 = LD8(r8);
+    r9 = 0;
+    if (!((unsigned)r2 > (unsigned)9)) {
+        r1 = LD16(0x0605CB28 + (r2 + r2));
+        switch (r1) {
+        case 20:
+            r0 = GCALL4(0x0605BFA4, r8, 0, r6, r7);
+            r9 = r0;
+            c1 = (r9 & r9) == 0;
+            r5 = c1;
+            if (c1) {
+                r1 = 0x0605BBC4;
+                r0 = GCALL2(r1, r8, r5);
+            }
+            break;
+        case 70:
+            break;
+        case 40:
+            ST8((r8 + 3), 30);
+            r0 = GCALL4(0x06060E64, r8, r5, r6, r7);
+            r9 = r0;
+            r1 = 0x0605BBC4;
+            r5 = 6;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        case 62:
+            r1 = 0x0605BBC4;
+            r5 = 5;
+            r0 = GCALL2(r1, r8, r5);
+            break;
+        }
+    }
+    return r9;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605E800(int r4, int r5, int r6, int r7)
+{
+    int r0, r1;
+
+    if ((unsigned)r4 > (unsigned)5) {
+        r0 = 1;
+        return r0;
+    } else {
+        r1 = LD16(0x0605E818 + (r4 + r4));
+        switch (r1) {
+        case 12:
+            r0 = GCALL4(0x0605E74C, 8, r5, r6, r7);
+            return r0;
+        case 24:
+            r0 = GCALL4(0x0605E74C, 9, r5, r6, r7);
+            return r0;
+        case 36:
+            r0 = GCALL4(0x0605E74C, 10, r5, r6, r7);
+            return r0;
+        case 48:
+            r0 = GCALL4(0x0605E74C, 11, r5, r6, r7);
+            return r0;
+        case 60:
+            r0 = GCALL4(0x0605E74C, 12, r5, r6, r7);
+            r0 = 1;
+            return r0;
+        case 70:
+            r0 = GCALL4(0x0605E74C, 20, r5, r6, r7);
+            return r0;
+        }
+    }
+}

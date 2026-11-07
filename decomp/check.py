@@ -102,8 +102,9 @@ class Counting(sh2emu.CPU):
             self.polls += 1
         elif op in ("braf", "jmp"):
             self.polls += pc in self._polling()
-            if self.code is self.own and op == "jmp" and pc in self.own:
-                # The C writes every jmp as a tail call, also where the recompile folded the target into this function.
+            if self.code is self.own and op == "jmp" and pc in self.own and pc not in status.jump_targets():
+                # The C writes every jmp as a tail call, also where the recompile folded the target into this function,
+                # except those through a jump table, which it writes as a switch.
                 self.calls.append((self.pr, self.r[8:16], self.frame(self.r[15])))
                 if self.stub is not None:
                     self.return_stub(sh2emu.RETURN_SENTINEL)
