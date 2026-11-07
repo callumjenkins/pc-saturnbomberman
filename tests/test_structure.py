@@ -45,6 +45,12 @@ def test_a_loop_entered_at_its_test_goes_back_in_one_place_only(body_polls, refu
         assert structure.Structurer(blocks, 0).run()
 
 
+def test_a_loop_entered_at_its_test_polls_once_a_pass_where_a_later_block_goes_back_into_the_body():
+    # 1 tests, 2 goes back by a jump to 3 in the body, 3 falls into 1; 4 leaves
+    blocks = graph(goto(0, 1), branch(1, 2, 4), branch(2, 3, 4, [3]), goto(3, 1), stop(4))
+    assert "\n".join(structure.Structurer(blocks, 0).run()).count("POLL();") == 1
+
+
 def test_a_draft_that_writes_a_shared_tail_out_for_every_path_to_it_is_refused():
     # Two blocks per layer, each branching to both blocks of the next, and two different returns at the end:
     # no layer has a place its paths meet, so each path writes out everything after it.

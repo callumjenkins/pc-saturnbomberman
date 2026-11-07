@@ -2,7 +2,7 @@
 
     python decomp/check.py [--trials N] [--seed S] [FUNCTION ...]
 
-The original is 0KRNL.BIN, run by the SH-2 interpreter in saturn-recomp. The decompiled C is built
+The original is the module's file (0KRNL.BIN unless DECOMP_MODULE names another), run by the SH-2 interpreter in saturn-recomp. The decompiled C is built
 for the host with DECOMP_HOST and run on a copy of the same memory. Each trial gives both the same
 random arguments and the same memory, random or dumped from a route, with the values cases.py plants.
 It then compares the return value, if the function has one, and every byte of memory afterwards.
@@ -24,11 +24,13 @@ sys.path.insert(0, HERE)
 import cases  # noqa: E402
 import gen  # noqa: E402
 import machine  # noqa: E402
+import modules  # noqa: E402
 import registers  # noqa: E402
 import status  # noqa: E402
 from saturnrecomp import sh2emu  # noqa: E402
 
-BASE = 0x06006000
+MODULE = modules.current()        # the module of game.toml the functions belong to: DECOMP_MODULE, or KRNL
+BASE = MODULE.base
 CALL_HOOK = ctypes.CFUNCTYPE(ctypes.c_uint32, ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32), ctypes.c_int)
 # The game's code a function calls, in order. Memory alone cannot tell two calls apart when their
 # stores do not overlap.
@@ -44,9 +46,10 @@ C_TYPES = {"int": ctypes.c_int32, "unsigned int": ctypes.c_uint32, "uint32_t": c
 # Values where a comparison, a width or a sign changes, which random numbers rarely land on.
 EDGES = (0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7FFFFFFF, 0x80000000, 0xFFFFFFFF,
          0xFFFFFFFE, 0xFFFFFF80, 0xFFFF8000)
-KRNL = os.path.join(ROOT, "build", "extract", "BOMSS", "0KRNL.BIN")
+IMAGE = MODULE.path
 TABLE_MAX = 0x100                # bytes of a jump table code_runs keeps, at most
 FRAME_MAX = 0x400                # bytes of a function's stack check.py compares at a call, at most
+LONG_RUN_POLLS = 1_000_000        # polls after which a trial the game's code could not finish in the step limit is skipped, since both sides are in an endless loop
 CALLS_MAX = 2000                # calls a trial that answers them follows before it gives up, since an endless loop of them would fill memory
 STUBBED = 0.5                    # the share of trials in which the calls out of the function are answered without running them
 
@@ -58,6 +61,7 @@ class Counting(sh2emu.CPU):
     _bodies: dict[int, set[int]] = {}
     _code: dict[int, set[int]] | None = None
     _jumps: set[int] | None = None
+    _operators: dict[int, bool] = {}
     seen: set[tuple[int, bool]] | None = None     # (pc, taken) for each conditional branch of the called function's own code
     stub: list[int] | None = None                 # when set, a call out of the function's own code returns the next of these without running
 
@@ -81,7 +85,7 @@ class Counting(sh2emu.CPU):
         if self.seen is not None and op in CONDITIONAL and pc in self.own and self.code is self.own:
             self.seen.add((pc, self.pc != pc + (4 if ins.delay else 2)))
         if op in ("bsr", "jsr", "bsrf"):
-            if self.code is self.own and pc in self.own:
+            if self.code is self.own and pc in self.own and not self._operator(self.pc):
                 self.calls.append((self.pr, self.r[8:16], self.frame(self.r[15])))
                 if self.stub is not None:
                     if len(self.calls) > CALLS_MAX:
@@ -98,25 +102,34 @@ class Counting(sh2emu.CPU):
             self.polls += 1
         elif op in ("braf", "jmp"):
             self.polls += pc in self._polling()
+            if self.code is self.own and op == "jmp" and pc in self.own:
+                # The C writes every jmp as a tail call, also where the recompile folded the target into this function.
+                self.calls.append((self.pr, self.r[8:16], self.frame(self.r[15])))
+                if self.stub is not None:
+                    self.return_stub(sh2emu.RETURN_SENTINEL)
+                    return
+                self.code = self._body(self.pc)
+                return
             if self.pc not in self.code:
                 if self.stub is not None and self.code is self.own:
-                    self.return_stub()
+                    self.return_stub(sh2emu.RETURN_SENTINEL)
                     return
                 self.code = self._body(self.pc)
         elif op == "bra" or op in CONDITIONAL and self.pc != pc + (4 if ins.delay else 2):
             if self.pc not in self.code:
                 if self.stub is not None and self.code is self.own:
-                    self.return_stub()
+                    self.return_stub(sh2emu.RETURN_SENTINEL)
                     return
                 self.code = self._body(self.pc)
             elif self.pc <= pc:
                 self.polls += 1
 
-    def return_stub(self) -> None:
-        """Answers the call just made, or the jump out of the function, without running the callee."""
+    def return_stub(self, to: int | None = None) -> None:
+        """Answers the call just made without running the callee, or the jump out of the function, which returns to
+        `to`: the caller, since a function that made a call of its own may have left pr at that call's return address."""
         self.stubbed.append((self.pc, self.r[4:8]))
         self.r[0] = self.stub[(len(self.stubbed) - 1) % len(self.stub)]
-        self.pc = self.pr
+        self.pc = self.pr if to is None else to
 
     @classmethod
     def _body(cls, entry: int) -> set[int]:
@@ -126,9 +139,17 @@ class Counting(sh2emu.CPU):
             return cls._code[entry]
         if entry not in cls._bodies:
             if cls._image is None:
-                cls._image = status.krnl_image()
+                cls._image = status.image()
             cls._bodies[entry] = {ins.pc for ins in status.body(cls._image, entry)}
         return cls._bodies[entry]
+
+    @classmethod
+    def _operator(cls, entry: int) -> bool:
+        """Whether the C writes a call to this address as HELPER, a run of shifts it computes without calling out."""
+        if entry not in cls._operators:
+            found = registers.routine(status.image(), entry, status.function_code())
+            cls._operators[entry] = found is not None and found[0].startswith("HELPER(")
+        return cls._operators[entry]
 
     @classmethod
     def _polling(cls) -> set[int]:
@@ -139,7 +160,7 @@ class Counting(sh2emu.CPU):
 
 def branches(entry: int) -> list[int]:
     """The conditional branches of the function's own code."""
-    image = status.krnl_image()
+    image = status.image()
     return [at for at in Counting._body(entry) if image.contains(at) and image.insn(at).op in CONDITIONAL]
 
 
@@ -151,15 +172,17 @@ def build(sources: list[str] | None = None) -> ctypes.CDLL:
         return ctypes.CDLL(out)
 
 
-# SHC's runtime library. A literal that points into it names a table the routines read, or one of the routines.
-LIBRARY = (0x06094100, 0x06094D80)
+
+
+# SHC's runtime library in KRNL. A literal that points into it names a table the routines read, or one of the routines.
+LIBRARY = (0x06094100, 0x06094D80) if MODULE.name == modules.DEFAULT else (0, 0)
 
 
 def code_runs() -> list[list[int]]:
-    """The (start, end) offsets into 0KRNL.BIN of every function's instructions and the literals they load,
+    """The (start, end) offsets into the module's file of every function's instructions and the literals they load,
     which randomising the image must leave alone. Cached in build/decomp, as walking every function is slow."""
-    cache = os.path.join(ROOT, "build", "decomp", "code-runs.json")
-    stamp = [os.path.getmtime(KRNL), os.path.getmtime(status.TABLE), os.path.getmtime(__file__), TABLE_MAX, *LIBRARY]
+    cache = os.path.join(ROOT, "build", "decomp", "code-runs%s.json" % ("" if MODULE.name == modules.DEFAULT else "-" + MODULE.name))
+    stamp = [os.path.getmtime(IMAGE), os.path.getmtime(status.TABLE), os.path.getmtime(__file__), TABLE_MAX, *LIBRARY]
     try:
         with open(cache, encoding="utf-8") as f:
             saved = json.load(f)
@@ -167,12 +190,12 @@ def code_runs() -> list[list[int]]:
             return saved["runs"]
     except (OSError, ValueError, KeyError):
         pass
-    image = status.krnl_image()
+    image = status.image()
     used = set()
     tables = set()
     code = status.function_code()
     for row in status.previous().values():
-        if row.module != "KRNL":
+        if row.module != MODULE.name:
             continue
         for ins in status.own(image, row.address, code.get(row.address)):
             used.update((ins.pc, ins.pc + 1))
@@ -212,7 +235,9 @@ def default_spec(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
     unknown = [t for t in sig.params + [sig.returns] if t not in C_TYPES and t != "void"]
     if unknown:
         raise SystemExit("%s: no host type for %s; add it to C_TYPES" % (sig.name, ", ".join(unknown)))
-    return [cases.ptr(0x060C0000, 0x400) if t == "uint32_t" else ("any",) for t in sig.params], sig.returns != "void", []
+    kinds = [cases.ptr(0x060C0000, 0x400) if t == "uint32_t" else ("address",) if i in sig.addressed else ("any",)
+             for i, t in enumerate(sig.params)]
+    return kinds, sig.returns != "void", []
 
 
 def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
@@ -287,9 +312,9 @@ def spec_for(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
 def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: random.Random,
           sig: gen.Signature | None = None, seen: set[tuple[int, bool]] | None = None,
           plants: list[tuple] = ()) -> tuple[list[int], list[str], bool]:
-    cpu = counting(sh2emu.load(KRNL, BASE))     # the game's own function
+    cpu = counting(machine.load(IMAGE, BASE))     # the game's own function
     cpu.seen = seen
-    host = counting(sh2emu.load(KRNL, BASE))    # the memory the host build runs on, and its callees
+    host = counting(machine.load(IMAGE, BASE))    # the memory the host build runs on, and its callees
     machine.fill(cpu, r, BASE, code_runs(), plants)
     machine.copy(cpu, host)
     machine.attach(cpu)
@@ -310,8 +335,11 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     ctypes.c_uint32.in_dll(lib, "g_pr_value").value = sh2emu.RETURN_SENTINEL
 
     state = {"calls": [], "snaps": [], "entry_sp": host.r[15], "stubbed": []}
-    if random.Random("stub:" + repr(vals)).random() < STUBBED:
-        answers = random.Random("answers:" + repr(vals))
+    ahead = random.Random()                     # a copy of r's state, so a trial with no arguments still varies and r's draws stay as they were
+    ahead.setstate(r.getstate())
+    salt = ahead.getrandbits(64)
+    if name not in cases.UNSTUBBED and random.Random("stub:%r:%d" % (vals, salt)).random() < STUBBED:
+        answers = random.Random("answers:%r:%d" % (vals, salt))
         state["stub"] = cpu.stub = [value(("any",), answers) & 0xFFFFFFFF for _ in range(16)]
     keep = machine.point(lib, host)
     hook = hook_for(host, state, [value(("any",), r) & 0xFFFFFFFF for _ in range(8)], lib)
@@ -319,6 +347,8 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     ctypes.c_void_p.in_dll(lib, "g_call_hook").value = ctypes.cast(hook, ctypes.c_void_p).value
     ctypes.c_int.in_dll(lib, "g_fault").value = 0
     ctypes.c_int.in_dll(lib, "g_polls").value = 0
+    ctypes.c_uint32.in_dll(lib, "g_top").value = 0
+    ctypes.c_int.in_dll(lib, "g_unprotected").value = 0
     fn = getattr(lib, name)
     fn.restype = C_TYPES.get(sig.returns if sig else "int", ctypes.c_int32)
     fn.argtypes = [C_TYPES[t] for t in sig.params] if sig else [ctypes.c_int32] * len(vals)
@@ -331,8 +361,12 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     want = 0
     try:
         want = cpu.call(int(name[1:], 16), **regs)
-    except (sh2emu.MemoryError_, RuntimeError):         # touched memory this check does not model, or ran on
+    except sh2emu.MemoryError_:                          # touched memory this check does not model
         original_fault = True
+    except RuntimeError:                                 # ran past the interpreter's step limit
+        original_fault = True
+        if polls >= LONG_RUN_POLLS:
+            return vals, [], True
     del keep
 
     if fault and original_fault:
@@ -351,6 +385,9 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     problems += machine.differences(host, cpu)
     problems += machine.control_differences(lib, cpu)
     problems += call_differences(state["snaps"], cpu.calls, sig is not None and sig.parked)
+    exposed = ctypes.c_int.in_dll(lib, "g_unprotected").value
+    if exposed:
+        problems.append("%d safe points where r15 is above the function's own frame data: an interrupt there pushes over it" % exposed)
     if state.get("stub"):
         problems += stub_differences(state["stubbed"], cpu.stubbed)
     problems += register_differences(lib, cpu, machine.mac_start(vals))
@@ -362,7 +399,7 @@ def stub_differences(host: list[tuple[int, list[int], int]], game: list[tuple[in
     callee reads."""
     if len(host) != len(game):
         return ["made %d calls out of the function, the game's code %d" % (len(host), len(game))]
-    image, code = status.krnl_image(), status.function_code()
+    image, code = status.image(), status.function_code()
     problems = []
     for i, ((addr, args, n), (target, regs)) in enumerate(zip(host, game)):
         if addr != target:
@@ -381,7 +418,7 @@ def call_differences(host: list[tuple[list[int], int, list[int], int]],
     stack: r15 and the stack above it, which the callee's frame must not run into. At a call that can switch tasks,
     also the registers the code after it reads and pr, which is where the callee returns to. A function that does
     not keep them cannot make such a call."""
-    image, code = status.krnl_image(), status.function_code()
+    image, code = status.image(), status.function_code()
     problems = []
     if not parked:
         resumes = [i + 1 for i, (after, _, _) in enumerate(game) if after in code]
@@ -429,6 +466,9 @@ def value(kind, r):
         # whatever a parameter might hold: a small count, a negative, a pointer into the data, anything
         return value(r.choice([("int", 0, 40), ("int", -40, 0), cases.ptr(0x060C0000, 0x400), cases.ptr(0x060B0000, 0x40000),
                                ("int", -(1 << 31), (1 << 31) - 1), ("pick", EDGES)]), r)
+    if kind[0] == "address":
+        # a parameter the function loads or stores through: a pointer into the data most of the time
+        return value(r.choice([cases.ptr(0x060C0000, 0x400)] * 4 + [cases.ptr(0x060B0000, 0x40000)] * 4 + [("any",)]), r)
     if kind[0] == "pick":
         return r.choice(kind[1])
     if kind[0] == "int":

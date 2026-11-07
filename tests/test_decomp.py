@@ -290,7 +290,7 @@ def test_a_function_a_task_can_park_in_is_swapped_when_its_c_keeps_what_a_resume
     table = tmp_path / "status.tsv"
     status.write_table([status.Row("KRNL", 0x06006B38, 15, 0, True, "swapped", yields=True)], str(table))
     parked = gen.Signature(0x06006B38, "void", [], parked=True)
-    monkeypatch.setattr(gen, "signatures", lambda paths=None: {0x06006B38: parked})
+    monkeypatch.setattr(gen, "signatures", lambda paths=None, module=None: {0x06006B38: parked})
     assert gen.swapped(str(table)) == [0x06006B38]
 
 
@@ -357,6 +357,22 @@ def test_a_tail_call_is_a_jump_that_hands_on_all_four_argument_registers():
     code = lifted(encode("mov #imm,Rn", 1, low=0x20), encode("jmp @Rn", 1), NOP)
     assert code.splitlines()[0] == "int f06006000(int r4, int r5, int r6, int r7)"
     assert "GJUMP4(32, r4, r5, r6, r7)" in code
+
+
+@pytest.mark.parametrize("through_register, polling, expected", [
+    pytest.param(False, True, ["int r0;", "POLL();", "r0 = GJUMP4(32, r4, r5, r6, r7);", "return r0;"], id="a polling jump to a known address"),
+    pytest.param(False, False, ["int r0;", "r0 = GJUMP4(32, r4, r5, r6, r7);", "return r0;"], id="a jump that does not poll"),
+    pytest.param(True, True, ["int r0;", "POLL();", "r0 = GJUMP4(r4, r4, r5, r6, r7);", "return r0;"], id="a polling jump through a register"),
+])
+def test_a_jump_the_recompile_advances_time_at_advances_it_before_jumping_wherever_it_goes(
+        monkeypatch, through_register, polling, expected):
+    # mov #0x20,r1 ; jmp @r1 ; nop, or jmp @r4 ; nop
+    words = (encode("jmp @Rn", 4), NOP) if through_register else (encode("mov #imm,Rn", 1, low=0x20), encode("jmp @Rn", 1), NOP)
+    jump_at = BASE + 2 * (len(words) - 2)
+    monkeypatch.setattr(status, "polling_jumps", lambda: {jump_at} if polling else set())
+    instructions = {BASE + 2 * i for i in range(len(words))}
+    code = lift.lift(image(*words), BASE, instructions, {BASE: instructions})
+    assert body(code) == expected
 
 
 @pytest.mark.parametrize("words, jump", [

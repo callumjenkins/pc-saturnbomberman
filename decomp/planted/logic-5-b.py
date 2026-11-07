@@ -129,7 +129,7 @@ case("f0609BE8C", [span(0, 4), pick(0, 1, 5), pick(0, 1, 2, 5, 100), ptr(MEM, 0x
      [stack(0, [MEM + 0x100, MEM + 0x110]), plant(0x060FB930, 1, [0, 0, 3], 1.0)]
      + [plant(MEM + 2 * k, 2, [0, 1, 5, -3, 200, 0x7FFF, 0x8000], 0.8) for k in range(16)]
      + [plant(MEM + 0x100 + 2 * k, 2, [0, 1, 5, -3, 200, 0x7FFF, 0x8000], 0.8) for k in range(16)])
-case("f0609C0B4", [pick(0, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000, 1, 2, 4, 8, 16, 32, 128, 0x3F, 0xFFFF, 0x1FF), pick(0, 5, 31, 32, 200, 255, 0x1FF)], False, [])
+case("f0609C0B4", [pick(0, 0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000, 1, 2, 4, 8, 16, 32, 128, 0x3F, 0xFFFF, 0x1FF), pick(0, 5, 31, 32, 200, 255, 0x1FF)], True, [])
 
 case("f06083BE8", [], False, LINKS + [plant(CURRENT_PTR, 4, [bomber(0)], 1.0), plant(0x060C062C, 2, [0, 1, 2, 5], 1.0)])
 case("f06085D9C", [], True, [plant(CURRENT_PTR, 4, [bomber(0), bomber(1)], 1.0), plant(bomber(0) + 24, 2, [0x10, 0x28, 0x58, 0x100], 1.0),

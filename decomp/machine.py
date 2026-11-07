@@ -40,7 +40,6 @@ HIRQ, CR1, SMPC_SF = 0x05890008, 0x05890018, 0x00100063
 _ALIGNED = bytes(b & 0xFC for b in range(256))
 _HALF = bytes(0xFF if b < 128 else 0 for b in range(256))
 _LINKED = 0.5                    # the share of random fills whose variables hold addresses among the noise
-_VARIABLES_HIGH = bytes(0x0B + b % 5 for b in range(256))    # the second byte of an address in DATA, 060B to 060F
 
 
 class Devices(sh2emu.Memory):
@@ -110,6 +109,16 @@ def differences(host: sh2emu.CPU, game: sh2emu.CPU) -> list[str]:
     return problems
 
 
+def load(path: str, base: int) -> sh2emu.CPU:
+    """The interpreter with the module's file at base, in either work RAM."""
+    cpu = sh2emu.load(path, base)
+    if WRAML <= base < WRAML + RAM:
+        with open(path, "rb") as f:
+            data = f.read()
+        cpu.mem.regions[1][2][base - WRAML:base - WRAML + len(data)] = data
+    return cpu
+
+
 def fill(cpu: sh2emu.CPU, r: random.Random, base: int, code: list[tuple[int, int]], plants: list[tuple]) -> None:
     """Maps the devices on cpu, then fills its memory: half the time a route's work RAM, if any was
     dumped, and otherwise random data. Then the image's code, from base, goes back over it and the plants
@@ -117,38 +126,55 @@ def fill(cpu: sh2emu.CPU, r: random.Random, base: int, code: list[tuple[int, int
     for name, lo, size in DEVICES:
         cpu.mem.add(lo, size)[:] = r.randbytes(size)
     wram, wraml = cpu.mem.regions[0][2], cpu.mem.regions[1][2]
-    image = bytes(wram[base - WRAM:base - WRAM + max((end for start, end in code), default=0)])
+    low = base < WRAM                       # the image is in the second work RAM
+    holder, origin = (wraml, WRAML) if low else (wram, WRAM)
+    image = bytes(holder[base - origin:base - origin + max((end for start, end in code), default=0)])
     dumps = _dumps()
-    if dumps and r.random() < 0.5:
+    data = DATA[0] if low else variables(base, max((end for start, end in code), default=0))
+    below = data < DATA[0]                  # the module's variables lie below the kernel's, which the dumps hold other data in
+    if dumps and r.random() < (0.2 if below else 0.5):
         ram = r.choice(dumps)
         wram[:] = ram[:RAM]
         wraml[:] = ram[RAM:]
     else:
-        lo = base - WRAM if r.random() < 0.5 else DATA[0] - WRAM    # the image's own variables too, half the time
+        lo = base - WRAM if r.random() < 0.5 and not low else data - WRAM    # the image's own variables too, half the time
         wram[lo:DATA[1] - WRAM] = r.randbytes(DATA[1] - WRAM - lo)
         wraml[:] = r.randbytes(RAM)
-        if r.random() < _LINKED:
-            lo = DATA[0] - WRAM
-            wram[lo:DATA[1] - WRAM] = linked(r, DATA[1] - DATA[0], wram[lo:DATA[1] - WRAM])
+        if below or r.random() < _LINKED:
+            lo = data - WRAM
+            wram[lo:DATA[1] - WRAM] = linked(r, DATA[1] - data, wram[lo:DATA[1] - WRAM], data, below)
     for start, end in code:
-        wram[base - WRAM + start:base - WRAM + end] = image[start:end]
+        holder[base - origin + start:base - origin + end] = image[start:end]
     for address, size, values, chance in plants:
         if r.random() < chance:
             cpu.mem.write(address, size, r.choice(values))
 
 
-def linked(r: random.Random, size: int, noise: bytes) -> bytes:
-    """`noise` with half of its longwords replaced by a longword-aligned address in the variables' area, so that a
-    pointer a function loads from memory is usually one it can follow, and what it finds there holds more of them."""
+def variables(base: int, extent: int) -> int:
+    """Where the random data starts: DATA's start, or the 64 KiB boundary after the image, if that is lower. The
+    variables of a module that ends below DATA lie between its code and DATA."""
+    return min(DATA[0], (base + extent + 0xFFFF) & ~0xFFFF)
+
+
+def linked(r: random.Random, size: int, noise: bytes, start: int = DATA[0], dense: bool = False) -> bytes:
+    """`noise` with some of its bytes replaced by those of a longword-aligned address in the variables' area, which
+    starts at `start`, so that a pointer a function loads from memory is usually one it can follow, and what it
+    finds there holds more of them. With `dense`, three in four whole longwords are addresses."""
     words = size // 4
     pointers = bytearray(size)
     pointers[0::4] = bytes([0x06]) * words
-    pointers[1::4] = r.randbytes(words).translate(_VARIABLES_HIGH)
+    high = start >> 16 & 0xFF
+    pointers[1::4] = r.randbytes(words).translate(bytes(high + b % (0x10 - high) for b in range(256)))
     pointers[2::4] = r.randbytes(words)
     pointers[3::4] = r.randbytes(words).translate(_ALIGNED)
     choice = bytearray(size)
-    for lane in range(4):
-        choice[lane::4] = r.randbytes(words).translate(_HALF)
+    if dense:
+        some = bytes(a | b for a, b in zip(r.randbytes(words).translate(_HALF), r.randbytes(words).translate(_HALF)))
+        for lane in range(4):
+            choice[lane::4] = some
+    else:
+        for lane in range(4):
+            choice[lane::4] = r.randbytes(words).translate(_HALF)
     mask = int.from_bytes(choice, "big")
     return (((int.from_bytes(pointers, "big") & mask) | (int.from_bytes(noise, "big") & ~mask)) & ((1 << 8 * size) - 1)).to_bytes(size, "big")
 

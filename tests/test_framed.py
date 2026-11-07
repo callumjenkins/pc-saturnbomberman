@@ -80,7 +80,7 @@ def stack_words(values: list[int], count: int, framed: bool) -> list[str]:
 ])
 def test_words_stored_at_the_bottom_of_the_frame_follow_r4_to_r7_as_the_calls_stack_arguments(values, count, how, framed):
     code = lifted(with_stored_words(values, how, framed))
-    assert call_arguments(code) == ["7", "0", "0", "0"] + stack_words(values, count, framed)
+    assert call_arguments(code) == ["7", "r5", "r6", "r7"] + stack_words(values, count, framed)
 
 
 def test_a_tail_call_passes_no_stack_arguments():
@@ -125,6 +125,36 @@ def test_a_popped_local_is_read_before_a_store_that_follows_it():
     pytest.param("((sp + 4) - 8)", "(sp - 4)", id="above sp, then below"),
     pytest.param("((sp - 4) + 4)", "sp", id="back to sp"),
     pytest.param("LD32(((sp - 8) + 4))", "LD32((sp - 4))", id="inside a load"),
+    pytest.param("LD32((sp - 8) + 8)", "LD32(sp)", id="the call's own parentheses around the sum"),
 ])
 def test_an_offset_added_to_an_address_next_to_sp_is_one_offset_from_sp(text, folded):
     assert state.fold_frame(text) == folded
+
+
+def frame_pointer(restore_from: int) -> list[int]:
+    # push r14 ; add #-8,r15 ; mov r15,r14 ; mov #1,r0 ; add #8,r14 ; mov rN,r15 ; mov.l @r15+,r14 ; rts ; nop
+    return [encode("mov.l Rm,@-Rn", 15, 14), adjust(-8), encode("mov Rm,Rn", 14, 15), encode("mov #imm,Rn", 0, low=1),
+            encode("add #imm,Rn", 14, low=8), encode("mov Rm,Rn", 15, restore_from), encode("mov.l @Rm+,Rn", 14, 15), RTS, NOP]
+
+
+def test_a_frame_pointer_moved_back_over_the_frame_gives_r15_its_entry_value():
+    code = lifted(frame_pointer(14))
+    assert "FRAME(sp, 12);" in code
+
+
+def test_r15_loaded_from_a_register_that_is_not_a_copy_of_it_is_refused():
+    with pytest.raises(state.Unsupported, match="a piece of a larger function"):
+        lifted(frame_pointer(4))
+
+
+def test_a_copy_of_r15_that_another_instruction_overwrites_is_not_a_frame_pointer():
+    words = frame_pointer(14)
+    words.insert(4, encode("mov #imm,Rn", 14, low=5))
+    with pytest.raises(state.Unsupported, match="moves r15"):
+        lifted(words)
+
+
+def test_a_call_through_a_register_passes_the_registers_below_the_last_one_it_has_set():
+    # mov #7,r5 ; mov.l @r6,r2 ; jsr @r2 ; nop ; rts ; nop
+    code = lifted([encode("mov #imm,Rn", 5, low=7), encode("mov.l @Rm,Rn", 2, 6), encode("jsr @Rn", 2), NOP, RTS, NOP])
+    assert call_arguments(code) == ["r4", "7", "r6"]

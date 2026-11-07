@@ -61,7 +61,7 @@ def main():
         if errs: print("\n".join(errs))
         if os.path.exists(src):
             funcs.update(shc_funcs(src)); os.remove(src)
-    image=status.krnl_image(); code=status.function_code(); res=[]
+    image=status.image(); code=status.function_code(); res=[]
     import difflib
     for name,seq in funcs.items():
         m=re.match(r"f([0-9A-Fa-f]{8})",name)

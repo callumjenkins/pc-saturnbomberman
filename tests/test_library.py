@@ -18,7 +18,7 @@ import registers  # noqa: E402
 import status  # noqa: E402
 from saturnrecomp import sh2, sh2emu  # noqa: E402
 
-pytestmark = pytest.mark.skipif(shutil.which("clang") is None or not os.path.exists(check.KRNL),
+pytestmark = pytest.mark.skipif(shutil.which("clang") is None or not os.path.exists(check.IMAGE),
                                 reason="needs clang and the extracted disc")
 
 BASE = 0x06006000
@@ -62,7 +62,7 @@ def probe_lib(tmp_path: Path, template: str) -> ctypes.CDLL:
 
 def machines(lib: ctypes.CDLL) -> tuple[sh2emu.CPU, sh2emu.CPU, list]:
     """The game and the host build's interpreter, with the same random memory, each counting its polls."""
-    game, host = (check.counting(sh2emu.load(check.KRNL, BASE)) for _ in range(2))
+    game, host = (check.counting(sh2emu.load(check.IMAGE, BASE)) for _ in range(2))
     machine.fill(game, random.Random(1), BASE, check.code_runs(), [])
     machine.copy(game, host)
     keep = machine.point(lib, host)
@@ -173,7 +173,7 @@ def test_a_routine_called_from_the_host_runs_with_r0_r1_and_r2_as_given_and_coun
 
 
 def stamp() -> list:
-    return [os.path.getmtime(check.KRNL), os.path.getmtime(status.TABLE), os.path.getmtime(check.__file__), check.TABLE_MAX,
+    return [os.path.getmtime(check.IMAGE), os.path.getmtime(status.TABLE), os.path.getmtime(check.__file__), check.TABLE_MAX,
             *check.LIBRARY]
 
 

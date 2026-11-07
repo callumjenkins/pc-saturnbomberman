@@ -7,15 +7,15 @@ BRAIN = 0x060C2200
 S = 0x060C2400          # a decoder stream
 
 # 066D8: the table pointer, with room for the zero fill
-case("f060066D8", [], False, [plant(0x060B2D24, 4, [0x060C0000, 0x060D8000, 0x060C1000, 0x060D0010])])
+case("f060066D8", [], False, [plant(0x060B2D24, 4, [0x060C0000, 0x060D8000, 0x060C1000, 0x060D0010], 1.0)])
 case("f060079B6", [pick(S), pick(0, 65, 255, -1)], True, [plant(S, 4, [0x060C3000, 0x060C3100])])
 case("f06008ABA", [span(0, 5), span(0, 3)], True, [plant(0x060BD8E4 + 4 * k, 4, [0x060C3000, 0x060C3400], 1.0) for k in range(4)])
 PAL = ([plant(0x060BD8E8, 4, [0x060C3000], 1.0), plant(0x060BD8D4, 4, [0x060C4000], 1.0), plant(0x060BD8D8, 4, [0x060C4000], 1.0), plant(0x060C4004, 4, [0x060C3000], 1.0)]
        + [plant(0x060C3000 + 4 * k, 4, [0x060C3400, 0x060C3600], 1.0) for k in range(40)]
        + [plant(a + 2 * k, 2, [0, 2, 5, 33, 0x7FF0, 0x4000], 0.5) for a in (0x060C3400, 0x060C3600) for k in range(2)]
        + [plant(0x26006168, 4, [0, 0, 0x060090D8]), plant(0x060BF4A8, 2, [0, 3, 40], 1.0)])
-case("f06008ECA", [span(0, 5), pick(0, 5, 0x20, 0x7FFF, 0x8000, 0xFFFF, 0x1F3)], True, PAL)
-case("f06008ECE", [span(0, 5)], True, PAL)
+case("f06008ECA", [span(0, 5), pick(0, 5, 0x20, 0x7FFF, 0x8000, 0xFFFF, 0x1F3)], True, PAL, stubbed=False)
+case("f06008ECE", [span(0, 5)], True, PAL, stubbed=False)
 case("f0600A8F4", [pick(1, 2, 4, 8, 16, 32), span(0, 0xFFFFFF)], True,
      [plant(0x060FA9C8 + 2 * k, 2, [0, 0x8000, 0xC000, 0x8010, 0xC010, 0x0010, 0x4000, 0x0001, 0x1000, 0x0100], 0.8) for k in range(24)]
      + [plant(0x060FA9DE, 2, [0, 1, 2]), plant(0x060FA9DA, 2, [0, 0x100, 0x1000, 0x30, 0x00C0, 0x3000])])
@@ -131,11 +131,11 @@ case("f0601C534", [], False, THIRD + CUR + OTHER)
 case("f0601C620", [ptr(0x060C5200, 0x100, 4), ptr(0x060C5300, 0x100, 4)], False, CUR + bom(36, 2, [0, 1, 2]) + bom(52, 2, [0, 1, 2, 4]) + bom(76, 2, [0, 4, 12, 40, 0xFFFF]))
 case("f0601CF8C", [], False, CUR + OTHER + THIRD + bom(6, 1, [0, 1, 2, 3, 4, 5]) + bom(52, 2, [0, 1, 2, 4]) + [plant(0x060C5000, 2, [0, 5, 0x30]), plant(0x060C5000 + 24, 1, [0, 1, 3, 6, 0x90, 0x7F])]
      + [plant(0x060B47B8 + k, 1, [0, 1, 3, 6, 0xF0, 0x7F, 0x80], 0.7) for k in range(0, 48)])
-case("f0601D5EC", [span(0, 0), pick(0x40, 0x41, 0x50, 0x80, 0xC0, 0x60, 0x90, 0xA0), pick(0x060C5200)], False,
+case("f0601D5EC", [span(0, 0), pick(0x40, 0x41, 0x50, 0x80, 0xC0, 0x60, 0x90, 0xA0), pick(0x060C5200), ("any",)], True,
      CUR + OTHER + bom(6, 1, [1, 2, 3, 4]) + [plant(0x060C5200 + 68, 2, [0x13F, 0x140, 0x200, 0])]
      + [plant(0x060EC8B0 + 2 * k, 2, [0, 0x20, 0x10, 0x30, 0x1], 0.6) for k in range(0x20, 0x200)]
      + [plant(0x060F08B0 + 2 * k, 2, [0, 0x1, 0x10, 0xFF], 0.6) for k in range(0x20, 0x200)] + bom(20, 2, [0x40, 0x41, 0x50, 0x80, 0xC0]) + [plant(0x060D849C + 7, 1, [0], 1.0)])
-case("f0601E300", [span(0, 1), span(0, 100), pick(0, 1, 5, 6)], False, [plant(0x060DF988, 4, [0x060C5000]), plant(0x060DF98C, 4, [0x060C6000])] + TILES + CELLS)
+case("f0601E300", [span(0, 1), span(0, 100), pick(0, 1, 5, 6)], True, [plant(0x060DF988, 4, [0x060C5000]), plant(0x060DF98C, 4, [0x060C6000])] + TILES + CELLS)
 case("f0601E336", [pick(0, 1, 5), span(0, 100), pick(0, 1, 2, 16, 17, 0x8, 3)], False,
      ACTS + [plant(0x060DF988, 4, [0x060C5000]), plant(0x060DF98C, 4, [0x060C6000])] + TILES + CELLS + [plant(0x060F08B0 + 2 * k, 2, [0, 0x100, 0x200, 0x1234], 0.6) for k in range(0, 100)])
 case("f0601F578", [], True, ACTS + [plant(0x060D7E8C, 2, [0x10, 0x11, 0x20, 0x30])] + CELLS)

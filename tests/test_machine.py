@@ -18,6 +18,7 @@ from saturnrecomp import hw, sh2emu  # noqa: E402
 
 BASE = 0x06006000
 CODE = [(0, 0x10)]
+KERNEL_SIZED = [(0, 0xC0000)]
 
 
 @pytest.fixture
@@ -31,16 +32,21 @@ def dumped(tmp_path, monkeypatch):
     machine._dumps.cache_clear()
 
 
-def filled(seed: int, plants: list[tuple] = ()) -> sh2emu.CPU:
+def filled(seed: int, plants: list[tuple] = (), code: list[tuple[int, int]] = CODE) -> sh2emu.CPU:
     cpu = sh2emu.load(os.devnull, BASE)
     cpu.mem.regions[0][2][BASE - machine.WRAM:BASE - machine.WRAM + 0x10] = bytes(range(0x10))
-    machine.fill(cpu, random.Random(seed), BASE, CODE, plants)
+    machine.fill(cpu, random.Random(seed), BASE, code, plants)
     return cpu
 
 
 def test_about_half_the_trials_start_from_a_dumped_route(dumped):
-    starts = [filled(seed).mem.regions[1][2][:4] == b"\xA5" * 4 for seed in range(40)]
+    starts = [filled(seed, code=KERNEL_SIZED).mem.regions[1][2][:4] == b"\xA5" * 4 for seed in range(40)]
     assert 10 < sum(starts) < 30
+
+
+def test_a_fifth_of_a_modules_trials_start_from_a_dump_when_its_variables_lie_below_the_kernels(dumped):
+    starts = [filled(seed).mem.regions[1][2][:4] == b"\xA5" * 4 for seed in range(100)]
+    assert 5 < sum(starts) < 40
 
 
 def test_the_code_goes_back_over_a_dump(dumped):
@@ -106,7 +112,7 @@ def test_a_stack_difference_is_not_one():
     assert machine.differences(host, game) == []
 
 
-@pytest.mark.skipif(shutil.which("clang") is None or not os.path.exists(check.KRNL), reason="needs clang and the extracted disc")
+@pytest.mark.skipif(shutil.which("clang") is None or not os.path.exists(check.IMAGE), reason="needs clang and the extracted disc")
 @pytest.mark.parametrize("extra, agrees", [
     pytest.param("", True, id="the game's own stores"),
     pytest.param("    ST16(0x25E00000, 1);\n", False, id="one more store to VDP2 VRAM"),
@@ -158,3 +164,17 @@ def test_the_cosim_maps_the_whole_of_each_hardware_region_the_decompiled_code_re
     cpu = filled(3)
     cpu.mem.read(lo, 1)
     cpu.mem.read(hi - 1, 1)
+
+
+@pytest.mark.parametrize("base, extent, start", [
+    pytest.param(0x06006000, 0xC0000, machine.DATA[0], id="KRNL, whose code runs past DATA"),
+    pytest.param(0x06010000, 0x6A460, 0x06080000, id="BOOT, whose variables follow its code"),
+    pytest.param(0x06002000, 0x800, 0x06010000, id="a small image, up to the next 64 KiB"),
+])
+def test_random_data_starts_after_a_modules_code_when_that_is_below_the_data_area(base, extent, start):
+    assert machine.variables(base, extent) == start
+
+
+def test_linked_pointers_take_their_second_byte_from_the_variables_area_that_starts_at_the_start_it_is_given():
+    words = machine.linked(random.Random(1), 4096, bytes(4096), 0x06080000)
+    assert set(words[1::4]) == {0} | set(range(0x08, 0x10))

@@ -1,17 +1,26 @@
 # decomp
 
-A decompilation of the game's kernel (`BOMSS/0KRNL.BIN`). Each function in `src/` is C that does what
-the game's function does, named by its address. A function is swapped into the recompiled game once it
-agrees with the game's own code.
+A decompilation of the game's kernel (`BOMSS/0KRNL.BIN`) and of its boot code (BOOT), initial program (IP) and field
+loader (FLD). Each function in `src/` is C that does what the game's function does, named by its address. A function is
+swapped into the recompiled game once it agrees with the game's own code.
+
+KRNL is the default module. Every tool works on the module that `DECOMP_MODULE` names (`KRNL`, `BOOT`, `IP` or `FLD`):
+its C is in `src/<module>/` and its cases in `planted/<module>/`, and its functions keep the names `f` and the address.
+The host build puts the module's prefix in front of them (`boot_f06010000`) through a generated `names.h`, since the
+modules load at addresses that overlap.
 
 | File | What it does |
 |---|---|
-| `src/krnl_06XX.c` | The decompiled functions, one file per 0x10000 of address (`krnl_0600.c` holds 06006000 to 0600FFFF), so workers given different ranges edit different files |
+| `src/krnl_06XX.c`, `src/<module>/` | The decompiled functions, one file per 0x10000 of address (`krnl_0600.c` holds 06006000 to 0600FFFF), so workers given different ranges edit different files; `names.h` in a module's folder is generated |
+| `modules.py` | The module `DECOMP_MODULE` names: its file, base address, folders and host-build prefix |
 | `krnl.h` | Types and tables the files share |
 | `status.tsv` | A row per function the recompile found: size, calls, whether a route runs it, whether a task can park in it, whether it starts inside another function (`piece`), and its state |
 | `status.py` | Rewrites `status.tsv` from the build, the coverage files and `src/` |
 | `lift.py` | A first draft of a function's C from its instructions (`state.py` turns each instruction into statements, `structure.py` rebuilds the if and while) |
+| `draft.py` | Lifts a list of addresses (for `farm map`), places the drafts in the module's files, and removes functions again with `--drop` |
+| `voidify.py` | Makes functions `void`, for a draft that returns the r0 a callee left |
 | `batch.py` | Lifts many functions and runs the cosim on each draft |
+| `adapt.py` | Runs the cosim on a list of drafts with as many trials as each needs, for `farm map` |
 | `run.py` | Runs the cosim on functions of `src/` and swaps those that agree |
 | `merge.py` | Puts a batch of workers' C into `src/` and their cases into `planted/` |
 | `gen.py` | Writes `swap_gen.inc` and the `[[replace]]` block in `game.toml` from `status.tsv` |
@@ -19,6 +28,7 @@ agrees with the game's own code.
 | `machine.py`, `snapshots.py` | The memory a cosim trial runs on, and the route RAM dumps half the trials start from |
 | `cases.py`, `planted/` | Arguments and planted values that reach the branches default trials miss; one file in `planted/` per batch of workers |
 | `registers.py` | Which registers a function reads before writing them, and the runtime routines SHC calls for an operator |
+| `returns.py` | Swapped functions whose callers read a register the C does not give them (r0 of a `void`, or r1 to r7) |
 | `guest.h`, `host_mem.c` | Macros and memory that let one source compile for SHC and for the host |
 | `swap.cpp`, `swap.cmake` | The runtime side: `g_rd`, `g_wr`, `g_call` and the build option |
 | `shc_compare.py` | Compiles `src/` with SHC and compares its instructions with the game's |
@@ -28,6 +38,7 @@ agrees with the game's own code.
 ```sh
 python decomp/status.py --summary            # where things stand
 python decomp/lift.py 0605C6A2               # a draft; --append adds it to its file in src/
+DECOMP_MODULE=BOOT python decomp/lift.py 06010FC8      # the same in another module (also --module BOOT)
 python decomp/batch.py --leaves --executed --limit 50   # drafts and cosim for many, in build/decomp/batch.tsv
 python decomp/run.py 0605C6A2                # cosim, then swap it in on agreement
 uv run tests/frames.py normal battle-round   # the game, with the swap
@@ -43,10 +54,13 @@ one of SHC's runtime routines becomes its operator: `DIVS`, `DIVU`, `MODS` or `M
 shift in `HELPER()`, or one of the library macros below. A function that passes a local's address on, or reads an argument from the stack,
 keeps its locals in a frame on the game's own stack: `FRAME(sp, n)` declares `sp`, r15 on entry, and
 the locals are loads and stores below it. A loop that leaves for several places gets its main exit after
-it and the others written out where it leaves for them. A jump through a register is a tail call, `GJUMPn`
+it and the others written out where it leaves for them. A register that holds r15 plus an offset (`mov r15,r14`)
+gives r15 that offset back at a `mov r14,r15`, so a frame pointer and a shared epilogue lift. A call passes the
+registers its callee reads; one whose last registers an earlier call overwrote leaves them off, since the callee finds
+there what that call left, as it does in the game's code. A jump through a register is a tail call, `GJUMPn`
 with the pointer; `SR()`, `GBR()` and `VBR()` read the control registers and `SETSR(x)` and the others write
 them (a write to sr advances time, as `ldc` does); `m0` is MACH:MACL as one `long long`, and `MAC_L` and `MAC_W`
-accumulate into it. The lifter refuses a jump table, a register read after a call that may have written it,
+accumulate into it. The lifter refuses a jump table (`jmp` through a table of offsets), a register read after a call that may have written it,
 a call into the middle of a function (code that reads r8 to r14 from its caller), and code that reads a
 register it never set (a piece of a larger function or a task's entry). A draft that would write its blocks out
 more than twelve times over is refused too. Its drafts are for reading and rewriting, and the cosim decides
@@ -86,6 +100,19 @@ reached"). A case in `cases.py` reaches them: the function's arguments drawn fro
 plants, values written over the memory at given addresses in a share of the trials. A plant can go in
 any region the trial maps, through the cache-through mirror too, and one anywhere else fails the trial.
 `check.py --cases FILE` adds a file of `case()` calls to those.
+
+A share of the trials, half by default (`STUBBED` in `check.py`), answer every call the function makes
+themselves: the game's code and the host build each get the same made-up result per call, and the check
+compares the calls' addresses and arguments, not what the callees do. That lets a draft whose callees fault on
+random data still reach its own branches. Half of the random fills also hold addresses into the variables'
+area among the noise (`linked` in `machine.py`), so a pointer loaded from memory usually leads somewhere that
+holds more pointers. A call to a run of shifts is not answered, since the C computes it inline. A function
+that reads a register its last callee leaves, which an answered call does not set, takes `stubbed=False` in its
+`case()` and has real-callee trials only. So does one whose answered calls give indices that send the game's code
+through memory the host build does not hold (`f06008ECA`, `f06008ECE`, `f060ABB80`, `f06021190`, `f06021888`,
+`f06022C9C`). Neither kind checks the call count or the arguments. A trial in which the game's code passes the
+interpreter's step limit is skipped once the host build has polled `LONG_RUN_POLLS` times, since both sides are then
+in an endless loop.
 
 `shc_compare.py` is a second, separate measure. The game was built with Hitachi SHC, and these
 functions are the ones whose SHC 5.0 output has the same instructions as the game's, some in another
@@ -146,6 +173,14 @@ original does, at each call that can switch tasks:
 - `check.py` compares, at every such call, those registers, r15 and the stack words from r15 up to where the
   function was entered, with the game's. At the end it compares r8 to r14 and pr. Both sides start with random
   values in r8 to r14.
+- r15 stays below what the function keeps on the stack. An interrupt delivered at a safe point (a call, a loop
+  back-edge, an `ldc` of sr) pushes at the context's r15, so if r15 were still the entry value while the saved
+  registers, pr and locals sat below it, the interrupt would overwrite them. The cosim never delivers one, so
+  `lift.py --parked` writes `SETSP(sp - n)` after `ENTRY_SP`, where n is the deepest the original takes r15
+  (`lift.frame_depth`), a `SETSP(...)` after every push, pop and `add` to r15, and `SETSP(sp)` before a tail
+  jump that leaves with the frame popped. `host_mem.c` counts the safe points where r15 is above the lowest
+  word the function has stored (`g_unprotected`), and `check.py` reports each trial that has any. Code that
+  pushes by hand with `ST32` needs its own `SETSP`.
 - `ENTRY_SP(` in a definition is what lets `gen.py` and `run.py` swap a row whose `yields` is set.
 
 `batch.py --parked` drafts and checks the rows that task can park in and are not resume points.
@@ -168,9 +203,10 @@ earlier instruction of the function that is running, before a jump table that ca
 function has to do the same, or the game's timing shifts and its sound moves while its frames still
 match. So the C says where: `GCALLn` advances once, as a `bsr` does, and `GJUMPn` is the tail call that does not. `POLL()`
 goes where the game's code branches back, and `AGAIN(cond)` is a do-while's condition with a `POLL()`
-when it holds. A direct call to another function of `src/` needs a `POLL()` of its own. `check.py`
+when it holds. A `jmp` that reads as a tail call to a known address can advance too: `status.polling_jumps()` lists the
+ones the recompile polls at, and the lifter writes a `POLL()` before their `GJUMPn`. A direct call to another function of `src/` needs a `POLL()` of its own. `check.py`
 counts both sides, using the recompiler's own function boundaries, and a different count fails the
-trial. Under SHC the four macros are nothing or a plain call.
+trial. The game's side counts a `jmp` in its own code as a call out in every trial, though the recompile may have folded the target's code into that function: the C writes every `jmp` as a tail call. Where the cosim answers calls, that `jmp` is answered like one and returns to the function's caller (`Counting.return_stub`), also when the function's own `jsr` set pr. Under SHC the four macros are nothing or a plain call.
 
 ## Running them in the game
 
@@ -192,8 +228,53 @@ that `src/` marks "Lifted by"). Most are empty or return a constant, so they sho
 and little else. With all 18 swapped, `normal`, `battle-round`, `mad-bomber-com`, `bonus-game`,
 `clear-M-1`, `die` and `items` match their recorded frame and sound hashes.
 
+## On several machines
+
+Heavy runs go through `farm run`, which queues them behind the machine's other jobs, and a list of
+addresses can be spread over machines with `farm map`, which sends each a snapshot of the working tree
+(`.farm-include` names the ignored files the cosim reads):
+
+```sh
+farm map --items ADDRESSES.txt --out OUT -- python decomp/adapt.py
+farm map --items ADDRESSES.txt --chunk 30 --out OUT -- env DECOMP_MODULE=BOOT ADAPT_BUDGET=600 python3 decomp/adapt.py
+```
+
+`farm map` joins the words of the command and drops quotes, so the module goes in with `env`. Give a chunk as many items
+as the nodes have cores (`--chunk 30`): a chunk runs its items in a pool, and a chunk of five waits for its slowest one
+with most of its cores idle.
+
+`adapt.py` runs the cosim on each address in a process of its own and gives each draft as many 100-trial
+blocks as it needs to reach 100 that run to the end, up to a deadline: `ok`, `differs`, `slow`, `few`,
+`hung`, `hung memory` or `crashed`, one row each (`ADAPT_BUDGET`, `ADAPT_DEADLINE` and `ADAPT_HARD` set the trial count and the two time limits, and `ADAPT_MEM_GB` a process's memory limit). Swapping many functions at once can still change a route the cosim
+cannot see, so run `tests/frames.py` over all routes afterwards; if one differs, swap half the set and
+halve again until the function is found. In the run of 1,058 drafts, five of the 669 that agreed
+changed the frames of the boss, co-op and team routes. The cause was the unlowered r15 above; with it
+fixed they are swapped and all routes match.
+
 ## Return types
 
 A function is `void` when every caller the build shows ignores r0, since the cosim compares r0 and the game leaves
 a leftover there. A function reached only through a pointer keeps the result the game's code leaves in r0, so its
 type is a judgement; a wrong one shows in the routes or in the Beetle compare.
+
+`returns.py` checks the first half of that rule against the disc's code. It lists the swapped void functions that
+write r0 before an `rts` and have a caller, a `bsr` or a `jsr` through a register loaded from the function's address,
+whose code reads r0 first; `tests/test_returns.py` keeps the list empty. Such a function returns that r0 (`int`), with
+its case saying so, because the cosim does not compare a void function's r0 and the routes may not reach the caller. A
+function that only tail-calls is not listed: its callee's r0 reaches the caller through the context. Calls through
+tables in RAM are not seen.
+
+`returns.py` also checks r1 to r7 for every swapped function. A function that writes one of them itself, and a caller
+whose own instructions read it before writing it (what a callee would read does not count), cannot be swapped as C:
+the C leaves those registers as the caller had them. The BOOT shifts of r4 (`060727A2` to `060727AC`) and a few
+routines that return in r1 are of that kind. They stay `drafted`, and `tests/test_returns.py` runs the check over
+every module.
+
+## Boot code, the initial program and the field loader
+
+BOOT is 2,148 functions, IP 18 and FLD 82. They go through the same steps as KRNL's: `draft.py` lifts them, `adapt.py`
+checks the drafts, `status.py` and `gen.py` write the table and the build's files. The cosim's random memory starts the
+module's variables where its code ends when that is below the kernel's (`machine.variables`), and fills them mostly
+with pointers to each other. What the lifter still refuses in BOOT is a `jmp` through a table, a register read after a
+call that overwrote it, a branch whose T bit two blocks set differently, and a tail jump into the middle of
+another function.

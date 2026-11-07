@@ -68,7 +68,7 @@ case("f06015D16", [], False,
      [plant(0x060D7B3C, 4, [0x060C2400], 1.0), plant(0x060C1AA8, 2, [3, 4], 1.0)] +
      [plant(0x060D7768, 4, [0x060C2000], 1.0), plant(0x060C2000 + 4, 1, [0, 0x40, 0x80, 0xC0]), plant(0x060C2000 + 20, 2, [0, 1, 2, 3]),
       plant(0x060C2000 + 90, 2, [0, 0x12, 0x1234, 0x7F]), plant(0x060C062C, 2, [0, 1, 5]), plant(0x060C063D, 1, [0, 1, 5])]
-     + [plant(0x060EE8B0 + 2 * c, 2, [0, 0x12, 0x1200, 0x7F, 0xFFFF], 0.7) for c in range(4)])
+     + [plant(0x060EE8B0 + 2 * c, 2, [0, 0x12, 0x1200, 0x7F, 0xFFFF], 0.7) for c in range(4)], stubbed=False)
 # 0601640E, which 06016394 branches to, wants the mover (060D7B3C) or the object named by the bomber, with halfwords 60 and 62
 MOVE = [plant(0x060D7B3C, 4, [0x060C2000], 1.0), plant(0x060C2000 + 60, 2, [0, 1, 5, 9]), plant(0x060C2000 + 62, 2, [0, 1, 5, 9]),
         plant(0x060D7768, 4, [0x060C2100], 1.0), plant(0x060C2100 + 70, 2, [0, 1, 3]), plant(0x060C2100 + 4, 1, [0, 0x80]),
@@ -267,8 +267,8 @@ case("f06050F02", [pick(0, 1, 7, 8, 0xF)], True, TBL)
 case("f06050F28", [pick(0, 1, 7, 8, 0xF)], True, TBL)
 case("f06054350", [], True, FREE + BANK + [plant(ENTS + 16 * k + 11, 1, [0, 1], 0.5) for k in range(16)] + [plant(0x060BF4A4, 4, [-1, 5])])
 case("f0605C9B4", [pick(0, 1, 5)], False, KEYS + [plant(0x060C1918, 2, [0, 1, 5, 300], 0.9)] + POS)
-case("f0606950C", [pick(FIX), pick(0, 1, 7, 8, 0xF)], False, TBL)
-case("f06069546", [pick(0, 1, 2, 3), pick(0, 1, 7, 8)], False, TBL)
+case("f0606950C", [pick(FIX), pick(0, 1, 7, 8, 0xF)], True, TBL)
+case("f06069546", [pick(0, 1, 2, 3), pick(0, 1, 7, 8)], True, TBL)
 case("f06069562", [pick(FIX)], True, TBL + [plant(FIX + 46, 2, [0, 0xFFFF, 0x1234], 0.9)])
 case("f060695B0", [pick(FIX), pick(0, 1, 7, 8, 0xF)], False, TBL)
 case("f06046A5C", [pick(0, 1, 2, 3)], True, SHTAB + [plant(0x060B672A + 2 * k, 2, [0, 1, 2, 3, 4, 5], 1.0) for k in range(12)]
@@ -320,7 +320,7 @@ case("f06021888", [pick(FIX)], False,
      [plant(FIX + k, 1, [0, 1, 2, 26, 5], 0.8) for k in range(4)] + [plant(FIX + 4, 1, [0], 1.0), plant(0x060C0682, 1, [0, 16], 0.8)]
      + [plant(0x060DFB96 + 8 * i + 5, 1, [0, 0, 7], 0.7) for i in range(1, 6)]
      + [plant(0x060D7E7C, 2, [1], 1.0), plant(0x060D7E80, 2, [5, 6], 1.0), plant(0x060D7E7E, 2, [1], 1.0), plant(0x060D7E82, 2, [3, 4], 1.0)]
-     + [plant(0x060EC8B0 + 2 * c, 2, [0x10], 1.0) for c in range(0, 600)] + [plant(0x060F08B0 + 2 * c, 2, [0, 0, 0x100], 0.95) for c in range(0, 600)])
+     + [plant(0x060EC8B0 + 2 * c, 2, [0x10], 1.0) for c in range(0, 600)] + [plant(0x060F08B0 + 2 * c, 2, [0, 0, 0x100], 0.95) for c in range(0, 600)], stubbed=False)
 case("f060222D8", [pick(0, 21, 5, 0x10000, 0x10015), pick(0, 1, 2, 3, 0x10001)], True,
      OBJFREE + BANK + FREE + SHTAB + [plant(0x060F08B0 + 2 * c, 2, [0, 0, 3, 0x102], 0.8) for c in range(4)] + [plant(0x060DFB9B + 8 * k, 1, [0, 1], 0.6) for k in range(0, 80)]
      + [plant(0x060C029C, 1, [0, 17], 1.0), plant(0x060DF984, 2, [100, 101], 1.0)] + POS)
@@ -328,13 +328,14 @@ case("f06022C9C", [pick(0, 1, 3, 20, 100)], False, [plant(0x060B49BE + 2 * k, 2,
      [plant(0x060D7E7C, 2, [1, 2], 1.0), plant(0x060D7E80, 2, [4, 6], 1.0), plant(0x060D7E7E, 2, [1], 1.0), plant(0x060D7E82, 2, [3, 5], 1.0)]
      + [plant(0x060D5F30 + 124 * k + 22, 2, [0, 1], 0.5) for k in range(50)] + [plant(0x060D5F30 + 124 * k + 20, 2, [0, 5, 70], 1.0) for k in range(50)]
      + [plant(0x060D5F30 + 124 * k + 58, 2, [0, 1], 1.0) for k in range(50)]
-     + [plant(0x060EC8B0 + 2 * c, 2, [0, 0, 0x4C90, 0x10], 0.7) for c in range(0, 400)] + [plant(0x060EE8B0 + 2 * c, 2, [0, 0x1000], 0.6) for c in range(0, 100)])
+     + [plant(0x060EC8B0 + 2 * c, 2, [0, 0, 0x4C90, 0x10], 0.7) for c in range(0, 400)] + [plant(0x060EE8B0 + 2 * c, 2, [0, 0x1000], 0.6) for c in range(0, 100)], stubbed=False)
 case("f06021190", [pick(0, 1, 2, 3, 4), pick(0, 1, 2, 3), pick(65, 66, 100, 130), pick(0, 0, 1, 2)], False,
      [plant(0x060D8C08, 4, [0x060C2900], 1.0), plant(0x060C2900 + 36, 1, [0, 1, 5], 1.0), plant(0x060C2900 + 8, 2, [0, 16, 1], 0.8)]
      + [plant(0x060B47F0 + 2 * k, 2, [0, 1, 0xFFFF, 64, 0xFFC0], 1.0) for k in range(5)] + [plant(0x060B47FA + k, 1, [0, 1, 2, 3, 4], 1.0) for k in range(5)]
      + [plant(0x060D7E7E, 2, [0], 1.0), plant(0x060D7E7C, 2, [0], 1.0), plant(0x060D7E80, 2, [63], 1.0), plant(0x060D7E82, 2, [63], 1.0), plant(0x060DF978, 2, [0, 1, 0x40], 0.8)]
      + [plant(0x060EC8B0 + 2 * c, 2, [0, 0x4000, 0x80, 0x88, 0x4080, 0x2000, 0x20, 0x4290, 0x2080, 0], 0.9) for c in range(0, 300)]
-     + [plant(0x060EE8B0 + 2 * c, 2, [0, 0x100, 0xF00, 0x200], 0.9) for c in range(0, 300)])
+     + [plant(0x060EE8B0 + 2 * c, 2, [0, 0x100, 0xF00, 0x200], 0.9) for c in range(0, 300)],
+     stubbed=False)
 case("f06069A3E", [], False, BANK + LISTS + [plant(0x060CBB5C, 4, [0x060C2700], 1.0), plant(0x060C2700 + 10, 2, [1, 2, 3], 1.0), plant(0x060C1B04, 4, [0, 5, 0x322, 0x323], 0.9),
      plant(0x060C1B10, 4, [0, 1], 0.7), plant(0x060C1B08, 4, [0, 3], 0.8), plant(0x060C1B0C, 4, [0, 3], 0.8)] + [plant(0x060C2700 + o, 2, [0, 5, 0x1234], 0.8) for o in (4, 16, 18, 20, 22, 24, 26, 36, 38, 40, 44, 46, 64)])
 case("f06069BD2", [], False, BANK + LISTS + [plant(0x060CBB5C, 4, [0x060C2700], 1.0), plant(0x060C2700 + 10, 2, [1, 2, 3], 1.0), plant(0x060C1B04, 4, [0, 5, 0x322, 0x323], 0.9),

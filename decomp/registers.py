@@ -29,6 +29,8 @@ LIBRARY = {
     0x06094BC0: ("STRCMP({r0}, {r1})", {1}),
     0x06094B08: ("BITSET({r2}, {r0}, {r1})", set()),
 }
+# Ops that leave a register holding nothing of its old value when both operands are that register.
+_CLEARS = frozenset({"xor", "sub", "subc"})
 # Ops whose last operand, a register, is only written.
 _MOVES = frozenset({"mov", "mov.b", "mov.w", "mov.l", "mova", "movt", "sts", "stc", "exts.b", "exts.w",
                     "extu.b", "extu.w", "neg", "negc", "not", "swap.b", "swap.w"})
@@ -63,6 +65,16 @@ def written(image: sh2.Image, code: set[int]) -> frozenset[int]:
     for pc in code:
         found |= _operands(image.insn(pc))[1]
     return frozenset(r for r in found if 8 <= r <= 14)
+
+
+def defs(ins: sh2.Insn) -> frozenset[int]:
+    """The registers the instruction writes."""
+    return _operands(ins)[1]
+
+
+def uses(ins: sh2.Insn) -> frozenset[int]:
+    """The registers the instruction reads."""
+    return _operands(ins)[0]
 
 
 def writes(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> frozenset[int]:
@@ -202,6 +214,8 @@ def _operands(ins: sh2.Insn) -> tuple[frozenset[int], frozenset[int]]:
     operands = re.split(r",(?![^(]*\))", parts[1]) if len(parts) > 1 else []
     uses: set[int] = set()
     defs: set[int] = set()
+    if ins.op in _CLEARS and len(operands) == 2 and operands[0] == operands[1] and _REG.fullmatch(operands[0]):
+        return frozenset(), frozenset({int(operands[0][1:])})
     for i, operand in enumerate(operands):
         regs = {int(r) for r in _REG.findall(operand)}
         bare = re.fullmatch(r"r\d+", operand.strip()) is not None

@@ -23,9 +23,9 @@ sys.path.insert(0, os.path.join(ROOT, "saturn-recomp", "src"))
 import check  # noqa: E402
 import gen  # noqa: E402
 import lift  # noqa: E402
+import modules  # noqa: E402
 import status  # noqa: E402
 import structure  # noqa: E402
-from saturnrecomp import sh2  # noqa: E402
 
 OUT = os.path.join(ROOT, "build", "decomp")
 TIMEOUT = 120        # seconds a function's trials may take before the draft counts as hung
@@ -36,16 +36,14 @@ def select(args: argparse.Namespace) -> list[int]:
     if args.addresses:
         return [int(a, 16) for a in args.addresses]
     rows = [r for r in status.previous().values()
-            if r.module == gen.MODULE and r.state == "todo" and r.yields == args.parked and not r.hooked and not r.piece and (r.leaf or not args.leaves)
+            if r.module == modules.current().name and r.state == "todo" and r.yields == args.parked and not r.hooked and not r.piece and (r.leaf or not args.leaves)
             and (r.executed or not args.executed)]
     rows.sort(key=lambda r: (r.insns, r.address))
     return [r.address for r in rows[:args.limit]]
 
 
 def lift_all(addresses: list[int], parked: bool = False) -> tuple[dict[int, str], dict[int, str]]:
-    path, base = lift.IMAGES[gen.MODULE]
-    with open(os.path.join(ROOT, path), "rb") as f:
-        image = sh2.Image(f.read(), base)
+    image = status.image()
     drafts: dict[int, str] = {}
     refused: dict[int, str] = {}
     code = status.function_code()
@@ -77,7 +75,7 @@ def judge(sig: gen.Signature, spec: tuple, source: str) -> tuple[str, str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("addresses", nargs="*", help="hex entry addresses in KRNL")
+    parser.add_argument("addresses", nargs="*", help="hex entry addresses in the module")
     parser.add_argument("--leaves", action="store_true", help="only functions that call nothing")
     parser.add_argument("--executed", action="store_true", help="only functions a route runs")
     parser.add_argument("--parked", action="store_true", help="the functions a task can park in, not the others")

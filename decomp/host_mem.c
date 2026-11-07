@@ -24,8 +24,11 @@ uint32_t (*g_call_hook)(uint32_t addr, const uint32_t *args, int n);
 
 int g_poll_limit = 3000000; /* g_poll()s after which a loop that tests with AGAIN ends and the trial counts as one that faulted */
 
+static void safe_point(void);
+
 int g_poll(void)
 {
+    safe_point();
     if (++g_polls > g_poll_limit) {
         g_fault = 1;
         return 0;
@@ -33,14 +36,33 @@ int g_poll(void)
     return 1;
 }
 
+/* Where a function a task can park in keeps its frame. An interrupt at a safe point pushes at r15, so what the
+ * function stored below its entry r15 must be below r15 by then: g_unprotected counts the safe points where it was not. */
+uint32_t g_top;             /* r15 on entry, once ENTRY_SP has read it; 0 before */
+uint32_t g_low;             /* the lowest address the function stored below g_top, within a frame's reach */
+int g_unprotected;
+
 uint32_t g_entry_sp(void)
 {
+    if (!g_top) {
+        g_top = g_sp;
+        g_low = g_sp;
+    }
     return g_sp;
 }
 
+static void safe_point(void)
+{
+    if (g_top && g_sp > g_low)
+        g_unprotected++;
+}
+
+/* Popping the frame past what the function stored leaves nothing live below r15. */
 void g_set_sp(uint32_t sp)
 {
     g_sp = sp;
+    if (g_top && sp > g_low)
+        g_low = sp;
 }
 
 uint32_t g_reg(int n)
@@ -128,6 +150,8 @@ uint32_t g_frame(int size)
 void g_unframe(uint32_t top)
 {
     g_sp = top;
+    if (g_top && top > g_low)
+        g_low = top;
 }
 
 /* A tail call: the callee's registers are the function's own when it returns, so g_tail tells the hook not to put
@@ -142,6 +166,7 @@ uint32_t g_jump(uint32_t addr, const uint32_t *args, int n)
         g_fault = 1;
         return 0;
     }
+    safe_point();
     g_tail = 1;
     result = g_call_hook(addr, args, n);
     g_tail = 0;
@@ -153,6 +178,7 @@ uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2)
 {
     const uint32_t regs[3] = {r0, r1, r2};
 
+    safe_point();
     g_polls++;
     if (!g_call_hook) {
         g_fault = 1;
@@ -163,6 +189,7 @@ uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2)
 
 uint32_t g_call(uint32_t addr, const uint32_t *args, int n)
 {
+    safe_point();
     g_polls++;
     if (!g_call_hook) {
         g_fault = 1;
@@ -215,6 +242,8 @@ void g_wr(uint32_t addr, int size, uint32_t value)
     p = locate(addr, size);
     if (!p)
         return;
+    if (g_top && addr < g_top && addr >= g_top - 0x400 && addr < g_low)
+        g_low = addr;
     for (i = size - 1; i >= 0; i--, value >>= 8)
         p[i] = (uint8_t)value;
 }

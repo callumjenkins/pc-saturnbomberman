@@ -125,20 +125,107 @@ void f060B0246(gaddr dst, gaddr src, int n)
     }
 }
 
-void f060B027E(gaddr a, gaddr b, int c, int d)
+void f060B027E(int r4, int r5, int r6, int r7)
 {
-    GCALL3(0x060B0212, a, b, d);
-    GCALL3(0x060B0212, b, b + d, c - d);
+    int r0, r1, r2, r12, r13, r14;
+    int v20;
+
+    r14 = r5;
+    r13 = r7;
+    r12 = r6 - r13;
+    v20 = r4;
+    r0 = GCALL5(0x060B0212, r4, r5, r7, 0, v20);
+    r0 = GCALL5(0x060B0212, r14, (r13 + r14), r12, 0, v20);
+    r6 = r13;
+    r5 = v20;
+    r4 = r12 + r14;
     POLL();
-    GJUMP3(0x060B0212, b + (c - d), a, d);
+    if ((unsigned)r4 >= (unsigned)r5) {
+        if ((unsigned)r4 > (unsigned)r5) {
+            r4 = r4 + r6;
+            r5 = r5 + r6;
+            while (1) {
+                r6 = r6 - 1;
+                if (r6 >= 0) {
+                    POLL();
+                    r5 = r5 - 1;
+                    r2 = LD8(r5);
+                    r4 = r4 - 1;
+                    ST8(r4, r2);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        }
+    } else {
+        while (1) {
+            r6 = r6 - 1;
+            if (r6 >= 0) {
+                POLL();
+                r2 = r4;
+                r4 = r4 + 1;
+                r1 = LD8(r5);
+                r5 = r5 + 1;
+                ST8(r2, r1);
+                continue;
+            } else {
+                break;
+            }
+        }
+    }
 }
 
-void f060B02B4(gaddr a, gaddr b, int c, int d)
+void f060B02B4(int r4, int r5, int r6, int r7)
 {
-    GCALL3(0x060B0246, a, b, d);
-    GCALL3(0x060B0246, b, b + d * 4, c - d);
+    int r0, r1, r2, r12, r13, r14;
+    int v20;
+
+    r14 = r5;
+    r13 = r7;
+    r12 = r6 - r13;
+    v20 = r4;
+    r0 = GCALL5(0x060B0246, r4, r5, r7, 0, v20);
+    r0 = GCALL5(0x060B0246, r14, ((r13 << 2) + r14), r12, 0, v20);
+    r6 = r13;
+    r5 = v20;
+    r4 = (r12 << 2) + r14;
     POLL();
-    GJUMP3(0x060B0246, b + (c - d) * 4, a, d);
+    if ((unsigned)r4 >= (unsigned)r5) {
+        if ((unsigned)r4 > (unsigned)r5) {
+            r7 = r6 << 2;
+            r4 = r4 + r7;
+            r5 = r5 + r7;
+            while (1) {
+                r6 = r6 - 1;
+                if (r6 >= 0) {
+                    POLL();
+                    r5 = r5 - 4;
+                    r2 = LD32(r5);
+                    r4 = r4 - 4;
+                    ST32(r4, r2);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        }
+    } else {
+        while (1) {
+            r6 = r6 - 1;
+            if (r6 >= 0) {
+                POLL();
+                r2 = r4;
+                r4 = r4 + 4;
+                r1 = LD32(r5);
+                r5 = r5 + 4;
+                ST32(r2, r1);
+                continue;
+            } else {
+                break;
+            }
+        }
+    }
 }
 
 void f060B02F0(int n)
@@ -325,6 +412,7 @@ int f060B0894(int r4)
 {
     int r0, r1, r2, r3, r5, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 48);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));

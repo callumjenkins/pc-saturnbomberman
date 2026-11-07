@@ -14,6 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import check  # noqa: E402
 import gen  # noqa: E402
+import modules  # noqa: E402
 import status  # noqa: E402
 
 
@@ -22,20 +23,20 @@ MIN_RAN = 100       # trials that must run to the end, of the default 300
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("addresses", nargs="+", help="hex entry addresses in KRNL")
+    parser.add_argument("addresses", nargs="+", help="hex entry addresses in the module")
     parser.add_argument("--trials", type=int, default=300)
     parser.add_argument("--seed", type=int, default=1)
     args = parser.parse_args()
 
     sigs = gen.signatures()
     rows = status.build_table()
-    by_address = {row.address: row for row in rows if row.module == gen.MODULE}
+    by_address = {row.address: row for row in rows if row.module == modules.current().name}
     lib = check.build()
     failed = 0
     for text in args.addresses:
         address = int(text, 16)
         if address not in sigs or address not in by_address:
-            sys.exit("%08X: not a KRNL function defined in src/" % address)
+            sys.exit("%08X: not a function of the module defined in its folder of C" % address)
         sig = sigs[address]
         if by_address[address].yields and not sig.parked:
             failed += 1

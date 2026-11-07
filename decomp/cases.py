@@ -11,12 +11,15 @@ import glob
 import os
 import runpy
 
+import modules
+
 PLANTED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "planted")
 
 # A pointer argument whose target the plants can name.
 FIX = 0x060C0100
 
 SPEC: dict[str, tuple[list[tuple], bool, list[tuple]]] = {}
+UNSTUBBED: set[str] = set()      # the functions whose trials never answer their calls themselves
 
 
 def bomber(i: int) -> int:
@@ -33,7 +36,7 @@ def ent(k: int) -> int:
 
 @functools.cache
 def load() -> None:
-    for path in sorted(glob.glob(os.path.join(PLANTED, "*.py"))):
+    for path in sorted(glob.glob(os.path.join(modules.current().planted, "*.py"))):
         runpy.run_path(path)
 
 
@@ -45,10 +48,13 @@ def slot(k: int) -> int:
     return 0x060D7B48 + 24 * k
 
 
-def case(name: str, args: list[tuple], returns: bool, plants: list[tuple] = ()) -> None:
+def case(name: str, args: list[tuple], returns: bool, plants: list[tuple] = (), stubbed: bool = True) -> None:
+    """`stubbed` False for a function that reads a register its last callee leaves, which an answered call does not set."""
     if name in SPEC:
         raise ValueError("%s has two cases" % name)
     SPEC[name] = (args, returns, list(plants))
+    if not stubbed:
+        UNSTUBBED.add(name)
 
 
 def objs(offset: int, values: list[int], ids: tuple[int, ...] = (3, 4), chance: float = 0.9) -> list[tuple]:
@@ -279,7 +285,7 @@ case("f06055616", [pick(0, 1, 0x80, 0x100, -1)], False, [plant(0x060C122C, 1, [0
 case("f06069462", [pick(0, 1, 7, 0x10000, 0x10001), pick(0, 499, 500, 501, -1, 0x7FFFFFFF, 0x80000000)], False)
 case("f0606935A", [pick(0, 1, 2, 7), pick(0, 1, 2, 7)], False,
     [plant(obj(k) + 6, 2, [0, 1, 2, 7, 0x1003], 0.9) for k in (0, 1, 2, 7)])
-case("f0606AB92", [pick(FIX)], False, [plant(0x060FB89C, 2, [0, 0x10, 0xFFEF, 0xFFFF, 0x20]), plant(FIX + 40, 2, [0, 0xFFFF, 3, 0x8000])])
+case("f0606AB92", [pick(FIX)], True, [plant(0x060FB89C, 2, [0, 0x10, 0xFFEF, 0xFFFF, 0x20]), plant(FIX + 40, 2, [0, 0xFFFF, 3, 0x8000])])
 case("f0606ABCC", [pick(0, 1, 2, 7, 0x10000)], False, [plant(0x060FB89C, 2, [0, 0x10, 0xFFEF, 0xFFFF, 0x20])])
 case("f06094A6C", [pick(FIX)], True, [plant(FIX + i, 1, [0, 1, 2, 0xFF], 0.15) for i in range(40)])
 case("f0609BE40", [pick(0, 1, 0x0F, 0xFF, 0x1F3, 0x12345), pick(0, 1, 0x0F, 0xFF, 0x1F3, 0x12345)], False)

@@ -3,6 +3,8 @@ import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+import registers
+
 if TYPE_CHECKING:
     from saturnrecomp import sh2
 
@@ -16,9 +18,10 @@ _SIZES = {"b": 1, "w": 2, "l": 4}
 _STORE = {1: "ST8", 2: "ST16", 4: "ST32"}
 _CONTROL = {"sr": "SR", "gbr": "GBR", "vbr": "VBR"}
 _SAVED = {"mach": "MACH", "macl": "MACL", "pr": "PR"}      # what a parked function pushes with sts.l
+NO_FLAG = "cT"                           # stands for a T bit no block has set, in a block read before the lift refuses it
 MAC = "m0"                                  # MACH:MACL as one 64-bit variable
 _FRAMED = re.compile(r"sp|\(sp ([-+]) (\d+)\)")
-_SP_SUM = re.compile(r"\(\(sp ([-+]) (\d+)\) ([-+]) (\d+)\)")
+_SP_SUM = re.compile(r"(\w?)\(\(sp ([-+]) (\d+)\) ([-+]) (\d+)\)")
 
 
 @dataclass
@@ -50,16 +53,20 @@ class State:
     callee: str = ""                        # the call that last overwrote them
     fresh: set[int] = field(default_factory=set)         # written since the last call, on every path here
     flag: str | None = None
+    lacks: str = ""                         # why the block needs a T bit that no block before it has set, if it does
     macl: str | None = None                 # the product of the last mul.l, muls.w or mulu.w, which sets MACL alone
     mac64: bool = False                     # the block has set MACH:MACL as a whole (m0)
     flags: int = 0                          # how many flag variables have been made so far
     sp: int = 0                             # r15 relative to its value on entry
+    copies: dict[int, int] = field(default_factory=dict)   # registers that hold r15 at one offset throughout the function
+    adjust: dict[int, int] = field(default_factory=dict)   # how far the block has moved each of them since
     slots: dict[int, int] = field(default_factory=dict)     # the function's stack locals: offset to size
     framed: bool = False                    # locals live in guest memory below `sp`, r15 on entry
     parked: bool = False                    # a task can park in the function: its pushes and pops are real stores and loads
     touched: frozenset[int] = frozenset(range(8, 15))   # r8 to r14 the function writes, which a jump out of it has to set
     stored: set[int] = field(default_factory=set)   # offsets from r15 on entry stored to anywhere in the function
     saved: set[int] = field(default_factory=set)    # r8 to r14 the function's prologue has pushed
+    sp_set: str = ""                        # the SETSP the block last wrote, which a call after it need not repeat
 
     def get(self, reg: int) -> str:
         if reg == 15 and self.framed:
@@ -108,10 +115,14 @@ def address(base: str, offset: int | str) -> str:
 
 
 def fold_frame(text: str) -> str:
-    """text with each `(sp - a) + b` or `(sp + a) - b` folded to one offset from sp."""
+    """text with each `(sp - a) + b` or `(sp + a) - b` folded to one offset from sp. A sum that is a call's
+    argument list keeps its parentheses."""
+    def fold(m: re.Match[str]) -> str:
+        where = framed(int(m.group(3)) * (-1 if m.group(2) == "-" else 1) + int(m.group(5)) * (-1 if m.group(4) == "-" else 1))
+        return m.group(1) + ("(sp)" if m.group(1) and where == "sp" else where)
+
     while True:
-        new = _SP_SUM.sub(lambda m: framed(int(m.group(2)) * (-1 if m.group(1) == "-" else 1)
-                                           + int(m.group(4)) * (-1 if m.group(3) == "-" else 1)), text)
+        new = _SP_SUM.sub(fold, text)
         if new == text:
             return text
         text = new
@@ -132,7 +143,8 @@ def set_mac(st: State, expr: str, pure: bool = True) -> None:
 def carried(ins: "sh2.Insn", st: State) -> str:
     """The T bit going into an instruction that adds or rotates it in."""
     if st.flag is None:
-        raise Unsupported("the T bit is read before this block sets it at %08X" % ins.pc)
+        st.lacks = st.lacks or "the T bit is read before this block sets it at %08X" % ins.pc
+        return NO_FLAG
     return st.flag
 
 
@@ -164,6 +176,16 @@ def frame(ins: "sh2.Insn", st: State) -> bool:
     op, fmt, n, m = ins.op, ins.fmt, ins.n, ins.m
     if op == "add" and n == 15 and ins.imm is not None:
         st.sp += ins.imm
+        moved(st)
+        return True
+    if op == "add" and fmt == "add Rm,Rn" and n == 15 and m in st.known:
+        st.sp += st.known[m]
+        moved(st)
+        return True
+    restore = restored(ins, st.copies, st.adjust)
+    if restore is not None:
+        st.sp = restore
+        moved(st)
         return True
     if st.parked and parked_frame(ins, st):
         return True
@@ -270,15 +292,25 @@ def parked_frame(ins: "sh2.Insn", st: State) -> bool:
     return False
 
 
+def moved(st: State) -> None:
+    """r15 has a new value. In a function a task can park in the context's r15 follows it, so that what the function
+    keeps below the entry value is below r15 whenever time advances: an interrupt pushes at r15."""
+    if st.parked:
+        st.sp_set = "SETSP(%s);" % st.get(15)
+        st.effect(st.sp_set)
+
+
 def pop(st: State, template: str) -> None:
     st.effect(template % st.get(15))
     st.sp += 4
+    moved(st)
 
 
 def push(st: State, value: str) -> None:
     st.sp -= 4
     st.stored.add(st.sp)
     st.effect("ST32(%s, %s);" % (st.get(15), value))
+    moved(st)
 
 
 def local(st: State, offset: int, size: int, ins: "sh2.Insn") -> str:
@@ -355,19 +387,79 @@ def signed(expr: str) -> str:
     return "(int)%s" % expr
 
 
-def sp_change(ins: "sh2.Insn") -> int:
-    """How far an instruction moves r15."""
+def sp_change(ins: "sh2.Insn", known: dict[int, int] | None = None) -> int:
+    """How far an instruction moves r15. `known` holds the registers a straight run of instructions has set to a
+    number, for an `add Rm,r15` of a frame too large for an immediate."""
     if ins.op in ("sts.l", "stc.l", "mov.l") and ins.n == 15 and "@-Rn" in ins.fmt:
         return -4
     if ins.op in ("lds.l", "ldc.l", "mov.l") and ins.m == 15 and "@Rm+" in ins.fmt:
         return 4
     if ins.op == "add" and ins.n == 15 and ins.imm is not None:
         return ins.imm
+    if ins.op == "add" and ins.n == 15 and known and ins.m in known:
+        return known[ins.m]
     return 0
+
+
+class Copies:
+    """The registers a function sets to r15 with `mov r15,Rn`, and the offset from its entry value that r15 had.
+    A register whose copy any other instruction overwrites, or that copies r15 at two offsets, is not kept.
+    A pop is no overwrite: it gives the register back to the caller. An `add #imm,Rn` moves the copy within a
+    straight run, which `adjust` holds, and the run has to restore r15 from it before it ends.
+    """
+
+    def __init__(self) -> None:
+        self.at: dict[int, int] = {}
+        self.spoiled: set[int] = set()
+        self.adjust: dict[int, int] = {}
+
+    def end(self) -> None:
+        """A run ended with a copy moved and not restored from, so the copy's other blocks cannot count on it."""
+        self.spoiled |= self.adjust.keys()
+        self.adjust = {}
+
+    def note(self, ins: "sh2.Insn", sp: int) -> None:
+        if ins.op == "mov" and ins.fmt == "mov Rm,Rn" and ins.m == 15 and ins.n != 15:
+            if self.at.setdefault(ins.n, sp) != sp:
+                self.spoiled.add(ins.n)
+        elif ins.op == "add" and ins.imm is not None and ins.n in self.at:
+            self.adjust[ins.n] = self.adjust.get(ins.n, 0) + ins.imm
+        elif not (ins.op == "mov.l" and ins.m == 15 and "@Rm+" in ins.fmt):
+            self.spoiled |= registers.defs(ins)
+
+    def kept(self) -> dict[int, int]:
+        return {reg: sp for reg, sp in self.at.items() if reg not in self.spoiled}
+
+
+def restored(ins: "sh2.Insn", copies: dict[int, int], adjust: dict[int, int]) -> int | None:
+    """r15's offset after `mov Rm,r15` of a register that holds a copy of it, moved by `adjust` since the copy was
+    made, or None for any other instruction."""
+    if ins.op == "mov" and ins.fmt == "mov Rm,Rn" and ins.n == 15 and ins.m in copies:
+        return copies[ins.m] + adjust.get(ins.m, 0)
+    return None
+
+
+def track(ins: "sh2.Insn", known: dict[int, int], image: "sh2.Image") -> None:
+    """Updates `known`, the registers set to a number so far in a straight run, with what the instruction does."""
+    if ins.op == "mov" and ins.fmt == "mov #imm,Rn":
+        known[ins.n] = ins.imm
+        return
+    if ins.op in ("mov.w", "mov.l") and "@T" in ins.fmt:
+        value = image.literal(ins)
+        if value is None:
+            known.pop(ins.n, None)
+        else:
+            known[ins.n] = value - (1 << 32) if value >= 1 << 31 else value
+        return
+    if ins.n is not None:
+        known.pop(ins.n, None)
+    known.pop(0, None)
 
 
 def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
     op, fmt, n, m = ins.op, ins.fmt, ins.n, ins.m
+    if op == "add" and ins.imm is not None and n in st.copies:
+        st.adjust[n] = st.adjust.get(n, 0) + ins.imm
     if n == 15 or m == 15 or "r15" in fmt:
         if frame(ins, st):
             return
@@ -473,9 +565,7 @@ def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
         difference = st.temp(op2(st.get(n), "^", st.get(m)))
         st.set_flag(" || ".join(op2(difference, "&", mask) + " == 0" for mask in ("255", "0xFF00", "0xFF0000", "0xFF000000")))
     elif op == "movt":
-        if st.flag is None:
-            raise Unsupported("the T bit is read before this block sets it at %08X" % ins.pc)
-        st.put(n, st.flag)
+        st.put(n, carried(ins, st))
     elif op in ("mul.l", "muls.w", "mulu.w"):
         a, b = st.get(n), st.get(m)
         product = {"mul.l": op2(a, "*", b), "muls.w": op2("(short)" + a, "*", "(short)" + b),

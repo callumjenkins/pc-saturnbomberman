@@ -36,6 +36,9 @@ def program(*functions: tuple[int, ...]) -> tuple[sh2.Image, dict[int, set[int]]
     pytest.param((encode("shar Rn", 0), RTS, NOP), {0}, id="r0 shifted, as a runtime helper takes it"),
     pytest.param((encode("cmp/eq Rm,Rn", 6, 5), RTS, encode("mov Rm,Rn", 0, 6)), {5, 6}, id="a compare and a delay slot"),
     pytest.param((encode("mov.l Rm,@-Rn", 15, 7), RTS, NOP), {7}, id="a register pushed"),
+    pytest.param((encode("xor Rm,Rn", 4, 4), encode("mov Rm,Rn", 0, 4), RTS, NOP), set(), id="a register xored with itself"),
+    pytest.param((encode("subc Rm,Rn", 5, 5), encode("mov Rm,Rn", 0, 5), RTS, NOP), set(), id="a register subtracted with carry from itself"),
+    pytest.param((encode("subc Rm,Rn", 5, 6), RTS, NOP), {5, 6}, id="a register subtracted with carry from another"),
 ])
 def test_a_function_reads_what_it_uses_before_writing(function, read):
     image, code = program(function)

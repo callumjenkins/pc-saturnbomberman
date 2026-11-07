@@ -174,11 +174,19 @@ case("f0602A2A8", [ptr(0x060C3000, 0x400, 4), ptr(0x060C3800, 0x400, 4), pick(-2
 case("f0602A618", [ptr(0x060C3000, 0x400, 4), span(0, 5), ptr(0x060C3800, 0x400, 4)], False, [plant(0x060FA9A0, 2, [0, 192], 1.0)])
 case("f0602B86E", [span(-3, 15)], True, [plant(0x060C1040, 4, [0, 4], 1.0), plant(0x060C1044, 1, [0, 3, 10, 12, 0xF0], 1.0)]
      + [plant(0x060C0640 + k, 1, [0, 1, 2, 3, 4], 0.8) for k in range(12)] + [plant(0x060C064A + k, 1, [0, 1, 5, 9, 11, 12, 30], 0.8) for k in range(12)])
+# the slots 0602B7CA and 0602B86E clear are named by bytes below 12, as in the game; a larger one writes into their saved registers
+SLOTS = [plant(0x060C1040, 4, [0, 4], 1.0), plant(0x060C1044, 1, [0, 3, 10, 12], 1.0)] \
+    + [plant(0x060C0640 + k, 1, [0, 1, 2, 3, 4], 0.8) for k in range(12)] + [plant(0x060C064A + k, 1, list(range(12)), 1.0) for k in range(12)]
+case("f0602B8F0", [], True, SLOTS)
+case("f0602B916", [span(-3, 15)], True, SLOTS)
 _bytes = [plant(0x060C0640 + k, 1, [0, 1, 2, 3, 4, 5, 7, 8], 0.8) for k in range(14)]
 case("f0602C482", [span(0, 12)], True, _bytes)
 case("f0602C4D8", [span(0, 12)], True, _bytes)
 case("f0602C50C", [span(0, 6)], True, [])
-case("f0602C5EE", [span(-2, 5)], True, [])
+case("f0602BF7E", [], False, [plant(0x060C1048, 4, [0, 0x00080000], 1.0), plant(0x060C1044, 1, [0, 3, 10], 1.0)]
+     + [plant(0x060C0640 + i, 1, [0, 1, 4, 5, 8, 9, 12, 13, 16, 17, 3, 19, 2], 1.0) for i in range(10)])
+case("f0602C5EE", [span(-2, 5)], True,
+     [plant(0x060C0640 + i, 1, [0, 1, 4, 5, 8, 9, 12, 13, 16, 17, 3, 19, 2], 1.0) for i in range(10)] + [plant(0x060C1044, 1, [0, 3, 10], 1.0)])
 case("f0602D36E", [span(0, 20), span(-5, 400), span(-5, 400), span(-300, 300)], True,
      [plant(SP, 4, [0, 3, 0x10004], 1.0)] + [plant(0x060E20DE + 14 * k + 2 + 2 * j, 2, [0, 3, 4, 5], 0.7) for k in range(20) for j in range(5)]
      + [plant(0x060B522A + j, 1, [0, 3], 1.0) for j in range(5)])

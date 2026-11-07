@@ -92,3 +92,49 @@ def test_a_frame_lowers_the_games_stack_by_its_size_rounded_up_to_a_word_and_ret
     assert (top, sp.value) == (0x060FFF00, 0x060FFF00 - lowered)
     mem.g_unframe(top)
     assert sp.value == 0x060FFF00
+
+
+TOP = 0x060FFF00
+
+
+def parked(mem) -> None:
+    ctypes.c_uint32.in_dll(mem, "g_sp").value = TOP
+    mem.g_entry_sp.restype = ctypes.c_uint32
+    mem.g_entry_sp()
+    mem.g_set_sp.argtypes = [ctypes.c_uint32]
+
+
+def unprotected(mem) -> int:
+    return ctypes.c_int.in_dll(mem, "g_unprotected").value
+
+
+def test_a_safe_point_with_r15_at_its_entry_value_over_a_stored_frame_is_unprotected(mem):
+    parked(mem)
+    mem.g_wr(TOP - 4, 4, 1)
+    mem.g_poll()
+    assert unprotected(mem) == 1
+
+
+def test_a_safe_point_with_r15_below_what_was_stored_is_protected(mem):
+    parked(mem)
+    mem.g_set_sp(TOP - 8)
+    mem.g_wr(TOP - 4, 4, 1)
+    mem.g_wr(TOP - 8, 4, 2)
+    mem.g_poll()
+    assert unprotected(mem) == 0
+
+
+def test_a_safe_point_after_the_frame_is_popped_is_protected(mem):
+    parked(mem)
+    mem.g_set_sp(TOP - 8)
+    mem.g_wr(TOP - 8, 4, 2)
+    mem.g_set_sp(TOP)
+    mem.g_poll()
+    assert unprotected(mem) == 0
+
+
+def test_a_function_that_never_read_its_entry_r15_has_no_frame_to_protect(mem):
+    ctypes.c_uint32.in_dll(mem, "g_sp").value = TOP
+    mem.g_wr(TOP - 4, 4, 1)
+    mem.g_poll()
+    assert unprotected(mem) == 0

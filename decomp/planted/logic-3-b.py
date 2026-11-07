@@ -157,7 +157,7 @@ case("f060AC62E", [pick(FIX)], True, CTX + [sf(64, [0, 0, 1], 1.0), sf(12, [0, 1
      + [plant(V + 64 + 16 * k + o, 4, [-1, 0, 5, 100], 0.7) for k in range(4) for o in (0, 4, 8)])
 case("f060ACC02", [pick(FIX)], True, CTX + [sf(4, [-1, 0, 1, 2, 3, 4, 5, 9], 1.0), sf(152, [1, 2, 7, 100], 1.0), sf(124, [1, 5, 33], 1.0),
                                               sf(128, [0, 4], 1.0)])
-case("f060ACCB2", [pick(FIX), ptr(0x060C2000, 16, 4), ptr(0x060C2100, 16, 4)], False,
+case("f060ACCB2", [pick(FIX), ptr(0x060C2000, 16, 4), ptr(0x060C2100, 16, 4)], True,
      CTX + [sf(4, [-1, 0, 1, 2, 3, 4, 5, 9], 1.0), sf(48, [0, 1], 1.0), sf(0xE4, [100, 5000], 0.9), sf(0xE0, [0, 20], 0.9),
             sf(0x90, [100, 5000], 0.9), sf(0x8C, [0, 20], 0.9), sf(124, [1, 5, 33], 1.0), vf(56, [1, 7, 100, 2000], 1.0),
             plant(0x060FC0E4, 4, [100, 5000], 0.9)])
@@ -238,7 +238,7 @@ case("f06095158", [pick(FIX), pick(FIX, FIX + 1, FIX + 0x10), span(0, 12)], True
 case("f060957B0", [pick(FIX), pick(FIX + 0x100)], False, [plant(FIX, 4, [0, 1, 2, 3, 4], 1.0)])
 case("f06096B9C", [], True, [plant(0x060FA8BC, 4, [0x060C7000], 1.0), plant(0x060C7000, 4, [0, 1, 3, 4, 18], 1.0)]
      + [plant(0x060C7000 + 0xC60 + 168 * k, 4, [0, 0, 1, 5], 0.6) for k in range(20)])
-case("f06098700", [pick(FIX), span(-3, 3), pick(0x060C8000)], False)
+case("f06098700", [pick(FIX), span(-3, 3), pick(0x060C8000)], True)
 case("f0609870C", [pick(FIX)], False, [plant(FIX + 4, 4, [0x060C8000], 1.0)] + TABLES)
 case("f06099828", [], False,
      [plant(0x060FA97C, 1, [0, 1, 3, 6], 1.0), plant(0x060FA920, 4, [0x060C8000], 1.0), plant(0x060FA930, 4, [0x060C9000], 1.0),

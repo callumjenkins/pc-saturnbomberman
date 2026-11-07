@@ -17,14 +17,24 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "saturn-recomp", "src"))
+import modules  # noqa: E402
 import registers  # noqa: E402
 import status  # noqa: E402
 import structure  # noqa: E402
 from saturnrecomp import sh2  # noqa: E402
-from state import LOCAL_TYPES, MAC, VAR, State, Stmt, Unsupported, const, fold_frame, framed, number, sp_change, step, strip  # noqa: E402
+from state import (LOCAL_TYPES, MAC, NO_FLAG, VAR, Copies, State, Stmt, Unsupported, const, fold_frame, framed,  # noqa: E402
+                   number, restored, sp_change, step, strip, track)
 
-IMAGES = {"KRNL": ("build/extract/BOMSS/0KRNL.BIN", 0x06006000)}
 _CALLS = ("bsr", "jsr")
+MAX_ROUNDS = 12                         # times read_blocks reads every block again before it gives up
+
+
+class Stops(dict):
+    """r15's offset at each leader, and in `copies` the registers that hold r15 at one offset throughout."""
+
+    def __init__(self, offsets: dict[int, int], copies: dict[int, int]) -> None:
+        super().__init__(offsets)
+        self.copies = copies
 
 
 @dataclass
@@ -36,12 +46,16 @@ class Read:
     tail: bool = False                      # it ends by jumping to another function
     fresh: set[int] = field(default_factory=set)         # State.fresh where the block ends
     clobbered: set[int] = field(default_factory=set)     # State.clobbered where the block ends
+    lacks: str = ""                         # State.lacks: the block reads a T bit nothing before it set
+    flag: str | None = None                 # State.flag where the block ends: what T holds on the way to its fall-through
+    taken: str | None = None                # what T holds on the way to the target of its branch
 
 
 def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: "sh2.Image",
          functions: dict[int, set[int]] | None = None) -> bool:
-    """Writes the call as a statement. With `functions`, the arguments are the registers the callee
-    reads. Without, a call passes those set since the last call, and a tail call hands on r4 to r7 as
+    """Writes the call as a statement. With `functions`, the arguments are the registers the callee reads, except
+    those at the end that an earlier call overwrote: the callee finds there what that call left, as it does in the
+    game's code. Without, a call passes those set since the last call, and a tail call hands on r4 to r7 as
     they stand, except those an earlier call overwrote: those at the end are left out, and one before a
     register that does go in passes 0."""
     tail = ins.op in ("jmp", "bra")
@@ -50,7 +64,7 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
     if through_register and status.jump_kinds().get(ins.pc) == "switch":
         raise Unsupported("a jump table at %08X" % ins.pc)
     step(slot, st, image)
-    if through_register and ins.pc in status.polling_jumps():
+    if ins.op == "jmp" and functions is not None and ins.pc in status.polling_jumps():
         st.effect("POLL();")
     if st.parked and not tail:
         spill(ins, st, image, functions)
@@ -79,18 +93,22 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         if helper:
             raise Unsupported("calls %s, which takes r%d, as a runtime routine does: write its operator in HELPER()"
                               % (where, helper[0]))
-        args = [st.get(r) if r in reads else "0" for r in range(4, max(reads, default=3) + 1)]
+        top = max((r for r in reads if r not in st.clobbered), default=3)
+        args = [st.get(r) if r in reads else "0" for r in range(4, top + 1)]
     else:
-        for r in range(4, 8):
-            if r not in st.fresh and r not in params and not tail:
-                break
+        top = 7 if tail else max((r for r in range(4, 8) if r in st.fresh or r in params), default=3)
+        for r in range(4, top + 1):
             args.append("" if r in st.clobbered else st.get(r))
         while args and not args[-1]:
             args.pop()
         args = [a or "0" for a in args]
     extra = stack_arguments(st) if not tail and not st.parked else []   # a parked function's are in its frame already
     if extra:
-        args += ["0"] * (4 - len(args)) + extra
+        for r in sorted(reads or ()):
+            if r > 3 + len(args):
+                st.get(r)                       # overwritten by a call: it cannot be left out before a stack argument
+        args += [st.get(r) for r in range(4 + len(args), 8)] if reads is None else ["0"] * (4 - len(args))
+        args += extra
     text = "%s%d(%s%s)" % ("GJUMP" if tail else "GCALL", len(args), where, "".join(", " + a for a in args))
     if tail and st.framed and not st.sp:
         st.effect("UNFRAME(sp);")
@@ -119,15 +137,38 @@ def spill(ins: "sh2.Insn", st: State, image: "sh2.Image", functions: dict[int, s
     if resumes and functions is not None:
         for reg in sorted(registers.saved(image, after, functions)):
             st.effect("SETR(%d, %s);" % (reg, strip(st.get(reg))))
-    st.effect("SETSP(%s);" % st.get(15))
+    set_sp = "SETSP(%s);" % st.get(15)
+    if st.sp_set != set_sp:
+        st.effect(set_sp)
     if resumes:
         st.effect("SETPR(0x%08X);" % after)
 
 
-def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None, parked: bool = False) -> dict[int, int]:
+def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None, parked: bool = False) -> Stops:
     """Entry plus every branch target and instruction that follows a branch, with r15's offset at each. A parked
     function may leave with its frame still down, by a jump to code that pops it."""
+    found, _, _, copies = walk(image, entry, code, parked)
+    return Stops(found, copies)
+
+
+def frame_depth(image: "sh2.Image", entry: int, code: set[int] | None = None) -> int:
+    """How many bytes below its entry the function's own pushes and stack adjustments take r15 at the lowest."""
+    return -walk(image, entry, code, True)[1]
+
+
+def tail_offsets(image: "sh2.Image", entry: int, code: set[int] | None = None) -> set[int]:
+    """r15's offset from its entry value at each jump the function makes to code outside it."""
+    return walk(image, entry, code, True)[2]
+
+
+def walk(image: "sh2.Image", entry: int, code: set[int] | None,
+         parked: bool) -> tuple[dict[int, int], int, set[int], dict[int, int]]:
+    """`leaders`, the lowest offset r15 has at any instruction, its offsets at the jumps out of the function, and the
+    registers that copy it. A `mov Rm,r15` of a copy sets it back to the offset the copy was made at."""
     found = {entry: 0}
+    copies = Copies()
+    lowest = 0
+    tails: set[int] = set()
     seen: set[int] = set()
     work = [(entry, 0)]
 
@@ -139,6 +180,7 @@ def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None, parked
 
     while work:
         at, sp = work.pop()
+        known: dict[int, int] = {}
         while at not in seen and image.contains(at):
             seen.add(at)
             ins = image.insn(at)
@@ -146,7 +188,14 @@ def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None, parked
             nxt = at + (4 if slot else 2)
             if ins.op in ("braf", "bsrf", "rte", "trapa", "sleep") or ins.op == ".word":
                 raise Unsupported("%s at %08X" % (ins.text, at))
-            sp += sp_change(ins) + (sp_change(slot) if slot else 0)
+            for each in (ins, slot) if slot else (ins,):
+                copies.note(each, sp)
+                restore = restored(each, copies.at, copies.adjust)
+                if restore is not None:
+                    copies.adjust.pop(each.m, None)
+                sp = sp + sp_change(each, known) if restore is None else restore
+            track(ins, known, image)
+            lowest = min(lowest, sp)
             leaves = code is not None and ins.target is not None and ins.target not in code
             if leaves and ins.op != "bra" and ins.op in ("bt", "bf", "bt/s", "bf/s"):
                 raise Unsupported("a conditional branch out of the function at %08X" % at)
@@ -158,9 +207,12 @@ def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None, parked
                 if sp and not (parked and ins.op != "rts"):
                     raise Unsupported("returns with the stack %d bytes off at %08X: a piece of a larger function"
                                       % (sp, at))
+                if ins.op != "rts" and (leaves or ins.op == "jmp"):
+                    tails.add(sp)
                 break
             at = nxt
-    return found
+        copies.end()
+    return found, lowest, tails, copies.kept()
 
 
 def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions: dict[int, set[int]] | None = None,
@@ -218,14 +270,21 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
     return "\n".join([head, "{"] + decl + ["    " + line for line in lines] + ["}"]) + "\n"
 
 
-def frame_size(image: "sh2.Image", stops: dict[int, int]) -> int:
+def frame_size(image: "sh2.Image", stops: Stops) -> int:
     """How far below its entry value r15 goes."""
     low = 0
     for at, sp in stops.items():
+        known: dict[int, int] = {}
+        adjust: dict[int, int] = {}
         while True:
             ins = image.insn(at)
             slot = image.insn(at + 2) if ins.delay else None
-            sp += sp_change(ins) + (sp_change(slot) if slot else 0)
+            for each in (ins, slot) if slot else (ins,):
+                restore = restored(each, stops.copies, adjust)
+                sp = sp + sp_change(each, known) if restore is None else restore
+                if each.op == "add" and each.imm is not None and each.n in stops.copies:
+                    adjust[each.n] = adjust.get(each.n, 0) + each.imm
+            track(ins, known, image)
             low = min(low, sp)
             at += 4 if slot else 2
             if slot or ins.op in ("bt", "bf", "rts") or at in stops:
@@ -258,18 +317,19 @@ def stack_arguments(st: State) -> list[str]:
     return [("LD32(%s)" % framed(off)) if st.framed else "v%d" % -off for off in words]
 
 
-def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: set[int], flags: int,
+def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], flags: int,
                slots: dict[int, int], fresh: set[int], code: set[int] | None,
                functions: dict[int, set[int]] | None = None, framed: bool = False,
                stored: set[int] | None = None, saved: set[int] | None = None, parked: bool = False,
-               clobbered: set[int] = frozenset()) -> tuple[Read, int]:
-    st = State(flags=flags, sp=stops[start], slots=slots, fresh=set(fresh), framed=framed, parked=parked,
-               clobbered=set(clobbered),
+               clobbered: set[int] = frozenset(), flag: str | None = None) -> tuple[Read, int]:
+    st = State(flags=flags, sp=stops[start], copies=stops.copies, slots=slots, fresh=set(fresh), framed=framed, parked=parked,
+               clobbered=set(clobbered), flag=flag,
                touched=registers.written(image, code) if code is not None else frozenset(range(8, 15)),
                stored=stored if stored is not None else set(), saved=saved if saved is not None else set())
     block = structure.Block(start)
     term = ""
     tail = False
+    taken_flag = None
     at = start
     while True:
         ins = image.insn(at)
@@ -277,10 +337,15 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
         nxt = at + (4 if slot else 2)
         if ins.op in ("bt", "bf", "bt/s", "bf/s"):
             if st.flag is None:
-                raise Unsupported("a branch on a T bit set in another block at %08X" % at)
-            test = st.flag
+                st.lacks = st.lacks or "a branch on a T bit set in another block at %08X" % at
+            test = st.flag or NO_FLAG
+            before = st.flag
             if slot:
                 step(slot, st, image)
+            if st.flag == before:           # the slot left T alone, so on each way out it holds what the test settled
+                taken_flag, st.flag = ("1", "0") if ins.op.startswith("bt") else ("0", "1")
+            else:
+                taken_flag = st.flag
             term = test if ins.op.startswith("bt") else "!" + test
             block.kind, block.targets = "branch", [ins.target, nxt]
             block.polls = [ins.target] if ins.target <= at else []
@@ -304,6 +369,7 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
             break
         if ins.op in _CALLS:
             call(ins, slot, st, params, image, functions)
+            st.flag = None
         else:
             step(ins, st, image)
             if slot:
@@ -312,10 +378,10 @@ def read_block(image: "sh2.Image", start: int, stops: dict[int, int], params: se
         if at in stops:
             block.kind, block.targets = "goto", [at]
             break
-    return Read(block, st.stmts, term, tail, st.fresh, st.clobbered), st.flags
+    return Read(block, st.stmts, term, tail, st.fresh, st.clobbered, st.lacks, st.flag, taken_flag), st.flags
 
 
-def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: set[int], code: set[int] | None,
+def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], code: set[int] | None,
                 functions: dict[int, set[int]] | None = None, framed: bool = False,
                 parked: bool = False) -> tuple[dict[int, Read], dict[int, int]]:
     """Every block, read until the registers a call may pass settle: those written since the last call
@@ -323,7 +389,8 @@ def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: s
     overwrote on some path into it, which the block may not read."""
     fresh = {at: set() if at == entry else set(range(16)) for at in stops}
     clobbered: dict[int, set[int]] = {at: set() for at in stops}
-    while True:
+    carried: dict[int, str | None] = {at: None for at in stops}
+    for _ in range(MAX_ROUNDS):
         flags = 0
         reads: dict[int, Read] = {}
         slots: dict[int, int] = {}
@@ -331,18 +398,26 @@ def read_blocks(image: "sh2.Image", entry: int, stops: dict[int, int], params: s
         saved: set[int] = set()
         for at in sorted(stops):
             reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions, framed,
-                                          stored, saved, parked, clobbered[at])
+                                          stored, saved, parked, clobbered[at], carried[at])
         into: dict[int, list[set[int]]] = {at: [] for at in stops}
         after: dict[int, list[set[int]]] = {at: [] for at in stops}
+        holding: dict[int, list[str | None]] = {at: [] for at in stops}
         for read in reads.values():
-            for target in read.block.targets:
+            for i, target in enumerate(read.block.targets):
                 into[target].append(read.fresh)
                 after[target].append(read.clobbered)
+                holding[target].append(read.taken if read.block.kind == "branch" and i == 0 else read.flag)
         settled = {at: set() if at == entry or not into[at] else set.intersection(*into[at]) for at in stops}
         spoiled = {at: set().union(*after[at]) for at in stops}
-        if settled == fresh and spoiled == clobbered:
+        # T is carried into a block only when every way into it leaves it in the same variable
+        leaving = {at: None if at == entry or len(set(holding[at])) != 1 else holding[at][0] for at in stops}
+        if settled == fresh and spoiled == clobbered and leaving == carried:
+            for read in reads.values():
+                if read.lacks:
+                    raise Unsupported(read.lacks)
             return reads, slots
-        fresh, clobbered = settled, spoiled
+        fresh, clobbered, carried = settled, spoiled, leaving
+    raise Unsupported("what the blocks leave in registers and T does not settle")
 
 
 def simplify(read: Read, live_out: set[str], returns: bool) -> None:
@@ -402,14 +477,13 @@ def uses_of(read: Read, returns: bool) -> set[str]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("address", help="hex entry address")
-    parser.add_argument("--module", default="KRNL", choices=sorted(IMAGES))
+    parser.add_argument("--module", default=modules.DEFAULT, choices=modules.SCOPE)
     parser.add_argument("--append", action="store_true", help="add the draft to its file in src/ instead of printing it")
     parser.add_argument("--parked", action="store_true", help="the function is one a task can park in")
     args = parser.parse_args()
-    path, base = IMAGES[args.module]
-    with open(os.path.join(ROOT, path), "rb") as f:
-        image = sh2.Image(f.read(), base)
-    functions = status.function_code() if args.module == "KRNL" else {}
+    os.environ["DECOMP_MODULE"] = args.module
+    image = status.image()
+    functions = status.function_code()
     try:
         draft = lift(image, int(args.address, 16), functions.get(int(args.address, 16)), functions or None, args.parked)
     except (Unsupported, structure.Unstructured) as error:

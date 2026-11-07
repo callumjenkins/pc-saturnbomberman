@@ -263,7 +263,7 @@ PCM = HS + [plant(STREAM + 56, 4, [-1, 0, 1, 2, 3, 4, 5, 9], 1.0), plant(STREAM 
             plant(STREAM + 160, 4, [0, 5], 1.0), plant(STREAM + 184, 4, [0, 1], 1.0), plant(STREAM + 32, 4, [0, 100, 1000], 1.0)]
 case("f060ABCCC", [], True, PCM + [plant(0x060FC168, 4, [0, HANDLE], 1.0)])
 case("f060AC500", [pick(HANDLE)], False, PCM)
-case("f060AD27A", [pick(HANDLE), pick(BUF + 0x5200), pick(BUF + 0x5300)], False, PCM)
+case("f060AD27A", [pick(HANDLE), pick(BUF + 0x5200), pick(BUF + 0x5300)], True, PCM)
 case("f060AD564", [pick(HANDLE), pick(BUF + 0x5200)], False, PCM + [plant(STREAM + 52, 4, [-1, 0, 1, 2, 3, 4, 5, 9], 1.0),
                                                                     plant(STREAM + 160, 4, [0, 5], 1.0), plant(STREAM + 164, 4, [0, 100], 1.0)])
 case("f060AD848", [pick(HANDLE)], True, PCM)
@@ -273,7 +273,8 @@ case("f060ABB80", [pick(HANDLE), pick(HANDLE3)], True, PCM + [plant(STREAM3, 4, 
                                                               plant(STREAM3 + 52 + 108, 4, [0, 5], 1.0)]
      + [plant(STREAM + o, 4, [5], 1.0) for o in (28, 32, 36)] + [plant(STREAM3 + o, 4, [5, 5, 6], 0.9) for o in (28, 32, 36)]
      + [plant(PAR + 56, 4, [10], 1.0), plant(PAR3 + 56, 4, [10, 10, 11], 0.9), plant(STREAM + 52 + 124, 4, [9], 1.0),
-        plant(STREAM3 + 52 + 124, 4, [9, 9, 8], 0.9), plant(PAR3 + 37, 1, [0, 1], 1.0)])
+        plant(STREAM3 + 52 + 124, 4, [9, 9, 8], 0.9), plant(PAR3 + 37, 1, [0, 1], 1.0)],
+     stubbed=False)
 
 RB = BUF + 0x6000
 case("f060AFEA8", [pick(RB), pick(RB + 0x40), pick(RB + 0x80), pick(RB + 0x100, RB + 0x200)], True,

@@ -9,6 +9,7 @@ int f060700E4(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -91,6 +92,7 @@ int f060704D0(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -201,6 +203,7 @@ int f06070660(void)
 {
     int r0, r1, r2, r3, r4, r5, r8, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(8));
@@ -268,6 +271,7 @@ int f06070748(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -305,6 +309,7 @@ int f06070748(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -314,6 +319,7 @@ int f060707C2(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -355,6 +361,7 @@ int f060707C2(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -364,6 +371,7 @@ int f060708BC(void)
 {
     int r0, r1, r2, r4, r5;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -384,6 +392,7 @@ int f060708EA(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -416,6 +425,7 @@ int f060708EA(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -425,6 +435,7 @@ int f06070A04(void)
 {
     int r0, r1, r2, r3, r4, r5, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -478,6 +489,7 @@ int f06070C2C(void)
 {
     int r0, r2, r3, r4, r5, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 24);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -571,6 +583,7 @@ int f06070DE8(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -591,6 +604,7 @@ int f06070DE8(int r4, int r5, int r6, int r7)
     ST16(58 + r2, 99);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x06014516, 0x0606E864);
     return r0;
 }
@@ -610,6 +624,7 @@ int f06070F1C(void)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -630,6 +645,7 @@ int f06070F7A(void)
 {
     int r0, r2, r3, r4, r5, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -688,6 +704,7 @@ int f06071142(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -702,6 +719,7 @@ int f06071142(int r4, int r5, int r6, int r7)
     ST16(42 + r3, (r2 | 2));
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x060144F4, 0x060711DC);
     return r0;
 }
@@ -715,6 +733,7 @@ int f0607127C(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -814,6 +833,7 @@ int f060714D8(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 40);
 
     ST32((sp - 4), R(14));
     r14 = 15;
@@ -957,6 +977,7 @@ int f060718A8(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     r3 = LD32(0x060D7768);
@@ -976,6 +997,7 @@ int f060718A8(int r4, int r5, int r6, int r7)
         ST16((0x060EE8B0 + ((r0 & 0xFFFF) << 1)), r3);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -1005,6 +1027,7 @@ int f060719F0(void)
 {
     int r0, r2, r3, r4, r5, r6, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     r5 = 0x060D7B3C;
@@ -1090,6 +1113,7 @@ int f06071B9C(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 28);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -1247,6 +1271,7 @@ int f06071E16(void)
 {
     int r0, r2, r3, r4, r5;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -1278,6 +1303,7 @@ int f06071E64(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -1314,6 +1340,7 @@ int f06071E64(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -1323,6 +1350,7 @@ int f06071F0C(void)
 {
     int r0, r1, r2, r3, r4, r5, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -1398,6 +1426,7 @@ int f06072052(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -1432,6 +1461,7 @@ int f06072052(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -1441,6 +1471,7 @@ int f0607217C(void)
 {
     int r0, r1, r2, r3, r4, r5, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 28);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -1501,6 +1532,7 @@ int f06072380(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -1510,6 +1542,7 @@ int f06072380(int r4, int r5, int r6, int r7)
     r4 = LD16(40 + r4);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0606D8E6, (r4 & 0xFFFF));
     return r0;
 }
@@ -1528,6 +1561,7 @@ int f06072406(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -1632,6 +1666,7 @@ int f060725F2(void)
 {
     int r0, r2, r3, r4, r5, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 24);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -1728,6 +1763,7 @@ int f06072778(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -1744,6 +1780,7 @@ int f06072778(int r4, int r5, int r6, int r7)
     ST32(0x060E2154 + ((short)(((r3 << 2) + r3) << 2)), 0x06072812);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x060144F4, 0x060727BE);
     return r0;
 }
@@ -1752,6 +1789,7 @@ int f060727BE(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -1779,6 +1817,7 @@ int f060727BE(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -1788,6 +1827,7 @@ int f06072812(void)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -1808,6 +1848,7 @@ int f060728F8(void)
 {
     int r0, r3, r4, r5, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -1862,6 +1903,7 @@ int f060729C4(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -1900,6 +1942,7 @@ int f060729C4(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -1909,6 +1952,7 @@ int f06072A34(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -1943,6 +1987,7 @@ int f06072A34(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -1965,6 +2010,7 @@ int f06072BBA(void)
 {
     int r0, r2, r3, r4;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     r4 = LD32(0x060D7768);
@@ -2062,6 +2108,7 @@ int f06072C22(int r4, int r5, int r6, int r7)
 {
     int r0, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -2093,6 +2140,7 @@ int f06072C22(int r4, int r5, int r6, int r7)
                 SETPR(LD32((sp - 8)));
                 SETR(14, LD32((sp - 4)));
                 UNFRAME(sp);
+                SETSP(sp);
                 r0 = GJUMP1(0x06014516, 0x0606E864);
                 return r0;
             } else {
@@ -2116,6 +2164,7 @@ int f06072CD8(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -2163,6 +2212,7 @@ int f06072CD8(int r4, int r5, int r6, int r7)
     SETPR(LD32((sp - 8)));
     SETR(14, LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x06014516, 0x0606D8B6);
     return r0;
 }
@@ -2171,6 +2221,7 @@ int f06072D62(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -2197,6 +2248,7 @@ int f06072D62(int r4, int r5, int r6, int r7)
     r0 = GCALL1(0x060144F4, 0x06072DCA);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0600996A, 195);
     return r0;
 }
@@ -2216,6 +2268,7 @@ int f06072ECA(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -2233,6 +2286,7 @@ int f06072ECA(int r4, int r5, int r6, int r7)
     ST16((62 + r3), 10);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x060144F4, 0x06072F9C);
     return r0;
 }
@@ -2241,6 +2295,7 @@ int f06072F9C(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 40);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -2336,6 +2391,7 @@ int f06072F9C(int r4, int r5, int r6, int r7)
             SETR(13, LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP0(0x0606D410);
             return r0;
         } else {
@@ -2349,6 +2405,7 @@ int f06072F9C(int r4, int r5, int r6, int r7)
             SETR(13, LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP1(0x060144F4, 0x0606D398);
             return r0;
         }
@@ -2359,6 +2416,7 @@ int f06073112(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     r4 = LD32(0x060D7768);
@@ -2454,6 +2512,7 @@ int f06073242(void)
 {
     int r0, r1, r2, r3, r4, r5, r8, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 24);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -2593,6 +2652,7 @@ int f06073468(int r4, int r5, int r6, int r7)
 {
     int r0, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 40);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -2648,6 +2708,7 @@ int f06073468(int r4, int r5, int r6, int r7)
     SETR(13, LD32((sp - 8)));
     SETR(14, LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x060144F4, 0x0606D2C8);
     return r0;
 }
@@ -2656,6 +2717,7 @@ int f060734F8(void)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -2675,6 +2737,7 @@ int f06073520(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -2696,6 +2759,7 @@ int f06073520(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -2705,6 +2769,7 @@ int f060735A0(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -2739,6 +2804,7 @@ int f060735A0(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -2748,6 +2814,7 @@ int f06073678(void)
 {
     int r0, r1, r2, r3, r4, r5, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -2808,6 +2875,7 @@ int f06073726(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -2894,6 +2962,7 @@ int f06073726(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     } else {
@@ -2957,6 +3026,7 @@ int f06073AEC(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -2990,6 +3060,7 @@ int f06073AEC(int r4, int r5, int r6, int r7)
             return r0;
         } else {
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP2(0x060689FC, 0x060BA654, 107);
             return r0;
         }
@@ -3011,6 +3082,7 @@ int f06073B72(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -3024,6 +3096,7 @@ int f06073B72(int r4, int r5, int r6, int r7)
         ST16(68 + r2, 1);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -3033,6 +3106,7 @@ int f06073BE0(void)
 {
     int r0, r2, r3, r4, r5, r6, r7, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -3147,6 +3221,7 @@ int f06073D4C(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -3192,6 +3267,7 @@ int f06073D4C(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -3201,6 +3277,7 @@ int f06073DC6(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -3221,12 +3298,14 @@ int f06073DC6(int r4, int r5, int r6, int r7)
         if ((r0 & r0) == 0) {
             SETPR(LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP0(0x0606D410);
             return r0;
         } else {
             r4 = LD16(0x060C062C);
             SETPR(LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP1(0x0606B194, (r4 & 0xFFFF));
             return r0;
         }
@@ -3237,6 +3316,7 @@ int f06073E02(void)
 {
     int r0, r1, r2, r4, r5, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -3268,6 +3348,7 @@ int f06073E4E(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -3277,6 +3358,7 @@ int f06073E4E(int r4, int r5, int r6, int r7)
     r0 = GCALL0(0x0606C7FE);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x060144F4, 0x06073EB8);
     return r0;
 }
@@ -3285,6 +3367,7 @@ int f06073EB8(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -3319,6 +3402,7 @@ int f06073EB8(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -3338,6 +3422,7 @@ int f06073FF8(void)
 {
     int r0, r2, r3, r4, r5, r8, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(8));
@@ -3387,6 +3472,7 @@ int f0607421E(void)
 {
     int r0, r2, r3, r4, r5, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -3438,6 +3524,7 @@ int f060742E4(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -3493,6 +3580,7 @@ int f060742E4(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP1(0x060144F4, 0x0606D8B6);
         return r0;
     } else {
@@ -3505,6 +3593,7 @@ int f060742E4(int r4, int r5, int r6, int r7)
             SETPR(LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP1(0x060144F4, 0x0606D8B6);
             return r0;
         } else {
@@ -3514,6 +3603,7 @@ int f060742E4(int r4, int r5, int r6, int r7)
             SETPR(LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP1(0x06014516, 0x0606D8B6);
             return r0;
         }
@@ -3523,7 +3613,7 @@ int f060742E4(int r4, int r5, int r6, int r7)
 void f060743A6(void)
 {
     POLL();
-    GJUMP0(0x06073968);
+    f06073968();
 }
 
 void f060743AA(void)
@@ -3540,6 +3630,7 @@ int f06074424(void)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     r2 = LD32(0x060D7768);
@@ -3557,6 +3648,7 @@ int f06074444(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -3600,6 +3692,7 @@ int f06074444(int r4, int r5, int r6, int r7)
         SETMACL(LD32((sp - 8)));
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -3609,6 +3702,7 @@ int f060744DC(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -3625,6 +3719,7 @@ int f060744DC(int r4, int r5, int r6, int r7)
     r0 = GCALL1(0x060144F4, 0x06074522);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0600996A, 188);
     return r0;
 }
@@ -3633,6 +3728,7 @@ int f06074522(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -3660,6 +3756,7 @@ int f06074522(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -3669,6 +3766,7 @@ int f06074576(void)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -3689,6 +3787,7 @@ int f06074604(void)
 {
     int r0, r1, r2, r3, r4, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -3728,6 +3827,7 @@ int f0607466C(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -3739,6 +3839,7 @@ int f0607466C(int r4, int r5, int r6, int r7)
     } else {
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -3748,6 +3849,7 @@ int f06074684(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -3764,6 +3866,7 @@ int f06074684(int r4, int r5, int r6, int r7)
     } else {
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP1(0x06014516, 0x0606D37A);
         return r0;
     }
@@ -3773,6 +3876,7 @@ int f060746AC(void)
 {
     int r0, r1, r4, r5;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     r4 = LD16(0x060C1AA8);
@@ -3934,6 +4038,7 @@ int f06074DC0(void)
 {
     int r0, r1, r2, r3, r4, r5, r8, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 28);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -4028,6 +4133,7 @@ int f06074E20(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, c2;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -4068,6 +4174,7 @@ int f06074E20(int r4, int r5, int r6, int r7)
         SETMACL(LD32((sp - 8)));
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -4077,6 +4184,7 @@ int f060750D4(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -4111,6 +4219,7 @@ int f060750D4(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -4120,6 +4229,7 @@ int f0607512C(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -4161,6 +4271,7 @@ int f0607512C(int r4, int r5, int r6, int r7)
                 SETR(13, LD32((sp - 8)));
                 SETR(14, LD32((sp - 4)));
                 UNFRAME(sp);
+                SETSP(sp);
                 r0 = GJUMP0(0x0606D410);
                 return r0;
             } else {
@@ -4181,6 +4292,7 @@ int f0607512C(int r4, int r5, int r6, int r7)
                     SETR(13, LD32((sp - 8)));
                     SETR(14, LD32((sp - 4)));
                     UNFRAME(sp);
+                    SETSP(sp);
                     r0 = GJUMP0(0x0606D410);
                     return r0;
                 } else {
@@ -4188,6 +4300,7 @@ int f0607512C(int r4, int r5, int r6, int r7)
                     SETR(13, LD32((sp - 8)));
                     SETR(14, LD32((sp - 4)));
                     UNFRAME(sp);
+                    SETSP(sp);
                     r0 = GJUMP1(0x060144F4, 0x0606D398);
                     return r0;
                 }
@@ -4217,6 +4330,7 @@ int f0607512C(int r4, int r5, int r6, int r7)
             SETR(13, LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP0(0x0606D410);
             return r0;
         }
@@ -4227,6 +4341,7 @@ int f060752B0(void)
 {
     int r0, r1, r2, r3, r4, r5, r6, r7, r8, r13;
     ENTRY_SP(sp);
+    SETSP(sp - 44);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -4286,6 +4401,7 @@ int f06075384(void)
 {
     int r0, r2, r3, r4, r5, r8, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -4355,6 +4471,7 @@ int f0607544E(void)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     r3 = LD16(0x060C277C);
@@ -4372,6 +4489,7 @@ int f0607553A(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -4405,6 +4523,7 @@ int f0607553A(int r4, int r5, int r6, int r7)
     r4 = LD16(0x060C1AA8);
     SETR(14, LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP2(0x06068A8E, (r4 & 0xFFFF), 0);
     return r0;
 }
@@ -4413,6 +4532,7 @@ int f060755C8(void)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -4440,6 +4560,7 @@ int f06075648(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -4527,6 +4648,7 @@ int f06075648(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     } else {
@@ -4545,6 +4667,7 @@ int f06075766(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -4571,6 +4694,7 @@ int f06075766(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -4580,6 +4704,7 @@ int f060757A6(void)
 {
     int r0, r3, r4, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -4627,6 +4752,7 @@ int f0607581A(int r4)
 {
     int r0, r3, r5;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     r5 = r4;
     ST32((sp - 4), PR());
@@ -4650,6 +4776,7 @@ int f0607587C(int r4)
 {
     int r0, r1, r2, r3, r5, r6, r7, r8, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 48);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -4732,6 +4859,7 @@ int f06075950(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     r4 = 1;
     ST32((sp - 4), R(14));
@@ -4788,6 +4916,7 @@ int f06075950(int r4, int r5, int r6, int r7)
             SETR(8, LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP3(0x060693DC, (r4 & 0xFFFF), (r5 & 0xFFFF), -1);
             return r0;
         }
@@ -4798,6 +4927,7 @@ int f06075954(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     r4 = 0;
     ST32((sp - 4), R(14));
@@ -4854,6 +4984,7 @@ int f06075954(int r4, int r5, int r6, int r7)
             SETR(8, LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP3(0x060693DC, (r4 & 0xFFFF), (r5 & 0xFFFF), -1);
             return r0;
         }
@@ -4864,6 +4995,7 @@ int f06075A14(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -4898,6 +5030,7 @@ int f06075A14(int r4, int r5, int r6, int r7)
         SETMACL(LD32((sp - 8)));
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -4907,6 +5040,7 @@ int f06075AC0(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -4929,6 +5063,7 @@ int f06075AC0(int r4, int r5, int r6, int r7)
         SETMACL(LD32((sp - 8)));
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -4938,6 +5073,7 @@ int f06075B04(void)
 {
     int r0, r2, r3, r4, r5;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -4976,6 +5112,7 @@ int f06075C38(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -4989,6 +5126,7 @@ int f06075C38(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x060144F4, 0x0606D2C8);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5052,6 +5190,7 @@ int f06075D98(int r4)
 {
     int r0, r1, r2, r3, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 84);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -5223,6 +5362,7 @@ int f06075F92(int r4, int r5, int r6)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -5249,6 +5389,7 @@ int f06075FE8(void)
 {
     int r0, r2, r3, r8;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(8));
@@ -5283,6 +5424,7 @@ int f06076048(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -5299,6 +5441,7 @@ int f06076048(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5308,6 +5451,7 @@ int f06076070(int r4, int r5, int r6, int r7)
 {
     int r0, r8, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(8));
@@ -5349,6 +5493,7 @@ int f06076070(int r4, int r5, int r6, int r7)
         SETR(8, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5382,6 +5527,7 @@ int f060761BE(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -5416,6 +5562,7 @@ int f060761BE(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5425,6 +5572,7 @@ int f06076250(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -5456,6 +5604,7 @@ int f06076250(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5465,6 +5614,7 @@ int f060762AE(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -5516,6 +5666,7 @@ int f060762AE(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5525,6 +5676,7 @@ int f06076374(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r11, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 24);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -5624,6 +5776,7 @@ int f06076374(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5633,6 +5786,7 @@ int f06076488(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -5690,6 +5844,7 @@ int f06076488(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5699,6 +5854,7 @@ int f06076528(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -5710,6 +5866,7 @@ int f06076528(int r4, int r5, int r6, int r7)
     } else {
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5719,6 +5876,7 @@ int f06076540(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -5755,6 +5913,7 @@ int f06076540(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5764,6 +5923,7 @@ int f06076608(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -5790,6 +5950,7 @@ int f06076608(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -5815,6 +5976,7 @@ int f060766D8(void)
 {
     int r0, r1, r2, r3, r4, r5, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 48);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -5947,6 +6109,7 @@ int f06076874(int r4)
 {
     int r0, r2, r5, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -5974,6 +6137,7 @@ int f060768B0(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -5997,6 +6161,7 @@ int f060768B0(int r4, int r5, int r6, int r7)
     ST16(74 + r3, 0);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0600996A, 115);
     return r0;
 }
@@ -6005,6 +6170,7 @@ int f0607690E(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -6044,6 +6210,7 @@ int f0607690E(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -6053,6 +6220,7 @@ int f060769DC(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r8, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 44);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -6144,6 +6312,7 @@ int f060769DC(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -6164,6 +6333,7 @@ int f06076B3C(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -6189,6 +6359,7 @@ int f06076B3C(int r4, int r5, int r6, int r7)
     r4 = LD16(40 + r4);
     SETR(14, LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0606D8E6, (r4 & 0xFFFF));
     return r0;
 }
@@ -6205,6 +6376,7 @@ int f06076BE0(void)
 {
     int r0, r1, r2, r4, r6, r7, r11, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 48);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -6258,6 +6430,7 @@ int f06076C66(void)
 {
     int r0, r3, r4, r5, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -6303,6 +6476,7 @@ int f06076D1A(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r8, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 48);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -6376,6 +6550,7 @@ int f06076D1A(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -6385,6 +6560,7 @@ int f06076DDA(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -6429,6 +6605,7 @@ int f06076DDA(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -6452,6 +6629,7 @@ int f060771D4(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -6487,6 +6665,7 @@ int f060771D4(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -6496,6 +6675,7 @@ int f0607723A(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -6519,6 +6699,7 @@ int f0607723A(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x0600996A, 76);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -6528,6 +6709,7 @@ int f0607727E(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     r3 = LD16(0x060C062C);
@@ -6543,6 +6725,7 @@ int f0607727E(int r4, int r5, int r6, int r7)
     r0 = GCALL0(0x06039FA4);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x060775C6, 0);
     return r0;
 }
@@ -6551,6 +6734,7 @@ int f06077330(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     ST16(0x060C27CE, 0);
@@ -6569,6 +6753,7 @@ int f06077330(int r4, int r5, int r6, int r7)
         if (!((r0 & r0) == 0)) {
             SETPR(LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP0(0x0606D410);
             return r0;
         } else {
@@ -6581,6 +6766,7 @@ int f06077330(int r4, int r5, int r6, int r7)
             if ((r0 & r0) == 0) {
                 SETPR(LD32((sp - 4)));
                 UNFRAME(sp);
+                SETSP(sp);
                 r0 = GJUMP0(0x0606D410);
                 return r0;
             } else {
@@ -6609,6 +6795,7 @@ int f060773A8(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -6629,6 +6816,7 @@ int f060773A8(int r4, int r5, int r6, int r7)
             SETPR(LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP0(0x0606D410);
             return r0;
         } else {
@@ -6643,6 +6831,7 @@ int f060773A8(int r4, int r5, int r6, int r7)
                 SETPR(LD32((sp - 8)));
                 SETR(14, LD32((sp - 4)));
                 UNFRAME(sp);
+                SETSP(sp);
                 r0 = GJUMP0(0x0606D410);
                 return r0;
             } else {
@@ -6654,6 +6843,7 @@ int f060773A8(int r4, int r5, int r6, int r7)
                     SETPR(LD32((sp - 8)));
                     SETR(14, LD32((sp - 4)));
                     UNFRAME(sp);
+                    SETSP(sp);
                     r0 = GJUMP0(0x0606D410);
                     return r0;
                 } else {
@@ -6693,6 +6883,7 @@ int f060774A8(void)
 {
     int r0, r1, r2, r3, r4, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -7110,6 +7301,7 @@ int f06077738(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r8, r9, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(9));
@@ -7161,6 +7353,7 @@ int f06077738(int r4, int r5, int r6, int r7)
         SETR(9, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7170,6 +7363,7 @@ int f060777F6(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7191,6 +7385,7 @@ int f060777F6(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x0606D88C);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7200,6 +7395,7 @@ int f06077834(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -7238,6 +7434,7 @@ int f06077834(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7248,6 +7445,7 @@ void f06077870(void)
     ST16(0x060C27D2, LD16(0x060C27D0));
     GCALL1(0x060144F4, 0x060778FC);
     GCALL1(0x06014516, 0x0606D88C);
+    SETPR(0x06077888);
     GJUMP0(0x060778A0);
 }
 
@@ -7255,6 +7453,7 @@ int f060778FC(void)
 {
     int r0, r1, r2, r3, r4, r5, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 48);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -7369,6 +7568,7 @@ int f06077AA8(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -7404,6 +7604,7 @@ int f06077AA8(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7413,6 +7614,7 @@ int f06077B06(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7434,6 +7636,7 @@ int f06077B06(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x0606D88C);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7443,6 +7646,7 @@ int f06077B44(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7466,6 +7670,7 @@ int f06077B44(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x0606D88C);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7475,6 +7680,7 @@ int f06077B8A(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7499,6 +7705,7 @@ int f06077B8A(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x0606D88C);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7508,6 +7715,7 @@ int f06077BCC(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7526,6 +7734,7 @@ int f06077BCC(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x060775C6, ((r4 & 0xFFFF) + 4));
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7547,6 +7756,7 @@ int f06077CA8(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7572,6 +7782,7 @@ int f06077CA8(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x0606D88C);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7581,6 +7792,7 @@ int f06077CF8(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7602,6 +7814,7 @@ int f06077CF8(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x060144F4, 0x0606D8B6);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7611,6 +7824,7 @@ int f06077DCC(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7638,6 +7852,7 @@ int f06077DCC(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7647,6 +7862,7 @@ int f06077E20(void)
 {
     int r0, r4, r5, r6, r7, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 28);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7711,6 +7927,7 @@ int f06077E2A(void)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7734,6 +7951,7 @@ int f06077E62(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7758,6 +7976,7 @@ int f06077E62(int r4, int r5, int r6, int r7)
         r0 = GCALL0(0x06078782);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7767,6 +7986,7 @@ int f06077EA4(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -7787,6 +8007,7 @@ int f06077EA4(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -7796,6 +8017,7 @@ int f06077ED8(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 52);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -7851,6 +8073,7 @@ int f06077ED8(int r4, int r5, int r6, int r7)
                 SETR(13, LD32((sp - 8)));
                 SETR(14, LD32((sp - 4)));
                 UNFRAME(sp);
+                SETSP(sp);
                 r0 = GJUMP1(0x0606ABCC, (r4 & 0xFFFF));
                 return r0;
             } else {
@@ -7900,6 +8123,7 @@ int f06077FB0(void)
 {
     int r0, r3, r4, r5, r6, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 36);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -7973,6 +8197,7 @@ int f060780C0(void)
 {
     int r0, r1, r2, r3, r4, r8;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(8));
@@ -8017,6 +8242,7 @@ int f06078164(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -8060,6 +8286,7 @@ int f06078164(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP2(0x0606AAC8, r4, 3);
         return r0;
     }
@@ -8075,6 +8302,7 @@ int f0607825E(void)
 {
     int r0, r1, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 32);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -8117,6 +8345,7 @@ int f060782D2(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -8192,6 +8421,7 @@ int f060782D2(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -8201,6 +8431,7 @@ int f060783D6(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3, r8, r9;
     ENTRY_SP(sp);
+    SETSP(sp - 24);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -8255,6 +8486,7 @@ int f060783D6(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -8264,6 +8496,7 @@ void f060784B8(int r4)
 {
     int r0, r3, r5, r6, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 36);
 
     ST32((sp - 4), R(14));
     r6 = 4;
@@ -8332,6 +8565,7 @@ int f06078532(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -8348,6 +8582,7 @@ int f06078532(int r4, int r5, int r6, int r7)
     ST16(42 + r3, (r2 | 128));
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0606947C, 0x1E0);
     return r0;
 }
@@ -8356,6 +8591,7 @@ int f06078598(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 48);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -8446,6 +8682,7 @@ int f06078598(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -8455,6 +8692,7 @@ int f060786DC(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -8494,6 +8732,7 @@ int f060786DC(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -8503,6 +8742,7 @@ int f0607874C(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -8524,6 +8764,7 @@ int f0607874C(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -8533,6 +8774,7 @@ int f06078782(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -8558,6 +8800,7 @@ int f06078782(int r4, int r5, int r6, int r7)
         r4 = LD16(0x060C1AAA);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP2(0x06069462, r4, 0x1E7);
         return r0;
     }
@@ -8567,6 +8810,7 @@ int f0607881C(void)
 {
     int r0, r2, r4;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -8606,6 +8850,7 @@ int f060789B6(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -8627,6 +8872,7 @@ int f060789B6(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x0606E70E);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -8636,6 +8882,7 @@ int f060789FC(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -8667,6 +8914,7 @@ int f060789FC(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -8676,6 +8924,7 @@ int f06078AB4(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -8712,6 +8961,7 @@ int f06078AB4(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -8721,6 +8971,7 @@ int f06078B44(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -8796,6 +9047,7 @@ int f06078B44(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -8805,6 +9057,7 @@ int f06078CA0(void)
 {
     int r0, r2, r3, r4, r5, r8, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -8855,6 +9108,7 @@ int f06078D16(int r4, int r5, int r6, int r7)
 {
     int r0, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -8868,6 +9122,7 @@ int f06078D16(int r4, int r5, int r6, int r7)
     SETPR(LD32((sp - 8)));
     SETR(14, LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP0(0x0606D398);
     return r0;
 }
@@ -8904,6 +9159,7 @@ int f06078FBC(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -8944,6 +9200,7 @@ int f06078FBC(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -8953,6 +9210,7 @@ int f06079064(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r10, r11, r12, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 52);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -9050,6 +9308,7 @@ int f06079064(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     } else {
@@ -9067,6 +9326,7 @@ int f060791E0(void)
 {
     int r0, r1, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     ST16(0x060C27F4, 1);
@@ -9096,6 +9356,7 @@ int f06079232(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -9172,6 +9433,7 @@ int f06079232(int r4, int r5, int r6, int r7)
                 SETR(13, LD32((sp - 8)));
                 SETR(14, LD32((sp - 4)));
                 UNFRAME(sp);
+                SETSP(sp);
                 r0 = GJUMP0(0x0606D410);
                 return r0;
             } else {
@@ -9211,6 +9473,7 @@ int f06079232(int r4, int r5, int r6, int r7)
             SETR(13, LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP0(0x0606D410);
             return r0;
         }
@@ -9226,6 +9489,7 @@ int f0607940C(void)
 {
     int r0, r1, r3, r5, r6, r7, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 52);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -9298,6 +9562,7 @@ int f06079416(void)
 {
     int r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 56);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -10801,6 +11066,7 @@ int f060796F8(void)
 {
     int r0, r2, r3, r4, r5;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -10834,6 +11100,7 @@ int f0607988C(void)
 {
     int r0, r2, r3, r4, r5, r6, r7;
     ENTRY_SP(sp);
+    SETSP(sp - 52);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -10887,6 +11154,7 @@ int f06079956(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -10904,6 +11172,7 @@ int f06079956(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x0606E864);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -10913,6 +11182,7 @@ int f06079A1A(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -10951,6 +11221,7 @@ int f06079A1A(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -10969,6 +11240,7 @@ int f06079AB4(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -11003,6 +11275,7 @@ int f06079AB4(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -11030,6 +11303,7 @@ int f06079DE2(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -11069,6 +11343,7 @@ int f06079DE2(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -11078,6 +11353,7 @@ int f06079E80(void)
 {
     int r0, r2, r3, r4, r5, r6, r7, r13;
     ENTRY_SP(sp);
+    SETSP(sp - 40);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -11134,6 +11410,7 @@ int f06079F18(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r12, r13, r14, c3;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -11232,6 +11509,7 @@ int f06079F18(int r4, int r5, int r6, int r7)
                     SETR(13, LD32((sp - 8)));
                     SETR(14, LD32((sp - 4)));
                     UNFRAME(sp);
+                    SETSP(sp);
                     r0 = GJUMP2(0x06068A8E, r4, 0);
                     return r0;
                 } else {
@@ -11283,6 +11561,7 @@ int f0607A050(void)
 {
     int r0, r2, r3, r5, r6, r7;
     ENTRY_SP(sp);
+    SETSP(sp - 36);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -11334,6 +11613,7 @@ int f0607A120(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -11371,6 +11651,7 @@ int f0607A120(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -11380,6 +11661,7 @@ int f0607A178(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -11405,6 +11687,7 @@ int f0607A178(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -11414,6 +11697,7 @@ int f0607A1C2(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -11439,6 +11723,7 @@ int f0607A1C2(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -11448,6 +11733,7 @@ int f0607A2B2(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 24);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -11480,6 +11766,7 @@ int f0607A35C(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -11495,6 +11782,7 @@ int f0607A35C(int r4, int r5, int r6, int r7)
     r0 = GCALL1(0x060144F4, 0x0607A390);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0600996A, 101);
     return r0;
 }
@@ -11503,6 +11791,7 @@ int f0607A390(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -11524,6 +11813,7 @@ int f0607A390(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x06074CB4);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -11533,6 +11823,7 @@ int f0607A3CE(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -11574,6 +11865,7 @@ int f0607A3CE(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -11593,6 +11885,7 @@ int f0607A4C0(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -11627,6 +11920,7 @@ int f0607A4C0(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -11636,6 +11930,7 @@ int f0607A530(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -11654,6 +11949,7 @@ int f0607A530(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x0600996A, 96);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -11663,6 +11959,7 @@ int f0607A55C(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -11733,6 +12030,7 @@ int f0607A55C(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -11770,6 +12068,7 @@ int f0607A6C4(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 56);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -11853,6 +12152,7 @@ int f0607A6C4(int r4, int r5, int r6, int r7)
     SETR(13, LD32((sp - 8)));
     SETR(14, LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP0(0x0607A7DC);
     return r0;
 }
@@ -11880,6 +12180,7 @@ int f0607AB38(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -11909,6 +12210,7 @@ int f0607AB38(int r4, int r5, int r6, int r7)
         r4 = LD16(0x060C1AAA);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP1(0x0606948A, r4);
         return r0;
     }
@@ -11918,6 +12220,7 @@ int f0607ABD4(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -11944,6 +12247,7 @@ int f0607ABD4(int r4, int r5, int r6, int r7)
     r0 = GCALL0(0x0607AE7E);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0600996A, 98);
     return r0;
 }
@@ -11952,6 +12256,7 @@ int f0607AC34(int r4, int r5, int r6, int r7)
 {
     int r0, r3, r8, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(8));
@@ -11989,6 +12294,7 @@ int f0607AC34(int r4, int r5, int r6, int r7)
         SETR(8, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0607AE7E);
         return r0;
     }
@@ -11998,6 +12304,7 @@ int f0607ACDC(int r4, int r5, int r6, int r7)
 {
     int r0, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -12050,6 +12357,7 @@ int f0607ACDC(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12059,6 +12367,7 @@ int f0607AD74(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -12081,6 +12390,7 @@ int f0607AD74(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12098,6 +12408,7 @@ int f0607ADDC(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 40);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -12149,6 +12460,7 @@ int f0607ADDC(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606C7C2);
         return r0;
     }
@@ -12158,6 +12470,7 @@ int f0607AFC0(void)
 {
     int r0, r2, r3, r4, r5;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -12198,6 +12511,7 @@ int f0607B044(int r4, int r5, int r6, int r7)
 {
     int r0, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -12254,6 +12568,7 @@ int f0607B044(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12275,6 +12590,7 @@ int f0607B15A(void)
 {
     int r0, r4, r5, r6, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 32);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -12327,6 +12643,7 @@ int f0607B1AE(void)
 {
     int r0, r3, r4, r5;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -12359,6 +12676,7 @@ int f0607B204(void)
 {
     int r0, r1, r2, r3, r4, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 44);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -12413,6 +12731,7 @@ int f0607B2E4(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -12438,6 +12757,7 @@ int f0607B2E4(int r4, int r5, int r6, int r7)
         SETMACL(LD32((sp - 8)));
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP2(0x06069462, r4, 0x1E7);
         return r0;
     }
@@ -12447,6 +12767,7 @@ int f0607B32E(void)
 {
     int r0, r2, r4;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -12509,6 +12830,7 @@ int f0607B6A4(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -12550,6 +12872,7 @@ int f0607B6A4(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12559,6 +12882,7 @@ int f0607B72A(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -12599,6 +12923,7 @@ int f0607B72A(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12608,6 +12933,7 @@ int f0607B79A(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -12625,6 +12951,7 @@ int f0607B79A(int r4, int r5, int r6, int r7)
         r0 = GCALL0(0x0607B9D8);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12641,6 +12968,7 @@ int f0607B90A(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -12695,6 +13023,7 @@ int f0607B90A(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12714,6 +13043,7 @@ int f0607BA0E(void)
 {
     int r0, r2, r3, r4, r5, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -12820,6 +13150,7 @@ int f0607BB60(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -12849,6 +13180,7 @@ int f0607BB60(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12858,6 +13190,7 @@ int f0607BBAE(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -12883,6 +13216,7 @@ int f0607BBAE(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12892,6 +13226,7 @@ int f0607BC3C(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -12925,6 +13260,7 @@ int f0607BC3C(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12939,6 +13275,7 @@ int f0607BC9A(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -12961,6 +13298,7 @@ int f0607BC9A(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -12975,6 +13313,7 @@ int f0607BCCA(void)
 {
     int r0, r4, r5;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     r4 = LD16(0x060C2870);
@@ -13102,6 +13441,7 @@ int f0607BEBC(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13127,6 +13467,7 @@ int f0607BEBC(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x06074CB4);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13136,6 +13477,7 @@ int f0607BF14(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 44);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -13198,6 +13540,7 @@ int f0607BF14(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13207,6 +13550,7 @@ int f0607C040(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -13264,6 +13608,7 @@ int f0607C040(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13273,6 +13618,7 @@ int f0607C0E8(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13292,6 +13638,7 @@ int f0607C0E8(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13301,6 +13648,7 @@ int f0607C118(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13321,6 +13669,7 @@ int f0607C118(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x06074CB4);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13340,6 +13689,7 @@ int f0607C1C0(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13367,6 +13717,7 @@ int f0607C1C0(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13376,6 +13727,7 @@ int f0607C214(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -13422,6 +13774,7 @@ int f0607C214(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13431,6 +13784,7 @@ int f0607C2EE(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13452,6 +13806,7 @@ int f0607C2EE(int r4, int r5, int r6, int r7)
         ST16(62 + r2, 42);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13461,6 +13816,7 @@ int f0607C3D8(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13489,6 +13845,7 @@ int f0607C3D8(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13498,6 +13855,7 @@ int f0607C434(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -13542,6 +13900,7 @@ int f0607C434(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13551,6 +13910,7 @@ int f0607C4EE(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13574,6 +13934,7 @@ int f0607C4EE(int r4, int r5, int r6, int r7)
         r0 = GCALL0(0x0607B9D8);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13583,6 +13944,7 @@ int f0607C524(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13609,6 +13971,7 @@ int f0607C524(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x0607E0BC, 2);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13618,6 +13981,7 @@ int f0607C572(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13666,6 +14030,7 @@ int f0607C572(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13675,6 +14040,7 @@ int f0607C65A(void)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13702,6 +14068,7 @@ int f0607C6A0(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13736,6 +14103,7 @@ int f0607C6A0(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13745,6 +14113,7 @@ int f0607C75C(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13788,6 +14157,7 @@ int f0607C75C(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -13797,6 +14167,7 @@ int f0607C7D6(void)
 {
     int r0, r1, r2, r3, r4, r5, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     r4 = 0x060C2890;
@@ -13867,6 +14238,7 @@ int f0607CD84(void)
 {
     int r0, r3, r4, r5, r8;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(8));
     ST32((sp - 8), PR());
@@ -13913,6 +14285,7 @@ int f0607CE40(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -13931,6 +14304,7 @@ int f0607CE40(int r4, int r5, int r6, int r7)
     ST16(66 + r2, 0);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0600996A, 137);
     return r0;
 }
@@ -13939,6 +14313,7 @@ int f0607CFFE(void)
 {
     int r0, r2, r4, r5, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -13967,6 +14342,7 @@ int f0607D03E(void)
 {
     int r0, r1, r2, r3, r4;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -14011,6 +14387,7 @@ int f0607D120(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3, r8, r10, r11, r12;
     ENTRY_SP(sp);
+    SETSP(sp - 32);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -14112,24 +14489,10 @@ int f0607D120(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f0607D240(void)
-{
-    int r0;
-    ENTRY_SP(sp);
-
-    ST32((sp - 4), PR());
-    r0 = GCALL5(0x0607D2A4, 0, 0, 0, 0, LD32((sp - 4)));
-    SETSP((sp - 4));
-    SETPR(0x0607D24C);
-    r0 = GCALL5(0x0606C8C0, 0, 0, 0, 0, LD32((sp - 4)));
-    SETPR(LD32((sp - 4)));
-    return 0;
 }
 
 void f0607D2A4(void)
@@ -14144,6 +14507,7 @@ int f0607D2D8(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 24);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -14178,6 +14542,7 @@ int f0607D324(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -14195,6 +14560,7 @@ int f0607D324(int r4, int r5, int r6, int r7)
     r0 = GCALL1(0x0606AB24, r4);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x060144F4, 0x0607D35C);
     return r0;
 }
@@ -14203,6 +14569,7 @@ int f0607D35C(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -14224,6 +14591,7 @@ int f0607D35C(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x06074CB4);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -14233,6 +14601,7 @@ int f0607D3F0(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -14269,6 +14638,7 @@ int f0607D3F0(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -14278,6 +14648,7 @@ int f0607D464(void)
 {
     int r0, r2, r4, r5, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -14306,6 +14677,7 @@ int f0607D4A6(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -14323,6 +14695,7 @@ int f0607D4A6(int r4, int r5, int r6, int r7)
     r4 = LD32(0x060D7B3C);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0606AB24, r4);
     return r0;
 }
@@ -14331,6 +14704,7 @@ int f0607D55C(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -14350,6 +14724,7 @@ int f0607D55C(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x06074CB4);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -14359,6 +14734,7 @@ int f0607D592(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3, r8;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(8));
@@ -14401,29 +14777,17 @@ int f0607D592(int r4, int r5, int r6, int r7)
         SETR(8, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f0607D60E(void)
-{
-    int r0;
-    ENTRY_SP(sp);
-
-    ST32((sp - 4), PR());
-    SETSP((sp - 4));
-    SETPR(0x0607D616);
-    r0 = GCALL5(0x0606C8C0, 0, 0, 0, 0, LD32((sp - 4)));
-    SETPR(LD32((sp - 4)));
-    return 0;
 }
 
 int f0607D724(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -14443,6 +14807,7 @@ int f0607D724(int r4, int r5, int r6, int r7)
     r4 = LD32(0x060D7B3C);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP2(0x0606950C, r4, (r5 & 255));
     return r0;
 }
@@ -14451,6 +14816,7 @@ int f0607D764(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -14476,6 +14842,7 @@ int f0607D764(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x06074CB4);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -14485,6 +14852,7 @@ int f0607D8B0(void)
 {
     int r0, r3, r4;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -14512,6 +14880,7 @@ int f0607D906(int r4, int r5)
 {
     int r0, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     r6 = r5;
     ST32((sp - 4), PR());
@@ -14529,6 +14898,7 @@ int f0607D96C(void)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -14551,6 +14921,7 @@ int f0607D9A2(int r4, int r5, int r6, int r7)
 {
     int r0, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -14593,6 +14964,7 @@ int f0607D9A2(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -14602,6 +14974,7 @@ int f0607DA1E(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -14624,6 +14997,7 @@ int f0607DA1E(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x060144F4, 0x0607D9A2);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -14640,6 +15014,7 @@ int f0607DABC(int r4)
 {
     int r0, r2, r3, r5, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -14670,6 +15045,7 @@ int f0607DB04(void)
 {
     int r0, r1, r2, r3, r4;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -14718,6 +15094,7 @@ int f0607DBA4(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     SETSP((sp - 8));
@@ -14746,6 +15123,7 @@ int f0607DBA4(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x06074CB4);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -14755,6 +15133,7 @@ int f0607DC4C(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -14809,6 +15188,7 @@ int f0607DC4C(int r4, int r5, int r6, int r7)
     SETR(13, LD32((sp - 8)));
     SETR(14, LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x060144F4, 0x0607DCFC);
     return r0;
 }
@@ -14817,6 +15197,7 @@ int f0607DCFC(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -14844,6 +15225,7 @@ int f0607DCFC(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -14884,6 +15266,7 @@ int f0607DEAC(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r8, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 44);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -14943,6 +15326,7 @@ int f0607DEAC(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP2(0x0606950C, r14, (r5 & 255));
         return r0;
     }
@@ -14998,6 +15382,7 @@ int f0607E0BC(int r4)
 {
     int r0, r1;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -15021,6 +15406,7 @@ int f0607E0F2(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15041,6 +15427,7 @@ int f0607E0F2(int r4, int r5, int r6, int r7)
     r0 = GCALL1(0x0606AB24, r4);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x060144F4, 0x0607E132);
     return r0;
 }
@@ -15049,6 +15436,7 @@ int f0607E132(void)
 {
     int r0, r1, r2, r3, r4, r5, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 28);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -15180,6 +15568,7 @@ int f0607E334(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -15211,6 +15600,7 @@ int f0607E334(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15220,6 +15610,7 @@ int f0607E408(void)
 {
     int r0, r2, r3, r4, r5;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -15251,6 +15642,7 @@ int f0607E44C(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15306,6 +15698,7 @@ int f0607E44C(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15332,6 +15725,7 @@ int f0607E570(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15352,6 +15746,7 @@ int f0607E570(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, r4);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15361,6 +15756,7 @@ int f0607E5A2(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -15398,6 +15794,7 @@ int f0607E5A2(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15407,6 +15804,7 @@ int f0607E70E(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15432,6 +15830,7 @@ int f0607E70E(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15441,6 +15840,7 @@ int f0607E7CC(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15450,6 +15850,7 @@ int f0607E7CC(int r4, int r5, int r6, int r7)
     r5 = LD16(80 + r5);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP2(0x06068ACC, (r4 & 0xFFFF), ((r5 & 0xFFFF) + 2));
     return r0;
 }
@@ -15458,6 +15859,7 @@ int f0607E7EE(int r4, int r5, int r6, int r7)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15492,6 +15894,7 @@ int f0607E7EE(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15501,6 +15904,7 @@ int f0607E850(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15522,6 +15926,7 @@ int f0607E850(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x06014516, 0x0606D88C);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15531,6 +15936,7 @@ int f0607E88E(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -15552,6 +15958,7 @@ int f0607E88E(int r4, int r5, int r6, int r7)
             SETPR(LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP0(0x0606D410);
             return r0;
         } else {
@@ -15577,6 +15984,7 @@ int f0607E88E(int r4, int r5, int r6, int r7)
                 SETPR(LD32((sp - 8)));
                 SETR(14, LD32((sp - 4)));
                 UNFRAME(sp);
+                SETSP(sp);
                 r0 = GJUMP0(0x0606D410);
                 return r0;
             } else {
@@ -15591,6 +15999,7 @@ int f0607E88E(int r4, int r5, int r6, int r7)
                 SETPR(LD32((sp - 8)));
                 SETR(14, LD32((sp - 4)));
                 UNFRAME(sp);
+                SETSP(sp);
                 r0 = GJUMP1(0x06014516, 0x0606D88C);
                 return r0;
             }
@@ -15602,6 +16011,7 @@ int f0607E95C(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     r3 = LD32(0x060D7768);
@@ -15630,6 +16040,7 @@ int f0607E95C(int r4, int r5, int r6, int r7)
         r0 = GCALL1(0x0600996A, 182);
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15639,6 +16050,7 @@ int f0607E9BA(int r4, int r5, int r6, int r7)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15668,6 +16080,7 @@ int f0607E9BA(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15685,6 +16098,7 @@ int f0607EA90(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15713,6 +16127,7 @@ int f0607EA90(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15722,6 +16137,7 @@ int f0607EB66(void)
 {
     int r0, r2, r3, r4, r5, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -15760,6 +16176,7 @@ int f0607ECDE(void)
 {
     int r0, r2;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15783,6 +16200,7 @@ int f0607ED16(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -15817,6 +16235,7 @@ int f0607ED16(int r4, int r5, int r6, int r7)
         SETPR(LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15826,6 +16245,7 @@ int f0607ED68(int r4, int r5, int r6, int r7)
 {
     int r0;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -15843,6 +16263,7 @@ int f0607ED68(int r4, int r5, int r6, int r7)
     r0 = GCALL1(0x060144F4, 0x0607EDF0);
     SETPR(LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x0600996A, 160);
     return r0;
 }
@@ -15851,6 +16272,7 @@ int f0607EDF0(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -15924,6 +16346,7 @@ int f0607EDF0(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -15933,6 +16356,7 @@ int f0607EEF8(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -16027,6 +16451,7 @@ int f0607EEF8(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     } else {
@@ -16043,6 +16468,7 @@ int f0607F058(void)
 {
     int r0, r1, r2, r4, r5, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -16094,6 +16520,7 @@ int f0607F0D2(void)
 {
     int r0, r1, r2, r4, r5, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -16145,6 +16572,7 @@ int f0607F14C(void)
 {
     int r0, r5, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     r6 = LD32(0x060D7768);
@@ -16164,6 +16592,7 @@ int f0607F190(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -16192,6 +16621,7 @@ int f0607F190(int r4, int r5, int r6, int r7)
     SETPR(LD32((sp - 8)));
     SETR(14, LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP2(0x06068ACC, (r4 & 0xFFFF), 0);
     return r0;
 }
@@ -16200,6 +16630,7 @@ int f0607F1EA(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 20);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -16280,6 +16711,7 @@ int f0607F1EA(int r4, int r5, int r6, int r7)
         SETR(13, LD32((sp - 8)));
         SETR(14, LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -16289,6 +16721,7 @@ int f0607F318(void)
 {
     int r0, r2, r3, r4, r5, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -16327,6 +16760,7 @@ int f0607F37E(void)
 {
     int r0, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -16409,6 +16843,7 @@ int f0607F648(void)
 {
     int r0, r1, r2, r3, r4, r5, r8, r9, r10, r11, r12, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 100);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -16636,6 +17071,7 @@ int f0607F8F4(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r3;
     ENTRY_SP(sp);
+    SETSP(sp - 4);
 
     ST32((sp - 4), PR());
     SETSP((sp - 4));
@@ -16663,6 +17099,7 @@ int f0607F8F4(int r4, int r5, int r6, int r7)
         }
         SETPR(LD32((sp - 4)));
         UNFRAME(sp);
+        SETSP(sp);
         r0 = GJUMP0(0x0606D410);
         return r0;
     }
@@ -16672,6 +17109,7 @@ int f0607F946(int r4, int r5, int r6, int r7)
 {
     int r0, r2, r3, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -16721,18 +17159,8 @@ int f0607F946(int r4, int r5, int r6, int r7)
     SETPR(LD32((sp - 8)));
     SETR(14, LD32((sp - 4)));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP1(0x06014516, 0x0606D88C);
-    return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f0607F9E4(int r4, int r5, int r6, int r7)
-{
-    int r0;
-    ENTRY_SP(sp);
-
-    UNFRAME(sp);
-    r0 = GJUMP0(0x0606D398);
     return r0;
 }
 
@@ -16753,6 +17181,7 @@ int f0607FA78(void)
 {
     int r0, r1, r2, r3, r4;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -16787,6 +17216,7 @@ int f0607FAD4(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(8));
@@ -16827,6 +17257,7 @@ int f0607FAD4(int r4, int r5, int r6, int r7)
             SETR(8, LD32((sp - 8)));
             SETR(14, LD32((sp - 4)));
             UNFRAME(sp);
+            SETSP(sp);
             r0 = GJUMP0(0x0606D410);
             return r0;
         } else {
@@ -16847,6 +17278,7 @@ int f0607FC00(void)
 {
     int r0, r2, r3, r4, r5, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 8);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), PR());
@@ -16888,6 +17320,7 @@ int f0607FE0E(int r4, int r5, int r6, int r7)
     r3 = LD16(0x060C289E);
     ST16(0x060C289E, (r3 - 1));
     UNFRAME(sp);
+    SETSP(sp);
     r0 = GJUMP0(0x0606D398);
     return r0;
 }
@@ -16896,6 +17329,7 @@ int f0607FE68(void)
 {
     int r0, r1, r2, r4, r5, r13, r14;
     ENTRY_SP(sp);
+    SETSP(sp - 16);
 
     ST32((sp - 4), R(14));
     ST32((sp - 8), R(13));
@@ -16964,6 +17398,7 @@ int f0607FF5A(int r4)
 {
     int r0, r1, r2, r5, r6;
     ENTRY_SP(sp);
+    SETSP(sp - 12);
 
     ST32((sp - 4), PR());
     ST32((sp - 8), MACL());
@@ -16987,4 +17422,46 @@ int f0607FF5A(int r4)
     SETMACL(LD32((sp - 8)));
     SETPR(LD32((sp - 4)));
     return r4;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0607F9E4(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP0(0x0606D398);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0607D240(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    r0 = GCALL0(0x0607D2A4);
+    SETPR(0x0607D24C);
+    r0 = GCALL0(0x0606C8C0);
+    SETPR(LD32((sp - 4)));
+    SETSP(sp);
+    return 0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0607D60E(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    SETPR(0x0607D616);
+    r0 = GCALL0(0x0606C8C0);
+    SETPR(LD32((sp - 4)));
+    SETSP(sp);
+    return 0;
 }

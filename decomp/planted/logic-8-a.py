@@ -30,10 +30,10 @@ case("f0603C83A", [], True,
 # 0606B6BC jumps to the word at 060B90EC plus eight times the halfword at 46 of the current record
 JUMPS = [plant(0x060B90EC + 8 * k, 4, STUBS, 1.0) for k in range(3)] + [plant(bomber(i) + 46, 2, [0, 1, 2], 1.0) for i in range(3)]
 case("f0606B6BC", [span(0, 5), span(0, 5), span(0, 5), span(0, 5)], False, CURB + JUMPS)
-case("f0606D97A", [], False, CURB + JUMPS)
+case("f0606D97A", [], False, CURB + JUMPS, stubbed=False)
 # 0606D23C picks a record of the table at 060E2154 by the halfword at 060C062C and jumps to its word at 12
 WORD = [plant(0x060C062C, 2, [0, 1, 2, 3], 1.0)]
-case("f0606D23C", [], False, CURB + MOVER + WORD + [plant(0x060E2160 + 20 * k, 4, STUBS, 1.0) for k in range(4)])
+case("f0606D23C", [], False, CURB + MOVER + WORD + [plant(0x060E2160 + 20 * k, 4, STUBS, 1.0) for k in range(4)], stubbed=False)
 case("f0607F3BE", [], False, CURB + MOVER + WORD)
 case("f0606FC60", [], True, CURB + MOVER + WORD + [plant(bomber(i) + 62, 2, [0, 0, 1], 1.0) for i in range(3)])
 case("f060738A2", [], False, CURB + MOVER + [plant(bomber(i) + 68, 2, [0, 1, 0x80, 0x100, 0x7FFF, 0xFFFF], 1.0) for i in range(3)]

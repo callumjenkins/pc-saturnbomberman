@@ -15,7 +15,7 @@ import machine  # noqa: E402
 import status  # noqa: E402
 from saturnrecomp import sh2, sh2emu  # noqa: E402
 
-pytestmark = pytest.mark.skipif(shutil.which("clang") is None or not os.path.exists(check.KRNL),
+pytestmark = pytest.mark.skipif(shutil.which("clang") is None or not os.path.exists(check.IMAGE),
                                 reason="needs clang and the extracted disc")
 
 BASE = 0x06006000
@@ -61,9 +61,11 @@ def test_a_loop_must_advance_time_as_often_as_the_games_branch_back(tmp_path, co
     assert ran == 20 and (not fails) == agrees
 
 
-def test_a_tail_branch_to_the_next_instruction_but_one_still_leaves_the_function(tmp_path):
+def test_a_tail_branch_to_the_next_instruction_but_one_still_leaves_the_function(tmp_path, monkeypatch):
     # f06027684 ends its first loop with `bra 0602769A ; nop`, into a function of its own whose loop
     # advances time too: 18 times in each loop.
+    # A stubbed trial answers that branch as a call out, which the C writes inline.
+    monkeypatch.setattr(check, "STUBBED", 0)
     path = tmp_path / "f.c"
     path.write_text('#include "krnl.h"\nvoid f06027684(void)\n{\n    int i = 0;\n\n'
                     '    do { ST32(0x060C0A4C + i * 4, 0); } while (AGAIN(++i < 19));\n    i = 0;\n'
@@ -117,7 +119,9 @@ def test_the_vbr_a_function_leaves_is_compared(tmp_path):
     pytest.param("f0600CA7C", id="a call"),
     pytest.param("f0600A1F4", id="a tail jump back into another function"),
 ])
-def test_calls_and_tail_jumps_advance_time_as_the_game_does(name):
+def test_calls_and_tail_jumps_advance_time_as_the_game_does(name, monkeypatch):
+    # A stubbed trial answers the game's branch into the next function as a call out, which the C writes inline.
+    monkeypatch.setattr(check, "STUBBED", 0)
     sig = gen.signatures()[int(name[1:], 16)]
     fails, ran = check.run(check.build(), name, check.default_spec(sig), 20, 1, sig)
     assert ran == 20 and not fails
@@ -164,6 +168,148 @@ def test_a_jump_advances_time_as_the_generated_code_does_wherever_it_goes(monkey
     monkeypatch.setattr(check.Counting, "_jumps", polling)
     words = [sh2.encode("jmp @Rn", 4), NOP, RTS, NOP]
     assert polls(monkeypatch, words, {BASE: {BASE + 2 * i for i in range(4)}}, r4=BASE + 4) == expected
+
+
+@pytest.mark.parametrize("stub, answered", [
+    pytest.param([7], [(BASE + 4, [BASE + 4, 0, 0, 0])], id="in a trial that answers calls"),
+    pytest.param(None, [], id="in one that runs them"),
+])
+def test_a_jmp_into_code_the_recompile_folded_into_the_function_is_a_jump_out_when_calls_are_answered(monkeypatch, stub, answered):
+    # jmp @r4 ; nop ; mov #5,r0 ; rts ; nop, where the target is the mov and the function's code holds it
+    words = [sh2.encode("jmp @Rn", 4), NOP, sh2.encode("mov #imm,Rn", 0, low=5), RTS, NOP]
+    mem = sh2emu.Memory()
+    ram = mem.add(0x06000000, 0x100000)
+    for i, word in enumerate(words):
+        ram[BASE - 0x06000000 + 2 * i:BASE - 0x06000000 + 2 * i + 2] = word.to_bytes(2, "big")
+    cpu = sh2emu.CPU(mem)
+    cpu.r[15] = 0x060FFFF0
+    monkeypatch.setattr(check.Counting, "_code", {BASE: {BASE + 2 * i for i in range(5)}})
+    counting = check.counting(cpu)
+    counting.stub = stub
+    counting.call(BASE, r4=BASE + 4)
+    assert (counting.stubbed, cpu.r[0]) == (answered, 7 if stub else 5)
+
+
+def test_a_jmp_into_code_the_recompile_folded_into_the_function_is_counted_as_a_call_out_when_calls_run(monkeypatch):
+    words = [sh2.encode("jmp @Rn", 4), NOP, sh2.encode("mov #imm,Rn", 0, low=5), RTS, NOP]
+    mem = sh2emu.Memory()
+    ram = mem.add(0x06000000, 0x100000)
+    for i, word in enumerate(words):
+        ram[BASE - 0x06000000 + 2 * i:BASE - 0x06000000 + 2 * i + 2] = word.to_bytes(2, "big")
+    cpu = sh2emu.CPU(mem)
+    cpu.r[15] = 0x060FFFF0
+    monkeypatch.setattr(check.Counting, "_code", {BASE: {BASE + 2 * i for i in range(5)}})
+    counting = check.counting(cpu)
+    counting.call(BASE, r4=BASE + 4)
+    assert len(counting.calls) == 1
+
+
+@pytest.mark.parametrize("cap, skipped", [
+    pytest.param(0, True, id="polls at the cap"),
+    pytest.param(1_000_000, False, id="polls below it"),
+])
+def test_a_trial_the_games_code_cannot_finish_is_skipped_only_once_the_host_has_polled_the_cap(monkeypatch, tmp_path, cap, skipped):
+    finish = check.Counting.call
+
+    def endless(self, *args, **regs):
+        finish(self, *args, **regs)
+        raise RuntimeError("step limit")
+    monkeypatch.setattr(check, "LONG_RUN_POLLS", cap)
+    monkeypatch.setattr(check.Counting, "call", endless)
+    path = tmp_path / "f.c"
+    path.write_text(SCALE % ("int", "int"))
+    sig = gen.signatures([str(path)])[0x0600B934]
+    fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 5, 1, sig)
+    assert (ran == 0) == skipped and (not fails) == skipped
+
+
+def test_a_jump_out_after_a_call_of_the_functions_own_returns_to_its_caller_when_calls_are_answered(monkeypatch):
+    # jsr @r4 ; nop ; bra out ; nop, a fragment that never saves pr, so the jump leaves with pr at the jsr's return address
+    words = [sh2.encode("jsr @Rn", 4), NOP, 0xA004, NOP]
+    mem = sh2emu.Memory()
+    ram = mem.add(0x06000000, 0x100000)
+    for i, word in enumerate(words):
+        ram[BASE - 0x06000000 + 2 * i:BASE - 0x06000000 + 2 * i + 2] = word.to_bytes(2, "big")
+    cpu = sh2emu.CPU(mem)
+    cpu.r[15] = 0x060FFFF0
+    monkeypatch.setattr(check.Counting, "_code", {BASE: {BASE + 2 * i for i in range(4)}})
+    monkeypatch.setattr(check.Counting, "_operators", {BASE + 0x100: False})
+    counting = check.counting(cpu)
+    counting.stub = [7]
+    counting.call(BASE, max_steps=100, r4=BASE + 0x100)
+    assert [entry for entry, _ in counting.stubbed] == [BASE + 0x100, BASE + 16]
+
+
+@pytest.mark.parametrize("operator, stubbed, r0", [
+    pytest.param(True, [], 5, id="a run of shifts the C computes inline"),
+    pytest.param(False, [(BASE + 12, [BASE + 12, 0, 0, 0])], 7, id="any other function"),
+])
+def test_only_a_call_the_c_makes_is_answered_when_calls_are(monkeypatch, operator, stubbed, r0):
+    # sts.l pr,@-r15 ; jsr @r4 ; nop ; lds.l @r15+,pr ; rts ; nop ; callee: mov #5,r0 ; rts ; nop
+    words = [0x4F22, sh2.encode("jsr @Rn", 4), NOP, 0x4F26, RTS, NOP, sh2.encode("mov #imm,Rn", 0, low=5), RTS, NOP]
+    mem = sh2emu.Memory()
+    ram = mem.add(0x06000000, 0x100000)
+    for i, word in enumerate(words):
+        ram[BASE - 0x06000000 + 2 * i:BASE - 0x06000000 + 2 * i + 2] = word.to_bytes(2, "big")
+    cpu = sh2emu.CPU(mem)
+    cpu.r[15] = 0x060FFFF0
+    monkeypatch.setattr(check.Counting, "_code", {BASE: {BASE + 2 * i for i in range(6)}, BASE + 12: {BASE + 12, BASE + 14, BASE + 16}})
+    monkeypatch.setattr(check.Counting, "_operators", {BASE + 12: operator})
+    counting = check.counting(cpu)
+    counting.stub = [7]
+    counting.call(BASE, r4=BASE + 12)
+    assert (counting.stubbed, cpu.r[0]) == (stubbed, r0)
+
+
+@pytest.mark.parametrize("entry, operator", [
+    pytest.param(0x06094972, True, id="a run of shifts of r0"),
+    pytest.param(0x0609410C, False, id="the signed division, which the C calls"),
+    pytest.param(0x0609460C, False, id="the variable shift, which the C calls"),
+    pytest.param(0x06006218, False, id="a game function"),
+])
+def test_only_a_run_of_shifts_is_an_operator_the_c_computes_inline(entry, operator):
+    assert check.Counting._operator(entry) is operator
+
+
+@pytest.mark.parametrize("unstubbed, answered", [
+    pytest.param({"f0606DDCA"}, False, id="a function whose case leaves its calls to run"),
+    pytest.param(set(), True, id="any other"),
+])
+def test_a_case_can_keep_its_function_from_having_its_calls_answered(tmp_path, monkeypatch, unstubbed, answered):
+    path = tmp_path / "f.c"
+    path.write_text(CALLS_A_ROUTINE)
+    sig = gen.signatures([str(path)])[0x0606DDCA]
+    monkeypatch.setattr(check, "STUBBED", 1.0)
+    monkeypatch.setattr(cases, "UNSTUBBED", unstubbed)
+    _, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 20, 1, sig)
+    assert (ran > 0) == answered
+
+
+CALLS_A_ROUTINE = """#include "krnl.h"
+int f0606DDCA(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+    SETSP(sp - 4);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    r0 = GCALL1(0x060144F4, 0x0606DDDE);
+    SETSP((sp - 4));
+    SETPR(0x0606DDD8);
+    r0 = GCALL0(0x0606DDDE);
+    SETPR(LD32((sp - 4)));
+    return r0;
+}
+"""
+
+
+def test_a_function_without_parameters_has_trials_that_answer_its_calls(tmp_path):
+    path = tmp_path / "f.c"
+    path.write_text(CALLS_A_ROUTINE)
+    sig = gen.signatures([str(path)])[0x0606DDCA]
+    fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 40, 1, sig)
+    assert 0 < ran < 40 and not fails
 
 
 FLAG = '#include "krnl.h"\nint f06062168(void)\n{\n    if (LDU16(0x060D7C94) == 255)\n        return %s;\n    return 0;\n}\n'

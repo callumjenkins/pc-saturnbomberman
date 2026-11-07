@@ -41,7 +41,7 @@ case("f06006EE6", [pick(0, 1, 0x12345678, -1), pick(0, 5, 0x80000000)], False,
 case("f0600B7CA", [pick(0, 1, 5, -1), pick(0, 2, 3), pick(0, 7), pick(0, 9)], True, [plant(0x0600026C, 4, [ZERO], 1.0)])
 case("f06058DBE", [pick(0, 1, 5, -1), pick(0, 2, 3), pick(0, 7), pick(0, 9)], True, [plant(0x06002F3C, 4, [ZERO], 1.0)])
 case("f060A4CE4", [pick(0, 1), pick(0, 2, 3), pick(0, 7), pick(0, 9)], True, [plant(0x06000320, 4, [ZERO], 1.0)])
-case("f060144F4", [pick(0, 1, 0x0606D398, -1)], False, [plant(0x060C062C, 2, [0, 1, 2, 3, 0xFFFF], 0.9)])
+case("f060144F4", [pick(0, 1, 0x0606D398, -1)], True, [plant(0x060C062C, 2, [0, 1, 2, 3, 0xFFFF], 0.9)])
 
 # 0602B7CA clears the byte of a 12-byte frame that the byte at 060C064A + n names, for each n below the count at 060C1044 whose flag at 060C0640 + n has bit 0 or 1 set
 case("f0602B8FC", [pick(-1, 0, 1, 2, 3, 4, 11, 12, 0x10000)], True,

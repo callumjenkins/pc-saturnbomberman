@@ -17,6 +17,7 @@ import sys
 from dataclasses import dataclass
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "saturn-recomp", "src"))
+import modules  # noqa: E402
 from saturnrecomp import build as recomp_build, config, sh2  # noqa: E402
 from saturnrecomp.analysis import resume  # noqa: E402
 from saturnrecomp.recomp import __main__ as recomp_main, discover, emit  # noqa: E402
@@ -82,31 +83,31 @@ def body(image: sh2.Image, address: int) -> list[sh2.Insn]:
 def build_table(root: str = ROOT) -> list[Row]:
     ran = executed(root)
     swapped = replaced(os.path.join(root, "game.toml"))     # only to start a table; gen.py writes them after
-    written = drafted()
+    written = {name: drafted(sources(modules.load(name).src)) for name in modules.SCOPE}
     old = previous(os.path.join(HERE, "status.tsv"))
     rows = functions(root)
     found = {(row.module, row.address) for row in rows}
     for key in sorted((set(old) or swapped) - found):       # the map leaves out a replaced function
         was = old.get(key)
-        insns, calls = (was.insns, was.calls) if was else walk(root, key[1])
+        insns, calls = (was.insns, was.calls) if was else walk(root, key[1], key[0])
         rows.append(Row(key[0], key[1], insns, calls, False))
     rows.sort(key=lambda row: (row.module, row.address))
     parked = yielding(root)
-    caught = hooked(root)
-    inside = pieces(root)
+    inside = {name: pieces(root, name) for name in modules.SCOPE}
+    caught = {name: hooked(root, name) for name in modules.SCOPE}
     for row in rows:
         key = (row.module, row.address)
         row.executed = key in ran
         row.yields = row.module == KRNL[0] and row.address in parked
-        row.hooked = row.module == KRNL[0] and row.address in caught
-        row.piece = row.module == KRNL[0] and row.address in inside
+        row.hooked = row.address in caught.get(row.module, ())
+        row.piece = row.address in inside.get(row.module, ())
         was = old.get(key)
         row.name = was.name if was else ""
         if was and was.state in ("dead", "swapped"):
             row.state = was.state
         elif not old and key in swapped:
             row.state = "swapped"
-        elif row.module == KRNL[0] and row.address in written:
+        elif row.address in written.get(row.module, ()):
             row.state = "drafted"
     return rows
 
@@ -114,7 +115,7 @@ def build_table(root: str = ROOT) -> list[Row]:
 def drafted(paths: list[str] | None = None) -> set[int]:
     """The addresses the decompiled C defines a function for."""
     found: set[int] = set()
-    for path in paths or sources():
+    for path in sources() if paths is None else paths:
         with open(path, encoding="utf-8") as f:
             found |= {int(m.group(1), 16) for m in _DEFINED.finditer(f.read())}
     return found
@@ -133,9 +134,10 @@ def executed(root: str = ROOT) -> set[tuple[str, int]]:
     return seen
 
 
-def function_code(root: str = ROOT) -> dict[int, set[int]]:
-    """{entry: its instruction addresses} for KRNL, as the recompiler finds them from the build's seeds."""
-    return {int(k): set(v) for k, v in _discovery(root)["code"].items()}
+def function_code(root: str = ROOT, module: str | None = None) -> dict[int, set[int]]:
+    """{entry: its instruction addresses} for a module (the one DECOMP_MODULE names), as the recompiler finds
+    them from the build's seeds."""
+    return {int(k): set(v) for k, v in _discovery(root, module or modules.current().name)["code"].items()}
 
 
 def functions(root: str = ROOT) -> list[Row]:
@@ -166,16 +168,17 @@ def holding(code: dict[int, set[int]], addresses: set[int]) -> set[int]:
     return {entry for entry, insns in code.items() if insns & addresses}
 
 
-def hooked(root: str = ROOT) -> set[int]:
-    """The KRNL functions whose code holds an address game.toml hooks."""
-    hooks = set(config.load(os.path.join(root, "game.toml")).hooks.get(KRNL[0], []))
-    return holding(function_code(root), hooks)
+def hooked(root: str = ROOT, module: str | None = None) -> set[int]:
+    """The functions of a module whose code holds an address game.toml hooks."""
+    name = module or modules.current().name
+    hooks = set(config.load(os.path.join(root, "game.toml")).hooks.get(name, []))
+    return holding(function_code(root, name), hooks)
 
 
-def krnl_image(root: str = ROOT) -> sh2.Image:
-    _, rel, base = KRNL
-    with open(os.path.join(root, rel), "rb") as f:
-        return sh2.Image(f.read(), base)
+def image(root: str = ROOT, module: str | None = None) -> sh2.Image:
+    found = modules.load(module or modules.current().name, root)
+    with open(found.path, "rb") as f:
+        return sh2.Image(f.read(), found.base)
 
 
 def own(image: sh2.Image, address: int, code: set[int] | None) -> list[sh2.Insn]:
@@ -191,21 +194,21 @@ def own(image: sh2.Image, address: int, code: set[int] | None) -> list[sh2.Insn]
 
 
 def jump_kinds(root: str = ROOT) -> dict[int, str]:
-    """How the recompiler resolves each KRNL jmp and braf: `literal` (a tail call to a known address),
+    """How the recompiler resolves each jmp and braf of the module: `literal` (a tail call to a known address),
     `pointer` or `unresolved` (a tail call through a register), or `switch` (a jump table)."""
-    return {int(a): kind for a, kind in _discovery(root)["jumps"].items()}
+    return {int(a): kind for a, kind in _discovery(root, modules.current().name)["jumps"].items()}
 
 
 def polling_jumps(root: str = ROOT) -> set[int]:
-    """The KRNL jmp and braf instructions whose generated code advances time before it jumps, wherever the
+    """The jmp and braf instructions of the module whose generated code advances time before it jumps, wherever the
     jump then goes: one that may go back within its function."""
-    return set(_discovery(root)["polling"])
+    return set(_discovery(root, modules.current().name)["polling"])
 
 
-def pieces(root: str = ROOT) -> set[int]:
-    """The KRNL entries inside another function's code: the resume points the recompile seeds in the middle of
+def pieces(root: str = ROOT, module: str | None = None) -> set[int]:
+    """The entries inside another function's code: the resume points the recompile seeds in the middle of
     a function, whose code that function holds too."""
-    code = function_code(root)
+    code = function_code(root, module)
     inside = {at for entry, instructions in code.items() for at in instructions if at != entry}
     return {entry for entry in code if entry in inside}
 
@@ -233,15 +236,16 @@ def replaced(path: str = os.path.join(ROOT, "game.toml")) -> set[tuple[str, int]
         return {(m.group(1), int(m.group(2), 16)) for m in _REPLACE.finditer(f.read())}
 
 
-def source_for(address: int, folder: str = SRC) -> str:
-    """The file of src/ a function at this address belongs in: one per 0x10000 of address, so workers given
-    different ranges edit different files."""
-    return os.path.join(folder, "krnl_%04X.c" % (address >> 16))
+def source_for(address: int, folder: str | None = None) -> str:
+    """The file a function at this address belongs in, in the module's folder of C: one per 0x10000 of address,
+    so workers given different ranges edit different files."""
+    current = modules.current()
+    return os.path.join(folder or current.src, "%s_%04X.c" % (current.name.lower(), address >> 16))
 
 
-def sources(folder: str = SRC) -> list[str]:
-    """The decompiled C, every file of src/."""
-    return sorted(glob.glob(os.path.join(folder, "*.c")))
+def sources(folder: str | None = None) -> list[str]:
+    """The decompiled C of the module (DECOMP_MODULE), every file of its folder."""
+    return sorted(glob.glob(os.path.join(folder or modules.current().src, "*.c")))
 
 
 def summary(rows: list[Row]) -> str:
@@ -261,10 +265,10 @@ def summary(rows: list[Row]) -> str:
     return "\n".join(lines)
 
 
-def walk(root: str, address: int) -> tuple[int, int]:
-    """Instructions and calls of a KRNL function. A replaced function has no rows in the map, so this
+def walk(root: str, address: int, module: str) -> tuple[int, int]:
+    """Instructions and calls of a function. A replaced function has no rows in the map, so this
     counts one that was never in the table."""
-    insns = own(krnl_image(root), address, function_code(root).get(address))
+    insns = own(image(root, module), address, function_code(root, module).get(address))
     return len(insns), sum(ins.op in ("bsr", "jsr", "bsrf") for ins in insns)
 
 
@@ -280,10 +284,10 @@ def yielding(root: str = ROOT) -> set[int]:
     return resume.yielding_functions(config.load(os.path.join(root, "game.toml")))
 
 
-def _discovery(root: str) -> dict:
-    """The recompiler's view of KRNL, cached against build/recomp/inputs.json, which the last recompile
+def _discovery(root: str, module: str) -> dict:
+    """The recompiler's view of a module, cached against build/recomp/inputs.json, which the last recompile
     wrote from everything it read."""
-    cache = os.path.join(root, "build", "decomp", "function-code.json")
+    cache = os.path.join(root, "build", "decomp", "function-code%s.json" % ("" if module == KRNL[0] else "-" + module))
     with open(os.path.join(root, "build", "recomp", "inputs.json"), encoding="utf-8") as f:
         stamp = f.read()
     try:
@@ -294,7 +298,7 @@ def _discovery(root: str) -> dict:
     except (OSError, ValueError, KeyError):
         pass
     game = config.load(os.path.join(root, "game.toml"))
-    _, path, base, seeds = next(s for s in recomp_build.specs(game) if s[0] == "KRNL")
+    _, path, base, seeds = next(s for s in recomp_build.specs(game) if s[0] == module)
     with open(path, "rb") as f:
         program = discover.Program(sh2.Image(f.read(), base), [base, *seeds])
     polling, jumps = _polling_jumps(program)

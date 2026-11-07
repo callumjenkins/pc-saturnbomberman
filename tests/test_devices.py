@@ -147,7 +147,7 @@ SOURCES = {
 }
 
 
-@pytest.mark.skipif(not os.path.exists(check.KRNL), reason="needs the extracted disc")
+@pytest.mark.skipif(not os.path.exists(check.IMAGE), reason="needs the extracted disc")
 @pytest.mark.parametrize("entry, source", list(SOURCES.values()), ids=list(SOURCES))
 def test_a_store_to_hirq_gets_the_same_answer_from_the_game_and_the_host_build(tmp_path, entry, source):
     path = tmp_path / "f.c"
@@ -157,7 +157,7 @@ def test_a_store_to_hirq_gets_the_same_answer_from_the_game_and_the_host_build(t
     assert ran == 20 and not fails
 
 
-@pytest.mark.skipif(not os.path.exists(check.KRNL), reason="needs the extracted disc")
+@pytest.mark.skipif(not os.path.exists(check.IMAGE), reason="needs the extracted disc")
 def test_a_plant_in_hirq_without_cmok_reads_the_same_on_both_sides(tmp_path):
     path = tmp_path / "f.c"
     path.write_text('#include "krnl.h"\nunsigned short f060958EA(void)\n{\n    return 0;\n}\n')
