@@ -1350,13 +1350,13 @@ void f00201060(int r4)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f00201066(void)
+void f00201066(void)
 {
     int r0;
 
     r0 = GCALL1(0x00201060, 0xBE1);
     ST16(0x00201378, 0xBE1);
-    return r0;
+    return;
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */

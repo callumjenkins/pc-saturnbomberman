@@ -4525,6 +4525,7 @@ int boot_f060533F8(void);
 int boot_f06053404(int);
 int boot_f0605381C(void);
 void boot_f060538A0(int, int);
+void boot_f06053A18(void);
 int boot_f06053B24(int, int);
 int boot_f06053B44(int, int);
 int boot_f06053BA8(int);
@@ -5453,6 +5454,7 @@ int fld_f00201002(void);
 int fld_f00201040(void);
 int fld_f00201046(void);
 void fld_f00201060(int);
+void fld_f00201066(void);
 void fld_f00201078(int);
 int fld_f00201096(int, int);
 int fld_f002010EE(int, int, int);
@@ -9991,6 +9993,7 @@ void swap_boot_f060533F8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f06053404(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06053404((int)c.r[4]); }
 void swap_boot_f0605381C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0605381C(); }
 void swap_boot_f060538A0(SH2Context& c) { InSwap in(c); boot_f060538A0((int)c.r[4], (int)c.r[5]); }
+void swap_boot_f06053A18(SH2Context& c) { InSwap in(c); boot_f06053A18(); }
 void swap_boot_f06053B24(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06053B24((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f06053B44(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06053B44((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f06053BA8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06053BA8((int)c.r[4]); }
@@ -10919,6 +10922,7 @@ void swap_fld_f00201002(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f0
 void swap_fld_f00201040(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f00201040(); }
 void swap_fld_f00201046(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f00201046(); }
 void swap_fld_f00201060(SH2Context& c) { InSwap in(c); fld_f00201060((int)c.r[4]); }
+void swap_fld_f00201066(SH2Context& c) { InSwap in(c); fld_f00201066(); }
 void swap_fld_f00201078(SH2Context& c) { InSwap in(c); fld_f00201078((int)c.r[4]); }
 void swap_fld_f00201096(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f00201096((int)c.r[4], (int)c.r[5]); }
 void swap_fld_f002010EE(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f002010EE((int)c.r[4], (int)c.r[5], (int)c.r[6]); }

@@ -164,7 +164,7 @@ int f060727E0(int r4, int r5)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f06072820(int r4, int r5, int r6, int r7)
+void f06072820(int r4, int r5, int r6, int r7)
 {
     int r0;
 
@@ -213,7 +213,7 @@ int f06072820(int r4, int r5, int r6, int r7)
     }
     POLL();
     r0 = GJUMP4((0x06072810 + (r6 << 2)), (r4 + 64), (r5 + 64), (r6 << 2), r7);
-    return r0;
+    return;
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */

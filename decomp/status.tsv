@@ -984,7 +984,7 @@ BOOT	06053784	64	8	no	no	no	no	no	todo
 BOOT	0605381C	63	0	yes	no	no	no	no	swapped	
 BOOT	060538A0	100	0	yes	no	no	no	no	swapped	
 BOOT	0605396C	82	0	yes	no	no	no	no	todo	
-BOOT	06053A18	25	2	no	no	no	no	no	drafted	
+BOOT	06053A18	25	2	no	no	no	no	no	swapped	
 BOOT	06053A58	89	2	no	no	no	no	no	todo	
 BOOT	06053B24	14	2	no	no	no	no	no	swapped	
 BOOT	06053B44	44	2	no	no	no	no	no	swapped	
@@ -2215,7 +2215,7 @@ FLD	00201002	20	4	no	yes	no	no	no	swapped
 FLD	00201040	3	0	yes	yes	no	no	no	swapped	
 FLD	00201046	4	0	yes	yes	no	no	no	swapped	
 FLD	00201060	3	0	yes	yes	no	no	no	swapped	
-FLD	00201066	9	2	no	yes	no	no	no	drafted	
+FLD	00201066	9	2	no	yes	no	no	no	swapped	
 FLD	00201078	5	0	yes	yes	no	no	no	swapped	
 FLD	00201096	44	4	no	yes	no	no	no	swapped	
 FLD	002010EE	28	2	no	yes	no	no	no	swapped	

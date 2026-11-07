@@ -3411,7 +3411,7 @@ int f0606D688(void)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f0606D69A(void)
+void f0606D69A(void)
 {
     int r0, r2;
 
@@ -3420,7 +3420,7 @@ int f0606D69A(void)
     if (!((r2 & r2) == 0)) {
         r0 = GCALL0(r2);
     }
-    return r0;
+    return;
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */

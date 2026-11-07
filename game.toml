@@ -22864,6 +22864,11 @@ symbol = "swap_boot_f060538A0"
 
 [[replace]]
 module = "BOOT"
+at = 0x06053A18
+symbol = "swap_boot_f06053A18"
+
+[[replace]]
+module = "BOOT"
 at = 0x06053B24
 symbol = "swap_boot_f06053B24"
 
@@ -27501,6 +27506,11 @@ symbol = "swap_fld_f00201046"
 module = "FLD"
 at = 0x00201060
 symbol = "swap_fld_f00201060"
+
+[[replace]]
+module = "FLD"
+at = 0x00201066
+symbol = "swap_fld_f00201066"
 
 [[replace]]
 module = "FLD"

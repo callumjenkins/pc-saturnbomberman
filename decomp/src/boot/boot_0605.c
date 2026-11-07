@@ -894,7 +894,7 @@ int f06053404(int r4)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f06053A18(void)
+void f06053A18(void)
 {
     int r0, r1, r8, r9;
 
@@ -904,7 +904,7 @@ int f06053A18(void)
     ST8(((r9 + ((((signed char)r8) << 2) + (((signed char)r8) << 2))) + 98), 3);
     r1 = LD32(0x0608D7D0);
     ST32(0x0608D7D0, (r1 + 1));
-    return r0;
+    return;
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
