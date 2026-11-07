@@ -85,7 +85,16 @@ the NetLink menus to the call (`[online.classic]` in `game.toml`), and after eac
 rematch. `SATURN_PLAYTEST_TOKEN` or `SATURN_PLAYTEST_TESTER` says which tester you are, and both sides
 need the same build. `replay` plays such a session again from what its line heard, without the room.
 `uv run tests/netlink.py --room` checks a match, a rematch, and both replays through a room on this
-machine, under the playtest Worker's `wrangler dev`.
+machine, under the playtest Worker's `wrangler dev`. With `--saved`, both sides start from a save the
+XBAND client has already written, as a returning player's is, and its rematch goes through the
+client's chat on the held call.
+
+`uv run bomberman play --netband wait|match|IP` plays a real Saturn, or anyone else using SegaRPGFan's
+NetBand tunnel. `wait` waits for a call; `IP` calls that address directly, on TCP 65432 and UDP
+20001-20002; `match` finds a game waiting on the dreampipe.net match service under
+`[online.classic] netband_code`, which is still to be filled in from a patched disc's dial screen.
+The Saturn on the other end needs the NetLink patches its players use, and their effect on the match
+is unchecked.
 
 The port supports one disc: Saturn Bomberman (USA), MK-81070 V1.003. `disc.json` lists every
 file on it with its size and SHA-1, and `prepare` stops before extracting anything if a file
