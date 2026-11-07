@@ -27,6 +27,7 @@ from state import (LOCAL_TYPES, MAC, NO_FLAG, VAR, Copies, State, Stmt, Unsuppor
 
 _CALLS = ("bsr", "jsr")
 TABLE_LOAD = re.compile(r"mov\.w @\(r0,r\d+\),r(\d+)$")     # the load of an entry of a jump table of words
+MERGED = 1000                           # flag variables from here are made for a block entered with T in different variables
 MAX_ROUNDS = 12                         # times read_blocks reads every block again before it gives up
 
 
@@ -331,7 +332,8 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
                slots: dict[int, int], fresh: set[int], code: set[int] | None,
                functions: dict[int, set[int]] | None = None, framed: bool = False,
                stored: set[int] | None = None, saved: set[int] | None = None, parked: bool = False,
-               clobbered: set[int] = frozenset(), flag: str | None = None) -> tuple[Read, int]:
+               clobbered: set[int] = frozenset(), flag: str | None = None,
+               merged: dict[int, str] | None = None) -> tuple[Read, int]:
     st = State(flags=flags, sp=stops[start], copies=stops.copies, slots=slots, fresh=set(fresh), framed=framed, parked=parked,
                clobbered=set(clobbered), flag=flag,
                touched=registers.written(image, code) if code is not None else frozenset(range(8, 15)),
@@ -404,6 +406,8 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
         if at in stops:
             block.kind, block.targets = "goto", [at]
             break
+    if block.kind == "goto" and merged and st.flag is not None and block.targets[0] in merged:
+        st.stmts.append(Stmt(merged[block.targets[0]], st.flag))
     return Read(block, st.stmts, term, tail, st.fresh, st.clobbered, st.lacks, st.flag, taken_flag), st.flags
 
 
@@ -416,6 +420,7 @@ def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], 
     fresh = {at: set() if at == entry else set(range(16)) for at in stops}
     clobbered: dict[int, set[int]] = {at: set() for at in stops}
     carried: dict[int, str | None] = {at: None for at in stops}
+    merged: dict[int, str] = {}                 # blocks entered with T in different variables, to the one the ways in copy it to
     for _ in range(MAX_ROUNDS):
         flags = 0
         reads: dict[int, Read] = {}
@@ -424,12 +429,14 @@ def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], 
         saved: set[int] = set()
         for at in sorted(stops):
             reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions, framed,
-                                          stored, saved, parked, clobbered[at], carried[at])
+                                          stored, saved, parked, clobbered[at], carried[at], merged)
         into: dict[int, list[set[int]]] = {at: [] for at in stops}
         after: dict[int, list[set[int]]] = {at: [] for at in stops}
         holding: dict[int, list[str | None]] = {at: [] for at in stops}
+        ways: dict[int, list[str]] = {at: [] for at in stops}
         for read in reads.values():
             for i, target in enumerate(read.block.targets):
+                ways[target].append(read.block.kind)
                 into[target].append(read.fresh)
                 after[target].append(read.clobbered)
                 holding[target].append(read.taken if read.block.kind == "branch" and i == 0 else read.flag)
@@ -437,12 +444,16 @@ def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], 
         spoiled = {at: set().union(*after[at]) for at in stops}
         # T is carried into a block only when every way into it leaves it in the same variable
         leaving = {at: None if at == entry or len(set(holding[at])) != 1 else holding[at][0] for at in stops}
-        if settled == fresh and spoiled == clobbered and leaving == carried:
+        merges = {}
+        for number, at in enumerate(sorted(stops)):
+            if at != entry and len(set(holding[at])) > 1 and None not in holding[at] and set(ways[at]) == {"goto"}:
+                merges[at] = leaving[at] = "c%d" % (MERGED + number)
+        if settled == fresh and spoiled == clobbered and leaving == carried and merges == merged:
             for read in reads.values():
                 if read.lacks:
                     raise Unsupported(read.lacks)
             return reads, slots
-        fresh, clobbered, carried = settled, spoiled, leaving
+        fresh, clobbered, carried, merged = settled, spoiled, leaving, merges
     raise Unsupported("what the blocks leave in registers and T does not settle")
 
 

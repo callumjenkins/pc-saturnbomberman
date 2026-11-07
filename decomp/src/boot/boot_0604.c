@@ -5696,3 +5696,87 @@ int f06046D54(int r4)
         }
     }
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06044030(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r8, r9, r10, r11;
+
+    r11 = r4;
+    r10 = 0x0608BD04;
+    r6 = LD32(0x0608BD04);
+    r5 = LD32(0x0608BD08);
+    r0 = GCALL4(0x06027C18, 0, r5, ((r6 + 1) << 2), r7);
+    r9 = r0;
+    if ((r9 & r9) == 0) {
+        r0 = GCALL2(0x06045264, 0x0608B860, 0x06043CE4);
+        r0 = GCALL1(0x06010DDC, 24);
+        ST32(0x060766C0, 0);
+    } else {
+        ST32(r10 + 4, r9);
+        r0 = GCALL1(0x0607507C, r11);
+        r0 = GCALL4(0x060279E0, 0, (r0 + 1), -1, 1);
+        r8 = r0;
+        r5 = r11;
+        if ((r8 & r8) == 0) {
+            r0 = GCALL2(0x06045264, 0x0608B860, 0x06043CE4);
+            r0 = GCALL1(0x06010DDC, 24);
+            ST32(0x060766C0, 0);
+        } else {
+            r0 = GCALL2(0x060750DC, r8, r5);
+            r1 = LD32(r10);
+            ST32((r1 << 2) + r9, r8);
+            r1 = LD32(r10);
+            ST32(r10, (r1 + 1));
+            r0 = GCALL0(0x06043B20);
+            if (!((r0 & r0) == 0)) {
+                r0 = GCALL2(0x06045264, 0x0608B860, 0x06043CE4);
+                r0 = GCALL1(0x06010DDC, 24);
+                ST32(0x060766C0, 0);
+            } else {
+                r0 = GCALL1(0x06010DDC, 16);
+            }
+        }
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060440E4(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r8, r9, r10, r11;
+
+    r11 = r4;
+    r10 = 0x0608BCF4;
+    r6 = LD32(0x0608BCF4);
+    r5 = LD32(0x0608BCF8);
+    r0 = GCALL4(0x06027C18, 0, r5, ((r6 + 1) << 2), r7);
+    r9 = r0;
+    if ((r9 & r9) == 0) {
+        r0 = GCALL2(0x06045264, 0x0608B860, 0x06043CE4);
+        r0 = GCALL1(0x06010DDC, 24);
+    } else {
+        ST32(r10 + 4, r9);
+        r0 = GCALL1(0x0607507C, r11);
+        r0 = GCALL4(0x060279E0, 0, (r0 + 1), -1, 1);
+        r8 = r0;
+        r5 = r11;
+        if ((r8 & r8) == 0) {
+            r0 = GCALL2(0x06045264, 0x0608B860, 0x06043CE4);
+            r0 = GCALL1(0x06010DDC, 24);
+        } else {
+            r0 = GCALL2(0x060750DC, r8, r5);
+            r1 = LD32(r10);
+            ST32((r1 << 2) + r9, r8);
+            r1 = LD32(r10);
+            ST32(r10, (r1 + 1));
+            r0 = GCALL0(0x06043C08);
+            if (!((r0 & r0) == 0)) {
+                r0 = GCALL2(0x06045264, 0x0608B860, 0x06043CE4);
+                r0 = GCALL1(0x06010DDC, 24);
+            }
+        }
+    }
+    ST32(0x060766C0, 0);
+    return r0;
+}

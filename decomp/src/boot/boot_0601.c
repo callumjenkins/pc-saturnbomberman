@@ -8809,3 +8809,74 @@ int f0601E9F8(int r4, int r5, int r6, int r7)
     }
     return r0;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f0601DD34(int r4, int r5, int r6)
+{
+    int r0, r1, r2, r3, r7, r8, c4, c1010;
+
+    r1 = LD32(r4 + 32);
+    r2 = LD32(r5 + 32);
+    r7 = 1;
+    if (!(r1 >= r2)) {
+        ST32(r4 + 32, r2);
+    }
+    r3 = LD32(r4 + 36);
+    r1 = LD32(r4 + 32);
+    r2 = LD32(r5 + 32);
+    r3 = r3 - r1;
+    r1 = LD32(r5 + 36);
+    if (!(r3 >= (r1 - r2))) {
+        r1 = LD8(r6);
+        r1 = r1 & 255;
+        if ((r1 & r1) == 0) {
+            c1010 = (r7 & r7) == 0;
+        } else {
+            r2 = 32;
+            r3 = 0x06075135;
+            r0 = r1;
+            while (1) {
+                r8 = LD8(r0 + r3);
+                c4 = (unsigned)r1 > (unsigned)r2;
+                if (!(((r8 & 8) & (r8 & 8)) == 0)) {
+                    r6 = r6 + 1;
+                    r1 = LD8(r6);
+                    r1 = r1 & 255;
+                    r0 = r1;
+                    if (!((r1 & r1) == 0)) {
+                        POLL();
+                        continue;
+                    } else {
+                        c1010 = (r7 & r7) == 0;
+                        break;
+                    }
+                } else {
+                    if (!(c4)) {
+                        r6 = r6 + 1;
+                        r1 = LD8(r6);
+                        r1 = r1 & 255;
+                        r0 = r1;
+                        if (!((r1 & r1) == 0)) {
+                            POLL();
+                            continue;
+                        } else {
+                            c1010 = (r7 & r7) == 0;
+                            break;
+                        }
+                    } else {
+                        c1010 = 0 == 0;
+                        break;
+                    }
+                }
+                POLL();
+            }
+        }
+        if (c1010) {
+            r1 = LD32(r5 + 36);
+            r2 = LD32(r5 + 32);
+            r1 = r1 - r2;
+            r2 = LD32(r4 + 32);
+            ST32(r4 + 36, (r1 + r2));
+        }
+    }
+}
