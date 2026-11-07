@@ -119,7 +119,8 @@ reference comparisons, and automation runs. `AGENTS.md` is the shared project en
     src/bomberman/         routes.py (the scripted runs as pad presses), run.py, prepare.py, the CLI
     src/bomberman/research/  one-off tools: stage maps from dumps, slot reel timing, the Yuna unlock
     inputs/                pad presses for the longer routes
-    tests/                 frames.py: every route replayed and its frames compared with frames.json
+    tests/                 frames.py: every route replayed and its frames compared with frames.json,
+                           dump_parity.py: machine dumps compared with another build's
     saturn-recomp/         the recompiler and runtime (submodule)
     iso/, build/           your disc and everything made from it (ignored)
 
@@ -243,8 +244,9 @@ counts as the same, since the sound's floating point rounds differently there; i
 `--saturn EXE` runs another executable as it is, without building, and `--expected FILE` compares with
 or records into that file, keeping its pictures beside it in `NAME.kept/`. Together they check a build for
 another platform against Linux's: record a Linux build of the same sources and options with
-`--update`, then run the other build against that file. `docs/PLATFORMS.md` says what each platform
-has passed.
+`--update`, then run the other build against that file. `tests/dump_parity.py` does the same with a dump of the
+whole machine near the end of `normal`, `battle-round`, `die` and `pause`, part by part.
+`docs/PLATFORMS.md` says what each platform has passed.
 
 ## Researching the game
 

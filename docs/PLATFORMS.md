@@ -9,9 +9,9 @@ check and the smoke checklist below. Until then it's a playtest build.
 | Platform | Status | Game-free CI | Parity | Smoke checklist |
 |---|---|---|---|---|
 | Linux x64 | Supported | Clang and GCC, every push | It's the reference | Played throughout development |
-| Windows x64 | Parity passed. The pad, and sound on a PC with a GPU, still to try | Clang with MSVC's libraries, every push | Passed 2026-10-18 at saturn-recomp `7aa53b8`, in a Windows 11 VM | All but the pad and the sound stream (below) |
+| Windows x64 | Parity passed. The pad, and sound on a PC with a GPU, still to try | Clang with MSVC's libraries, every push | Passed 2026-10-18 at saturn-recomp `7aa53b8`, in a Windows 11 VM, and again 2026-11-07 at `f20de94` with machine dumps equal to Linux's | All but the pad and the sound stream (below) |
 | Android arm64 | Playtest | none | Not run | Not run. 31 sessions played on a Galaxy Z Fold 7, on builds from 2026-10-07 to 2026-10-11 |
-| macOS arm64 | Playtest. The pad, and the picture, still to try | Clang, every push | Frames matched `tests/frames.json` on 2026-10-19 at saturn-recomp `b22688d`, built on the Mac from the disc. Sound differs from Linux's by one 16-bit step in 6 of 600 quarter-second blocks of `normal` | Pace: 54 s for 3000 VBlanks, with the audio stream empty 0 times and no chunks dropped. The pad and the picture are not tried |
+| macOS arm64 | Playtest. The pad, and the picture, still to try | Clang, every push | Passed 2026-11-07 at saturn-recomp `f20de94`: frames, sound and machine dumps equal to the Linux release build's. On 2026-10-19 at `b22688d` the sound differed by one 16-bit step in 6 of 600 quarter-second blocks of `normal` | Pace: 54 s for 3000 VBlanks, with the audio stream empty 0 times and no chunks dropped. The pad and the picture are not tried |
 
 ## The parity check
 
@@ -25,13 +25,19 @@ cmake -S build/recomp -B build/release-linux -G Ninja -DCMAKE_BUILD_TYPE=Release
 ninja -C build/release-linux saturn
 uv run tests/frames.py --saturn build/release-linux/saturn --expected build/parity/release.json --update \
     normal battle-round die pause
+uv run tests/dump_parity.py --saturn build/release-linux/saturn --expected build/parity/dumps.json --update
 ```
 
-Then run the other platform's build against that file, with the same checkout and disc there:
+Then run the other platform's build against those files, with the same checkout and disc there:
 
 ```sh
 uv run tests/frames.py --saturn PATH/TO/saturn.exe --expected build/parity/release.json normal battle-round die pause
+uv run tests/dump_parity.py --saturn PATH/TO/saturn.exe --expected build/parity/dumps.json
 ```
+
+`dump_parity.py` dumps the machine 100 VBlanks before the end of the same four runs and compares each of
+the dump's parts: the memory, the processors and every device. Equal dumps mean the builds also agree on
+state the frames have not shown yet.
 
 The other machine needs its own `build/prepared.json`, because `prepare` records the disc's files by
 path and modification time.
