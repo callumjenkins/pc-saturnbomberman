@@ -45,14 +45,17 @@
 #define f06013F5C boot_f06013F5C
 #define f0601413C boot_f0601413C
 #define f06014150 boot_f06014150
+#define f06014638 boot_f06014638
 #define f060146A4 boot_f060146A4
 #define f060147F0 boot_f060147F0
 #define f06014E60 boot_f06014E60
 #define f06014E74 boot_f06014E74
 #define f06014FE4 boot_f06014FE4
+#define f06015154 boot_f06015154
 #define f060152A0 boot_f060152A0
 #define f060153C8 boot_f060153C8
 #define f060159A4 boot_f060159A4
+#define f060161C4 boot_f060161C4
 #define f060162B4 boot_f060162B4
 #define f06016A10 boot_f06016A10
 #define f06016F08 boot_f06016F08
@@ -64,8 +67,12 @@
 #define f06017534 boot_f06017534
 #define f060176CC boot_f060176CC
 #define f06017C80 boot_f06017C80
+#define f06017D08 boot_f06017D08
 #define f0601852C boot_f0601852C
 #define f06018550 boot_f06018550
+#define f06018588 boot_f06018588
+#define f0601897C boot_f0601897C
+#define f060189FC boot_f060189FC
 #define f06018A78 boot_f06018A78
 #define f06018AA8 boot_f06018AA8
 #define f06018ACC boot_f06018ACC
@@ -112,7 +119,9 @@
 #define f0601AFA8 boot_f0601AFA8
 #define f0601AFF8 boot_f0601AFF8
 #define f0601B028 boot_f0601B028
+#define f0601B098 boot_f0601B098
 #define f0601B124 boot_f0601B124
+#define f0601B188 boot_f0601B188
 #define f0601B1E4 boot_f0601B1E4
 #define f0601B204 boot_f0601B204
 #define f0601B858 boot_f0601B858
@@ -127,6 +136,7 @@
 #define f0601CD50 boot_f0601CD50
 #define f0601CD5C boot_f0601CD5C
 #define f0601CE48 boot_f0601CE48
+#define f0601CEEC boot_f0601CEEC
 #define f0601CF60 boot_f0601CF60
 #define f0601CF94 boot_f0601CF94
 #define f0601D034 boot_f0601D034
@@ -144,6 +154,7 @@
 #define f0601D9E8 boot_f0601D9E8
 #define f0601DAB0 boot_f0601DAB0
 #define f0601DBAC boot_f0601DBAC
+#define f0601DC10 boot_f0601DC10
 #define f0601DCE8 boot_f0601DCE8
 #define f0601DD34 boot_f0601DD34
 #define f0601E268 boot_f0601E268
@@ -171,12 +182,15 @@
 #define f060202EC boot_f060202EC
 #define f06020DCC boot_f06020DCC
 #define f060216EC boot_f060216EC
+#define f06021724 boot_f06021724
+#define f06021780 boot_f06021780
 #define f06021990 boot_f06021990
 #define f06021A70 boot_f06021A70
 #define f06021DD8 boot_f06021DD8
 #define f060221DC boot_f060221DC
 #define f0602220C boot_f0602220C
 #define f0602234C boot_f0602234C
+#define f06022690 boot_f06022690
 #define f06022750 boot_f06022750
 #define f0602306C boot_f0602306C
 #define f0602316C boot_f0602316C
@@ -187,6 +201,7 @@
 #define f06023B1C boot_f06023B1C
 #define f060243C0 boot_f060243C0
 #define f0602443C boot_f0602443C
+#define f0602464C boot_f0602464C
 #define f060255E0 boot_f060255E0
 #define f06025608 boot_f06025608
 #define f06025618 boot_f06025618
@@ -203,7 +218,11 @@
 #define f06025B44 boot_f06025B44
 #define f06025D24 boot_f06025D24
 #define f06025DB0 boot_f06025DB0
+#define f060261A4 boot_f060261A4
+#define f06026A1C boot_f06026A1C
+#define f06026B64 boot_f06026B64
 #define f06026C54 boot_f06026C54
+#define f06026DEC boot_f06026DEC
 #define f06026F98 boot_f06026F98
 #define f06026FBC boot_f06026FBC
 #define f06027620 boot_f06027620
@@ -247,6 +266,7 @@
 #define f06029FD8 boot_f06029FD8
 #define f06029FF8 boot_f06029FF8
 #define f0602A030 boot_f0602A030
+#define f0602A074 boot_f0602A074
 #define f0602A150 boot_f0602A150
 #define f0602A664 boot_f0602A664
 #define f0602A6F0 boot_f0602A6F0
@@ -266,6 +286,7 @@
 #define f0602B408 boot_f0602B408
 #define f0602B4E0 boot_f0602B4E0
 #define f0602B560 boot_f0602B560
+#define f0602B5D4 boot_f0602B5D4
 #define f0602B7C0 boot_f0602B7C0
 #define f0602B840 boot_f0602B840
 #define f0602B8B4 boot_f0602B8B4
@@ -281,11 +302,13 @@
 #define f0602C924 boot_f0602C924
 #define f0602CA04 boot_f0602CA04
 #define f0602CAF0 boot_f0602CAF0
+#define f0602E26C boot_f0602E26C
 #define f0602E2A4 boot_f0602E2A4
 #define f0602E380 boot_f0602E380
 #define f0602E488 boot_f0602E488
 #define f0602E4E4 boot_f0602E4E4
 #define f0602EC44 boot_f0602EC44
+#define f0602EDBC boot_f0602EDBC
 #define f0602F1FC boot_f0602F1FC
 #define f0602F218 boot_f0602F218
 #define f0602F540 boot_f0602F540
@@ -295,6 +318,8 @@
 #define f0602F7F4 boot_f0602F7F4
 #define f0602F830 boot_f0602F830
 #define f0602FBCC boot_f0602FBCC
+#define f0602FBE4 boot_f0602FBE4
+#define f0602FDD4 boot_f0602FDD4
 #define f0602FFD0 boot_f0602FFD0
 #define f06030098 boot_f06030098
 #define f06030250 boot_f06030250
@@ -337,6 +362,7 @@
 #define f06033168 boot_f06033168
 #define f06033378 boot_f06033378
 #define f0603340C boot_f0603340C
+#define f060334B4 boot_f060334B4
 #define f06033540 boot_f06033540
 #define f060335FC boot_f060335FC
 #define f06033710 boot_f06033710
@@ -346,6 +372,7 @@
 #define f060338B8 boot_f060338B8
 #define f06033930 boot_f06033930
 #define f06033974 boot_f06033974
+#define f06033A1C boot_f06033A1C
 #define f06033C2C boot_f06033C2C
 #define f06033CA8 boot_f06033CA8
 #define f06033D70 boot_f06033D70
@@ -358,6 +385,8 @@
 #define f06033FE0 boot_f06033FE0
 #define f06034000 boot_f06034000
 #define f06034024 boot_f06034024
+#define f0603486C boot_f0603486C
+#define f06034990 boot_f06034990
 #define f06034CEC boot_f06034CEC
 #define f06034D08 boot_f06034D08
 #define f06034D24 boot_f06034D24
@@ -385,6 +414,7 @@
 #define f06036138 boot_f06036138
 #define f06036310 boot_f06036310
 #define f06036454 boot_f06036454
+#define f060365E8 boot_f060365E8
 #define f060368C4 boot_f060368C4
 #define f0603696C boot_f0603696C
 #define f06036C40 boot_f06036C40
@@ -396,14 +426,17 @@
 #define f06036E68 boot_f06036E68
 #define f06037108 boot_f06037108
 #define f06037298 boot_f06037298
+#define f060372AC boot_f060372AC
 #define f0603739C boot_f0603739C
 #define f060378C8 boot_f060378C8
+#define f06037924 boot_f06037924
 #define f06037C2C boot_f06037C2C
 #define f06037C9C boot_f06037C9C
 #define f06037DBC boot_f06037DBC
 #define f06037DD0 boot_f06037DD0
 #define f06037E74 boot_f06037E74
 #define f06037FBC boot_f06037FBC
+#define f0603807C boot_f0603807C
 #define f060387C8 boot_f060387C8
 #define f06038938 boot_f06038938
 #define f060389D4 boot_f060389D4
@@ -423,6 +456,8 @@
 #define f0603941C boot_f0603941C
 #define f060394E0 boot_f060394E0
 #define f06039510 boot_f06039510
+#define f060395A0 boot_f060395A0
+#define f06039650 boot_f06039650
 #define f0603970C boot_f0603970C
 #define f0603975C boot_f0603975C
 #define f060398B0 boot_f060398B0
@@ -432,6 +467,7 @@
 #define f06039B40 boot_f06039B40
 #define f06039B68 boot_f06039B68
 #define f06039BC8 boot_f06039BC8
+#define f06039C1C boot_f06039C1C
 #define f06039F2C boot_f06039F2C
 #define f0603A0B4 boot_f0603A0B4
 #define f0603A178 boot_f0603A178
@@ -459,6 +495,7 @@
 #define f0603C02C boot_f0603C02C
 #define f0603CC04 boot_f0603CC04
 #define f0603CCE0 boot_f0603CCE0
+#define f0603CE40 boot_f0603CE40
 #define f0603D2BC boot_f0603D2BC
 #define f0603D3DC boot_f0603D3DC
 #define f0603D628 boot_f0603D628
@@ -469,6 +506,7 @@
 #define f0603E798 boot_f0603E798
 #define f0603E9B8 boot_f0603E9B8
 #define f0603E9D8 boot_f0603E9D8
+#define f0603EA7C boot_f0603EA7C
 #define f0603EBE4 boot_f0603EBE4
 #define f0603EC08 boot_f0603EC08
 #define f0603EC4C boot_f0603EC4C
@@ -490,6 +528,7 @@
 #define f06041134 boot_f06041134
 #define f060412F4 boot_f060412F4
 #define f06041590 boot_f06041590
+#define f060415D8 boot_f060415D8
 #define f06041638 boot_f06041638
 #define f0604167C boot_f0604167C
 #define f06041690 boot_f06041690
@@ -505,6 +544,7 @@
 #define f060419B8 boot_f060419B8
 #define f060419CC boot_f060419CC
 #define f060419E0 boot_f060419E0
+#define f06041B44 boot_f06041B44
 #define f06041D58 boot_f06041D58
 #define f06041DAC boot_f06041DAC
 #define f06042468 boot_f06042468
@@ -541,6 +581,7 @@
 #define f0604528C boot_f0604528C
 #define f060452D0 boot_f060452D0
 #define f06045560 boot_f06045560
+#define f060455C4 boot_f060455C4
 #define f060455FC boot_f060455FC
 #define f06045614 boot_f06045614
 #define f06045654 boot_f06045654
@@ -548,11 +589,16 @@
 #define f060456E4 boot_f060456E4
 #define f06045760 boot_f06045760
 #define f060457E8 boot_f060457E8
+#define f06045B68 boot_f06045B68
 #define f06045BFC boot_f06045BFC
 #define f06045D70 boot_f06045D70
 #define f06045E34 boot_f06045E34
+#define f06045F9C boot_f06045F9C
 #define f06046478 boot_f06046478
 #define f06046534 boot_f06046534
+#define f06046550 boot_f06046550
+#define f060465B0 boot_f060465B0
+#define f06046600 boot_f06046600
 #define f06046860 boot_f06046860
 #define f060468E8 boot_f060468E8
 #define f06046AA4 boot_f06046AA4
@@ -601,12 +647,14 @@
 #define f060517E4 boot_f060517E4
 #define f0605180C boot_f0605180C
 #define f06051874 boot_f06051874
+#define f06051988 boot_f06051988
 #define f06051B18 boot_f06051B18
 #define f06051B1C boot_f06051B1C
 #define f06051B6C boot_f06051B6C
 #define f06051BB4 boot_f06051BB4
 #define f06051BC8 boot_f06051BC8
 #define f06051C30 boot_f06051C30
+#define f06051C84 boot_f06051C84
 #define f06051D10 boot_f06051D10
 #define f06051E30 boot_f06051E30
 #define f06051F38 boot_f06051F38
@@ -639,10 +687,13 @@
 #define f06053404 boot_f06053404
 #define f0605381C boot_f0605381C
 #define f060538A0 boot_f060538A0
+#define f0605396C boot_f0605396C
 #define f06053A18 boot_f06053A18
+#define f06053A58 boot_f06053A58
 #define f06053B24 boot_f06053B24
 #define f06053B44 boot_f06053B44
 #define f06053BA8 boot_f06053BA8
+#define f06053C9C boot_f06053C9C
 #define f06053E68 boot_f06053E68
 #define f06053E84 boot_f06053E84
 #define f06053EC4 boot_f06053EC4
@@ -665,6 +716,7 @@
 #define f06055160 boot_f06055160
 #define f06055210 boot_f06055210
 #define f06055230 boot_f06055230
+#define f06055260 boot_f06055260
 #define f060552F0 boot_f060552F0
 #define f06055360 boot_f06055360
 #define f06055404 boot_f06055404
@@ -718,6 +770,7 @@
 #define f06057ACC boot_f06057ACC
 #define f06057B38 boot_f06057B38
 #define f06057C88 boot_f06057C88
+#define f06057F80 boot_f06057F80
 #define f06058114 boot_f06058114
 #define f06058148 boot_f06058148
 #define f060582A8 boot_f060582A8
@@ -803,6 +856,7 @@
 #define f0605C420 boot_f0605C420
 #define f0605C4B8 boot_f0605C4B8
 #define f0605C534 boot_f0605C534
+#define f0605C598 boot_f0605C598
 #define f0605C67C boot_f0605C67C
 #define f0605C744 boot_f0605C744
 #define f0605C808 boot_f0605C808
@@ -816,6 +870,7 @@
 #define f0605CBC4 boot_f0605CBC4
 #define f0605CC30 boot_f0605CC30
 #define f0605CCF0 boot_f0605CCF0
+#define f0605CD98 boot_f0605CD98
 #define f0605CDCC boot_f0605CDCC
 #define f0605CE00 boot_f0605CE00
 #define f0605CE04 boot_f0605CE04
@@ -850,6 +905,8 @@
 #define f0605D30C boot_f0605D30C
 #define f0605D360 boot_f0605D360
 #define f0605D8A0 boot_f0605D8A0
+#define f0605D8E4 boot_f0605D8E4
+#define f0605D980 boot_f0605D980
 #define f0605DA18 boot_f0605DA18
 #define f0605DA94 boot_f0605DA94
 #define f0605DADC boot_f0605DADC
@@ -872,6 +929,7 @@
 #define f0605E520 boot_f0605E520
 #define f0605E53C boot_f0605E53C
 #define f0605E574 boot_f0605E574
+#define f0605E5EC boot_f0605E5EC
 #define f0605E638 boot_f0605E638
 #define f0605E64C boot_f0605E64C
 #define f0605E714 boot_f0605E714
@@ -885,6 +943,7 @@
 #define f0605ED4C boot_f0605ED4C
 #define f0605EDF8 boot_f0605EDF8
 #define f0605EE28 boot_f0605EE28
+#define f0605EE94 boot_f0605EE94
 #define f0605EFC8 boot_f0605EFC8
 #define f0605F0E4 boot_f0605F0E4
 #define f0605F490 boot_f0605F490
@@ -933,11 +992,13 @@
 #define f06060D10 boot_f06060D10
 #define f06061298 boot_f06061298
 #define f060615C8 boot_f060615C8
+#define f0606163C boot_f0606163C
 #define f060618C4 boot_f060618C4
 #define f060618E8 boot_f060618E8
 #define f06061940 boot_f06061940
 #define f06061A64 boot_f06061A64
 #define f06061A78 boot_f06061A78
+#define f06061AEC boot_f06061AEC
 #define f06061F44 boot_f06061F44
 #define f06061F9C boot_f06061F9C
 #define f060621C4 boot_f060621C4
@@ -978,6 +1039,7 @@
 #define f06065164 boot_f06065164
 #define f060651BC boot_f060651BC
 #define f060652A4 boot_f060652A4
+#define f060658B8 boot_f060658B8
 #define f06066798 boot_f06066798
 #define f0606694C boot_f0606694C
 #define f060669F8 boot_f060669F8
@@ -1071,6 +1133,7 @@
 #define f0606AEA8 boot_f0606AEA8
 #define f0606AF1C boot_f0606AF1C
 #define f0606AF44 boot_f0606AF44
+#define f0606B14C boot_f0606B14C
 #define f0606B258 boot_f0606B258
 #define f0606B2D0 boot_f0606B2D0
 #define f0606B308 boot_f0606B308
@@ -1113,6 +1176,7 @@
 #define f0606C378 boot_f0606C378
 #define f0606C3AC boot_f0606C3AC
 #define f0606C408 boot_f0606C408
+#define f0606C448 boot_f0606C448
 #define f0606C508 boot_f0606C508
 #define f0606C53C boot_f0606C53C
 #define f0606C578 boot_f0606C578
@@ -1399,6 +1463,7 @@
 #define f0606DEF4 boot_f0606DEF4
 #define f0606DF8C boot_f0606DF8C
 #define f0606DFC8 boot_f0606DFC8
+#define f0606E088 boot_f0606E088
 #define f0606E1CC boot_f0606E1CC
 #define f0606E240 boot_f0606E240
 #define f0606E2A0 boot_f0606E2A0
@@ -1409,6 +1474,7 @@
 #define f0606E310 boot_f0606E310
 #define f0606E384 boot_f0606E384
 #define f0606E4B4 boot_f0606E4B4
+#define f0606E4DC boot_f0606E4DC
 #define f0606E59C boot_f0606E59C
 #define f0606E5C8 boot_f0606E5C8
 #define f0606E5F4 boot_f0606E5F4
@@ -1467,6 +1533,7 @@
 #define f0606F8AC boot_f0606F8AC
 #define f0606F8D4 boot_f0606F8D4
 #define f0606F8E4 boot_f0606F8E4
+#define f0606F934 boot_f0606F934
 #define f0606FA30 boot_f0606FA30
 #define f0606FB10 boot_f0606FB10
 #define f0606FB48 boot_f0606FB48
@@ -1500,6 +1567,7 @@
 #define f060705A8 boot_f060705A8
 #define f06070704 boot_f06070704
 #define f060707E0 boot_f060707E0
+#define f06070818 boot_f06070818
 #define f06070974 boot_f06070974
 #define f06070A18 boot_f06070A18
 #define f06070C2C boot_f06070C2C
@@ -1524,6 +1592,7 @@
 #define f060717EC boot_f060717EC
 #define f0607183C boot_f0607183C
 #define f060718FC boot_f060718FC
+#define f06071924 boot_f06071924
 #define f06071990 boot_f06071990
 #define f060719E8 boot_f060719E8
 #define f06071A30 boot_f06071A30
@@ -1626,4 +1695,5 @@
 #define f06075868 boot_f06075868
 #define f06075880 boot_f06075880
 #define f0607589C boot_f0607589C
+#define f060758C4 boot_f060758C4
 #define f0607596C boot_f0607596C

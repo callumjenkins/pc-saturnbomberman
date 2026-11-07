@@ -342,7 +342,7 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
     term = ""
     tail = False
     table: tuple[int | None, int] | None = None     # the table address and the register of the last word loaded from it
-    taken_flag = None
+    taken_flag = after_slot = None
     at = start
     while True:
         ins = image.insn(at)
@@ -355,6 +355,7 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
             before = st.flag
             if slot:
                 step(slot, st, image)
+            after_slot = st.flag
             if st.flag == before:           # the slot left T alone, so on each way out it holds what the test settled
                 taken_flag, st.flag = ("1", "0") if ins.op.startswith("bt") else ("0", "1")
             else:
@@ -406,8 +407,12 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
         if at in stops:
             block.kind, block.targets = "goto", [at]
             break
-    if block.kind == "goto" and merged and st.flag is not None and block.targets[0] in merged:
-        st.stmts.append(Stmt(merged[block.targets[0]], st.flag))
+    if merged and block.kind in ("goto", "branch"):
+        # the variable T is in once the block ends is what T holds on every way out, a branch's own two ways included
+        holds = after_slot if block.kind == "branch" else st.flag
+        for target in dict.fromkeys(block.targets):
+            if target in merged and holds is not None:
+                st.stmts.append(Stmt(merged[target], holds))
     return Read(block, st.stmts, term, tail, st.fresh, st.clobbered, st.lacks, st.flag, taken_flag), st.flags
 
 
@@ -446,7 +451,7 @@ def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], 
         leaving = {at: None if at == entry or len(set(holding[at])) != 1 else holding[at][0] for at in stops}
         merges = {}
         for number, at in enumerate(sorted(stops)):
-            if at != entry and len(set(holding[at])) > 1 and None not in holding[at] and set(ways[at]) == {"goto"}:
+            if at != entry and len(set(holding[at])) > 1 and None not in holding[at] and set(ways[at]) <= {"goto", "branch"}:
                 merges[at] = leaving[at] = "c%d" % (MERGED + number)
         if settled == fresh and spoiled == clobbered and leaving == carried and merges == merged:
             for read in reads.values():
