@@ -161,7 +161,8 @@ random_index = 0x060BF4F4           # the 55-entry random generator's index; its
 # The score already checked for extra-life thresholds, a long per pad.
 awarded_score = 0x060C0FDC
 # H2H's connection state (06002FB8), as its entry at 06002F24 returned it at boot: 0 unless the NetLink's UART
-# passed the scratch-register test, then 1 for the answering side and 2 for the side that dialled.
+# passed the scratch-register test. A call made through the XBAND client leaves it 2 on both sides; only H2H's own
+# answer sets 1, and nothing reaches that yet.
 # Battles, the bonus game and the results take their online paths when it is not 0.
 link_mode = 0x060C0AA8
 lives = 0x060C063E                  # a byte: pad 1's lives left in Normal Game: 3 at its start, 0 while the last is played
