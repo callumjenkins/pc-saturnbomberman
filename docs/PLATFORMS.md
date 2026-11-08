@@ -42,6 +42,14 @@ state the frames have not shown yet.
 The other machine needs its own `build/prepared.json`, because `prepare` records the disc's files by
 path and modification time.
 
+## Classic online between platforms
+
+On 2026-11-08, release builds of one tree on Linux, macOS and the Windows VM played a classic online match to
+VICTORY in pairs over a TCP line (`--modem listen=PORT` on the waiter, `dial=HOST:PORT` on the dialler):
+Linux-Mac both ways, Linux-Windows and Mac-Windows. In every pair the two screens matched frame for frame once
+lined up. With two copies running at once in the VM, which has no GPU, both of its pairs fell out of step in the
+second round. A side that cannot keep the Saturn's pace can split a classic match.
+
 ## The smoke checklist
 
 | # | Check | Windows, 2026-10-18 |
