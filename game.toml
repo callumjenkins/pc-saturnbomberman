@@ -77,6 +77,7 @@ show = [["Stage {}", "stage_2", "world-stage"], ["{} pts", "score", "u32"], ["Li
 boot = ["1500:UP", "1530:", "1550:A", "1556:"]   # from power-on
 program = "XS"
 starts = 1559                                   # the VBlank the client first starts at
+netband_code = "109"                            # what the US disc's dial screen shows, patched for NetBand
 wait = ["741:A", "747:", "941:RIGHT", "947:", "971:A", "977:"]   # from each start of the client
 dial = ["741:A", "747:", "941:A", "947:", "1141:LEFT", "1147:", "1155:LEFT", "1161:", "1169:LEFT", "1175:",
         "1183:LEFT", "1189:", "1197:LEFT", "1203:", "1211:LEFT", "1217:", "1225:LEFT", "1231:", "1239:LEFT",
