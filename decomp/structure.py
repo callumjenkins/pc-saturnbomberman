@@ -262,7 +262,8 @@ class Structurer:
         body = self.bodies[header]
         self.active.append((header, leave))
         # A loop entered by a jump to its test goes back where the test branches into the body, and only there.
-        enters = any(target in body and target != header for at in body for target in self.blocks[at].polls)
+        enters = any(target in body and target != header and target not in self.bodies
+                     for at in body for target in self.blocks[at].polls)
         if enters and any(header in self.blocks[at].polls for at in body):
             raise Unstructured("the loop at %08X goes back in two places" % header)
         tests_only = (block.kind == "branch" and not block.stmts and (block.targets[0] in body) != (block.targets[1] in body)

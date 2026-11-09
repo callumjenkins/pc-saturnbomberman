@@ -6340,3 +6340,438 @@ int f06046600(int r4, int r5, int r6)
     }
     return r0;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06041790(int r4, int r5)
+{
+    int r0, r1, r2, r3, r6, r7, r8, c1, c5, c7;
+
+    r8 = r5;
+    r1 = r4;
+    r4 = r4 + 2;
+    r6 = 0;
+    r7 = 0;
+    r2 = LD8(r1);
+    r5 = 0x06075135;
+    r1 = LD8((r1 + 1));
+    r2 = ((r2 & 255) << 16) | (r1 & 255);
+    while (1) {
+        r3 = 0;
+        if (r2 > 0) {
+            while (1) {
+                r6 = LD8(r4);
+                r4 = r4 + 1;
+                r1 = LD8(r6 + r5);
+                c1 = ((r1 & 4) & (r1 & 4)) == 0;
+                r1 = r3;
+                if (c1) {
+                    break;
+                } else {
+                    r2 = r2 - 1;
+                    r3 = ((((r1 << 2) + r3) + ((r1 << 2) + r3)) - 48) + r6;
+                    if (r2 > 0) {
+                        POLL();
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+                POLL();
+            }
+        }
+        r1 = 2;
+        if (r3 > 0x100) {
+            r0 = -1;
+            break;
+        } else {
+            r0 = r6;
+            if (r7 > r1) {
+                c7 = r2 > 0;
+                if (!(r7 == 3)) {
+                    r0 = r8;
+                    ST8(r0 + r7, r3);
+                    r7 = r7 + 1;
+                    r2 = r2 - 1;
+                    if (!(r7 > 3)) {
+                        POLL();
+                        continue;
+                    } else {
+                        r0 = 0;
+                        break;
+                    }
+                } else {
+                    r0 = r8;
+                    if (!(c7)) {
+                        ST8(r0 + r7, r3);
+                        r7 = r7 + 1;
+                        r2 = r2 - 1;
+                        if (!(r7 > 3)) {
+                            POLL();
+                            continue;
+                        } else {
+                            r0 = 0;
+                            break;
+                        }
+                    } else {
+                        r0 = -1;
+                        break;
+                    }
+                }
+            } else {
+                c5 = r0 == 46;
+                r0 = -1;
+                if (!(c5)) {
+                    break;
+                } else {
+                    c7 = r2 > 0;
+                    if (!(r7 == 3)) {
+                        r0 = r8;
+                        ST8(r0 + r7, r3);
+                        r7 = r7 + 1;
+                        r2 = r2 - 1;
+                        if (!(r7 > 3)) {
+                            POLL();
+                            continue;
+                        } else {
+                            r0 = 0;
+                            break;
+                        }
+                    } else {
+                        r0 = r8;
+                        if (!(c7)) {
+                            ST8(r0 + r7, r3);
+                            r7 = r7 + 1;
+                            r2 = r2 - 1;
+                            if (!(r7 > 3)) {
+                                POLL();
+                                continue;
+                            } else {
+                                r0 = 0;
+                                break;
+                            }
+                        } else {
+                            r0 = -1;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        POLL();
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06041DBC(int r4)
+{
+    int r0, r1, r2, r5, r8, r9, r10, r11, r12, r13, r14, c2, c5, c11, c14, c1013, c1021;
+
+    r14 = r4;
+    r13 = 0;
+    r0 = GCALL1(0x0607507C, r4);
+    r12 = r0;
+    r8 = 0;
+    if (!(0 >= r12)) {
+        r10 = 1;
+        r11 = r14;
+        do {
+            r1 = LD8(r11);
+            r2 = r1 & 255;
+            c2 = r8 > 0;
+            if (!(r2 == 8)) {
+                r5 = r14;
+                if (!(r2 == 141)) {
+                    r10 = r10 + 1;
+                    r11 = r11 + 1;
+                    r8 = r8 + 1;
+                    c1021 = r8 >= r12;
+                } else {
+                    r0 = GCALL2(0x06041DAC, r11, (r5 + r10));
+                    r10 = r10 - 1;
+                    r11 = r11 - 1;
+                    r8 = r8 - 1;
+                    r13 = r13 + 1;
+                    c5 = r8 >= 0;
+                    r12 = r12 - 1;
+                    c1013 = c5;
+                    if (c5) {
+                        r9 = r8 + r14;
+                        while (1) {
+                            r1 = LD8(r9);
+                            r1 = LD8(0x06075135 + (r1 & 255));
+                            r5 = r14;
+                            if (((r1 & 8) & (r1 & 8)) == 0) {
+                                break;
+                            } else {
+                                r0 = GCALL2(0x06041DAC, r9, (r5 + r10));
+                                r9 = r9 - 1;
+                                r10 = r10 - 1;
+                                r11 = r11 - 1;
+                                r8 = r8 - 1;
+                                r13 = r13 + 1;
+                                r12 = r12 - 1;
+                                if (r8 >= 0) {
+                                    POLL();
+                                    continue;
+                                } else {
+                                    break;
+                                }
+                            }
+                            POLL();
+                        }
+                        c1013 = r8 >= 0;
+                    }
+                    c1021 = r8 >= r12;
+                    if (c1013) {
+                        r1 = LD8(r11);
+                        r1 = LD8(0x06075135 + (r1 & 255));
+                        c11 = r8 >= r12;
+                        c1021 = c11;
+                        if (((r1 & 8) & (r1 & 8)) == 0) {
+                            r9 = r8 + r14;
+                            r5 = r14;
+                            while (1) {
+                                r0 = GCALL2(0x06041DAC, r9, (r5 + r10));
+                                r9 = r9 - 1;
+                                r10 = r10 - 1;
+                                r11 = r11 - 1;
+                                r8 = r8 - 1;
+                                r13 = r13 + 1;
+                                r12 = r12 - 1;
+                                if (!(r8 >= 0)) {
+                                    c1021 = r8 >= r12;
+                                    break;
+                                } else {
+                                    r1 = LD8(r9);
+                                    r1 = LD8(0x06075135 + (r1 & 255));
+                                    c14 = r8 >= r12;
+                                    c1021 = c14;
+                                    if (!(((r1 & 8) & (r1 & 8)) == 0)) {
+                                        break;
+                                    } else {
+                                        r5 = r14;
+                                    }
+                                }
+                                POLL();
+                            }
+                        }
+                    }
+                }
+            } else {
+                r13 = r13 + 1;
+                if (!(c2)) {
+                    r12 = r12 - 1;
+                    r5 = r14 + r10;
+                    r4 = r11;
+                } else {
+                    r13 = r13 + 1;
+                    r12 = r12 - 2;
+                    r5 = r14 + r10;
+                    r4 = r14 + (r8 - 1);
+                }
+                r0 = GCALL2(0x06041DAC, r4, r5);
+                c1021 = r8 >= r12;
+            }
+        } while (AGAIN(!(c1021)));
+    }
+    return r13;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06043EC0(int r4)
+{
+    int r0, r1, r2, r5, r8, r9, r10, r11, r12, r13, r14;
+
+    r10 = r4;
+    r13 = LD32(r10 + 4);
+    r0 = GCALL4(0x060279E0, 0, (r13 << 2), -1, 1);
+    r2 = 0x0608BCF0;
+    ST32(0x0608BCF8, r0);
+    if (!((r0 & r0) == 0)) {
+        r1 = LD32(r10);
+        r12 = r0;
+        r11 = 0;
+        ST32(r2, r1);
+        ST32(r2 + 4, r13);
+        r10 = r10 + 8;
+        if (0 >= r13) {
+            r0 = 0;
+        } else {
+            r14 = 0x060750DC;
+            while (1) {
+                r9 = 0;
+                r1 = LD8(r10);
+                r2 = r10;
+                if (!((r1 & r1) == 0)) {
+                    do {
+                        r2 = r2 + 1;
+                        r1 = LD8(r2);
+                        r9 = r9 + 1;
+                    } while (AGAIN(!((r1 & r1) == 0)));
+                }
+                r9 = r9 + 1;
+                r0 = GCALL4(0x060279E0, 0, r9, -1, 1);
+                r8 = r0;
+                r5 = r10;
+                if ((r8 & r8) == 0) {
+                    POLL();
+                    r0 = -3;
+                    break;
+                } else {
+                    r0 = GCALL2(r14, r8, r5);
+                    ST32(r12, r8);
+                    r10 = r10 + r9;
+                    r11 = r11 + 1;
+                    r12 = r12 + 4;
+                    if (!(r11 >= r13)) {
+                        POLL();
+                        continue;
+                    } else {
+                        r0 = 0;
+                        break;
+                    }
+                }
+                POLL();
+            }
+        }
+    } else {
+        r0 = -3;
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06043F5C(int r4)
+{
+    int r0, r1, r2, r5, r8, r9, r10, r11, r12, r13, r14;
+
+    r10 = r4;
+    r13 = LD32(r10 + 4);
+    r0 = GCALL4(0x060279E0, 0, (r13 << 2), -1, 1);
+    r2 = 0x0608BD00;
+    ST32(0x0608BD08, r0);
+    if (!((r0 & r0) == 0)) {
+        r1 = LD32(r10);
+        r12 = r0;
+        r11 = 0;
+        ST32(r2, r1);
+        ST32(r2 + 4, r13);
+        r10 = r10 + 8;
+        if (0 >= r13) {
+            r0 = 0;
+        } else {
+            r14 = 0x060750DC;
+            while (1) {
+                r9 = 0;
+                r1 = LD8(r10);
+                r2 = r10;
+                if (!((r1 & r1) == 0)) {
+                    do {
+                        r2 = r2 + 1;
+                        r1 = LD8(r2);
+                        r9 = r9 + 1;
+                    } while (AGAIN(!((r1 & r1) == 0)));
+                }
+                r9 = r9 + 1;
+                r0 = GCALL4(0x060279E0, 0, r9, -1, 1);
+                r8 = r0;
+                r5 = r10;
+                if ((r8 & r8) == 0) {
+                    POLL();
+                    r0 = -3;
+                    break;
+                } else {
+                    r0 = GCALL2(r14, r8, r5);
+                    ST32(r12, r8);
+                    r10 = r10 + r9;
+                    r11 = r11 + 1;
+                    r12 = r12 + 4;
+                    if (!(r11 >= r13)) {
+                        POLL();
+                        continue;
+                    } else {
+                        r0 = 0;
+                        break;
+                    }
+                }
+                POLL();
+            }
+        }
+    } else {
+        r0 = -3;
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06048FA0(void)
+{
+    int r0, r1, r2, r3, r4, r5, r7, r8, r9, r10, r11, r12, r13, r14, c2, c4, c1006, c1010;
+
+    r14 = LD32(0x060791CC);
+    r10 = 0;
+    r13 = 128;
+    r11 = 0x0608AF60;
+    r1 = r14;
+    do {
+        if (!((r1 - r10) >= 0)) {
+            r14 = r10 + 31;
+        }
+        r9 = (((r14 - r10) << 2) + (r14 - r10)) << 2;
+        r12 = 0x0608CE90 + r9;
+        r4 = LD32(r12 + 4);
+        if ((r4 & r4) == 0) {
+            r0 = 0x0608CE90;
+            r4 = LD32(0x0608CE90 + r9);
+            r2 = 7;
+            if ((r4 & r4) == 0) {
+                if (!(r10 > r2)) {
+                    r7 = r10 << 8;
+                    r3 = 0;
+                    r0 = 0x0608AF60;
+                    do {
+                        ST8(r0 + r7, r3);
+                        r7 = r7 + 0x100;
+                        r10 = r10 + 1;
+                        r11 = r11 + 0x100;
+                    } while (AGAIN(!(r10 > r2)));
+                }
+            } else {
+                r0 = GCALL1(0x0607507C, r4);
+                r8 = r0;
+                c4 = r0 > r13;
+                r1 = r13;
+                c1010 = c4;
+                if (!(c4)) {
+                    r1 = r8;
+                    c1010 = 0;
+                }
+                r8 = r1;
+                r5 = LD32(0x0608CE90 + r9);
+                r0 = GCALL3(0x060750A0, r11, r5, r8);
+                r0 = r11;
+                ST8(r0 + r8, 0);
+            }
+        } else {
+            r0 = GCALL1(0x0607507C, r4);
+            r8 = r0;
+            c2 = r0 > r13;
+            r1 = r13;
+            c1006 = c2;
+            if (!(c2)) {
+                r1 = r8;
+                c1006 = 0;
+            }
+            r8 = r1;
+            r5 = LD32(r12 + 4);
+            r0 = GCALL3(0x060750A0, r11, r5, r8);
+            r0 = r11;
+            ST8(r0 + r8, 0);
+        }
+        r11 = r11 + 0x100;
+        r10 = r10 + 1;
+        r1 = r14;
+    } while (AGAIN(!(r10 > 7)));
+    return r0;
+}

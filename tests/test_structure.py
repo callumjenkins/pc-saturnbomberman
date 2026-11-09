@@ -90,3 +90,10 @@ def test_an_arm_that_leaves_a_loop_is_refused_because_a_switch_would_catch_the_b
     blocks[1].stmts = ["x();"]
     with pytest.raises(structure.Unstructured, match="leaves a loop"):
         structure.Structurer(blocks, 0).run()
+
+
+def test_a_loop_inside_a_loop_does_not_count_as_its_outer_loop_going_back_in_two_places():
+    # 1 is the outer header, 2 and 3 the inner loop, 4 goes back to 1; 5 leaves
+    blocks = graph(goto(0, 1), goto(1, 2), branch(2, 3, 4), goto(3, 2, True), branch(4, 1, 5, [1]), stop(5))
+    assert structure.Structurer(blocks, 0).run() == [
+        "do {", "    while (c2) {", "        POLL();", "    }", "} while (AGAIN(c4));", "return;"]
