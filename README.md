@@ -86,8 +86,8 @@ rematch. `SATURN_PLAYTEST_TOKEN` or `SATURN_PLAYTEST_TESTER` says which tester y
 need the same build. `replay` plays such a session again from what its line heard, without the room.
 `uv run tests/netlink.py --room` checks a match, a rematch, and both replays through a room on this
 machine, under the playtest Worker's `wrangler dev`. With `--saved`, both sides start from a save the
-XBAND client has already written, as a returning player's is, and its rematch goes through the
-client's chat on the held call.
+XBAND client has already written, as a returning player's is. A client back from a match finds its save either
+way and opens its chat on the held call, which taking the rematch hangs up.
 `uv run tests/netlink_sweep.py [SCENARIO...]` plays the classic scenarios that reach the kernel's online code a
 plain match leaves unrun: buttons pressed through the battle, a second match on one call, the Traditional link, and
 the practice game while waiting, with a call and without. Each checks the functions it has to reach, from its

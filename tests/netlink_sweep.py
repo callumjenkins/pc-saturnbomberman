@@ -1,9 +1,10 @@
 """Classic online scenarios that reach the kernel's online code a plain match in tests/netlink.py leaves unrun, each
 on a NetLink line on this machine, and the checks that they still reach it:
-    taunt           both sides press L, R, X, Y and Z in turn through the battle
+    taunt           both sides press X, Y and Z in turn through the battle, each a taunt of its own
     next-battle     both sides take VICTORY's "Next Battle?" and play a second match on the same call
     traditional     the waiter takes the NetLink page's Traditional link, and H2H lets a QuickLink call ring
-    practice        the waiter practises while it waits, and H2H answers a call that comes during the practice battle
+    practice        the waiter practises while it waits, H2H answers a call that comes during the practice battle,
+                    and the client plays the match on it
     practice-alone  the waiter practises with no call and loses, which runs the kernel's code for link_mode 1
 Six minutes for all of them at once: like tests/netlink.py, every copy runs in real time.
     uv run tests/netlink_sweep.py [--video] [SCENARIO...]"""
@@ -111,7 +112,7 @@ def play(name: str, side: Side, modem: str, video: bool) -> list[str]:
 
 def practice() -> list[Side]:
     # H2H answers in capitals, where the XBAND client sends "ata".
-    answered = (r"modem: -> ATA$", r"CONNECT 28800", r"program start \d+: BOOT")
+    answered = (r"modem: -> ATA$", r"CONNECT 28800", r"program start \d+: BOOT", r"program start \d+: KRNL")
     return [Side("waiter", CLASSIC.first("wait") + PRACTICE, 16000, ran=("H2H 06004DFC",), heard=answered),
             Side("dialer", CLASSIC.first("dial") + lose(6000, 11000), 11000, delay=PRACTICE_CALL)]
 
@@ -159,7 +160,7 @@ def taps(start: int, button: str, every: int, end: int, hold: int = 6) -> list[s
 
 def taunt() -> list[Side]:
     end = 14000
-    buttons = [p for v, b in zip(range(6080, 11400, 60), itertools.cycle("LRXYZ")) for p in (f"{v}:{b}", f"{v + 6}:")]
+    buttons = [p for v, b in zip(range(6080, 11400, 60), itertools.cycle("XYZ")) for p in (f"{v}:{b}", f"{v + 6}:")]
     effect = ("KRNL 06013C24", "KRNL 06051EBE")
     return [Side("waiter", CLASSIC.first("wait") + merged(press_on(6150, 11400), buttons), end, ran=effect),
             Side("dialer", CLASSIC.first("dial") + merged(lose(6000, 11400), buttons), end, ran=effect)]

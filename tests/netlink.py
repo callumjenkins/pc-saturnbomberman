@@ -1,5 +1,7 @@
 """Two copies of the game play each other over a NetLink line on this machine: a call, a match, the
-reboot back to the XBAND client, then a rematch and its reboot. Beside them, a second pair whose dialler
+reboot back to the XBAND client, which finds the save it wrote and opens its chat on the held call. Both leave the
+chat with Done, the waiter waits again, which drops the held call, and the dialler calls for a rematch, which
+reboots back to the client too. Beside them, a second pair whose dialler
 stops mid-match: the waiter holds the match while it waits for a call back, then returns to the XBAND
 client. Nine minutes: it runs in real time.
     uv run tests/netlink.py [--room [--saved]]
@@ -32,10 +34,13 @@ from bomberman import run
 from bomberman.paths import BUILD, cue
 
 CLASSIC = run.GAME.classic
-# Both sides are back on the XBAND title by then, and the client's presses make the second call.
-AGAIN = 14200
-END = 31000
-BACK = [16400, 30900]
+# Both sides are in the client's chat by then. DOWN three times from Caps reaches Done, which leaves for QuickLink's
+# menu with its cursor on the last choice, so the saved ways back make the second call from there.
+CHAT_DONE = ["16500:DOWN", "16506:", "16514:DOWN", "16520:", "16528:DOWN", "16534:", "16560:A", "16566:"]
+WAIT_AGAIN = 17200
+DIAL_AGAIN = 17500
+END = 34000
+BACK = [16400, 33900]
 # Through a room: when each side takes the offer of a rematch.
 TAKE_REMATCH = 15000
 ROOM_BACK = [TAKE_REMATCH - 100, 30900]
@@ -146,6 +151,12 @@ def replayed(name, out, save):
     return [f"{name} replay: {p}" for p in found]
 
 
+def from_at(presses, vblank):
+    """`presses` moved so the first that presses a button comes at `vblank`."""
+    first = min(int(p.split(":")[0]) for p in presses if p.split(":")[1])
+    return [p for p in later(presses, vblank - first) if int(p.split(":")[0]) >= vblank]
+
+
 def side(name, modem, presses, end=END, shots=BACK):
     out = f"{BUILD}/test/netlink-{name}"
     return out, learn.run(run.GAME, args(out, modem, presses, end, shots), out, timeout=3000)
@@ -187,9 +198,8 @@ def main():
         if not found:
             print("ok       two matches through a room, each back to the XBAND client, and each side's replay the same")
         sys.exit(1 if found else 0)
-    rematch = AGAIN + CLASSIC.starts
-    waiter = CLASSIC.first("wait") + later(CLASSIC.wait, rematch)
-    dialer = CLASSIC.first("dial") + later(CLASSIC.dial, rematch)
+    waiter = CLASSIC.first("wait") + CHAT_DONE + from_at(CLASSIC.saved_wait, WAIT_AGAIN)
+    dialer = CLASSIC.first("dial") + CHAT_DONE + from_at(CLASSIC.saved_dial, DIAL_AGAIN)
     ports = []
     for _ in range(2):
         with socket.socket() as probe:
@@ -206,7 +216,7 @@ def main():
     for p in rematch + drop:
         print("FAIL    ", p)
     if not rematch:
-        print("ok       two matches over a NetLink line, each back to the XBAND title")
+        print("ok       two matches over a NetLink line, each back to the XBAND client")
     if not drop:
         print("ok       a call dropped mid-match: the other side waits for it, then goes back to the XBAND title")
     sys.exit(1 if rematch or drop else 0)
