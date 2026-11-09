@@ -58,7 +58,8 @@ def play(more=(), launcher=False):
     started = datetime.datetime.now().replace(microsecond=0)
     out = os.path.join(PLAYS, started.strftime("%Y%m%d-%H%M%S"))
     os.makedirs(out)
-    clock = started.isoformat()
+    # A synced game names its own clock, which every player shares.
+    clock = more[more.index("--clock") + 1] if "--clock" in more else started.isoformat()
     open(f"{out}/clock.txt", "w").write(clock + "\n")
     open(f"{out}/args.txt", "w").write("".join(a + "\n" for a in more))
     save = user_save()
@@ -75,8 +76,11 @@ def play(more=(), launcher=False):
     return code
 
 
-def room_args(code=None):
-    """saturn's arguments for the NetLink battle through a playtest room: a new one, or the room `code`."""
+def room_args(code=None, players=None):
+    """saturn's arguments for a playtest room, a new one or the room `code`: the NetLink battle, or with `players`
+    one game for everyone in the room, which a new room starts once that many are in."""
+    if players is not None:
+        return playtest_session.sync_args({"endpoint": run.GAME.playtest.endpoint}, players, code)
     info = {"endpoint": run.GAME.playtest.endpoint, "classic": run.GAME.classic.steers()}
     return playtest_session.classic_args(info, code)
 

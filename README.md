@@ -93,6 +93,14 @@ plain match leaves unrun: buttons pressed through the battle, a second match on 
 the practice game while waiting, with a call and without. Each checks the functions it has to reach, from its
 coverage. `--video` keeps each side's video.
 
+`uv run bomberman play --room --sync 3` plays one game with everyone in a new room, any mode, a pad each by
+default. The game starts at power-on once three players are in, with no saves and the clock at 2000-01-01, so every
+copy runs the same machine. `uv run bomberman play --room CODE --sync` joins it. A press applies 2 to 8 frames
+after it is made, depending on the slowest player's round trip. A player who leaves has their pads go idle, and if
+two copies' work RAM ever differs, the shared game ends with the VBlank it was found at.
+`uv run tests/sync.py` checks two and three copies, a lost copy, a stray write, and a late joiner, under
+`wrangler dev`.
+
 `uv run bomberman play --netband wait|match|IP` plays a real Saturn, or anyone else using SegaRPGFan's
 NetBand tunnel. `wait` waits for a call; `IP` calls that address directly, on TCP 65432 and UDP
 20001-20002; `match` finds a game waiting on the dreampipe.net match service under

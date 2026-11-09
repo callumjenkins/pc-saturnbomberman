@@ -75,6 +75,9 @@ def main(argv=None):
     online.add_argument("--room", nargs="?", const="new", metavar="CODE",
                     help="play the NetLink battle through a playtest room: make one, or join CODE "
                          "(SATURN_PLAYTEST_TOKEN or SATURN_PLAYTEST_TESTER names the tester)")
+    pl.add_argument("--sync", nargs="?", type=int, const=0, metavar="PLAYERS",
+                    help="with --room: one game for everyone in the room instead of the NetLink battle, which a new "
+                         "room starts once PLAYERS are in")
     online.add_argument("--netband", metavar="wait|match|IP",
                     help="play the NetLink battle against a real Saturn through the NetBand tunnel: wait for its call, "
                          "find it waiting through the dreampipe.net match service, or call its address")
@@ -187,7 +190,8 @@ def main(argv=None):
         prepare.check_prepared()
         run.build.ensure(run.GAME)
         if args.room:
-            more = session.room_args(None if args.room == "new" else args.room.upper()) + more
+            code = None if args.room == "new" else args.room.upper()
+            more = session.room_args(code, args.sync) + more
         elif args.netband:
             more = run.GAME.classic.netband(args.netband) + more
         raise SystemExit(session.play(more, launcher=args.launcher))
