@@ -88,11 +88,15 @@ need the same build. `replay` plays such a session again from what its line hear
 machine, under the playtest Worker's `wrangler dev`. With `--saved`, both sides start from a save the
 XBAND client has already written, as a returning player's is, and its rematch goes through the
 client's chat on the held call.
+`uv run tests/netlink_sweep.py [SCENARIO...]` plays the classic scenarios that reach the kernel's online code a
+plain match leaves unrun: buttons pressed through the battle, a second match on one call, the Traditional link, and
+the practice game while waiting, with a call and without. Each checks the functions it has to reach, from its
+coverage. `--video` keeps each side's video.
 
 `uv run bomberman play --netband wait|match|IP` plays a real Saturn, or anyone else using SegaRPGFan's
 NetBand tunnel. `wait` waits for a call; `IP` calls that address directly, on TCP 65432 and UDP
 20001-20002; `match` finds a game waiting on the dreampipe.net match service under
-`[online.classic] netband_code`, which is still to be filled in from a patched disc's dial screen.
+`[online.classic] netband_code`, 109 for the US disc.
 The Saturn on the other end needs the NetLink patches its players use, and their effect on the match
 is unchecked.
 
