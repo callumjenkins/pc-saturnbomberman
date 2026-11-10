@@ -6,6 +6,7 @@ under wrangler dev, each with --sync, so every VBlank's pads are the same on all
 - of three copies, one is killed during the battle, and the other two play on together;
 - a copy whose work RAM is written to is reported out of step, by both;
 - a copy that joins once the game has started is told so;
+- a copy whose network goes mid-battle comes back, and the two still show the reference's frames;
 - a room's maker in a window starts the game with Start once another player is in.
 The copies run headless, so unpaced, but for the maker pressing Start: only the lockstep keeps them together."""
 import os
@@ -156,6 +157,27 @@ def stray_write(worker: LocalWorker) -> list[str]:
     return found
 
 
+def severed(worker: LocalWorker, reference: str) -> list[str]:
+    """Two copies, the second losing its network in the battle, as a phone that changes networks does."""
+    tokens = [worker.invite(n) for n in ("kay", "lou")]
+    a = start("severed-kay", worker.room(), tokens[0], list(ROUTE.presses), ("--sync", "2"))
+    code = netlink.room_code(*a)
+    if not code:
+        a[1].kill()
+        return ["severed: the first copy made no room"]
+    b = start("severed-lou", worker.room(code), tokens[1], SECOND, ("--sync", "0", "--session-sever-at", "7000"))
+    kay, lou = finished(a), finished(b)
+    found = problems("kay", *kay) + problems("lou", *lou)
+    found += same_shots(["kay", "lou", "one copy alone"], [a[0], b[0], reference])
+    if "session: the network goes" not in lou[1] or lou[1].count("session: connected to") < 2:
+        found.append("severed: lou's network did not go and come back")
+    for name, (_, log) in (("kay", kay), ("lou", lou)):
+        # The first to reach its last VBlank leaves the room, which the other notes as it finishes.
+        if re.search(r"sync: \w+ (its connection failed|sent no pads)", log):
+            found.append(f"severed {name}: the other copy was lost")
+    return found
+
+
 def started_by_start(worker: LocalWorker) -> list[str]:
     """The maker's Start, held from the first VBlank, which the room's card takes once a second player is in."""
     tokens = [worker.invite(n) for n in ("ida", "jo")]
@@ -180,13 +202,14 @@ def main() -> None:
     found = []
     with local_worker(f"{BUILD}/test/sync-worker", f"{BUILD}/test/sync-worker.log") as worker:
         for check in (lambda: two(worker, reference), lambda: three_one_killed(worker), lambda: stray_write(worker),
-                      lambda: started_by_start(worker)):
+                      lambda: severed(worker, reference), lambda: started_by_start(worker)):
             found += check()
     for p in found:
         print("FAIL    ", p)
     if not found:
         print("ok       two, three and a stray write: the same frames on every synced copy, a lost copy left behind, "
-              "and a copy out of step reported; and a game started with the maker's Start")
+              "and a copy out of step reported; a copy whose network went came back; and a game started with the "
+              "maker's Start")
     sys.exit(1 if found else 0)
 
 
