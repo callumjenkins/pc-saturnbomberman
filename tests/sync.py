@@ -7,11 +7,13 @@ under wrangler dev, each with --sync, so every VBlank's pads are the same on all
 - a copy whose work RAM is written to is reported out of step, by both;
 - a copy that joins once the game has started is told so;
 - a copy whose network goes mid-battle comes back, and the two still show the reference's frames;
-- a room's maker in a window starts the game with Start once another player is in.
+- a room's maker in a window starts the game with Start once another player is in;
+- a copy that joins plays with the maker's saves, and both keep them beside the run for a replay.
 The copies run headless, so unpaced, but for the maker pressing Start: only the lockstep keeps them together."""
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import time
@@ -196,20 +198,45 @@ def started_by_start(worker: LocalWorker) -> list[str]:
     return found
 
 
+def makers_saves(worker: LocalWorker) -> list[str]:
+    tokens = [worker.invite(n) for n in ("max", "ned")]
+    saves = f"{BUILD}/test/sync-makers-saves.bin"
+    data = bytes(range(64))
+    with open(saves, "wb") as f:
+        f.write(b"SYNC_TEST".ljust(12, b"\0") + b"A TEST".ljust(11, b"\0") + b"\0" + struct.pack("<II", 0, len(data)) + data)
+    a = start("saves-max", worker.room(), tokens[0], [], ("--sync", "2", "--save", saves), 600)
+    code = netlink.room_code(*a)
+    if not code:
+        a[1].kill()
+        return ["saves: the maker made no room"]
+    b = start("saves-ned", worker.room(code), tokens[1], [], ("--sync", "0"), 600)
+    found = []
+    for name, game in (("max", a), ("ned", b)):
+        out, log = finished(game)
+        found += problems(f"saves {name}", out, log)
+        kept = f"{out}/backup-at-start.bin"
+        if not os.path.exists(kept) or open(kept, "rb").read() != open(saves, "rb").read():
+            found.append(f"saves {name}: backup-at-start.bin is not the maker's saves")
+        if name == "ned" and "backup memory: 1 save from the room's creator" not in log:
+            found.append("saves ned: it did not play with the maker's saves")
+    return found
+
+
 def main() -> None:
     build.ensure(run.GAME, False, log=lambda s: None)
     reference = alone()
     found = []
     with local_worker(f"{BUILD}/test/sync-worker", f"{BUILD}/test/sync-worker.log") as worker:
         for check in (lambda: two(worker, reference), lambda: three_one_killed(worker), lambda: stray_write(worker),
-                      lambda: severed(worker, reference), lambda: started_by_start(worker)):
+                      lambda: severed(worker, reference), lambda: started_by_start(worker),
+                      lambda: makers_saves(worker)):
             found += check()
     for p in found:
         print("FAIL    ", p)
     if not found:
         print("ok       two, three and a stray write: the same frames on every synced copy, a lost copy left behind, "
-              "and a copy out of step reported; a copy whose network went came back; and a game started with the "
-              "maker's Start")
+              "and a copy out of step reported; a copy whose network went came back; a game started with the "
+              "maker's Start; and the maker's saves played by both")
     sys.exit(1 if found else 0)
 
 
