@@ -258,6 +258,21 @@ it. On 2026-10-19:
   before START, copied at frame 5352 by 060B00CA. Ours copied it at VBlank 4500 before; now its copies
   start 6 VBlanks later (4416 against 4410), after the first pause (VBlank 1910) took its BUSY time, and
   that one no longer fits before START. `normal` and `battle-round` screenshots are unchanged.
+- **The menu's picture stream keeps the game's own pace, which differs on ours.** The game copies each
+  picture of the menu's stream to 060EC41C-060EC4FF (060AB268 on ours, pc 060B00CA on the core). It has
+  two runs on `die`, ticks 18 to 538 and 2842 to START, and on 2026-10-20 both were traced with a copy of
+  the core that logs each CD command, its results and the drive's status (`cd-log.patch` beside
+  `write-log.patch`, which it goes on top of, with `CD_LOG=path`). In the first run the buffer
+  fills to its 200 sectors on both sides, so the decoding sets the pace, not the drive. The core falls 2
+  ticks behind ours there, so after its picture at tick 491 it skips the next, the one ours copies at tick
+  498, and ours copies one picture more (`lab writes die 060EC450:060EC453 --from 1` parts there). The
+  second run starts with the same Play at tick 2822, and on both sides the first sector arrives 211 ms
+  later. That run is drive-bound: both sides take about 5 sectors a tick, a single-speed drive's rate,
+  and the buffer stays nearly empty. Between ticks 2846 and 2866 the core spends 12 more frames on 20
+  ticks than ours (its frame offset from our VBlank grows from 839 to 851), so it holds 15 to 30 more
+  sectors, and its pictures come 3 or 4 ticks sooner by the end. The core's ninth picture comes at tick
+  2937. Ours's would come at about 2941, after START at 2940. Both runs differ by how long the game's
+  work takes, the accepted CPU timing difference below, and the copy itself pairs value for value.
 - **`lab writes` took ours a tick sooner than the core's.** It read our tick as a VBlank began, before the
   VBlank's handler had run, and the core's after each frame, so the ticks it printed for the same moment
   were one apart. `ticks_after` now reads ours from the next VBlank. Which store pairs with which, and where
