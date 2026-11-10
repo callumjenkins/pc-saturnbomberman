@@ -130,11 +130,17 @@ def test_a_register_passed_on_to_a_callee_untouched_is_a_parameter():
     pytest.param((encode("shlr2 Rn", 0), RTS, encode("shlr8 Rn", 0)), "HELPER((unsigned int){r0} >> 10)", id="logical shifts"),
     pytest.param((encode("shll8 Rn", 0), RTS, NOP), None, id="a nop is not a shift"),
     pytest.param((encode("shar Rn", 0), encode("shlr Rn", 0), RTS, encode("shar Rn", 0)), None, id="two kinds of shift"),
-    pytest.param((encode("shar Rn", 1), RTS, encode("shar Rn", 1)), None, id="a shift of another register"),
+    pytest.param((encode("shar Rn", 4), RTS, encode("shar Rn", 4)), "HELPER((int){r4} >> 2)", id="a shift of r4"),
+    pytest.param((encode("shar Rn", 1), RTS, encode("shar Rn", 2)), None, id="shifts of two registers"),
 ])
-def test_a_run_of_shifts_of_r0_is_a_routine_for_its_operator(function, text):
+def test_a_run_of_shifts_of_one_register_is_a_routine_for_its_operator(function, text):
     image, code = program(function)
     assert (registers.routine(image, BASE, code) or (None,))[0] == text
+
+
+def test_a_run_of_shifts_of_r4_leaves_its_result_in_r4_and_changes_nothing_else():
+    image, code = program((encode("shlr2 Rn", 4), RTS, encode("shlr Rn", 4)))
+    assert registers.routine(image, BASE, code)[1:] == (set(), 4)
 
 
 def test_a_call_to_a_division_routine_is_lifted_as_the_division(monkeypatch):

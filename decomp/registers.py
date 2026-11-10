@@ -100,7 +100,7 @@ def writes(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> fr
             if ins.op in _TAILS and target in code:
                 continue
             helper = routine(image, target, functions) if target is not None else None
-            found |= ({0} | helper[1]) if helper else writes(image, target, functions) if target is not None else EVERY
+            found |= (helper[1] | {helper[2]}) if helper else writes(image, target, functions) if target is not None else EVERY
             if ins.op in _CALLS:
                 found.add(0)
     cache[address] = frozenset(r for r in found if r < 8)
@@ -160,7 +160,7 @@ def _node(image: sh2.Image, ins: sh2.Insn, code: set[int], functions: dict[int, 
         if leaves:
             return uses, defs, []
         helper = routine(image, target, functions) if target is not None else None
-        written = {0} | helper[1] if helper else set(range(8))      # SHC's routines keep r4 to r7
+        written = helper[1] | {helper[2]} if helper else set(range(8))      # SHC's routines keep r4 to r7
         return uses, defs | frozenset(written), after
     if ins.op in _TAILS:
         return uses, defs, [target]
@@ -169,29 +169,30 @@ def _node(image: sh2.Image, ins: sh2.Insn, code: set[int], functions: dict[int, 
     return uses, defs, after
 
 
-def routine(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> tuple[str, set[int]] | None:
-    """The C for a call to a runtime routine, with {r0} to {r2} for what they hold, and the registers other
-    than r0 it changes: a division, one of LIBRARY, or a run of shifts of r0 to its rts. None for any other
-    function."""
+def routine(image: sh2.Image, address: int, functions: dict[int, set[int]]) -> tuple[str, set[int], int] | None:
+    """The C for a call to a runtime routine, with {r0} to {r7} for what they hold, the registers other than
+    the result's that it changes, and the register the result lands in: a division, one of LIBRARY, or a run of
+    shifts of one register to its rts. None for any other function."""
     if address in DIVISIONS:
-        return "%s({r1}, {r0})" % DIVISIONS[address], {1}
+        return "%s({r1}, {r0})" % DIVISIONS[address], {1}, 0
     if address in LIBRARY:
-        return LIBRARY[address]
+        return (*LIBRARY[address], 0)
     code = functions.get(address)
-    kinds, count = set(), 0
+    kinds, count, registers = set(), 0, set()
     for pc in sorted(code or ()):
         ins = image.insn(pc)
         if ins.op == "rts":
             continue
-        if ins.op not in _SHIFTS or ins.n != 0:
+        if ins.op not in _SHIFTS or ins.n > 7:
             return None
+        registers.add(ins.n)
         kinds.add("shar" if ins.op == "shar" else ins.op[:4])
         count += _SHIFTS[ins.op][1]
-    if len(kinds) != 1:
+    if len(kinds) != 1 or len(registers) != 1:
         return None
-    kind = kinds.pop()
-    value = {"shar": "(int){r0}", "shlr": "(unsigned int){r0}", "shll": "{r0}"}[kind]
-    return "HELPER(%s %s %d)" % (value, _SHIFTS[kind][0], count), set()
+    kind, register = kinds.pop(), registers.pop()
+    value = {"shar": "(int){r%d}", "shlr": "(unsigned int){r%d}", "shll": "{r%d}"}[kind] % register
+    return "HELPER(%s %s %d)" % (value, _SHIFTS[kind][0], count), set(), register
 
 
 def _loaded(image: sh2.Image, ins: sh2.Insn, code: set[int]) -> int | None:

@@ -17344,3 +17344,39 @@ int f0606CDF8(int r4, int r5, int r6, int r7)
     ST32(v32, r8);
     return r9;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060671A8(int r4, int r5)
+{
+    int r0, r1, r2, r7, r8, r9, r10;
+    FRAME(sp, 20);
+
+    r9 = r4;
+    r1 = LD32(0x06089694);
+    r8 = r5;
+    if (!((r1 & r1) == 0)) {
+        r0 = 1;
+    } else {
+        r10 = 0x06089694;
+        ST32(0x06089694, 1);
+        r0 = GCALL0(0x060678DC);
+        r7 = 0;
+        if (((r0 & 255) & (r0 & 255)) == 0) {
+            ST32(0x06089694, r7);
+            r0 = 1;
+        } else {
+            r1 = LD32(0x060896B8);
+            ST8((r1 + 2), r9);
+            r2 = LD32(0x060896B8);
+            r4 = HELPER((int)((short)r8) >> 8);
+            ST8((r2 + 4), r4);
+            r1 = LD32(0x060896B8);
+            ST8((r1 + 5), r8);
+            r2 = LD32(0x060896B8);
+            ST16(r2, 0x700);
+            ST32(r10, 0);
+            r0 = 0;
+        }
+    }
+    return r0;
+}

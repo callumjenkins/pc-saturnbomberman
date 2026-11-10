@@ -1,4 +1,5 @@
 /* Written by decomp/gen.py: the host build's names for the functions of BOOT, which load at addresses other modules use too. */
+#define f06010368 boot_f06010368
 #define f06010510 boot_f06010510
 #define f0601057C boot_f0601057C
 #define f06010598 boot_f06010598
@@ -205,6 +206,7 @@
 #define f06023B1C boot_f06023B1C
 #define f060243C0 boot_f060243C0
 #define f0602443C boot_f0602443C
+#define f0602450C boot_f0602450C
 #define f0602464C boot_f0602464C
 #define f060255E0 boot_f060255E0
 #define f06025608 boot_f06025608
@@ -330,10 +332,12 @@
 #define f0602FBE4 boot_f0602FBE4
 #define f0602FDD4 boot_f0602FDD4
 #define f0602FFD0 boot_f0602FFD0
+#define f06030034 boot_f06030034
 #define f06030098 boot_f06030098
 #define f06030250 boot_f06030250
 #define f060305F8 boot_f060305F8
 #define f060306D0 boot_f060306D0
+#define f06030E28 boot_f06030E28
 #define f06031190 boot_f06031190
 #define f060311D4 boot_f060311D4
 #define f06031208 boot_f06031208
@@ -416,6 +420,7 @@
 #define f060350C4 boot_f060350C4
 #define f0603510C boot_f0603510C
 #define f060351C4 boot_f060351C4
+#define f06035454 boot_f06035454
 #define f06035820 boot_f06035820
 #define f0603588C boot_f0603588C
 #define f0603592C boot_f0603592C
@@ -610,6 +615,8 @@
 #define f060456E4 boot_f060456E4
 #define f06045760 boot_f06045760
 #define f060457E8 boot_f060457E8
+#define f060458C0 boot_f060458C0
+#define f06045A0C boot_f06045A0C
 #define f06045B68 boot_f06045B68
 #define f06045BFC boot_f06045BFC
 #define f06045D70 boot_f06045D70
@@ -682,6 +689,7 @@
 #define f06051F38 boot_f06051F38
 #define f06051F68 boot_f06051F68
 #define f06051F88 boot_f06051F88
+#define f06051FAC boot_f06051FAC
 #define f0605215C boot_f0605215C
 #define f06052168 boot_f06052168
 #define f06052180 boot_f06052180
@@ -723,6 +731,7 @@
 #define f06053EC4 boot_f06053EC4
 #define f06053F40 boot_f06053F40
 #define f06054150 boot_f06054150
+#define f060541A8 boot_f060541A8
 #define f06054420 boot_f06054420
 #define f06054480 boot_f06054480
 #define f060546BC boot_f060546BC
@@ -859,6 +868,7 @@
 #define f0605B778 boot_f0605B778
 #define f0605B7A4 boot_f0605B7A4
 #define f0605B7CC boot_f0605B7CC
+#define f0605B7E8 boot_f0605B7E8
 #define f0605B808 boot_f0605B808
 #define f0605B81C boot_f0605B81C
 #define f0605B830 boot_f0605B830
@@ -869,6 +879,7 @@
 #define f0605B88C boot_f0605B88C
 #define f0605B8A0 boot_f0605B8A0
 #define f0605B8B4 boot_f0605B8B4
+#define f0605BA98 boot_f0605BA98
 #define f0605BBC4 boot_f0605BBC4
 #define f0605BC88 boot_f0605BC88
 #define f0605BD7C boot_f0605BD7C
@@ -1088,6 +1099,7 @@
 #define f06067070 boot_f06067070
 #define f060670D0 boot_f060670D0
 #define f06067130 boot_f06067130
+#define f060671A8 boot_f060671A8
 #define f06067224 boot_f06067224
 #define f060672DC boot_f060672DC
 #define f06067350 boot_f06067350

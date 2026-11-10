@@ -1,7 +1,7 @@
 module	address	insns	calls	leaf	executed	yields	hooked	piece	state	name
 BOOT	06010000	30	2	no	yes	no	no	no	todo	
 BOOT	0601003C	7	2	no	no	no	no	no	todo	
-BOOT	06010368	173	12	no	no	no	no	no	todo	
+BOOT	06010368	173	12	no	no	no	no	no	swapped	
 BOOT	06010510	46	8	no	no	no	no	no	swapped	
 BOOT	0601057C	10	2	no	no	no	no	no	swapped	
 BOOT	06010598	9	2	no	no	no	no	no	swapped	
@@ -298,7 +298,7 @@ BOOT	06023EE8	494	66	no	no	no	no	no	todo
 BOOT	060243C0	52	0	yes	no	no	no	no	swapped	
 BOOT	0602443C	38	0	yes	no	no	no	no	swapped	
 BOOT	0602448C	56	4	no	no	no	no	no	todo	
-BOOT	0602450C	134	2	no	no	no	no	no	todo	
+BOOT	0602450C	134	2	no	no	no	no	no	swapped	
 BOOT	0602464C	100	0	yes	no	no	no	no	swapped	
 BOOT	06024730	1442	66	no	no	no	no	no	todo	
 BOOT	06025530	83	0	yes	no	no	no	no	todo	
@@ -466,7 +466,7 @@ BOOT	0602FBCC	9	0	yes	no	no	no	no	swapped
 BOOT	0602FBE4	243	0	yes	no	no	no	no	drafted	
 BOOT	0602FDD4	252	0	yes	no	no	no	no	drafted	
 BOOT	0602FFD0	41	6	no	no	no	no	no	swapped	
-BOOT	06030034	44	4	no	no	no	no	no	todo	
+BOOT	06030034	44	4	no	no	no	no	no	swapped	
 BOOT	06030098	164	16	no	no	no	no	no	swapped	
 BOOT	06030210	29	0	yes	no	no	no	no	todo	
 BOOT	06030250	32	2	no	no	no	no	no	swapped	
@@ -479,7 +479,7 @@ BOOT	06030914	226	36	no	no	no	no	no	todo
 BOOT	06030B38	160	6	no	no	no	no	no	todo	
 BOOT	06030C94	149	4	no	no	no	no	no	todo	
 BOOT	06030DD8	35	0	yes	no	no	no	no	todo	
-BOOT	06030E28	243	24	no	no	no	no	no	todo	
+BOOT	06030E28	243	24	no	no	no	no	no	swapped	
 BOOT	0603104C	141	10	no	no	no	no	no	todo	
 BOOT	06031190	28	6	no	no	no	no	no	swapped	
 BOOT	060311D4	22	2	no	no	no	no	no	swapped	
@@ -577,7 +577,7 @@ BOOT	060350C4	29	4	no	no	no	no	no	swapped
 BOOT	0603510C	85	6	no	no	no	no	no	swapped	
 BOOT	060351C4	66	10	no	no	no	no	no	swapped	
 BOOT	06035264	240	8	no	no	no	no	no	todo	
-BOOT	06035454	452	46	no	no	no	no	no	todo	
+BOOT	06035454	452	46	no	no	no	no	no	swapped	
 BOOT	06035820	51	2	no	no	no	no	no	swapped	
 BOOT	0603588C	67	10	no	no	no	no	no	swapped	
 BOOT	0603592C	854	72	no	no	no	no	no	swapped	
@@ -838,8 +838,8 @@ BOOT	060456E4	17	4	no	no	no	no	no	swapped
 BOOT	06045710	31	6	no	no	no	no	no	todo	
 BOOT	06045760	64	2	no	no	no	no	no	swapped	
 BOOT	060457E8	103	4	no	no	no	no	no	drafted	
-BOOT	060458C0	149	2	no	no	no	no	no	todo	
-BOOT	06045A0C	155	2	no	no	no	no	no	todo	
+BOOT	060458C0	149	2	no	no	no	no	no	swapped	
+BOOT	06045A0C	155	2	no	no	no	no	no	swapped	
 BOOT	06045B68	73	0	yes	no	no	no	no	swapped	
 BOOT	06045BFC	60	8	no	no	no	no	no	swapped	
 BOOT	06045C9C	105	0	yes	no	no	no	no	todo	
@@ -949,7 +949,7 @@ BOOT	06051E6C	87	10	no	yes	no	no	no	todo
 BOOT	06051F38	18	2	no	no	no	no	no	swapped	
 BOOT	06051F68	11	4	no	no	no	no	no	swapped	
 BOOT	06051F88	11	0	yes	yes	no	no	no	swapped	
-BOOT	06051FAC	173	64	no	no	no	no	no	todo	
+BOOT	06051FAC	173	64	no	no	no	no	no	swapped	
 BOOT	0605215C	4	0	yes	no	no	no	no	swapped	
 BOOT	06052168	10	2	no	no	no	no	no	swapped	
 BOOT	06052180	92	12	no	no	no	no	no	swapped	
@@ -996,7 +996,7 @@ BOOT	06053EC4	47	8	no	yes	no	no	no	swapped
 BOOT	06053F40	32	6	no	no	no	no	no	swapped	
 BOOT	06054010	143	10	no	no	no	no	no	todo	
 BOOT	06054150	40	6	no	no	no	no	no	swapped	
-BOOT	060541A8	270	18	no	no	no	no	no	todo	
+BOOT	060541A8	270	18	no	no	no	no	no	drafted	
 BOOT	06054420	43	0	yes	no	no	no	no	swapped	
 BOOT	06054480	20	0	yes	no	no	no	no	swapped	
 BOOT	060544AC	94	10	no	no	no	no	no	todo	
@@ -1156,7 +1156,7 @@ BOOT	0605B748	16	6	no	no	no	no	no	swapped
 BOOT	0605B778	15	2	no	no	no	no	no	swapped	
 BOOT	0605B7A4	15	4	no	no	no	no	no	swapped	
 BOOT	0605B7CC	11	2	no	no	no	no	no	swapped	
-BOOT	0605B7E8	11	4	no	no	no	no	no	todo	
+BOOT	0605B7E8	11	4	no	no	no	no	no	swapped	
 BOOT	0605B808	8	2	no	no	no	no	no	swapped	
 BOOT	0605B81C	8	2	no	no	no	no	no	swapped	
 BOOT	0605B830	2	0	yes	yes	no	no	no	swapped	
@@ -1167,7 +1167,7 @@ BOOT	0605B878	7	2	no	no	no	no	no	swapped
 BOOT	0605B88C	7	2	no	no	no	no	no	swapped	
 BOOT	0605B8A0	7	2	no	no	no	no	no	swapped	
 BOOT	0605B8B4	7	2	no	no	no	no	no	swapped	
-BOOT	0605BA98	123	8	no	no	no	no	no	todo	
+BOOT	0605BA98	123	8	no	no	no	no	no	swapped	
 BOOT	0605BBC4	87	2	no	no	no	no	no	swapped	
 BOOT	0605BC88	106	8	no	no	no	no	no	swapped	
 BOOT	0605BD7C	50	4	no	no	no	no	no	swapped	
@@ -1422,7 +1422,7 @@ BOOT	06067010	40	2	no	no	no	no	no	swapped
 BOOT	06067070	40	2	no	no	no	no	no	swapped	
 BOOT	060670D0	40	2	no	no	no	no	no	swapped	
 BOOT	06067130	52	2	no	no	no	no	no	swapped	
-BOOT	060671A8	52	4	no	no	no	no	no	todo	
+BOOT	060671A8	52	4	no	no	no	no	no	swapped	
 BOOT	06067224	84	2	no	no	no	no	no	swapped	
 BOOT	060672DC	51	2	no	no	no	no	no	swapped	
 BOOT	06067350	127	4	no	no	no	no	no	swapped	

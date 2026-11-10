@@ -82,8 +82,8 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
             st.effect("SETSP(%s);" % st.get(15))
     helper = registers.routine(image, number(where), functions) if known and not tail else None
     if helper:
-        text, changes = helper
-        st.put(0, text.format(**{"r%d" % r: st.get(r) for r in range(3) if "{r%d}" % r in text}), False)
+        text, changes, result = helper
+        st.put(result, text.format(**{"r%d" % r: st.get(r) for r in range(8) if "{r%d}" % r in text}), False)
         for r in changes:
             st.clobbered.add(r)
             st.known.pop(r, None)
