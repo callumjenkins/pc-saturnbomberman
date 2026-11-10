@@ -5,8 +5,9 @@ under wrangler dev, each with --sync, so every VBlank's pads are the same on all
   frames later, which is when a press in a synced game applies;
 - of three copies, one is killed during the battle, and the other two play on together;
 - a copy whose work RAM is written to is reported out of step, by both;
-- a copy that joins once the game has started is told so.
-The copies run headless, so unpaced: only the lockstep keeps them together."""
+- a copy that joins once the game has started is told so;
+- a room's maker in a window starts the game with Start once another player is in.
+The copies run headless, so unpaced, but for the maker pressing Start: only the lockstep keeps them together."""
 import os
 import re
 import shutil
@@ -67,17 +68,22 @@ def same_shots(names: list[str], outs: list[str], shots: str = SHOTS) -> list[st
 
 
 def start(name: str, session: str, token: str, presses: list[str], more: tuple[str, ...] = (),
-          vblanks: int = ROUTE.vblanks) -> tuple[str, subprocess.Popen]:
-    """A synced copy of the game in the room at `session`, as tester `token`, pressing its own pad 1 as `presses`."""
+          vblanks: int = ROUTE.vblanks, window: bool = False) -> tuple[str, subprocess.Popen]:
+    """A synced copy of the game in the room at `session`, as tester `token`, pressing its own pad 1 as `presses`.
+    In a `window`, offscreen, its controllers and the room's card are the player's, and --input is left out."""
     out = f"{BUILD}/test/sync-{name}"
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(out)
     args = run.saturn_args(ROUTE, vblanks=vblanks, shots=SHOTS)
     args[args.index("--input") + 1] = ",".join(presses) or "0:"
+    env = {**os.environ, "SATURN_PLAYTEST_TOKEN": token}
+    if window:
+        at = args.index("--input")
+        args = [a for i, a in enumerate(args) if a != "--headless" and i not in (at, at + 1)] + ["--settings", "-"]
+        env.update(SDL_VIDEO_DRIVER="offscreen", SDL_AUDIO_DRIVER="dummy")
     command = [run.GAME.saturn, "--out", out, *args, "--session", session, "--sync-delay", str(DELAY), *more]
     with open(f"{out}/log.txt", "w") as log:
-        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT,
-                                   env={**os.environ, "SATURN_PLAYTEST_TOKEN": token})
+        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=env)
     return out, process
 
 
@@ -150,18 +156,37 @@ def stray_write(worker: LocalWorker) -> list[str]:
     return found
 
 
+def started_by_start(worker: LocalWorker) -> list[str]:
+    """The maker's Start, held from the first VBlank, which the room's card takes once a second player is in."""
+    tokens = [worker.invite(n) for n in ("ida", "jo")]
+    a = start("start-ida", worker.room(), tokens[0], [], ("--sync", "0", "--virtual-input", "1:START,10:"), 600, True)
+    code = netlink.room_code(*a)
+    if not code:
+        a[1].kill()
+        return ["start: the maker made no room"]
+    time.sleep(3)
+    b = start("start-jo", worker.room(code), tokens[1], [], ("--sync", "0"), 600)
+    found = []
+    for name, game in (("ida", a), ("jo", b)):
+        out, log = finished(game)
+        if not re.search(r"sync: the game starts at VBlank \d+ with 2 players", log):
+            found.append(f"start {name}: the game did not start with two players")
+    return found
+
+
 def main() -> None:
     build.ensure(run.GAME, False, log=lambda s: None)
     reference = alone()
     found = []
     with local_worker(f"{BUILD}/test/sync-worker", f"{BUILD}/test/sync-worker.log") as worker:
-        for check in (lambda: two(worker, reference), lambda: three_one_killed(worker), lambda: stray_write(worker)):
+        for check in (lambda: two(worker, reference), lambda: three_one_killed(worker), lambda: stray_write(worker),
+                      lambda: started_by_start(worker)):
             found += check()
     for p in found:
         print("FAIL    ", p)
     if not found:
         print("ok       two, three and a stray write: the same frames on every synced copy, a lost copy left behind, "
-              "and a copy out of step reported")
+              "and a copy out of step reported; and a game started with the maker's Start")
     sys.exit(1 if found else 0)
 
 

@@ -77,7 +77,7 @@ def main(argv=None):
                          "(SATURN_PLAYTEST_TOKEN or SATURN_PLAYTEST_TESTER names the tester)")
     pl.add_argument("--sync", nargs="?", type=int, const=0, metavar="PLAYERS",
                     help="with --room: one game for everyone in the room instead of the NetLink battle, which a new "
-                         "room starts once PLAYERS are in")
+                         "room's maker starts with Start, or which starts once PLAYERS are in")
     online.add_argument("--netband", metavar="wait|match|IP",
                     help="play the NetLink battle against a real Saturn through the NetBand tunnel: wait for its call, "
                          "find it waiting through the dreampipe.net match service, or call its address")
