@@ -268,6 +268,30 @@ def dump_matches(name):
     with open(f"{out}/log.txt", "w") as log:
         subprocess.run([run.GAME.saturn, "--out", out, *run.saturn_args(route), "--state-in", dump],
                        stdout=log, stderr=subprocess.STDOUT, timeout=600)
+    return shots_after(name, route, out, at)
+
+
+# The VBlanks a run with --rewind plays twice: it goes back to its dump at VBlank DUMPS[name] from this many after.
+REWIND = 240
+
+
+def rewind_matches(name):
+    """Problems with the run that loads its own dump again REWIND VBlanks after taking it: its frames after the
+    dump, those it takes twice included, must be the scripted run's, so a part of the machine outside the dump
+    that a load in the middle of a run leaves behind shows up here."""
+    route, at = RUNS[name](), DUMPS[name]
+    out = f"{BUILD}/test/rewind-{name}"
+    os.makedirs(out, exist_ok=True)
+    with open(f"{out}/log.txt", "w") as log:
+        subprocess.run([run.GAME.saturn, "--out", out, *run.saturn_args(route), "--rewind", f"{at}:{at + REWIND}"],
+                       stdout=log, stderr=subprocess.STDOUT, timeout=900)
+    if not any("back to" in line for line in open(f"{out}/log.txt")):
+        return ["the run never went back to its dump"]
+    return shots_after(name, route, out, at)
+
+
+def shots_after(name, route, out, at):
+    """The run in `out`'s failures, and its shots after VBlank `at` that differ from the scripted run's."""
     problems = [line.strip() for line in open(f"{out}/log.txt") if "FATAL" in line]
     return problems + [f"frame {v} differs" for v in route.shots.split(",") if int(v) > at and (
         not os.path.exists(f"{out}/shot-{v}.png") or
@@ -404,6 +428,7 @@ def main():
         sound = [ex.submit(device_sound_matches) for _ in device]
         pads = dict(zip(controllers, ex.map(controllers_match, controllers)))
         dumps = dict(zip(dumped, ex.map(dump_matches, dumped)))
+        rewinds = dict(zip(dumped, ex.map(rewind_matches, dumped)))
         rebuilt = dict(zip(checked, ex.map(checkpoint_matches, checked)))
 
     failed = 0
@@ -434,6 +459,10 @@ def main():
     for name, problems in dumps.items():
         failed += bool(problems)
         print(f"{'FAIL' if problems else 'ok':8} dump: {name} from a dump at VBlank {DUMPS[name]}"
+              + (f": {'; '.join(problems)}" if problems else ""))
+    for name, problems in rewinds.items():
+        failed += bool(problems)
+        print(f"{'FAIL' if problems else 'ok':8} rewind: {name} back to its dump at VBlank {DUMPS[name]} from {REWIND} after"
               + (f": {'; '.join(problems)}" if problems else ""))
     for name, problems in rebuilt.items():
         failed += bool(problems)
