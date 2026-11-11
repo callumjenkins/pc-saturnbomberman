@@ -76,11 +76,12 @@ def play(more=(), launcher=False):
     return code
 
 
-def room_args(code=None, players=None):
+def room_args(code=None, players=None, watch=False):
     """saturn's arguments for a playtest room, a new one or the room `code`: the NetLink battle, or with `players`
-    one game for everyone in the room, which a new room starts once that many are in."""
+    one game for everyone in the room, which a new room starts once that many are in, and which this copy may only
+    `watch`."""
     if players is not None:
-        return playtest_session.sync_args({"endpoint": run.GAME.playtest.endpoint}, players, code)
+        return playtest_session.sync_args({"endpoint": run.GAME.playtest.endpoint}, players, code, watch)
     info = {"endpoint": run.GAME.playtest.endpoint, "classic": run.GAME.classic.steers()}
     return playtest_session.classic_args(info, code)
 

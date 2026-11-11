@@ -8,7 +8,8 @@ under wrangler dev, each with --sync, so every VBlank's pads are the same on all
 - a copy that joins once the game has started is told so;
 - a copy whose network goes mid-battle comes back, and the two still show the reference's frames;
 - a room's maker in a window starts the game with Start once another player is in;
-- a copy that joins plays with the maker's saves, and both keep them beside the run for a replay.
+- a copy that joins plays with the maker's saves, and both keep them beside the run for a replay;
+- a copy that watches with no pad shows the same frames as the two that play.
 The copies run headless, so unpaced, but for the maker pressing Start: only the lockstep keeps them together."""
 import os
 import re
@@ -222,6 +223,23 @@ def makers_saves(worker: LocalWorker) -> list[str]:
     return found
 
 
+def watched(worker: LocalWorker, reference: str) -> list[str]:
+    tokens = [worker.invite(n) for n in ("pam", "quin", "rex")]
+    a = start("watched-pam", worker.room(), tokens[0], list(ROUTE.presses), ("--sync", "3"))
+    code = netlink.room_code(*a)
+    if not code:
+        a[1].kill()
+        return ["watched: the first copy made no room"]
+    b = start("watched-quin", worker.room(code), tokens[1], SECOND, ("--sync", "0"))
+    c = start("watched-rex", worker.room(code), tokens[2], [], ("--sync", "0", "--sync-pads", "0"))
+    found = []
+    for name, game in (("pam", a), ("quin", b), ("rex", c)):
+        found += problems(f"watched {name}", *finished(game))
+    if "sync: this game watches" not in open(f"{c[0]}/log.txt").read():
+        found.append("watched rex: it took a pad")
+    return found + same_shots(["pam", "quin", "rex", "one copy alone"], [a[0], b[0], c[0], reference])
+
+
 def main() -> None:
     build.ensure(run.GAME, False, log=lambda s: None)
     reference = alone()
@@ -229,14 +247,14 @@ def main() -> None:
     with local_worker(f"{BUILD}/test/sync-worker", f"{BUILD}/test/sync-worker.log") as worker:
         for check in (lambda: two(worker, reference), lambda: three_one_killed(worker), lambda: stray_write(worker),
                       lambda: severed(worker, reference), lambda: started_by_start(worker),
-                      lambda: makers_saves(worker)):
+                      lambda: makers_saves(worker), lambda: watched(worker, reference)):
             found += check()
     for p in found:
         print("FAIL    ", p)
     if not found:
         print("ok       two, three and a stray write: the same frames on every synced copy, a lost copy left behind, "
               "and a copy out of step reported; a copy whose network went came back; a game started with the "
-              "maker's Start; and the maker's saves played by both")
+              "maker's Start; the maker's saves played by both; and a watcher shown the same game")
     sys.exit(1 if found else 0)
 
 
