@@ -12,6 +12,7 @@ import ctypes
 import json
 import os
 import random
+import resource
 import runpy
 import subprocess
 import sys
@@ -50,7 +51,8 @@ IMAGE = MODULE.path
 TABLE_MAX = 0x100                # bytes of a jump table code_runs keeps, at most
 FRAME_MAX = 0x400                # bytes of a function's stack check.py compares at a call, at most
 LONG_RUN_POLLS = 1_000_000        # polls after which a trial the game's code could not finish in the step limit is skipped, since both sides are in an endless loop
-CALLS_MAX = 2000                # calls a trial that answers them follows before it gives up, since an endless loop of them would fill memory
+CALLS_MAX = 2000                # calls a trial makes, answered or run, before it gives up, since an endless loop of them would fill memory
+MEMORY_GB = 6.0                 # address space a check may use, a little under the 8 GB farm run gives it; CHECK_MEM_GB overrides
 STUBBED = 0.5                    # the share of trials in which the calls out of the function are answered without running them
 
 
@@ -87,9 +89,9 @@ class Counting(sh2emu.CPU):
         if op in ("bsr", "jsr", "bsrf"):
             if self.code is self.own and pc in self.own and not self._operator(self.pc):
                 self.calls.append((self.pr, self.r[8:16], self.frame(self.r[15])))
+                if len(self.calls) > CALLS_MAX:
+                    raise RuntimeError("more than %d calls" % CALLS_MAX)
                 if self.stub is not None:
-                    if len(self.calls) > CALLS_MAX:
-                        raise RuntimeError("more than %d calls" % CALLS_MAX)
                     self.polls += 1
                     self.return_stub()
                     return
@@ -106,6 +108,8 @@ class Counting(sh2emu.CPU):
                 # The C writes every jmp as a tail call, also where the recompile folded the target into this function,
                 # except those through a jump table, which it writes as a switch.
                 self.calls.append((self.pr, self.r[8:16], self.frame(self.r[15])))
+                if len(self.calls) > CALLS_MAX:
+                    raise RuntimeError("more than %d calls" % CALLS_MAX)
                 if self.stub is not None:
                     self.return_stub(sh2emu.RETURN_SENTINEL)
                     return
@@ -248,7 +252,7 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
     the game, whose registers hold something else."""
     @CALL_HOOK
     def hook(addr, args, n):
-        if state.get("stub") and len(state["stubbed"]) > CALLS_MAX:
+        if len(state["snaps"]) > CALLS_MAX:
             state["error"] = "more than %d calls" % CALLS_MAX
             return 0
         regs = (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")
@@ -288,6 +292,18 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
     return hook
 
 
+def limit_memory() -> float:
+    """Caps the address space at CHECK_MEM_GB (MEMORY_GB if unset), so a trial that grows fails with a MemoryError
+    before the kernel kills the check, where the system limits address space. Returns the cap in GB."""
+    gigabytes = float(os.environ.get("CHECK_MEM_GB", MEMORY_GB))
+    hard = resource.getrlimit(resource.RLIMIT_AS)[1]
+    try:
+        resource.setrlimit(resource.RLIMIT_AS, (int(gigabytes * 2 ** 30), hard))
+    except (ValueError, OSError):       # macOS does not limit address space
+        pass
+    return gigabytes
+
+
 def run(lib: ctypes.CDLL, name: str, spec: tuple[list[tuple], bool, list[tuple]], trials: int, seed: int,
         sig: gen.Signature | None = None, seen: set[tuple[int, bool]] | None = None) -> tuple[list, int]:
     """The trials that differ, as (arguments, problems), and how many ran to the end, for one function.
@@ -297,8 +313,13 @@ def run(lib: ctypes.CDLL, name: str, spec: tuple[list[tuple], bool, list[tuple]]
     r = random.Random("%s:%d" % (name, seed))
     fails = []
     ran = 0
+    limit = limit_memory()
     for _ in range(trials):
-        vals, problems, skipped = trial(lib, name, args, returns, r, sig, seen, plants)
+        try:
+            vals, problems, skipped = trial(lib, name, args, returns, r, sig, seen, plants)
+        except MemoryError:
+            fails.append(([], ["ran past the %.1f GB a check may use" % limit]))
+            continue
         ran += not skipped
         if problems:
             fails.append((vals, problems))

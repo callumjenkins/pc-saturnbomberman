@@ -148,6 +148,26 @@ def test_a_call_inside_a_loop_counts_each_call_and_each_branch_back(monkeypatch)
     assert polls(monkeypatch, words, code) == 3 + 2
 
 
+def test_an_endless_loop_of_calls_stops_at_the_cap_also_when_the_calls_run(monkeypatch):
+    # top: bsr sub ; nop ; bra top ; nop ; sub: rts ; nop
+    words = [0xB001, NOP, 0xAFFC, NOP, RTS, NOP]
+    code = {BASE: {BASE + 2 * i for i in range(4)}, BASE + 8: {BASE + 8, BASE + 10}}
+    monkeypatch.setattr(check, "CALLS_MAX", 5)
+    with pytest.raises(RuntimeError, match="more than 5 calls"):
+        polls(monkeypatch, words, code)
+
+
+def test_a_trial_that_runs_out_of_memory_fails_as_that_trial_instead_of_ending_the_check(monkeypatch, tmp_path):
+    def grows(*args):
+        raise MemoryError
+    monkeypatch.setattr(check, "trial", grows)
+    path = tmp_path / "f.c"
+    path.write_text(SCALE % ("int", "int"))
+    sig = gen.signatures([str(path)])[0x0600B934]
+    fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 3, 1, sig)
+    assert (len(fails), ran) == (3, 0) and "GB a check may use" in fails[0][1][0]
+
+
 def test_a_branch_to_itself_counts_each_time_it_is_taken(monkeypatch):
     # mov #3,r1 ; bf/s . ; dt r1 ; rts ; nop
     words = [sh2.encode("mov #imm,Rn", 1, low=3), 0x8FFE, sh2.encode("dt Rn", 1), RTS, NOP]
