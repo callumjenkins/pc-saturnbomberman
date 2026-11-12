@@ -1,1 +1,17 @@
+# Ignored files the cosim reads: the original's code, the recompiler's discovery caches and the RAM dumps.
+build/extract/BOMSS/0KRNL.BIN
+build/extract/0
+build/extract/FLD_KNL.BIN
+build/ip-patched.bin
+build/recomp/inputs.json
+build/decomp/function-code.json
+build/decomp/function-code-BOOT.json
+build/decomp/function-code-FLD.json
+build/decomp/function-code-IP.json
+build/decomp/code-runs.json
+build/decomp/code-runs-BOOT.json
+build/decomp/code-runs-FLD.json
+build/decomp/code-runs-IP.json
+build/decomp/ram
+# The disc, which bomberman prepare reads.
 iso

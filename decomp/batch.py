@@ -1,0 +1,111 @@
+"""Lifts many functions at once and runs the cosim on each of the drafts.
+
+    python decomp/batch.py --leaves [--executed] [--parked] [--limit N] [--jobs J]
+    python decomp/batch.py ADDRESS...
+
+The drafts go into build/decomp/lifted.c and the results into build/decomp/batch.tsv, one row per
+function: `ok` (the draft agrees with the game's code), `differs`, `few` (too few trials ran to the end
+to say), `hung`, `unsupported` (the lifter could not read it) or `crashed` (the draft crashed the check).
+Nothing is swapped in: run.py does that for the ones worth keeping. With --parked the functions are those a
+task can park in, drafted to keep what a task resumed after a call reads (lift.py --parked); without it, those
+are left out.
+"""
+import argparse
+import concurrent.futures
+import multiprocessing
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(ROOT, "saturn-recomp", "src"))
+import check  # noqa: E402
+import gen  # noqa: E402
+import lift  # noqa: E402
+import modules  # noqa: E402
+import status  # noqa: E402
+import structure  # noqa: E402
+
+OUT = os.path.join(ROOT, "build", "decomp")
+TIMEOUT = 120        # seconds a function's trials may take before the draft counts as hung
+TRIALS = 100
+
+
+def select(args: argparse.Namespace) -> list[int]:
+    if args.addresses:
+        return [int(a, 16) for a in args.addresses]
+    rows = [r for r in status.previous().values()
+            if r.module == modules.current().name and r.state == "todo" and r.yields == args.parked and not r.hooked and not r.piece and (r.leaf or not args.leaves)
+            and (r.executed or not args.executed)]
+    rows.sort(key=lambda r: (r.insns, r.address))
+    return [r.address for r in rows[:args.limit]]
+
+
+def lift_all(addresses: list[int], parked: bool = False) -> tuple[dict[int, str], dict[int, str]]:
+    image = status.image()
+    drafts: dict[int, str] = {}
+    refused: dict[int, str] = {}
+    code = status.function_code()
+    for address in addresses:
+        try:
+            drafts[address] = lift.lift(image, address, code.get(address), code, parked)
+        except (lift.Unsupported, structure.Unstructured) as error:
+            refused[address] = str(error)
+    return drafts, refused
+
+
+def trials(sig: gen.Signature, spec: tuple, seed: int, queue: "multiprocessing.Queue", source: str) -> None:
+    lib = check.build([source])
+    fails, ran = check.run(lib, sig.name, spec, TRIALS, seed, sig)
+    queue.put(("differs", fails[0][1][0]) if fails else ("few", "%d ran" % ran) if ran < TRIALS // 4 else ("ok", ""))
+
+
+def judge(sig: gen.Signature, spec: tuple, source: str) -> tuple[str, str]:
+    queue: multiprocessing.Queue = multiprocessing.Queue()
+    child = multiprocessing.Process(target=trials, args=(sig, spec, 1, queue, source))
+    child.start()
+    child.join(TIMEOUT)
+    if child.is_alive():
+        child.terminate()
+        child.join()
+        return "hung", ""
+    return queue.get() if not queue.empty() else ("crashed", "exit code %s" % child.exitcode)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("addresses", nargs="*", help="hex entry addresses in the module")
+    parser.add_argument("--leaves", action="store_true", help="only functions that call nothing")
+    parser.add_argument("--executed", action="store_true", help="only functions a route runs")
+    parser.add_argument("--parked", action="store_true", help="the functions a task can park in, not the others")
+    parser.add_argument("--limit", type=int, default=50, help="how many, smallest first")
+    parser.add_argument("--jobs", type=int, default=int(os.environ.get("FARM_CORES", 4)), help="default: FARM_CORES, set by `farm run`, else 4")
+    args = parser.parse_args()
+
+    os.makedirs(OUT, exist_ok=True)
+    drafts, refused = lift_all(select(args), args.parked)
+    source = os.path.join(OUT, "lifted.c")
+    with open(source, "w", encoding="utf-8") as f:
+        f.write('#include "guest.h"\n\n' + "\n".join(drafts.values()))
+    results: dict[int, tuple[str, str]] = {a: ("unsupported", why) for a, why in refused.items()}
+    try:
+        check.build([source])
+    except Exception as error:
+        raise SystemExit("the drafts do not compile together: %s" % error)
+    sigs = gen.signatures([source])
+    with concurrent.futures.ThreadPoolExecutor(args.jobs) as pool:
+        pending = {a: pool.submit(judge, sigs[a], check.default_spec(sigs[a]), source) for a in drafts}
+        for address, job in pending.items():
+            results[address] = job.result()
+    with open(os.path.join(OUT, "batch.tsv"), "w", encoding="utf-8") as f:
+        for address, (verdict, note) in sorted(results.items()):
+            f.write("%08X\t%s\t%s\n" % (address, verdict, note))
+    counts: dict[str, int] = {}
+    for verdict, _ in results.values():
+        counts[verdict] = counts.get(verdict, 0) + 1
+    print(", ".join("%d %s" % (n, v) for v, n in sorted(counts.items())))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,140 @@
+import ctypes
+import os
+import shutil
+import subprocess
+
+import pytest
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+pytestmark = pytest.mark.skipif(shutil.which("clang") is None, reason="needs clang")
+
+
+@pytest.fixture
+def mem(tmp_path):
+    out = tmp_path / "host_mem.so"
+    subprocess.check_call(["clang", "-shared", "-fPIC", "-o", str(out), os.path.join(ROOT, "decomp", "host_mem.c")])
+    lib = ctypes.CDLL(str(out))
+    lib.g_rd.restype = ctypes.c_uint32
+    lib.g_rd.argtypes = [ctypes.c_uint32, ctypes.c_int]
+    lib.g_wr.argtypes = [ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32]
+    regions = ((0x06000000, 0x100000), (0x00200000, 0x100000), (0x05D00000, 0x80000), (0xFFFFFE00, 0x200))
+    buffers = [ctypes.create_string_buffer(size) for base, size in regions]
+    for i, ((base, size), buf) in enumerate(zip(regions, buffers)):
+        (ctypes.c_uint32 * 16).in_dll(lib, "g_region_base")[i] = base
+        (ctypes.c_uint32 * 16).in_dll(lib, "g_region_size")[i] = size
+        (ctypes.c_void_p * 16).in_dll(lib, "g_region")[i] = ctypes.addressof(buf)
+    ctypes.c_int.in_dll(lib, "g_regions").value = len(regions)
+    lib.buffers = buffers
+    return lib
+
+
+def fault(lib) -> int:
+    return ctypes.c_int.in_dll(lib, "g_fault").value
+
+
+@pytest.mark.parametrize("address", [
+    pytest.param(0xFFFFFFFF, id="wraps past zero"),
+    pytest.param(0x060FFFFF, id="runs off the end of work RAM"),
+    pytest.param(0x002FFFFF, id="runs off the end of work RAM-L"),
+    pytest.param(0x05D7FFFF, id="runs off the end of VDP1"),
+    pytest.param(0x05CFFFFE, id="falls between two regions"),
+])
+def test_an_access_that_does_not_fit_faults_and_writes_nothing(mem, address):
+    mem.g_wr(address, 2, 0xABCD)
+    assert fault(mem) == 1
+    assert all(not any(buf.raw) for buf in mem.buffers)
+
+
+@pytest.mark.parametrize("address, buffer, offset", [
+    pytest.param(0x06001234, 0, 0x1234, id="work RAM-H"),
+    pytest.param(0x26001234, 0, 0x1234, id="its cache-through mirror"),
+    pytest.param(0x00201234, 1, 0x1234, id="work RAM-L"),
+    pytest.param(0x05D01234, 2, 0x1234, id="VDP1's registers"),
+    pytest.param(0xFFFFFF00, 3, 0x100, id="the on-chip registers, at the top of the address space"),
+])
+def test_a_store_lands_big_endian_in_its_region(mem, address, buffer, offset):
+    mem.g_wr(address, 4, 0x11223344)
+    assert mem.buffers[buffer].raw[offset:offset + 4] == b"\x11\x22\x33\x44"
+    assert mem.g_rd(address, 4) == 0x11223344 and fault(mem) == 0
+
+
+@pytest.mark.parametrize("address", [
+    pytest.param(0x060FFFFC, id="work RAM-H"),
+    pytest.param(0x002FFFFC, id="work RAM-L"),
+    pytest.param(0x05D7FFFC, id="VDP1's registers"),
+    pytest.param(0xFFFFFFFC, id="the on-chip registers"),
+])
+def test_the_last_word_that_fits_does_not_fault(mem, address):
+    mem.g_wr(address, 4, 0x11223344)
+    assert fault(mem) == 0 and mem.g_rd(address, 4) == 0x11223344
+
+
+def test_a_tail_jump_with_no_runtime_to_run_it_faults(mem):
+    mem.g_jump.argtypes = [ctypes.c_uint32, ctypes.c_void_p, ctypes.c_int]
+    mem.g_jump(0x06006000, None, 0)
+    assert fault(mem) == 1
+
+
+@pytest.mark.parametrize("size, lowered", [
+    pytest.param(0, 0, id="nothing"),
+    pytest.param(1, 4, id="a byte, rounded up to a word"),
+    pytest.param(5, 8, id="five bytes, rounded up to two words"),
+    pytest.param(8, 8, id="two words exactly"),
+])
+def test_a_frame_lowers_the_games_stack_by_its_size_rounded_up_to_a_word_and_returns_the_old_top(mem, size, lowered):
+    sp = ctypes.c_uint32.in_dll(mem, "g_sp")
+    sp.value = 0x060FFF00
+    mem.g_frame.restype = ctypes.c_uint32
+    mem.g_frame.argtypes = [ctypes.c_int]
+    mem.g_unframe.argtypes = [ctypes.c_uint32]
+    top = mem.g_frame(size)
+    assert (top, sp.value) == (0x060FFF00, 0x060FFF00 - lowered)
+    mem.g_unframe(top)
+    assert sp.value == 0x060FFF00
+
+
+TOP = 0x060FFF00
+
+
+def parked(mem) -> None:
+    ctypes.c_uint32.in_dll(mem, "g_sp").value = TOP
+    mem.g_entry_sp.restype = ctypes.c_uint32
+    mem.g_entry_sp()
+    mem.g_set_sp.argtypes = [ctypes.c_uint32]
+
+
+def unprotected(mem) -> int:
+    return ctypes.c_int.in_dll(mem, "g_unprotected").value
+
+
+def test_a_safe_point_with_r15_at_its_entry_value_over_a_stored_frame_is_unprotected(mem):
+    parked(mem)
+    mem.g_wr(TOP - 4, 4, 1)
+    mem.g_poll()
+    assert unprotected(mem) == 1
+
+
+def test_a_safe_point_with_r15_below_what_was_stored_is_protected(mem):
+    parked(mem)
+    mem.g_set_sp(TOP - 8)
+    mem.g_wr(TOP - 4, 4, 1)
+    mem.g_wr(TOP - 8, 4, 2)
+    mem.g_poll()
+    assert unprotected(mem) == 0
+
+
+def test_a_safe_point_after_the_frame_is_popped_is_protected(mem):
+    parked(mem)
+    mem.g_set_sp(TOP - 8)
+    mem.g_wr(TOP - 8, 4, 2)
+    mem.g_set_sp(TOP)
+    mem.g_poll()
+    assert unprotected(mem) == 0
+
+
+def test_a_function_that_never_read_its_entry_r15_has_no_frame_to_protect(mem):
+    ctypes.c_uint32.in_dll(mem, "g_sp").value = TOP
+    mem.g_wr(TOP - 4, 4, 1)
+    mem.g_poll()
+    assert unprotected(mem) == 0

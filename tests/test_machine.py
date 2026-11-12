@@ -1,0 +1,180 @@
+import os
+import random
+import re
+import shutil
+import sys
+
+import pytest
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "decomp"))
+sys.path.insert(0, os.path.join(ROOT, "saturn-recomp", "src"))
+import check  # noqa: E402
+import gen  # noqa: E402
+import hwnames  # noqa: E402
+import machine  # noqa: E402
+import snapshots  # noqa: E402
+from saturnrecomp import hw, sh2emu  # noqa: E402
+
+BASE = 0x06006000
+CODE = [(0, 0x10)]
+KERNEL_SIZED = [(0, 0xC0000)]
+
+
+@pytest.fixture
+def dumped(tmp_path, monkeypatch):
+    """One dump of work RAM, every byte 0xA5."""
+    path = tmp_path / "route-1.bin"
+    path.write_bytes(b"\xA5" * 2 * machine.RAM)
+    monkeypatch.setattr(snapshots, "paths", lambda: [str(path)])
+    machine._dumps.cache_clear()
+    yield
+    machine._dumps.cache_clear()
+
+
+def filled(seed: int, plants: list[tuple] = (), code: list[tuple[int, int]] = CODE) -> sh2emu.CPU:
+    cpu = sh2emu.load(os.devnull, BASE)
+    cpu.mem.regions[0][2][BASE - machine.WRAM:BASE - machine.WRAM + 0x10] = bytes(range(0x10))
+    machine.fill(cpu, random.Random(seed), BASE, code, plants)
+    return cpu
+
+
+def test_about_half_the_trials_start_from_a_dumped_route(dumped):
+    starts = [filled(seed, code=KERNEL_SIZED).mem.regions[1][2][:4] == b"\xA5" * 4 for seed in range(40)]
+    assert 10 < sum(starts) < 30
+
+
+def test_a_fifth_of_a_modules_trials_start_from_a_dump_when_its_variables_lie_below_the_kernels(dumped):
+    starts = [filled(seed).mem.regions[1][2][:4] == b"\xA5" * 4 for seed in range(100)]
+    assert 5 < sum(starts) < 40
+
+
+def test_the_code_goes_back_over_a_dump(dumped):
+    cpu = next(c for c in map(filled, range(40)) if c.mem.regions[1][2][:4] == b"\xA5" * 4)
+    assert cpu.mem.regions[0][2][BASE - machine.WRAM:BASE - machine.WRAM + 0x10] == bytes(range(0x10))
+    assert cpu.mem.regions[0][2][BASE - machine.WRAM + 0x10] == 0xA5
+
+
+def test_a_plant_goes_over_a_dump(dumped):
+    cpu = filled(1, [(0x060C0000, 2, [0x1234], 1.0)])
+    assert cpu.mem.read(0x060C0000, 2) == 0x1234
+
+
+@pytest.mark.parametrize("address, at", [
+    pytest.param(0x05D00010, 0x05D00010, id="a device register"),
+    pytest.param(0x260C0000, 0x060C0000, id="the cache-through mirror of work RAM"),
+    pytest.param(0x00200010, 0x00200010, id="work RAM-L"),
+    pytest.param(0x60000010, 0x60000010, id="the cache address array"),
+    pytest.param(0x25890010, 0x25890010, id="the CD block through the cache-through mirror"),
+])
+def test_a_plant_lands_in_the_region_its_address_names(address, at):
+    cpu = filled(1, [(address, 2, [0x1234], 1.0)])
+    assert cpu.mem.read(at, 2) == 0x1234 and len(cpu.mem.regions[0][2]) == machine.RAM
+
+
+def test_a_plant_outside_every_region_is_refused():
+    with pytest.raises(sh2emu.MemoryError_):
+        filled(1, [(0x07000000, 4, [0], 1.0)])
+
+
+def test_with_nothing_dumped_every_trial_is_random(monkeypatch):
+    monkeypatch.setattr(snapshots, "paths", lambda: [])
+    machine._dumps.cache_clear()
+    assert all(filled(seed).mem.regions[1][2][:4] != b"\xA5" * 4 for seed in range(10))
+
+
+def test_the_host_gets_every_device_and_the_same_bytes():
+    game, host = filled(3), sh2emu.load(os.devnull, BASE)
+    machine.copy(game, host)
+    assert [(lo, hi) for lo, hi, buf in host.mem.regions] == [(lo, hi) for lo, hi, buf in game.mem.regions]
+    assert all(mine == theirs for (_, _, mine), (_, _, theirs) in zip(host.mem.regions, game.mem.regions))
+    assert machine.differences(host, game) == []
+
+
+@pytest.mark.parametrize("address, name", [
+    pytest.param(0x25E00010, "VDP2 VRAM", id="VDP2 VRAM"),
+    pytest.param(0xFFFFFF04, "on-chip registers", id="the on-chip registers"),
+])
+def test_a_write_to_a_device_shows_as_a_difference_there(address, name):
+    game, host = filled(3), sh2emu.load(os.devnull, BASE)
+    machine.copy(game, host)
+    host.mem.write(address, 2, host.mem.read(address, 2) ^ 1)
+    assert machine.differences(host, game) == ["%s differs first at %08X: host %02X, game %02X"
+                                               % (name, (address & 0x1FFFFFFF if address >> 28 == 2 else address) + 1,
+                                                  host.mem.read(address + 1, 1), game.mem.read(address + 1, 1))]
+
+
+def test_a_stack_difference_is_not_one():
+    game, host = filled(3), sh2emu.load(os.devnull, BASE)
+    machine.copy(game, host)
+    host.mem.write(machine.STACK + 8, 4, 0)
+    game.mem.write(machine.STACK + 8, 4, 1)
+    assert machine.differences(host, game) == []
+
+
+@pytest.mark.skipif(shutil.which("clang") is None or not os.path.exists(check.IMAGE), reason="needs clang and the extracted disc")
+@pytest.mark.parametrize("extra, agrees", [
+    pytest.param("", True, id="the game's own stores"),
+    pytest.param("    ST16(0x25E00000, 1);\n", False, id="one more store to VDP2 VRAM"),
+])
+def test_the_host_build_writes_to_the_devices(tmp_path, extra, agrees):
+    path = tmp_path / "f.c"
+    path.write_text('#include "krnl.h"\nint f06062168(void)\n{\n%s    if (LDU16(0x060D7C94) == 255)\n'
+                    '        return -1;\n    return 0;\n}\n' % extra)
+    sig = gen.signatures([str(path)])[0x06062168]
+    fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 20, 1, sig)
+    assert ran == 20 and (not fails) == agrees
+
+
+@pytest.mark.parametrize("offset", [
+    pytest.param(0, id="first byte"),
+    pytest.param(-1, id="last byte"),
+])
+@pytest.mark.parametrize("name, base, size", machine.DEVICES)
+def test_a_difference_in_any_device_region_is_reported_under_its_own_name(name, base, size, offset):
+    game, host = filled(3), sh2emu.load(os.devnull, BASE)
+    machine.copy(game, host)
+    address = base + (size + offset if offset else 0)
+    host.mem.write(address, 1, host.mem.read(address, 1) ^ 1)
+    assert machine.differences(host, game) == ["%s differs first at %08X: host %02X, game %02X"
+                                               % (name, address, host.mem.read(address, 1), game.mem.read(address, 1))]
+
+
+def test_every_register_hw_h_names_is_in_memory_a_trial_maps():
+    cpu = filled(3)
+    for name, address in hwnames.names().items():
+        cpu.mem.read(address, 1)
+
+
+def test_the_regions_are_as_many_as_host_mem_c_has_room_for_and_none_overlap():
+    with open(os.path.join(ROOT, "decomp", "host_mem.c")) as f:
+        (c_limit,) = re.findall(r"#define MAX_REGIONS (\d+)", f.read())
+    assert int(c_limit) == machine.MAX_REGIONS
+    regions = sorted([(machine.WRAM, machine.RAM), (machine.WRAML, machine.RAM)] + [(base, size) for name, base, size in machine.DEVICES])
+    assert len(regions) <= machine.MAX_REGIONS
+    assert all(lo + size <= next_lo for (lo, size), (next_lo, _) in zip(regions, regions[1:]))
+
+
+HARDWARE = [(lo, hi, name) for lo, hi, name in hw.REGIONS if name in (
+    "SMPC", "WRAM-L", "SCSP RAM", "SCSP", "VDP1 VRAM", "VDP1", "VDP2 VRAM", "VDP2 CRAM", "VDP2", "SCU", "WRAM-H")]
+
+
+@pytest.mark.parametrize("lo, hi", [pytest.param(lo, hi, id=name) for lo, hi, name in HARDWARE])
+def test_the_cosim_maps_the_whole_of_each_hardware_region_the_decompiled_code_reaches(lo, hi):
+    cpu = filled(3)
+    cpu.mem.read(lo, 1)
+    cpu.mem.read(hi - 1, 1)
+
+
+@pytest.mark.parametrize("base, extent, start", [
+    pytest.param(0x06006000, 0xC0000, machine.DATA[0], id="KRNL, whose code runs past DATA"),
+    pytest.param(0x06010000, 0x6A460, 0x06080000, id="BOOT, whose variables follow its code"),
+    pytest.param(0x06002000, 0x800, 0x06010000, id="a small image, up to the next 64 KiB"),
+])
+def test_random_data_starts_after_a_modules_code_when_that_is_below_the_data_area(base, extent, start):
+    assert machine.variables(base, extent) == start
+
+
+def test_linked_pointers_take_their_second_byte_from_the_variables_area_that_starts_at_the_start_it_is_given():
+    words = machine.linked(random.Random(1), 4096, bytes(4096), 0x06080000)
+    assert set(words[1::4]) == {0} | set(range(0x08, 0x10))

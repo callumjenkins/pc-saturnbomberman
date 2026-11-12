@@ -1,0 +1,287 @@
+"""Turns a control-flow graph of basic blocks into C with if, while, break and continue.
+
+A block is a Block: statements, then a terminator. The graph must reduce to those constructs; anything
+else raises Unstructured, and the function stays for a person to write.
+"""
+from dataclasses import dataclass, field
+
+
+class Unstructured(Exception):
+    pass
+
+
+@dataclass
+class Block:
+    start: int
+    stmts: list[str] = field(default_factory=list)
+    kind: str = "return"                    # return, goto, branch, or switch
+    value: str = ""                         # the returned expression, the branch condition, or the switch's index
+    targets: list[int] = field(default_factory=list)   # goto: [next]; branch: [taken, fallthrough]; switch: each target once
+    cases: list[tuple[int, int]] = field(default_factory=list)   # switch: each value of the index and where it goes
+    polls: list[int] = field(default_factory=list)     # targets the branch reaches by going back, where the game advances time
+
+
+def successors(block: Block) -> list[int]:
+    return block.targets if block.kind != "return" else []
+
+
+def reachable(blocks: dict[int, Block], entry: int) -> list[int]:
+    """Block starts in reverse postorder."""
+    order: list[int] = []
+    seen: set[int] = set()
+
+    def visit(at: int) -> None:
+        seen.add(at)
+        for nxt in successors(blocks[at]):
+            if nxt not in seen:
+                visit(nxt)
+        order.append(at)
+
+    visit(entry)
+    return order[::-1]
+
+
+def postdominators(blocks: dict[int, Block], order: list[int]) -> dict[int, int | None]:
+    """The immediate post-dominator of each block, None when the function can return from either side."""
+    exit_node = -1
+    preds: dict[int, list[int]] = {at: [] for at in order}
+    preds[exit_node] = []
+    succs: dict[int, list[int]] = {}
+    for at in order:
+        succs[at] = successors(blocks[at]) or [exit_node]
+        for nxt in succs[at]:
+            preds[nxt].append(at)
+    rpo = [exit_node] + [at for at in reversed(order)]          # roughly reverse postorder of the reverse graph
+    index = {at: i for i, at in enumerate(rpo)}
+    idom: dict[int, int] = {exit_node: exit_node}
+
+    def intersect(a: int, b: int) -> int:
+        while a != b:
+            while index[a] > index[b]:
+                a = idom[a]
+            while index[b] > index[a]:
+                b = idom[b]
+        return a
+
+    changed = True
+    while changed:
+        changed = False
+        for at in rpo[1:]:
+            done = [s for s in succs[at] if s in idom]
+            if not done:
+                continue
+            new = done[0]
+            for other in done[1:]:
+                new = intersect(new, other)
+            if idom.get(at) != new:
+                idom[at] = new
+                changed = True
+    return {at: (None if idom.get(at, exit_node) == exit_node else idom[at]) for at in order}
+
+
+def loops(blocks: dict[int, Block], order: list[int]) -> dict[int, set[int]]:
+    """For each loop header, the blocks of its body, from the back edges that return to it."""
+    position = {at: i for i, at in enumerate(order)}
+    bodies: dict[int, set[int]] = {}
+    preds: dict[int, list[int]] = {at: [] for at in order}
+    for at in order:
+        for nxt in successors(blocks[at]):
+            preds[nxt].append(at)
+    for at in order:
+        for nxt in successors(blocks[at]):
+            if position[nxt] <= position[at]:                       # a back edge to nxt
+                body = bodies.setdefault(nxt, {nxt})
+                stack = [at]
+                while stack:
+                    node = stack.pop()
+                    if node not in body:
+                        body.add(node)
+                        stack.extend(preds[node])
+    return bodies
+
+
+REPEATS = 12            # how many times over the draft may write out the statements of its blocks
+
+# A jump back to the header of the loop being written, until loop() turns it into POLL() and a continue.
+BACK = "<back>;"
+
+
+def drop_tail_continue(lines: list[str]) -> list[str]:
+    """The loop body without a jump back that is its last statement, or the last in an if or else at its end."""
+    lines = list(lines)
+    for i in range(len(lines) - 1, -1, -1):
+        if lines[i].strip() == BACK and all(line.strip() == "}" for line in lines[i + 1:]):
+            del lines[i]
+            if i < len(lines) and i > 0 and lines[i - 1].strip() == "} else {" and lines[i].strip() == "}":
+                del lines[i - 1]
+            break
+        if lines[i].strip() != "}":
+            break
+    return lines
+
+
+def polled(lines: list[str], advance: bool = True) -> list[str]:
+    """The lines with each jump back to this loop's header written as a continue, after POLL() if `advance`."""
+    out = []
+    for line in lines:
+        if line.strip() == BACK:
+            indent = line[:len(line) - len(line.lstrip())]
+            out += ([indent + "POLL();"] if advance else []) + [indent + "continue;"]
+        else:
+            out.append(line)
+    return out
+
+
+def negate(condition: str) -> str:
+    return condition[2:-1] if condition.startswith("!(") and condition.endswith(")") else "!(%s)" % condition
+
+
+class Structurer:
+    def __init__(self, blocks: dict[int, Block], entry: int) -> None:
+        self.blocks = blocks
+        self.entry = entry
+        self.order = reachable(blocks, entry)
+        self.ipdom = postdominators(blocks, self.order)
+        self.bodies = loops(blocks, self.order)
+        self.active: list[tuple[int, int | None]] = []          # (header, exit) of the loops being written
+        self.breaks = 0                                         # breaks written out of a loop so far
+        self.sides: dict[int, set[int]] = {}                    # each loop's exits other than its exit
+        self.room = REPEATS * sum(len(block.stmts) + 1 for block in blocks.values()) + 100   # lines left before it is a blowup
+
+    def poll(self, block: Block, target: int) -> list[str]:
+        """POLL() for an edge back that is not a loop's own, which gets one where the loop is written."""
+        return ["POLL();"] if target in block.polls and not self.goes_round(target) else []
+
+    def run(self) -> list[str]:
+        return self.sequence(self.entry, None)
+
+    def exit_of(self, header: int) -> int | None:
+        """Where the loop carries on: the one place it leaves to, or where all of them meet. The others
+        are its side exits, written in the loop where it leaves for them."""
+        body = self.bodies[header]
+        outside = {n for at in body for n in successors(self.blocks[at]) if n not in body}
+        if len(outside) <= 1:
+            self.sides[header] = set()
+            return outside.pop() if outside else None
+        chains = []
+        for at in sorted(outside):
+            chain = []
+            while at is not None:
+                chain.append(at)
+                at = self.ipdom[at]
+            chains.append(chain)
+        leave = next((at for at in chains[0] if all(at in chain for chain in chains[1:])), None)
+        self.sides[header] = outside - {leave}
+        if self.sides[header] & set(self.bodies):
+            raise Unstructured("the loop at %08X leaves for another loop" % header)
+        return leave
+
+    def goes_round(self, at: int) -> bool:
+        """Whether going to `at` is a jump back to the header of a loop being written."""
+        for header, leave in reversed(self.active):
+            if at in (header, leave):
+                return at == header
+        return False
+
+    def leaving(self, at: int) -> list[str] | None:
+        for depth, (header, leave) in enumerate(reversed(self.active)):
+            if at not in (header, leave) and at not in self.sides[header]:
+                continue
+            if depth:
+                raise Unstructured("a loop inside the loop at %08X goes to %08X, which needs a goto" % (header, at))
+            if at == header:
+                return [BACK]
+            self.breaks += at == leave
+            return ["break;"] if at == leave else self.sequence(at, None, first=True)
+        return None
+
+    def sequence(self, at: int | None, stop: int | None, first: bool = False) -> list[str]:
+        """The blocks from `at` up to `stop`, where the construct around them carries on."""
+        out: list[str] = []
+        while at is not None and (at != stop or first):
+            if not first:
+                jump = self.leaving(at)
+                if jump:
+                    return out + jump
+                if at in self.bodies and all(at != header for header, _ in self.active):
+                    out += self.loop(at)
+                    at = self.exit_of(at)
+                    continue
+            first = False
+            block = self.blocks[at]
+            self.room -= len(block.stmts) + 1
+            if self.room < 0:
+                raise Unstructured("a block is written out so many times that the draft is a blowup")
+            out += block.stmts
+            if block.kind == "return":
+                return out + ["return %s;" % block.value if block.value else "return;"]
+            if block.kind == "goto":
+                at = block.targets[0]
+                out += self.poll(block, at)
+                continue
+            at = self.switch(block, out) if block.kind == "switch" else self.branch(block, out)
+        return out
+
+    def branch(self, block: Block, out: list[str]) -> int | None:
+        """Writes an if for the branch and returns where its arms join."""
+        merge = self.ipdom[block.start]
+        in_loop = not self.active or merge in self.bodies[self.active[-1][0]]
+        join = merge if in_loop else None
+        then, other = (self.poll(block, t) + self.sequence(t, join) for t in block.targets)
+        condition = block.value
+        if not then and other:
+            condition, then, other = negate(condition), other, []
+        if then:
+            out += ["if (%s) {" % condition] + ["    " + line for line in then]
+            out += (["} else {"] + ["    " + line for line in other]) if other else []
+            out.append("}")
+        return join
+
+    def switch(self, block: Block, out: list[str]) -> int | None:
+        """Writes a switch for the block and returns where its arms join. A `break` in an arm would leave the switch
+        rather than the loop around it, so an arm that has one is refused."""
+        merge = self.ipdom[block.start]
+        in_loop = not self.active or merge in self.bodies[self.active[-1][0]]
+        join = merge if in_loop else None
+        lines = ["switch (%s) {" % block.value]
+        for target in block.targets:
+            before = self.breaks
+            arm = self.sequence(target, join)
+            if self.breaks != before:
+                raise Unstructured("an arm of the switch at %08X leaves a loop, which a switch would catch" % block.start)
+            lines += ["case %d:" % value for value in dict.fromkeys(v for v, to in block.cases if to == target)]
+            lines += ["    " + line for line in arm]
+            if not arm or not (arm[-1].startswith("return") or arm[-1] == BACK):
+                lines.append("    break;")
+        out += lines + ["}"]
+        return join
+
+    def loop(self, header: int) -> list[str]:
+        leave = self.exit_of(header)
+        block = self.blocks[header]
+        body = self.bodies[header]
+        self.active.append((header, leave))
+        # A loop entered by a jump to its test goes back where the test branches into the body, and only there.
+        enters = any(target in body and target != header and target not in self.bodies
+                     for at in body for target in self.blocks[at].polls)
+        if enters and any(header in self.blocks[at].polls for at in body):
+            raise Unstructured("the loop at %08X goes back in two places" % header)
+        tests_only = (block.kind == "branch" and not block.stmts and (block.targets[0] in body) != (block.targets[1] in body)
+                      and leave in block.targets)
+        if tests_only:
+            stay = block.targets[0] if block.targets[0] in body else block.targets[1]
+            condition = block.value if stay == block.targets[0] else negate(block.value)
+            inner = self.poll(block, stay) + self.sequence(stay, header)
+            head = "while (%s) {" % condition
+        else:
+            inner = self.sequence(header, header, first=True)
+            head = "while (1) {"
+        self.active.pop()
+        inner = drop_tail_continue(inner)
+        if enters:
+            return [head] + ["    " + line for line in polled(inner, advance=False)] + ["}"]
+        if len(inner) >= 5 and inner[-5].startswith("if (") and inner[-4:] == ["    " + BACK, "} else {", "    break;", "}"]:
+            condition = inner[-5][4:-3]
+            return ["do {"] + ["    " + line for line in polled(inner[:-5])] + ["} while (AGAIN(%s));" % condition]
+        # A block that returns has no successors, so it is never in a loop body: every pass goes round again.
+        return [head] + ["    " + line for line in polled(inner + ["POLL();"])] + ["}"]
