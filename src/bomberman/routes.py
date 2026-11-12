@@ -50,6 +50,21 @@ TO_BATTLE = TO_NORMAL + tap(3700, "DOWN", 8) + tap(3760, "START", 10)
 TO_MASTER = TO_NORMAL + taps((3700, 3760), "DOWN", 8) + tap(3820, "START", 10)
 
 
+def idle():
+    """Power on with nothing pressed: the title and the opening movie, then the attract demo, a Normal Game the
+    computer plays, and the title again."""
+    return Route("power on with nothing pressed: the title, the opening movie, and the attract demo", (), 12000,
+                 "8400,10800,12000")
+
+
+def idle_ride():
+    """idle until the attract demo has created its bombers, with pad 1's slot given the pink dino between the
+    demo clearing it (8175) and creating it (8216), as the dino routes do in a battle."""
+    from .run import GAME
+    writes = (f"8200:{GAME.symbols['objects'] + 0x5E:08X}=0800", f"8200:{GAME.symbols['dino_colours']:08X}=01")
+    return Route("the attract demo with pad 1's bomber created on the pink dino", (), 9000, "8400,9000", writes=writes)
+
+
 def normal():
     return Route("the title, the story intro and stage 1",
                  TO_NORMAL + taps(range(4200, 8701, 300), "START", 10), 9000, "4500,6300,8100,9000")
@@ -170,6 +185,17 @@ def open_arena(off=(3, 4, 5), **rules):
     return Route(f"a {players}-player battle in Path to Glory under the white sky, with no soft blocks and CPUs walled in"
                  + (f", rules {rules}, {delay} VBlanks later" if rules else ""),
                  presses, 7600 + delay, f"{7400 + delay},{7600 + delay}", writes=writes)
+
+
+def battle_win():
+    """open_arena as a one-win match against one CPU, walled in, which a write strikes once both can move (7590),
+    as bot.strike does: its flags byte, 0x02 then, gains the hit bit 0x40. Pad 1 takes the round (its update
+    turns bomber_won at 7683) and with it the match (battle_wins at 7879), and the results show by 8100."""
+    from .run import GAME
+    base = open_arena(off=(3, 4, 5), battles=3)
+    strike = f"7590:{GAME.symbols['objects'] + 0x7C + 0x34:08X}=42"
+    return Route("a one-win match in the open arena, won by pad 1 against a CPU struck by a write", base.presses, 8100,
+                 "7700,8100", writes=(*base.writes, strike))
 
 
 def mechanic(name):
@@ -692,7 +718,7 @@ def com_level(level):
                             single().presses, 8900, "7200,8000,8900"), com_level=level)
 
 
-ROUTES = {"normal": normal, "single": single, "battle": battle,
+ROUTES = {"idle": idle, "idle-ride": idle_ride, "normal": normal, "single": single, "battle": battle, "battle-win": battle_win,
           "items": lambda: world("items"),
           **{name: (lambda name=name: world(name)) for name in WORLDS},
           "cactus": cactus, "slot": slot, "yuna": yuna,

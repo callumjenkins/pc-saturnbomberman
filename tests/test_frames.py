@@ -3,6 +3,7 @@ import json
 import os
 
 import frames
+import pytest
 from PIL import Image
 from saturnrecomp import audio
 
@@ -89,6 +90,24 @@ def test_a_failed_exit_a_fatal_error_and_a_missing_log_line_are_problems(monkeyp
     assert frames.log_problems("r", log) == ["FATAL] no function at 06001000",
                                              "saturn-recomp: the run exited with status 3", "no log line 'BUP: wrote X'"]
     assert frames.log_problems("r", "BUP: wrote X\n") == []
+
+
+@pytest.mark.parametrize("earns, log, problems", [
+    pytest.param([], "fine\n", [], id="none earned, none triggered"),
+    pytest.param(["a"], "[  93.120 M] achievement a triggered\n", [], id="its own"),
+    pytest.param(["a", "b"], "[1.000 M] achievement b triggered\n[2.000 M] achievement a triggered\n", [],
+                 id="its own in another order"),
+    pytest.param([], "[1.000 M] achievement a triggered\n", ["achievements triggered: a, where the run earns none"],
+                 id="one where none is earned"),
+    pytest.param(["a"], "fine\n", ["achievements triggered: none, where the run earns a"], id="its own missing"),
+    pytest.param(["a"], "[1.000 M] achievement a triggered\n[1.000 M] achievement b triggered\n",
+                 ["achievements triggered: a, b, where the run earns a"], id="another as well"),
+    pytest.param(["a"], "[1.000 M] achievement a triggered\n[2.000 M] achievement a triggered\n",
+                 ["achievements triggered: a, a, where the run earns a"], id="its own twice"),
+])
+def test_a_run_triggers_exactly_the_achievements_it_earns(monkeypatch, earns, log, problems):
+    monkeypatch.setitem(frames.ACHIEVEMENTS, "r", earns)
+    assert frames.log_problems("r", log) == problems
 
 
 def test_a_run_in_sounds_records_its_sound(monkeypatch):

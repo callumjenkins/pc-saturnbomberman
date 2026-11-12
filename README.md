@@ -129,8 +129,10 @@ reference comparisons, and automation runs. `AGENTS.md` is the shared project en
 
 | Route | What it plays |
 |---|---|
+| `idle` | power on with nothing pressed: the title, the opening movie and the attract demo |
 | `normal` | the title, the story intro and stage 1 |
 | `single` | a single battle on one pad, set up through to the match |
+| `battle-win` | a one-win match in the open arena, won by pad 1 against a CPU struck by a write |
 | `battle` | the 10-player battle on two multitaps |
 | `items` | Normal Game with every item, from the title's held code (L+R+A+UP+LEFT) |
 | `mage`, `gunman`, `tyranno`, `mujoe` | a world's first stage, from the title's held code |
@@ -245,6 +247,17 @@ or records into that file, keeping its pictures beside it in `NAME.kept/`. Toget
 another platform against Linux's: record a Linux build of the same sources and options with
 `--update`, then run the other build against that file. `docs/PLATFORMS.md` says what each platform
 has passed.
+
+## Achievements
+
+`game.toml` lists 15 achievements as `[[achievement]]` entries: the bosses of Normal Game's five worlds and
+the two between, Master Game's first boss and its last floor, a Battle Game round won, and a ride on each
+dino colour. saturn-recomp tests each trigger every VBlank. A `play` records an unlock in `achievements.json`
+beside the saves. Scripted runs, the bot, and the tests pass `--save -`, and a replay plays recorded presses,
+so they record nothing: the log says `achievement ID triggered`, and in a window the card says the unlock
+was not recorded. `tests/frames.py` checks that each run triggers exactly the achievements
+it earns (`EARNED_BY`), and that the idle boot, attract demo included, triggers none. `docs/RESEARCH.md` says where each
+trigger's addresses came from.
 
 ## Researching the game
 

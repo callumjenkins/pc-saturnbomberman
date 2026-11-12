@@ -93,11 +93,13 @@ bomber_touched = 0x0605E512         # in the touch check, where r3 holds the obj
 # kick, 0x02 glove, 0x04 line bomb, 0x08 item 15's) and +0x71 its bomb kind (one bit each for items 4, 13, 14, 20, 23 and 24).
 objects = 0x060D5F00
 idle_object = 0x060143D8
+bomber_update = 0x06015358          # a bomber's update function while it plays
+bomber_won = 0x06019BB4             # the update function a bomber takes once its stage, or its battle round, is won
 dino = 0x0601B5CC                   # a dino's update function; its object's +0x54 is its rider's slot, +0x64 the eggs it has eaten since, +0x70 its colour
 # A byte a bomber slot: the colour of the dino the bomber is created riding, when its +0x5E has 0x0800 then.
 # 1 pink (jumps), 2 blue (kicks bombs into the air), 3 green (dashes), 4 yellow (roars), 5 purple (sound
 # waves); 0, 6 and 7 draw other dinos. A battle clears it, and the bombers' fields, about 20 VBlanks before
-# it creates them.
+# it creates them. An egg hatching under pad 1 sets its byte to the dino's colour as well.
 dino_colours = 0x060D82D4
 # Normal Game's growth meter (the HUD's egg): a long per bomber slot and dino colour, at 20 × slot + 4 × (colour - 1).
 # Every point a bomber scores while riding goes into its dino's colour, and the total is never reset during a game.
@@ -138,6 +140,10 @@ awarded_score = 0x060C0FDC
 # Battles, the bonus game and the results take their online paths when it is not 0.
 link_mode = 0x060C0AA8
 lives = 0x060C063E                  # a byte: pad 1's lives left in Normal Game: 3 at its start, 0 while the last is played
+# A byte a bomber slot: 1 while a pad plays it, 2 while the computer does (the attract demo's bombers too), 0 while
+# nobody does. Starting a game sets pad 1's to 1.
+player_kinds = 0x060C0640
+battle_wins = 0x060C065F            # a byte a bomber slot: the rounds it has won in the Battle Game match being played
 # The kernel counts, for each pad port from 06006100, the VBlanks since that port's pad last changed, as
 # it reads the pads, so not while the game loads. With nothing in port 3, its count is the game's frames.
 tick = 0x06006108
@@ -238,3 +244,116 @@ at = "bomber_fire_under"
 [[hook]]
 module = "KRNL"
 at = "bomber_touched"
+
+# The achievements, each a condition on work RAM in rcheevos's syntax (saturn-recomp's README): 0xH, 0xI, and 0xG
+# read 8, 16, and 32 bits, 0xP bit 3, d a value's last frame, and h a hex constant. Every one needs pad 1 played
+# by a pad (player_kinds), which leaves out the attract demo. tests/frames.py names the runs that earn each.
+# A Normal Game boss is beaten once pad 1's update function turns bomber_won (06019BB4) on its stage.
+[[achievement]]
+id = "world-1"
+title = "World 1 Cleared"
+description = "Beat Castle Joe on stage 1-7, the end of Normal Game's first world"
+points = 10
+trigger = "0xH{player_kinds}=1_0xI{stage_2}=h0006_0xG{objects+0x30}=h06019BB4"
+
+[[achievement]]
+id = "world-2"
+title = "World 2 Cleared"
+description = "Beat J Ninja on stage 2-9, the end of the second world"
+points = 15
+trigger = "0xH{player_kinds}=1_0xI{stage_2}=h0108_0xG{objects+0x30}=h06019BB4"
+
+[[achievement]]
+id = "world-3"
+title = "World 3 Cleared"
+description = "Beat Rodeon on stage 3-9, the end of the third world"
+points = 20
+trigger = "0xH{player_kinds}=1_0xI{stage_2}=h0208_0xG{objects+0x30}=h06019BB4"
+
+[[achievement]]
+id = "egg-birdon"
+title = "Grounded"
+description = "Beat Egg Birdon on stage 4-5"
+points = 15
+trigger = "0xH{player_kinds}=1_0xI{stage_2}=h0304_0xG{objects+0x30}=h06019BB4"
+
+[[achievement]]
+id = "world-4"
+title = "World 4 Cleared"
+description = "Beat Crator on stage 4-10, the end of the fourth world"
+points = 25
+trigger = "0xH{player_kinds}=1_0xI{stage_2}=h0309_0xG{objects+0x30}=h06019BB4"
+
+[[achievement]]
+id = "mr-meanie"
+title = "Scrap Metal"
+description = "Wreck Mr. Meanie's mech on stage 5-9"
+points = 25
+trigger = "0xH{player_kinds}=1_0xI{stage_2}=h0408_0xG{objects+0x30}=h06019BB4"
+
+[[achievement]]
+id = "world-5"
+title = "Normal Game Cleared"
+description = "Beat Dr. Mechado on stage 5-10, the last of Normal Game"
+points = 50
+trigger = "0xH{player_kinds}=1_0xI{stage_2}=h0409_0xG{objects+0x30}=h06019BB4"
+
+# Master Game's floor is stage_2's low byte, from 0, and steps once its ladder is taken.
+[[achievement]]
+id = "master-floor-4"
+title = "First Bomber Master"
+description = "In Master Game, beat the boss on floor 4 and climb to floor 5"
+points = 10
+trigger = "0xH{player_kinds}=1_0xI{stage_2}=h0804_d0xI{stage_2}=h0803"
+
+[[achievement]]
+id = "master-floor-20"
+title = "Top of the Temple"
+description = "Beat Dragon Bomber on floor 20 and finish Master Game"
+points = 50
+trigger = "0xH{player_kinds}=1_0xI{stage_2}=h0814_d0xI{stage_2}=h0813"
+
+# A battle's stage_2 is 09 and the arena.
+[[achievement]]
+id = "battle-round"
+title = "Last One Standing"
+description = "Win a round of Battle Game"
+points = 10
+trigger = "0xH{player_kinds}=1_0xH{stage_2}=h09_0xH{battle_wins}>d0xH{battle_wins}"
+
+# Riding: pad 1's slot playing (its update bomber_update, 06015358), with 0x0800 in its +0x5E word, and its
+# dino_colours byte naming the colour.
+[[achievement]]
+id = "dino-pink"
+title = "Pink Rider"
+description = "Ride the pink dino, which jumps"
+points = 5
+trigger = "0xH{player_kinds}=1_0xG{objects+0x30}=h06015358_0xP{objects+0x5E}=1_0xH{dino_colours}=1"
+
+[[achievement]]
+id = "dino-blue"
+title = "Blue Rider"
+description = "Ride the blue dino, which kicks bombs into the air"
+points = 5
+trigger = "0xH{player_kinds}=1_0xG{objects+0x30}=h06015358_0xP{objects+0x5E}=1_0xH{dino_colours}=2"
+
+[[achievement]]
+id = "dino-green"
+title = "Green Rider"
+description = "Ride the green dino, which dashes"
+points = 5
+trigger = "0xH{player_kinds}=1_0xG{objects+0x30}=h06015358_0xP{objects+0x5E}=1_0xH{dino_colours}=3"
+
+[[achievement]]
+id = "dino-yellow"
+title = "Yellow Rider"
+description = "Ride the yellow dino, which roars"
+points = 5
+trigger = "0xH{player_kinds}=1_0xG{objects+0x30}=h06015358_0xP{objects+0x5E}=1_0xH{dino_colours}=4"
+
+[[achievement]]
+id = "dino-purple"
+title = "Purple Rider"
+description = "Ride the purple dino, which sends out sound waves"
+points = 5
+trigger = "0xH{player_kinds}=1_0xG{objects+0x30}=h06015358_0xP{objects+0x5E}=1_0xH{dino_colours}=5"

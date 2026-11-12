@@ -28,7 +28,7 @@ from bomberman.paths import BUILD, ROOT
 
 EXPECTED = f"{ROOT}/tests/frames.json"
 KEPT = f"{BUILD}/test-expected"
-RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", "items", *routes.WORLDS, "slot", "yuna"]},
+RUNS = {**{name: routes.ROUTES[name] for name in ["idle", "idle-ride", "normal", "single", "battle", "battle-win", "items", *routes.WORLDS, "slot", "yuna"]},
         "stage-5-3": lambda: routes.stage(5, 3), "clear-1-1": lambda: routes.clear(1, 1),
         "clear-1-7": lambda: routes.clear(1, 7),
         **{name: routes.ROUTES[name] for name in ["die", "continue", "save", "pause", "battle-round"]},
@@ -42,6 +42,27 @@ RUNS = {**{name: routes.ROUTES[name] for name in ["normal", "single", "battle", 
                                                      "open-arena", *routes.MECHANICS, "com-level-1", "com-level-3"]}}
 # Lines a run's log must hold, for what a frame does not show.
 LOG_LINES = {"save": ["BUP: wrote BOMBERSS_01 (12 bytes)"], "master-result": ["BUP: wrote BOMBERSS_02 (240 bytes)"]}
+# The runs that earn each of game.toml's [[achievement]] ids. Every run must trigger exactly the ones it earns,
+# and a run named nowhere none. Runs record nothing, so the log is where a trigger shows.
+EARNED_BY = {
+    "world-1": ("clear-1-7", "coop-1-7", "coop-p2-1-7", "coop-boss-p2-out"),
+    "world-2": ("coop-2-9", "coop-p2-2-9"),
+    "world-3": ("coop-3-9", "coop-p2-3-9"),
+    "egg-birdon": ("coop-4-5", "coop-p2-4-5"),
+    "world-4": ("coop-4-10", "coop-p2-4-10"),
+    "mr-meanie": ("coop-5-9", "coop-p2-5-9"),
+    "world-5": ("coop-5-10", "coop-p2-5-10"),
+    "master-floor-4": ("master-boss",),
+    "master-floor-20": ("master-ending",),
+    "battle-round": ("battle-win",),
+    "dino-pink": ("dino-pink", "egg-second", "dino-evolve", *(f"dino-pink-{m}-{n}" for m in ("hard", "jump") for n in range(3))),
+    "dino-blue": ("dino-blue", "dino-blue-onto-bomb", *(f"dino-blue-edge-{n}" for n in range(3))),
+    "dino-green": ("dino-green", "dino-burn", "dino-grow-normal", *(f"dino-green-dash-{n}" for n in range(3))),
+    "dino-yellow": ("dino-yellow",),
+    "dino-purple": ("dino-purple", *(f"dino-purple-waves-{n}" for n in range(3))),
+}
+ACHIEVEMENTS = {name: [a for a, runs in EARNED_BY.items() if name in runs] for runs in EARNED_BY.values() for name in runs}
+TRIGGERED = re.compile(r"\] achievement (\S+) triggered$", re.M)
 # Runs whose sound is checked too: music, effects, the death and the pause, which silences the sound.
 SOUNDS = {"normal", "battle-round", "die", "pause"}
 
@@ -76,9 +97,14 @@ def replay(name):
 
 
 def log_problems(name, log):
-    """The log's fatal errors and failed exit, and the LOG_LINES it lacks."""
+    """The log's fatal errors and failed exit, the LOG_LINES it lacks, and its triggered achievements when
+    they are not exactly the ones the run earns in ACHIEVEMENTS, each once."""
     problems = [line for line in log.splitlines() if "FATAL" in line or line.startswith(learn.EXITED)]
-    return problems + [f"no log line {want!r}" for want in LOG_LINES.get(name, []) if want not in log]
+    problems += [f"no log line {want!r}" for want in LOG_LINES.get(name, []) if want not in log]
+    triggered, earns = sorted(TRIGGERED.findall(log)), sorted(ACHIEVEMENTS.get(name, []))
+    if triggered != earns:
+        problems.append(f"achievements triggered: {', '.join(triggered) or 'none'}, where the run earns {', '.join(earns) or 'none'}")
+    return problems
 
 
 def keep(name):

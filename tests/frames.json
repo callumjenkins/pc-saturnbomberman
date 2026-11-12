@@ -134,6 +134,10 @@
   "16400": "6b81d67c2799a5dc7f8b9480e3044f22",
   "sound": "42e8745f011f03e572ab5714779fd293"
  },
+ "battle-win": {
+  "7700": "fe75fd5052b369a13af6ec6b0c3c4a4a",
+  "8100": "5d4ee29b2e8c77e7e7a446c49f3f51a5"
+ },
  "bonus-game": {
   "16450": "c1bd5ddfbfb23e837a12968a58f9f02c",
   "16900": "318d15cfe412564f415f9dbf4a5c042e",
@@ -1012,6 +1016,15 @@
  "gunman": {
   "4800": "2f4a2e6d7c23b738b7d5ebe13e091249",
   "6000": "d853c23fcb10c265892ab45f595c9a68"
+ },
+ "idle": {
+  "10800": "bcc9b377a3054ffc8e27f57c18345f21",
+  "12000": "ba25f1f01aef7afee03255973d5a20fd",
+  "8400": "0be4d6216119112777d3c6978512e03d"
+ },
+ "idle-ride": {
+  "8400": "6a62916abbe4e46342a058ab90a770b3",
+  "9000": "5950d7051ee01cab59286ddda2ba5155"
  },
  "illness-auto-bombs": {
   "7860": "81817443f16d16e2daa6f09bb0f9d660",

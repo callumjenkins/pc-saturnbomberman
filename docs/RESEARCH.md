@@ -579,6 +579,10 @@ the route writes the generator's state just before the pickup, as `item-skull` a
 | Pad 2's score, a long; 060C0698 and 060C069C hold pad 1's and pad 2's again | 060C0694 |
 | Master Game floor | stage_2's second byte, with 08 in its first |
 | Not the item list | 060D8C0C: a pool of 2000 14-byte records from a general allocator |
+| Who plays each bomber slot: 1 a pad, 2 the computer, 0 nobody (`player_kinds`) | 060C0640, a byte a slot |
+| A bomber's update once its stage or battle round is won (`bomber_won`) | 06019BB4 |
+| The rounds each slot has won in the Battle Game match (`battle_wins`) | 060C065F, a byte a slot |
+| The colour pad 1 rides, written as an egg hatches under it as well as by the dino routes | `dino_colours`' first byte |
 
 The bot clears Master floors whose enemies dodge every blast (floor 9's floating faces, floor 11's
 penguins) by setting their hit flag (+0x34 bit 0x40) after 30 seconds without a kill (`bot.strike`). The
@@ -587,6 +591,27 @@ the invincibility hook.
 
 `bot.play` alternates C and START through scene changes, so it can leave the next stage paused at its
 banner, with the timer stopped. Tap START once after it returns before reading anything in that stage.
+
+## Achievements
+
+The `[[achievement]]` triggers in `game.toml` read only the addresses above, found from these runs:
+
+- `stage` (060C179A) steps once as a Normal Game stage is cleared, and `stage_2` with it or a little later
+  (both 0006 to 0100 at 10726 in `clear-1-7`), then reads FF as the next world's intro shows.
+  Pad 1's update turns `bomber_won` sooner, as the boss falls (8925 there), and that is what the boss
+  triggers wait for. A death never turns it. Master Game's `stage_2` steps a floor as the ladder is taken
+  (0803 to 0804 at 11252 in `master-boss`, 0813 to 0814 at 10739 in `master-ending`).
+- Dr. Mechado leaves `stage` alone: the ending movie follows the clear. `coop-5-10` beats him at 12159.
+  The solo clear with every item (`clear-5-10-items`) ends paused at 3:38 with him still standing, so it
+  earns nothing.
+- Left at the title, the game plays its attract demo from about VBlank 8060 to 11700: a Normal Game with a
+  live bomber in pad 1's slot, lives at 3, and `player_kinds` at 2. A started game sets `player_kinds` to 1
+  before it creates the bombers, and in `items` the story intro runs then with other data in the object slots,
+  so a dino trigger also needs pad 1's update to be `bomber_update`.
+- `battle_wins` steps for the round's winner once the round ends: pad 1's at 7879 in `battle-win`, slot 4's
+  (a CPU) at 14092 in `battle-round`.
+- None of the routes explored for these held more than one heart (+0x37), and the limit was not found, so
+  no achievement asks for full hearts.
 
 Writes that do nothing useful:
 - A bomber's position fields: the game puts them back.
