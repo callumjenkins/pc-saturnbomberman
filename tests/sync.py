@@ -2,7 +2,10 @@
 under wrangler dev, each with --sync, so every VBlank's pads are the same on all of them.
     uv run tests/sync.py
 - two copies play battle-round, a pad each, and show the same frames as one copy given both pads' presses DELAY
-  frames later, which is when a press in a synced game applies;
+  frames later, which is when a press in a synced game applies, both running on guesses at the other's pads and in
+  lockstep;
+- two copies whose messages each take LAG ms, with no delay, guess wrong and go back, and still show the frames and
+  play the sound of one copy given both pads' presses at once, and the presses one of them records replay the game;
 - of three copies, one is killed during the battle, and the other two play on together;
 - a copy whose work RAM is written to is reported out of step, by both;
 - a copy that joins once the game has started is told so;
@@ -27,6 +30,7 @@ from bomberman import routes, run
 from bomberman.paths import BUILD
 
 DELAY = 3
+LAG = 60
 ROUTE = routes.battle_round()
 SHOTS = "6500,8400,13600,16400"
 # The second player's presses through the battle: C to drop a bomb, then RIGHT, over and over.
@@ -35,13 +39,14 @@ SECOND = [p for v in range(6500, 9000, 120) for p in (f"{v}:C", f"{v + 8}:", f"{
 STRAY = "KRNL:002FFFF0=A5"
 
 
-def alone() -> str:
-    """The reference: one copy with both pads' presses, DELAY frames late, as the synced copies apply them."""
-    out = f"{BUILD}/test/sync-alone"
-    presses = later(list(ROUTE.presses), DELAY) + later([p.replace(":", ":2.", 1) for p in SECOND], DELAY)
+def alone(delay: int = DELAY) -> str:
+    """The reference: one copy with both pads' presses, `delay` frames late, as the synced copies apply them, and its
+    sound."""
+    out = f"{BUILD}/test/sync-alone-{delay}"
+    presses = later(list(ROUTE.presses), delay) + later([p.replace(":", ":2.", 1) for p in SECOND], delay)
     args = run.saturn_args(ROUTE, shots=SHOTS)
     args[args.index("--input") + 1] = ",".join(presses)
-    learn.run(run.GAME, args, out, timeout=1200)
+    learn.run(run.GAME, [*args, "--wav", f"{out}/sound.wav"], out, timeout=1200)
     return out
 
 
@@ -72,7 +77,7 @@ def same_shots(names: list[str], outs: list[str], shots: str = SHOTS) -> list[st
 
 
 def start(name: str, session: str, token: str, presses: list[str], more: tuple[str, ...] = (),
-          vblanks: int = ROUTE.vblanks, window: bool = False) -> tuple[str, subprocess.Popen]:
+          vblanks: int = ROUTE.vblanks, window: bool = False, delay: int = DELAY) -> tuple[str, subprocess.Popen]:
     """A synced copy of the game in the room at `session`, as tester `token`, pressing its own pad 1 as `presses`.
     In a `window`, offscreen, its controllers and the room's card are the player's, and --input is left out."""
     out = f"{BUILD}/test/sync-{name}"
@@ -85,7 +90,7 @@ def start(name: str, session: str, token: str, presses: list[str], more: tuple[s
         at = args.index("--input")
         args = [a for i, a in enumerate(args) if a != "--headless" and i not in (at, at + 1)] + ["--settings", "-"]
         env.update(SDL_VIDEO_DRIVER="offscreen", SDL_AUDIO_DRIVER="dummy")
-    command = [run.GAME.saturn, "--out", out, *args, "--session", session, "--sync-delay", str(DELAY), *more]
+    command = [run.GAME.saturn, "--out", out, *args, "--wav", f"{out}/sound.wav", "--session", session, "--sync-delay", str(delay), *more]
     with open(f"{out}/log.txt", "w") as log:
         process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=env)
     return out, process
@@ -102,27 +107,66 @@ def started(game: tuple[str, subprocess.Popen], timeout: float = 120) -> bool:
     return False
 
 
-def two(worker: LocalWorker, reference: str) -> list[str]:
-    """Two copies, a pad each, and a third that joins too late."""
+def two(worker: LocalWorker, reference: str, ahead: str = "8") -> list[str]:
+    """Two copies, a pad each, guessing up to `ahead` frames, and a third that joins too late."""
     tokens = [worker.invite(n) for n in ("ann", "bob", "cat")]
-    a = start("two-ann", worker.room(), tokens[0], list(ROUTE.presses), ("--sync", "2"))
+    a = start(f"two-{ahead}-ann", worker.room(), tokens[0], list(ROUTE.presses), ("--sync", "2", "--sync-ahead", ahead))
     code = netlink.room_code(*a)
     if not code:
         a[1].kill()
-        return ["two: the first copy made no room"]
-    b = start("two-bob", worker.room(code), tokens[1], SECOND, ("--sync", "0"))
+        return [f"two, {ahead} ahead: the first copy made no room"]
+    b = start(f"two-{ahead}-bob", worker.room(code), tokens[1], SECOND, ("--sync", "0"))
     late = None
     if started(a):
-        late = start("two-late", worker.room(code), tokens[2], [], ("--sync", "0"), vblanks=600)
+        late = start(f"two-{ahead}-late", worker.room(code), tokens[2], [], ("--sync", "0"), vblanks=600)
     found = problems("ann", *finished(a)) + problems("bob", *finished(b))
     found += same_shots(["ann", "bob", "one copy alone"], [a[0], b[0], reference])
     if late:
         out, log = finished(late)
         if "sync: the game had already started" not in log:
-            found.append("late: it was not told the game had started")
+            found.append(f"late, {ahead} ahead: it was not told the game had started")
     else:
-        found.append("two: the game never started")
+        found.append(f"two, {ahead} ahead: the game never started")
     return found
+
+
+def wrong_guesses(log: str) -> int:
+    found = re.search(r"sync: (\d+) wrong guesses", log)
+    return int(found.group(1)) if found else 0
+
+
+def lagged(worker: LocalWorker, reference: str) -> list[str]:
+    """Two copies with no delay, each hearing the room LAG ms late, so a press reaches the other after it has run on
+    a guess. `reference` is one copy given both pads' presses at once."""
+    tokens = [worker.invite(n) for n in ("sid", "tom")]
+    lag = ("--session-lag", str(LAG))
+    a = start("lagged-sid", worker.room(), tokens[0], list(ROUTE.presses), ("--sync", "2", *lag), delay=0)
+    code = netlink.room_code(*a)
+    if not code:
+        a[1].kill()
+        return ["lagged: the first copy made no room"]
+    recorded = f"{BUILD}/test/sync-lagged-tom/input.txt"
+    b = start("lagged-tom", worker.room(code), tokens[1], SECOND, ("--sync", "0", *lag, "--record-input", recorded),
+              delay=0)
+    sid, tom = finished(a), finished(b)
+    found = problems("sid", *sid) + problems("tom", *tom)
+    found += same_shots(["sid", "tom", "one copy alone"], [a[0], b[0], reference])
+    if not wrong_guesses(sid[1]) or not wrong_guesses(tom[1]):
+        found.append("lagged: a copy never guessed wrong, so never went back")
+    sound = open(f"{reference}/sound.wav", "rb").read()
+    for name, out in (("sid", a[0]), ("tom", b[0])):
+        if not os.path.exists(f"{out}/sound.wav") or open(f"{out}/sound.wav", "rb").read() != sound:
+            found.append(f"lagged {name}: its sound is not the one copy's")
+    return found + same_shots(["one copy alone", "tom's presses replayed"], [reference, replay(recorded)])
+
+
+def replay(recorded: str) -> str:
+    """One copy given the presses a synced copy recorded, both pads', as a playtest session's replay is."""
+    out = f"{BUILD}/test/sync-replayed"
+    args = run.saturn_args(ROUTE, shots=SHOTS)
+    args[args.index("--input") + 1] = f"@{recorded}"
+    learn.run(run.GAME, args, out, timeout=1200)
+    return out
 
 
 def three_one_killed(worker: LocalWorker) -> list[str]:
@@ -245,14 +289,16 @@ def main() -> None:
     reference = alone()
     found = []
     with local_worker(f"{BUILD}/test/sync-worker", f"{BUILD}/test/sync-worker.log") as worker:
-        for check in (lambda: two(worker, reference), lambda: three_one_killed(worker), lambda: stray_write(worker),
+        for check in (lambda: two(worker, reference), lambda: two(worker, reference, "0"),
+                      lambda: lagged(worker, alone(0)), lambda: three_one_killed(worker), lambda: stray_write(worker),
                       lambda: severed(worker, reference), lambda: started_by_start(worker),
                       lambda: makers_saves(worker), lambda: watched(worker, reference)):
             found += check()
     for p in found:
         print("FAIL    ", p)
     if not found:
-        print("ok       two, three and a stray write: the same frames on every synced copy, a lost copy left behind, "
+        print("ok       two, three and a stray write: the same frames on every synced copy, on guesses or in "
+              "lockstep, and with lag the same sound, a lost copy left behind, "
               "and a copy out of step reported; a copy whose network went came back; a game started with the "
               "maker's Start; the maker's saves played by both; and a watcher shown the same game")
     sys.exit(1 if found else 0)
