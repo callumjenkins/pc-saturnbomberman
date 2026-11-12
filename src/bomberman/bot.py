@@ -193,8 +193,9 @@ def play(r, limit, log=print, pad=1, flame=True, clock=None):
     enemy frozen with a clock it hides beside itself (take_clock)."""
     from .run import GAME
     start, end = stage_number(r), r.vblank + limit
-    final = start in (bytes([len(routes.STAGES) - 1, routes.STAGES[len(routes.STAGES)] - 1]),
-                      bytes([state.MASTER_WORLD, routes.FLOORS - 1]))
+    last_stage = start == bytes([len(routes.STAGES) - 1, routes.STAGES[len(routes.STAGES)] - 1])
+    last_floor = start == bytes([state.MASTER_WORLD, routes.FLOORS - 1])
+    update = GAME.symbols["objects"] + (pad - 1) * state.SLOT + 0x30
     master = start[0] == state.MASTER_WORLD
     # bosses come out slower frozen, and a freeze can keep one from changing form (5-10)
     clock = (master if clock is None else clock) and ((routes.MASTER if master else start[0] + 1), start[1] + 1) not in routes.BOSSES
@@ -212,9 +213,12 @@ def play(r, limit, log=print, pad=1, flame=True, clock=None):
             log(f"{r.vblank}: no enemy has died for {PATIENCE} VBlanks; hitting the {count} left")
             strike(r, stage.enemies)
             changed = r.vblank
+        # the last boss leads to the ending, not to another stage
+        if last_stage and int.from_bytes(r.read(update, 4), "big") == GAME.symbols["bomber_won"]:
+            return True
         gone_since = (gone_since or r.vblank) if stage.me is None else None
-        if final and gone_since and r.vblank - gone_since > 1800:
-            return True                          # the last boss leads to the ending, not to another stage
+        if last_floor and gone_since and r.vblank - gone_since > 1800:
+            return True
         if stage.me is None:                     # a cutscene or a change of scene: C and START move them on
             r.pad("C" if (r.vblank // 10) % 2 else "START")
             r.step(4)

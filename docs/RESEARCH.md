@@ -601,9 +601,8 @@ The `[[achievement]]` triggers in `game.toml` read only the addresses above, fou
   Pad 1's update turns `bomber_won` sooner, as the boss falls (8925 there), and that is what the boss
   triggers wait for. A death never turns it. Master Game's `stage_2` steps a floor as the ladder is taken
   (0803 to 0804 at 11252 in `master-boss`, 0813 to 0814 at 10739 in `master-ending`).
-- Dr. Mechado leaves `stage` alone: the ending movie follows the clear. `coop-5-10` beats him at 12159.
-  The solo clear with every item (`clear-5-10-items`) ends paused at 3:38 with him still standing, so it
-  earns nothing.
+- Dr. Mechado leaves `stage` alone: the ending movie follows the clear. `coop-5-10` beats him at 12159,
+  and the solo clear with every item (`clear-5-10-items`) at 12885.
 - Left at the title, the game plays its attract demo from about VBlank 8060 to 11700: a Normal Game with a
   live bomber in pad 1's slot, lives at 3, and `player_kinds` at 2. A started game sets `player_kinds` to 1
   before it creates the bombers, and in `items` the story intro runs then with other data in the object slots,

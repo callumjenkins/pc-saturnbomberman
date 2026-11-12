@@ -189,7 +189,8 @@ Options:
 ## The bot
 
 `uv run bomberman bot 3-2` plays a Normal Game stage with the bomber invincible: it bombs every enemy,
-breaking soft blocks to reach them, then walks to the exit. A cleared stage's presses go to
+breaking soft blocks to reach them, then walks to the exit. Stage 5-10 leads to the ending rather than
+to another stage, so there it stops once its bomber has won (`bomber_won`). A cleared stage's presses go to
 `inputs/clears/`, and `bomberman run clear 3-2` replays them as an ordinary route.
 `bomberman bot M-4` plays Master Game's floor 4 the same way, taking the ladder that drops at the top of
 the field once no enemy is left. Some floors' enemies dodge every blast, such as floor 9's floating
