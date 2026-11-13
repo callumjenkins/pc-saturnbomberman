@@ -10,6 +10,7 @@ recording them with --update. README.md's Testing section says what is checked a
 import argparse
 import array
 import concurrent.futures
+import contextlib
 import dataclasses
 import hashlib
 import json
@@ -207,6 +208,9 @@ def device_sound_matches():
     route = RUNS["normal"]()
     out = f"{BUILD}/test/device-sound"
     os.makedirs(out, exist_ok=True)
+    for old in ("sound.wav", "device.raw"):
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(f"{out}/{old}")
     args = run.saturn_args(route, vblanks=DEVICE_VBLANKS)
     args.remove("--headless")
     args += ["--settings", "-", "--wav", f"{out}/sound.wav"]       # at the default volume, the stream's gain is 1
