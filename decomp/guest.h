@@ -31,6 +31,12 @@
  *                   advances time, as the game's ldc does, and changes the interrupt mask.
  *   MAC_L/MAC_W(acc,a,b)  acc, a 64-bit MACH:MACL, plus the product of two words, as mac.l and mac.w add it
  *                   (with sr's S bit set, saturated).
+ *   ENTRY_SP(sp)    declares sp, the game's stack pointer on entry, in a function a task can park in. Its locals
+ *                   live on the game's stack below sp as the game's code puts them, and SETSP(v) sets r15 to
+ *                   v before each call that can switch tasks, as the code after it reads it.
+ *   R(n) SETR(n,v)  r8 to r14 in the context, which a task resumed after a call has: set before each call that
+ *                   can switch tasks, for the ones the code after the call reads, and by the pops of the epilogue.
+ *   PR() SETPR(v)   pr, which the prologue pushes and the epilogue pops.
  *   FRAME(sp, n)    declares sp, the game's stack pointer on entry, and reserves n bytes of the game's
  *                   stack below it, for locals whose address the function passes on. The arguments a
  *                   caller passed on the stack start at sp. The swap's wrapper and SHC free the frame on return.
@@ -88,6 +94,18 @@ uint32_t g_routine(uint32_t addr, uint32_t r0, uint32_t r1, uint32_t r2);
 #define BITSET(p, v, spec) g_routine(0x06094B08, (v), (spec), (p))
 uint32_t g_frame(int size);
 void g_unframe(uint32_t top);
+uint32_t g_entry_sp(void);
+void g_set_sp(uint32_t sp);
+uint32_t g_reg(int n);
+void g_reg_set(int n, uint32_t value);
+uint32_t g_pr(void);
+void g_pr_set(uint32_t value);
+#define ENTRY_SP(sp) gaddr sp = g_entry_sp()
+#define SETSP(v) g_set_sp((uint32_t)(v))
+#define R(n) ((int)g_reg(n))
+#define SETR(n, v) g_reg_set((n), (uint32_t)(v))
+#define PR() ((int)g_pr())
+#define SETPR(v) g_pr_set((uint32_t)(v))
 uint32_t g_cr(int reg);
 void g_cr_set(int reg, uint32_t value);
 long long g_mac_l(long long acc, int a, int b);
@@ -189,6 +207,12 @@ typedef volatile unsigned short *H16PTR;
 #define STRCMP(a, b) strcmp((char *)(a), (char *)(b))
 #define BITSET(p, v, spec) _bitset((p), (v), (spec))
 #define UNFRAME(sp) ((void)0)
+#define ENTRY_SP(sp) FRAME(sp, 0)
+#define SETSP(v) ((void)(v))
+#define R(n) (0)
+#define SETR(n, v) ((void)(v))
+#define PR() (0)
+#define SETPR(v) ((void)(v))
 #define SR() get_cr()
 #define GBR() get_gbr()
 #define VBR() get_vbr()

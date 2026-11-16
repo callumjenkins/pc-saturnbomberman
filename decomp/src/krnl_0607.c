@@ -1134,3 +1134,58 @@ void f0607FED8(void)
     ST16(obj + 18, LD16(mover + 18) + LD16(mover + 38));
     ST16(obj + 38, -16 - ((LD32(0x26006034) & 1) << 4));
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0607D240(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    r0 = GCALL5(0x0607D2A4, 0, 0, 0, 0, LD32((sp - 4)));
+    SETSP((sp - 4));
+    r0 = GCALL5(0x0606C8C0, 0, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    return 0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0607D60E(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    r0 = GCALL5(0x0606C8C0, 0, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    return 0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0607D906(int r4, int r5)
+{
+    int r0, r6;
+    ENTRY_SP(sp);
+
+    r6 = r5;
+    ST32((sp - 4), PR());
+    ST32(sp - 12, r4);
+    ST32(sp - 8, r5);
+    r5 = LD32(sp - 12);
+    SETSP((sp - 12));
+    r0 = GCALL7(0x0606AE6C, 92, r5, r6, 0, LD32((sp - 12)), LD32((sp - 8)), LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0607F9E4(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP0(0x0606D398);
+    return r0;
+}

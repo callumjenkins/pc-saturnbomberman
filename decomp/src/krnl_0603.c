@@ -4396,3 +4396,40 @@ int f0603FCCC(void)
     ST16(obj + 42, LD16(obj + 42) | 0x400);
     return 42;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0603B8E4(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32(sp - 4, 0x060D7E30);
+    r0 = LD16(0x060D7E3E);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, (r0 & 0xFFFF), 0x154);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0603B8F8(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32(sp - 4, 0x060D7E30);
+    r0 = LD16(0x060D7E3E);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, (r0 & 0xFFFF), 0x150);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0603FA30(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP3(0x0603FA36, r4, r5, 0x200);
+    return r0;
+}

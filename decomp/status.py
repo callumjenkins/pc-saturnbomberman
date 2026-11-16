@@ -21,7 +21,7 @@ from saturnrecomp import build as recomp_build, config, sh2  # noqa: E402
 from saturnrecomp.analysis import resume  # noqa: E402
 from saturnrecomp.recomp import __main__ as recomp_main, discover, emit  # noqa: E402
 
-COLUMNS = ("module", "address", "insns", "calls", "leaf", "executed", "yields", "hooked", "state", "name")
+COLUMNS = ("module", "address", "insns", "calls", "leaf", "executed", "yields", "hooked", "piece", "state", "name")
 COVERAGE = ("build/test/*/coverage.txt", "build/run/*/coverage.txt", "build/play/*/replay/coverage.txt")
 HERE = os.path.dirname(os.path.abspath(__file__))
 KRNL = ("KRNL", "build/extract/BOMSS/0KRNL.BIN", 0x06006000)
@@ -47,6 +47,7 @@ class Row:
     name: str = ""
     yields: bool = False                    # a task can park inside it, so host code cannot stand in for it
     hooked: bool = False                    # its code holds an address game.toml hooks, which C never runs
+    piece: bool = False                     # it starts inside another function: a resume point, which that function's C covers
 
     @property
     def leaf(self) -> bool:
@@ -55,7 +56,7 @@ class Row:
     def fields(self) -> list[str]:
         return [self.module, "%08X" % self.address, str(self.insns), str(self.calls), "yes" if self.leaf else "no",
                 "yes" if self.executed else "no", "yes" if self.yields else "no",
-                "yes" if self.hooked else "no", self.state, self.name]
+                "yes" if self.hooked else "no", "yes" if self.piece else "no", self.state, self.name]
 
 
 def body(image: sh2.Image, address: int) -> list[sh2.Insn]:
@@ -92,11 +93,13 @@ def build_table(root: str = ROOT) -> list[Row]:
     rows.sort(key=lambda row: (row.module, row.address))
     parked = yielding(root)
     caught = hooked(root)
+    inside = pieces(root)
     for row in rows:
         key = (row.module, row.address)
         row.executed = key in ran
         row.yields = row.module == KRNL[0] and row.address in parked
         row.hooked = row.module == KRNL[0] and row.address in caught
+        row.piece = row.module == KRNL[0] and row.address in inside
         was = old.get(key)
         row.name = was.name if was else ""
         if was and was.state in ("dead", "swapped"):
@@ -199,6 +202,14 @@ def polling_jumps(root: str = ROOT) -> set[int]:
     return set(_discovery(root)["polling"])
 
 
+def pieces(root: str = ROOT) -> set[int]:
+    """The KRNL entries inside another function's code: the resume points the recompile seeds in the middle of
+    a function, whose code that function holds too."""
+    code = function_code(root)
+    inside = {at for entry, instructions in code.items() for at in instructions if at != entry}
+    return {entry for entry in code if entry in inside}
+
+
 def previous(path: str = TABLE) -> dict[tuple[str, int], Row]:
     """The rows of an existing table, keyed by module and address."""
     if not os.path.exists(path):
@@ -211,7 +222,8 @@ def previous(path: str = TABLE) -> dict[tuple[str, int], Row]:
             address = int(fields["address"], 16)
             old[(fields["module"], address)] = Row(
                 fields["module"], address, int(fields["insns"]), int(fields["calls"]), fields["executed"] == "yes",
-                fields["state"], fields["name"], fields.get("yields") == "yes", fields.get("hooked") == "yes")
+                fields["state"], fields["name"], fields.get("yields") == "yes", fields.get("hooked") == "yes",
+                fields.get("piece") == "yes")
     return old
 
 

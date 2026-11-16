@@ -2371,3 +2371,28 @@ int f0605FBF0(unsigned short i, int n)
         return (1 ^ (n - 1)) + 1;
     return 0;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06051066(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP4(0x060511EC, 0, 0, r6, r7);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0605B9BC(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r5 = LD8(0x060C18FB);
+    r4 = LD32(0x060C1658);
+    r0 = LD16(r4 + 10);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, r0, ((r5 & 255) + 0x1B2));
+    return r0;
+}

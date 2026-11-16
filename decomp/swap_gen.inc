@@ -414,6 +414,7 @@ void f06017E46(void);
 int f06017E70(int, int, int);
 int f06017FF6(void);
 void f06018138(int);
+int f06018494(int, int, int);
 int f06018C72(void);
 void f06018D0C(void);
 int f06018DD6(int);
@@ -2805,6 +2806,7 @@ void swap_f06017E46(SH2Context& c) { InSwap in(c); f06017E46(); }
 void swap_f06017E70(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f06017E70((int)c.r[4], (int)c.r[5], (int)c.r[6]); }
 void swap_f06017FF6(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f06017FF6(); }
 void swap_f06018138(SH2Context& c) { InSwap in(c); f06018138((int)c.r[4]); }
+void swap_f06018494(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f06018494((int)c.r[4], (int)c.r[5], (int)c.r[6]); }
 void swap_f06018C72(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f06018C72(); }
 void swap_f06018D0C(SH2Context& c) { InSwap in(c); f06018D0C(); }
 void swap_f06018DD6(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)f06018DD6((int)c.r[4]); }

@@ -1339,3 +1339,48 @@ void f0608F924(void)
     ST8(0x060FB8DC, LD8(0x060FB8DC) | 128);
     ST16(0x060FB8AA, LDU16(0x060FB8AA) & 0xFFCF);
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060883C6(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    r0 = GCALL5(0x0606C8C0, 0, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    return 0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0608A70A(void)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    r0 = GCALL5(0x0606C8C0, 0, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    return 0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0608BE0E(void)
+{
+    int r0, r1;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    r1 = LD16(0x060C31E2);
+    if (!((r1 & r1) == 0)) {
+        SETSP((sp - 4));
+        r0 = GCALL5(0x0608C84C, 0, 0, 0, 0, LD32((sp - 4)));
+    } else {
+        SETSP((sp - 4));
+        r0 = GCALL5(0x0608C6C4, 0, 0, 0, 0, LD32((sp - 4)));
+    }
+    SETPR(LD32((sp - 4)));
+    return 0;
+}

@@ -37,9 +37,9 @@ def main() -> None:
         if address not in sigs or address not in by_address:
             sys.exit("%08X: not a KRNL function defined in src/" % address)
         sig = sigs[address]
-        if by_address[address].yields:
+        if by_address[address].yields and not sig.parked:
             failed += 1
-            print("%s  a task can park inside it, so host code cannot stand in for it" % sig.name)
+            print("%s  a task can park inside it, so its C has to keep what a resumed task reads (ENTRY_SP)" % sig.name)
             continue
         if by_address[address].hooked:
             failed += 1

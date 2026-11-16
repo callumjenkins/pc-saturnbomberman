@@ -1783,3 +1783,27 @@ void f0604FD0C(gaddr p)
     ST16(p, LD8(0x060C17AE) & 255);
     ST16(p + 2, LD8(0x060C17AF) & 255);
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06042AD0(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r0 = LD16(0x060D7B80);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, (r0 & 0xFFFF), 71);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0604F5C8(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r4 = LD16(0x060C1798);
+    UNFRAME(sp);
+    r0 = GJUMP1(0x0606B51C, (r4 & 0xFFFF));
+    return r0;
+}

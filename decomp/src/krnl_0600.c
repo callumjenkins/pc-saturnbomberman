@@ -3021,3 +3021,70 @@ unsigned char f0600FF94(void)
     }
     return v;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060079CC(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    ST32(sp - 44, r4);
+    ST32(sp - 40, 0x060079B6);
+    SETSP((sp - 44));
+    r0 = GCALL6(0x060077FC, (sp - 44), r5, r6, r7, LD32((sp - 44)), LD32((sp - 40)));
+    SETPR(LD32((sp - 4)));
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06009F02(int r4, int r5, int r6, int r7)
+{
+    int r0, r14;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), R(14));
+    ST32((sp - 8), PR());
+    r14 = 0x06006D36;
+    while (1) {
+        r0 = GCALL6(0x06009EDA, 0, 0, r6, r7, LD32((sp - 8)), LD32((sp - 4)));
+        if (!((r0 & r0) == 0)) {
+            POLL();
+            SETR(14, r14);
+            SETSP((sp - 8));
+            r0 = GCALL6(r14, 2, 0, 0, 0, LD32((sp - 8)), LD32((sp - 4)));
+            continue;
+        } else {
+            break;
+        }
+    }
+    SETPR(LD32((sp - 8)));
+    SETR(14, LD32((sp - 4)));
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0600B8A8(void)
+{
+    int r0, r4;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    r4 = LD32(0x060C0298);
+    SETSP((sp - 4));
+    r0 = GCALL5(0x060A0C40, r4, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    ST32(0x060B2F00, -1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0600C2E2(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP0(0x0602EB78);
+    return r0;
+}

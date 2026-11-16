@@ -5512,3 +5512,14 @@ void f060AFF98(gaddr stream, gaddr out_a, gaddr out_b, gaddr out_c)
         ST32(out_b, 0);
     }
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060A570E(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP1(0x060A5712, -1);
+    return r0;
+}

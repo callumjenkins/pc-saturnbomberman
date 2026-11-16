@@ -3557,3 +3557,29 @@ void f0609FF14(int unit, unsigned short flags, unsigned short mask, unsigned sho
     ST16(cmd + 14, LD16(coords + 2));
     ST16(cmd + 28, ext == 0xFFFF ? 0 : LDU16(0x060FC008) + ext);
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06090888(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP3(0x0606AE6C, 141, 0x200, 0x360);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0609696C(int r4, int r5, int r6, int r7)
+{
+    int r0, r3;
+    ENTRY_SP(sp);
+
+    r3 = LD32(0x060FA8BC);
+    ST32(184 + r3, r4);
+    r3 = LD32(0x060FA8BC);
+    ST32(188 + r3, r5);
+    UNFRAME(sp);
+    r0 = GJUMP4(0x06096C60, 0, 0, 0x060FA8BC, r7);
+    return r0;
+}

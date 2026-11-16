@@ -3557,3 +3557,47 @@ int f0606FE7C(int dir)
     }
     return (LDU16(FLAGS_AT(LD16(0x060B90AA + dir * 2) + cell)) & 32) != 0;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06067DCC(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    SETSP((sp - 4));
+    r0 = GCALL5(0x06067F1E, 0, 0, 0, 0, LD32((sp - 4)));
+    SETSP((sp - 4));
+    r0 = GCALL5(0x06067F78, 0, 0, 0, 0, LD32((sp - 4)));
+    SETSP((sp - 4));
+    r0 = GCALL5(0x06067F78, 1, 0, 0, 0, LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    UNFRAME(sp);
+    r0 = GJUMP1(0x06008A96, 1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06067F1E(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r5 = LD8(0x060C063E);
+    r4 = LD16(0x060DFE54);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, r4, ((r5 & 255) + 59));
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06067F2E(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    r4 = LD16(0x060DFE54);
+    UNFRAME(sp);
+    r0 = GJUMP2(0x06068A8E, r4, 59);
+    return r0;
+}

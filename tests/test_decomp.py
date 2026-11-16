@@ -286,6 +286,21 @@ def test_a_function_a_task_can_park_in_cannot_be_swapped(tmp_path):
         gen.swapped(str(table))
 
 
+def test_a_function_a_task_can_park_in_is_swapped_when_its_c_keeps_what_a_resumed_task_reads(tmp_path, monkeypatch):
+    table = tmp_path / "status.tsv"
+    status.write_table([status.Row("KRNL", 0x06006B38, 15, 0, True, "swapped", yields=True)], str(table))
+    parked = gen.Signature(0x06006B38, "void", [], parked=True)
+    monkeypatch.setattr(gen, "signatures", lambda paths=None: {0x06006B38: parked})
+    assert gen.swapped(str(table)) == [0x06006B38]
+
+
+def test_a_definition_with_entry_sp_is_parked(tmp_path):
+    path = tmp_path / "f.c"
+    path.write_text("void f06006B38(void)\n{\n    ENTRY_SP(sp);\n}\n\nvoid f06006B3C(void)\n{\n}\n")
+    found = gen.signatures([str(path)])
+    assert (found[0x06006B38].parked, found[0x06006B3C].parked) == (True, False)
+
+
 def test_a_function_with_a_hook_on_one_of_its_instructions_cannot_be_swapped(tmp_path):
     table = tmp_path / "status.tsv"
     status.write_table([status.Row("KRNL", 0x0606CF28, 11, 0, True, "swapped", hooked=True)], str(table))

@@ -4642,3 +4642,46 @@ int f0601FFDA(void)
         next = LDU8(LD32(ACTOR_PTR) + 7);
     }
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06013DA4(int r4, int r5, int r6, int r7)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    UNFRAME(sp);
+    r0 = GJUMP4(0x06009B62, 13, 100, r6, r7);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06018494(int r4, int r5, int r6)
+{
+    int r0;
+    ENTRY_SP(sp);
+
+    ST32((sp - 4), PR());
+    ST32(sp - 8, r6);
+    ST32((sp - 12), r6);
+    SETSP((sp - 12));
+    r0 = GCALL7(0x060183F0, r4, r5, 24, 6, LD32((sp - 12)), LD32((sp - 8)), LD32((sp - 4)));
+    SETPR(LD32((sp - 4)));
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0601B390(int r4, int r5, int r6, int r7)
+{
+    int r0, r3;
+    ENTRY_SP(sp);
+
+    r3 = LD32(0x060D7768);
+    ST16(r3 + 18, 176);
+    r3 = LD32(0x060D7768);
+    ST16(36 + r3, 255);
+    r3 = LD32(0x060D7768);
+    ST32(100 + r3, 0x0601B6AE);
+    UNFRAME(sp);
+    r0 = GJUMP1(0x060165B8, 0);
+    return r0;
+}
