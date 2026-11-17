@@ -253,6 +253,21 @@ def sources(folder: str | None = None) -> list[str]:
     return sorted(glob.glob(os.path.join(folder or modules.current().src, "*.c")))
 
 
+_DEFINITION_START = re.compile(r"^(?:int|void) (f[0-9A-F]{8})\(", re.MULTILINE)
+
+
+def definitions(folder: str | None = None) -> dict[str, str]:
+    """The text of each function's definition in the module's C, by name."""
+    found: dict[str, str] = {}
+    for path in sources(folder):
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        starts = list(_DEFINITION_START.finditer(text))
+        for here, following in zip(starts, starts[1:] + [None]):
+            found[here.group(1)] = text[here.start():following.start() if following else len(text)]
+    return found
+
+
 def summary(rows: list[Row]) -> str:
     counts: dict[str, collections.Counter] = collections.defaultdict(collections.Counter)
     for row in rows:

@@ -295,7 +295,6 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
 
 
 _READ_AFTER_CALL = re.compile(r"\bR\([1-7]\)")
-_DEFINITION_START = re.compile(r"^(?:int|void) (f[0-9A-F]{8})\(", re.MULTILINE)
 _reading: set[str] | None = None
 
 
@@ -304,14 +303,7 @@ def reads_callee_registers() -> set[str]:
     call does not set, so their trials run the callees."""
     global _reading
     if _reading is None:
-        _reading = set()
-        for path in status.sources():
-            with open(path, encoding="utf-8") as f:
-                text = f.read()
-            starts = list(_DEFINITION_START.finditer(text))
-            for here, following in zip(starts, starts[1:] + [None]):
-                if _READ_AFTER_CALL.search(text, here.end(), following.start() if following else len(text)):
-                    _reading.add(here.group(1))
+        _reading = {name for name, text in status.definitions().items() if _READ_AFTER_CALL.search(text)}
     return _reading
 
 
@@ -374,6 +366,7 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     for side in (cpu, host):
         side.r[8:15] = saved_start
     (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")[8:15] = saved_start
+    ctypes.c_uint32.in_dll(lib, "g_regs_set").value = 0
     mach, macl = machine.mac_start(vals)
     cpu.mach, cpu.macl = host.mach, host.macl = mach, macl
     (ctypes.c_uint32 * 2).in_dll(lib, "g_mac_regs")[:] = [macl, mach]
@@ -494,7 +487,8 @@ def register_differences(lib: ctypes.CDLL, game: sh2emu.CPU, mac_start: tuple[in
     does not promise them, and the C never sets them."""
     problems = []
     regs = (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")
-    for reg in range(8, 15):
+    given = ctypes.c_uint32.in_dll(lib, "g_regs_set").value
+    for reg in [r for r in range(1, 8) if given >> r & 1] + list(range(8, 15)):
         if regs[reg] != game.r[reg]:
             problems.append("r%d is %08X, the game's code %08X" % (reg, regs[reg], game.r[reg]))
     macs = (ctypes.c_uint32 * 2).in_dll(lib, "g_mac_regs")

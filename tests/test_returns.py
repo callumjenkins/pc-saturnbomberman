@@ -69,6 +69,16 @@ def test_a_function_is_reported_when_a_callers_own_instructions_read_a_register_
     assert returns.outputs(image, code, {CALLEE}) == found
 
 
+def test_a_register_the_functions_c_sets_in_the_context_is_not_reported():
+    image, code = program(READS_R4, SHIFTS_R4)
+    assert returns.outputs(image, code, {CALLEE}, {CALLEE: {4}}) == {}
+
+
+def test_the_lifter_gives_back_the_registers_callers_read_after_a_call():
+    image, code = program(READS_R4, SHIFTS_R4)
+    assert returns.left_for_callers(image, code)[CALLEE] == {4}
+
+
 def test_a_register_a_callee_would_read_is_not_a_read_by_the_caller():
     # the caller calls on with r4 untouched: a spurious read by that callee is the callee's
     image, code = program([encode("mov.l @T,Rn", 3, low=1), encode("jsr @Rn", 3), NOP, RTS, NOP, 0, 0], SHIFTS_R4)

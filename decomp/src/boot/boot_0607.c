@@ -122,16 +122,6 @@ void f06072700(int r4, int r5)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-void f0607277E(int r4)
-{
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-void f060727A0(int r4)
-{
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
 int f060727E0(int r4, int r5)
 {
     int r0;
@@ -3081,36 +3071,6 @@ void f06072748(int r4)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-void f060727A2(int r4)
-{
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-void f060727A4(int r4)
-{
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-void f060727A6(int r4)
-{
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-void f060727A8(int r4)
-{
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-void f060727AA(int r4)
-{
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-void f060727AC(int r4)
-{
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
 int f060727F4(int r4, int r5)
 {
     int r0;
@@ -3531,588 +3491,6 @@ int f06074360(int r4, int r5, int r6, int r7)
             r0 = GCALL2(0x0607403C, r14, r5);
         }
     }
-    return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f060747B8(int r4, int r5, int r6, int r7)
-{
-    int r0, r1, r14;
-    FRAME(sp, 20);
-
-    r14 = sp - 16;
-    ST32((sp - 20), r14);
-    r0 = GCALL5(0x06074A9C, r4, r5, r6, r7, LD32((sp - 20)));
-    r0 = LD32(r14);
-    r1 = LD32(r14 + 4);
-    return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f060747D8(int r4, int r5, int r6, int r7)
-{
-    int r0;
-    FRAME(sp, 12);
-
-    ST32((sp - 12), 0);
-    r0 = GCALL5(0x06074A9C, r4, r5, r6, r7, LD32((sp - 12)));
-    return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f060747F4(int r4, int r5, int r6, int r7)
-{
-    int r0, r1, r2, r3, r14;
-    FRAME(sp, 48);
-
-    r14 = sp - 44;
-    ST32(r14 + 8, 0);
-    if (!(r4 >= 0)) {
-        ST32(r14 + 8, -1);
-        r1 = -r5;
-        r4 = (-r4) - (((r1 & r1) == 0) ^ 1);
-        r5 = r1;
-    }
-    r1 = -r7;
-    if (!(r6 >= 0)) {
-        r6 = (-r6) - (((r1 & r1) == 0) ^ 1);
-        r7 = r1;
-    }
-    ST32((sp - 48), r14);
-    r0 = GCALL5(0x06074A9C, r4, r5, r6, r7, LD32((sp - 48)));
-    r3 = LD32(r14 + 8);
-    r1 = LD32(r14);
-    if (!((r3 & r3) == 0)) {
-        r2 = LD32(r14 + 4);
-        r3 = -r2;
-        ST32(r14, ((-r1) - (((r3 & r3) == 0) ^ 1)));
-        ST32(r14 + 4, r3);
-    }
-    r0 = LD32(r14);
-    r1 = LD32(r14 + 4);
-    return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f06074924(int r4, int r5, int r6)
-{
-    int r0, r9, r10, r11, r12, r13, r14;
-    FRAME(sp, 36);
-
-    r14 = sp - 36;
-    r11 = r4;
-    r13 = r6;
-    r12 = r5;
-    if (!((r13 & r13) == 0)) {
-        r5 = (-r13) + 32;
-        r9 = 0;
-        if (r5 > 0) {
-            r0 = GCALL2(0x0607290C, r11, r5);
-            ST32(r14, r0);
-            r0 = GCALL2(0x0607462C, r11, r13);
-            r9 = r0;
-            r0 = GCALL2(0x0607462C, r12, r13);
-            r10 = LD32(r14);
-            r10 = r10 | r0;
-        } else {
-            r0 = GCALL2(0x0607462C, r11, (-r5));
-            r10 = r0;
-        }
-        r0 = r9;
-    } else {
-        r0 = r11;
-    }
-    return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f06074A9C(int r4, int r5, int r6, int r7)
-{
-    int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14, c2, c7, c12, c21, c31, c36, c52;
-    FRAME(sp, 80);
-
-    r14 = sp - 80;
-    r9 = r7;
-    r10 = r6;
-    ST32(r14 + 16, r5);
-    ST32(r14 + 44, r4);
-    if ((r10 & r10) == 0) {
-        c2 = (r9 & r9) == 0;
-        if ((unsigned)r9 > (unsigned)r4) {
-            r2 = r9;
-            if ((unsigned)r9 > (unsigned)0xFFFF) {
-                r8 = 24;
-                if (!((unsigned)r9 > (unsigned)0x00FFFFFF)) {
-                    r8 = 16;
-                }
-            } else {
-                r8 = 0;
-                if ((unsigned)r9 > (unsigned)255) {
-                    r8 = 8;
-                }
-            }
-            r11 = 0x0607462C;
-            r0 = GCALL2(0x0607462C, r2, r8);
-            r2 = LD8(0x0607499C + r0);
-            ST8(36 + r14, r2);
-            r1 = LD8((36 + r14));
-            r1 = r1 & 255;
-            ST32(r14 + 36, r1);
-            r12 = (-(r1 + r8)) + 32;
-            ST32(r14 + 40, r12);
-            if (!((r12 & r12) == 0)) {
-                r5 = LD32(r14 + 40);
-                r0 = GCALL2(0x0607290C, r9, r5);
-                r5 = LD32(r14 + 40);
-                r4 = LD32(r14 + 44);
-                r9 = r0;
-                r0 = GCALL2(0x0607290C, r4, r5);
-                r10 = r0;
-                r4 = LD32(r14 + 16);
-                r0 = GCALL2(r11, r4, ((-r12) + 32));
-                r5 = LD32(r14 + 40);
-                r4 = LD32(r14 + 16);
-                ST32(r14 + 44, (r10 | r0));
-                r0 = GCALL2(0x0607290C, r4, r5);
-                ST32(r14 + 16, r0);
-            }
-            r8 = (int)((unsigned)r9 >> 16);
-            r11 = r9 & 0xFFFF;
-            r5 = r8;
-            r4 = LD32(r14 + 44);
-            r7 = LD32(r14 + 44);
-            r0 = GCALL2(0x060745A0, r4, r5);
-            r4 = LD32(r14 + 44);
-            c7 = r0 * r8;
-            r0 = GCALL2(0x060745A0, r4, r5);
-            r10 = r0;
-            r1 = LD32(r14 + 16);
-            r7 = ((r7 - c7) << 16) | ((int)((unsigned)r1 >> 16));
-            r6 = r10 * r11;
-            if (!((unsigned)r7 >= (unsigned)r6)) {
-                r7 = r7 + r9;
-                r10 = r10 - 1;
-                if ((unsigned)r7 >= (unsigned)r9) {
-                    if (!((unsigned)r7 >= (unsigned)r6)) {
-                        r10 = r10 - 1;
-                        r7 = r7 + r9;
-                    }
-                }
-            }
-            r7 = r7 - r6;
-            r5 = r8;
-            r0 = GCALL2(0x060745A0, r7, r5);
-            c12 = r0 * r8;
-            r0 = GCALL2(0x060745A0, r7, r5);
-            r3 = r7 - c12;
-            r7 = r0;
-            r1 = LD16((18 + r14));
-            r1 = r1 & 0xFFFF;
-            r3 = r1 | (r3 << 16);
-            r6 = r7 * r11;
-            ST32(r14 + 36, r1);
-            if (!((unsigned)r3 >= (unsigned)r6)) {
-                r3 = r3 + r9;
-                r7 = r7 - 1;
-                if ((unsigned)r3 >= (unsigned)r9) {
-                    if (!((unsigned)r3 >= (unsigned)r6)) {
-                        r7 = r7 - 1;
-                        r3 = r3 + r9;
-                    }
-                }
-            }
-            r10 = r10 << 16;
-            ST32(r14 + 36, r10);
-            r11 = r10 | r7;
-            ST32(r14 + 16, (r3 - r6));
-            ST32(r14 + 20, 0);
-        } else {
-            r4 = c2;
-            if (c2) {
-                r0 = GCALL2(0x060745A0, r4, r9);
-                r9 = r0;
-            }
-            r2 = r9;
-            if ((unsigned)r9 > (unsigned)0xFFFF) {
-                r8 = 24;
-                if (!((unsigned)r9 > (unsigned)0x00FFFFFF)) {
-                    r8 = 16;
-                }
-            } else {
-                r8 = 0;
-                if ((unsigned)r9 > (unsigned)255) {
-                    r8 = 8;
-                }
-            }
-            r0 = GCALL2(0x0607462C, r2, r8);
-            r2 = LD8(0x0607499C + r0);
-            ST8(36 + r14, r2);
-            r1 = LD8((36 + r14));
-            r1 = r1 & 255;
-            ST32(r14 + 36, r1);
-            r12 = (-(r1 + r8)) + 32;
-            ST32(r14 + 40, r12);
-            if (!((r12 & r12) == 0)) {
-                r1 = LD32(r14 + 40);
-                r5 = LD32(r14 + 40);
-                r1 = -r1;
-                ST32(r14 + 24, r1);
-                ST32(r14 + 24, (r1 + 32));
-                r0 = GCALL2(0x0607290C, r9, r5);
-                r5 = LD32(r14 + 24);
-                r9 = r0;
-                r4 = LD32(r14 + 44);
-                r0 = GCALL2(0x0607462C, r4, r5);
-                r5 = LD32(r14 + 40);
-                r4 = LD32(r14 + 44);
-                r11 = r0;
-                r0 = GCALL2(0x0607290C, r4, r5);
-                r5 = LD32(r14 + 24);
-                r4 = LD32(r14 + 16);
-                r10 = r0;
-                r0 = GCALL2(0x0607462C, r4, r5);
-                r5 = LD32(r14 + 40);
-                r4 = LD32(r14 + 16);
-                ST32(r14 + 44, (r10 | r0));
-                r0 = GCALL2(0x0607290C, r4, r5);
-                ST32(r14 + 16, r0);
-                r8 = (int)((unsigned)r9 >> 16);
-                r13 = r9 & 0xFFFF;
-                ST32(r14 + 28, r13);
-                r5 = r8;
-                r0 = GCALL2(0x060745A0, r11, r5);
-                c21 = r0 * r8;
-                r0 = GCALL2(0x060745A0, r11, r5);
-                r10 = r0;
-                r1 = LD32(r14 + 44);
-                r7 = ((int)((unsigned)r1 >> 16)) | ((r11 - c21) << 16);
-                r6 = r10 * r13;
-                if (!((unsigned)r7 >= (unsigned)r6)) {
-                    r7 = r7 + r9;
-                    r10 = r10 - 1;
-                    if ((unsigned)r7 >= (unsigned)r9) {
-                        if (!((unsigned)r7 >= (unsigned)r6)) {
-                            r10 = r10 - 1;
-                            r7 = r7 + r9;
-                        }
-                    }
-                }
-                r7 = r7 - r6;
-                r5 = r8;
-                r0 = GCALL2(0x060745A0, r7, r5);
-                r3 = r0;
-                r0 = GCALL2(0x060745A0, r7, r5);
-                r12 = LD16((46 + r14));
-                r12 = r12 & 0xFFFF;
-                ST32(r14 + 36, r12);
-                r3 = r7 - (r3 * r8);
-                r7 = r0;
-                r1 = LD32(r14 + 28);
-                r3 = r12 | (r3 << 16);
-                r6 = r7 * r1;
-                if (!((unsigned)r3 >= (unsigned)r6)) {
-                    r3 = r3 + r9;
-                    r7 = r7 - 1;
-                    if ((unsigned)r3 >= (unsigned)r9) {
-                        if (!((unsigned)r3 >= (unsigned)r6)) {
-                            r7 = r7 - 1;
-                            r3 = r3 + r9;
-                        }
-                    }
-                }
-                ST32(r14 + 20, ((r10 << 16) | r7));
-                ST32(r14 + 44, (r3 - r6));
-            } else {
-                r13 = LD32(r14 + 44);
-                ST32(r14 + 44, (r13 - r9));
-                ST32(r14 + 20, 1);
-            }
-            r8 = (int)((unsigned)r9 >> 16);
-            r11 = r9 & 0xFFFF;
-            r5 = r8;
-            r4 = LD32(r14 + 44);
-            r7 = LD32(r14 + 44);
-            r0 = GCALL2(0x060745A0, r4, r5);
-            r4 = LD32(r14 + 44);
-            c31 = r0 * r8;
-            r0 = GCALL2(0x060745A0, r4, r5);
-            r10 = r0;
-            r1 = LD32(r14 + 16);
-            r7 = ((r7 - c31) << 16) | ((int)((unsigned)r1 >> 16));
-            r6 = r10 * r11;
-            if (!((unsigned)r7 >= (unsigned)r6)) {
-                r7 = r7 + r9;
-                r10 = r10 - 1;
-                if ((unsigned)r7 >= (unsigned)r9) {
-                    if (!((unsigned)r7 >= (unsigned)r6)) {
-                        r10 = r10 - 1;
-                        r7 = r7 + r9;
-                    }
-                }
-            }
-            r7 = r7 - r6;
-            r5 = r8;
-            r0 = GCALL2(0x060745A0, r7, r5);
-            c36 = r0 * r8;
-            r0 = GCALL2(0x060745A0, r7, r5);
-            r3 = r7 - c36;
-            r7 = r0;
-            r1 = LD16((18 + r14));
-            r1 = r1 & 0xFFFF;
-            r3 = r1 | (r3 << 16);
-            r6 = r7 * r11;
-            ST32(r14 + 36, r1);
-            if (!((unsigned)r3 >= (unsigned)r6)) {
-                r3 = r3 + r9;
-                r7 = r7 - 1;
-                if ((unsigned)r3 >= (unsigned)r9) {
-                    if (!((unsigned)r3 >= (unsigned)r6)) {
-                        r7 = r7 - 1;
-                        r3 = r3 + r9;
-                    }
-                }
-            }
-            r11 = (r10 << 16) | r7;
-            ST32(r14 + 16, (r3 - r6));
-        }
-        r12 = LD32((80 + r14));
-        r5 = LD32(r14 + 40);
-        if (!((r12 & r12) == 0)) {
-            r4 = LD32(r14 + 16);
-            r0 = GCALL2(0x0607462C, r4, r5);
-            ST32(r14 + 12, r0);
-            ST32(r14 + 8, 0);
-            r0 = LD32(r14 + 8);
-            r1 = LD32(r14 + 12);
-            r13 = LD32((80 + r14));
-            ST32(r13, r0);
-            ST32(r13 + 4, r1);
-        }
-    } else {
-        r0 = LD32(r14 + 44);
-        r1 = 0;
-        if (!((unsigned)r10 > (unsigned)r0)) {
-            r4 = r10;
-            if ((unsigned)r10 > (unsigned)0xFFFF) {
-                r8 = 24;
-                if (!((unsigned)r10 > (unsigned)0x00FFFFFF)) {
-                    r8 = 16;
-                }
-            } else {
-                r8 = 0;
-                if ((unsigned)r10 > (unsigned)255) {
-                    r8 = 8;
-                }
-            }
-            r0 = GCALL2(0x0607462C, r4, r8);
-            r2 = LD8(0x0607499C + r0);
-            ST8(36 + r14, r2);
-            r1 = LD8((36 + r14));
-            r1 = r1 & 255;
-            ST32(r14 + 36, r1);
-            r12 = (-(r1 + r8)) + 32;
-            ST32(r14 + 40, r12);
-            if (!((r12 & r12) == 0)) {
-                r0 = LD32(r14 + 40);
-                r5 = LD32(r14 + 40);
-                r0 = -r0;
-                ST32(r14 + 24, r0);
-                ST32(r14 + 24, (r0 + 32));
-                r0 = GCALL2(0x0607290C, r10, r5);
-                r10 = r0;
-                r5 = LD32(r14 + 24);
-                r0 = GCALL2(0x0607462C, r9, r5);
-                r10 = r10 | r0;
-                r5 = LD32(r14 + 40);
-                r0 = GCALL2(0x0607290C, r9, r5);
-                r5 = LD32(r14 + 24);
-                r9 = r0;
-                r4 = LD32(r14 + 44);
-                r0 = GCALL2(0x0607462C, r4, r5);
-                r5 = LD32(r14 + 40);
-                r4 = LD32(r14 + 44);
-                r11 = r0;
-                r0 = GCALL2(0x0607290C, r4, r5);
-                r5 = LD32(r14 + 24);
-                r4 = LD32(r14 + 16);
-                ST32(r14 + 44, r0);
-                r0 = GCALL2(0x0607462C, r4, r5);
-                r13 = LD32(r14 + 44);
-                r5 = LD32(r14 + 40);
-                r4 = LD32(r14 + 16);
-                r13 = r13 | r0;
-                ST32(r14 + 44, r13);
-                r0 = GCALL2(0x0607290C, r4, r5);
-                ST32(r14 + 16, r0);
-                r8 = (int)((unsigned)r10 >> 16);
-                ST32(r14 + 32, (r10 & 0xFFFF));
-                r5 = r8;
-                r0 = GCALL2(0x060745A0, r11, r5);
-                r7 = r11;
-                c52 = r0 * r8;
-                r0 = GCALL2(0x060745A0, r11, r5);
-                r11 = r0;
-                r1 = LD32(r14 + 32);
-                r7 = ((int)((unsigned)r13 >> 16)) | ((r7 - c52) << 16);
-                r6 = r11 * r1;
-                if (!((unsigned)r7 >= (unsigned)r6)) {
-                    r7 = r7 + r10;
-                    r11 = r11 - 1;
-                    if ((unsigned)r7 >= (unsigned)r10) {
-                        if (!((unsigned)r7 >= (unsigned)r6)) {
-                            r11 = r11 - 1;
-                            r7 = r7 + r10;
-                        }
-                    }
-                }
-                r7 = r7 - r6;
-                r5 = r8;
-                r0 = GCALL2(0x060745A0, r7, r5);
-                r3 = r0;
-                r0 = GCALL2(0x060745A0, r7, r5);
-                r12 = LD16((46 + r14));
-                r12 = r12 & 0xFFFF;
-                ST32(r14 + 36, r12);
-                r3 = r7 - (r3 * r8);
-                r7 = r0;
-                r1 = LD32(r14 + 32);
-                r3 = r12 | (r3 << 16);
-                r6 = r7 * r1;
-                if (!((unsigned)r3 >= (unsigned)r6)) {
-                    r3 = r3 + r10;
-                    r7 = r7 - 1;
-                    if ((unsigned)r3 >= (unsigned)r10) {
-                        if (!((unsigned)r3 >= (unsigned)r6)) {
-                            r7 = r7 - 1;
-                            r3 = r3 + r10;
-                        }
-                    }
-                }
-                r11 = (r11 << 16) | r7;
-                ST32(r14 + 44, (r3 - r6));
-                r4 = 0xFFFF;
-                r1 = r11 & 0xFFFF;
-                r7 = (int)((unsigned)r11 >> 16);
-                r2 = r9 & 0xFFFF;
-                r3 = (int)((unsigned)r9 >> 16);
-                r5 = r1 * r2;
-                r2 = r7 * r2;
-                r6 = ((r1 * r3) + ((int)((unsigned)r5 >> 16))) + r2;
-                r3 = r7 * r3;
-                if (!((unsigned)r6 >= (unsigned)r2)) {
-                    r3 = r3 + 0x00010000;
-                }
-                r7 = ((int)((unsigned)r6 >> 16)) + r3;
-                r6 = r6 & r4;
-                ST32(r14 + 36, r6);
-                r1 = LD32(r14 + 44);
-                r6 = (r6 << 16) + (r5 & r4);
-                if ((unsigned)r7 > (unsigned)r1) {
-                    r11 = r11 - 1;
-                    r3 = r6 - r9;
-                    r7 = (r7 - r10) - ((unsigned)r3 > (unsigned)r6);
-                    r6 = r3;
-                    r13 = 0;
-                } else {
-                    if (!(r7 == r1)) {
-                        r13 = 0;
-                    } else {
-                        r12 = LD32(r14 + 16);
-                        r13 = 0;
-                        if ((unsigned)r6 > (unsigned)r12) {
-                            r11 = r11 - 1;
-                            r3 = r6 - r9;
-                            r7 = (r7 - r10) - ((unsigned)r3 > (unsigned)r6);
-                            r6 = r3;
-                            r13 = 0;
-                        }
-                    }
-                }
-                ST32(r14 + 20, r13);
-                r0 = LD32(80 + r14);
-                r3 = LD32(r14 + 16);
-                if (!((r0 & r0) == 0)) {
-                    r2 = LD32(r14 + 44);
-                    r3 = r3 - r6;
-                    r1 = LD32(r14 + 16);
-                    ST32(r14 + 44, ((r2 - r7) - ((unsigned)r3 > (unsigned)r1)));
-                    ST32(r14 + 16, r3);
-                    r5 = LD32(r14 + 24);
-                    r4 = LD32(r14 + 44);
-                    r0 = GCALL2(0x0607290C, r4, r5);
-                    r5 = LD32(r14 + 40);
-                    r9 = r0;
-                    r4 = LD32(r14 + 16);
-                    r0 = GCALL2(0x0607462C, r4, r5);
-                    r5 = LD32(r14 + 40);
-                    r4 = LD32(r14 + 44);
-                    ST32(r14 + 12, (r9 | r0));
-                    r0 = GCALL2(0x0607462C, r4, r5);
-                    ST32(r14 + 8, r0);
-                    r0 = LD32(r14 + 8);
-                    r1 = LD32(r14 + 12);
-                    r13 = LD32((80 + r14));
-                    ST32(r13, r0);
-                    ST32(r13 + 4, r1);
-                }
-            } else {
-                r13 = LD32(r14 + 44);
-                r0 = LD32(r14 + 16);
-                if ((unsigned)r13 > (unsigned)r10) {
-                    r11 = 1;
-                    r3 = LD32(r14 + 16);
-                    r2 = LD32(r14 + 44);
-                    r3 = r3 - r9;
-                    r1 = LD32(r14 + 16);
-                    ST32(r14 + 44, ((r2 - r10) - ((unsigned)r3 > (unsigned)r1)));
-                    ST32(r14 + 16, r3);
-                } else {
-                    r11 = 0;
-                    if ((unsigned)r0 >= (unsigned)r9) {
-                        r11 = 1;
-                        r3 = LD32(r14 + 16);
-                        r2 = LD32(r14 + 44);
-                        r3 = r3 - r9;
-                        r1 = LD32(r14 + 16);
-                        ST32(r14 + 44, ((r2 - r10) - ((unsigned)r3 > (unsigned)r1)));
-                        ST32(r14 + 16, r3);
-                    }
-                }
-                ST32(r14 + 20, 0);
-                r0 = LD32(80 + r14);
-                r1 = LD32(r14 + 16);
-                if (!((r0 & r0) == 0)) {
-                    r12 = LD32(r14 + 44);
-                    ST32(r14 + 12, r1);
-                    ST32(r14 + 8, r12);
-                    r0 = LD32(r14 + 8);
-                    r1 = LD32(r14 + 12);
-                    r13 = LD32((80 + r14));
-                    ST32(r13, r0);
-                    ST32(r13 + 4, r1);
-                }
-            }
-        } else {
-            ST32(r14 + 20, r1);
-            r12 = LD32((80 + r14));
-            r11 = 0;
-            if (!((r12 & r12) == 0)) {
-                r13 = LD32(r14 + 16);
-                ST32(r14 + 12, r13);
-                ST32(r14 + 8, r0);
-                r0 = LD32(r14 + 8);
-                r1 = LD32(r14 + 12);
-                r13 = LD32((80 + r14));
-                ST32(r13, r0);
-                ST32(r13 + 4, r1);
-            }
-        }
-    }
-    r0 = LD32(r14 + 20);
-    ST32(r14 + 4, r11);
-    ST32(r14, r0);
-    r0 = LD32(r14);
-    r1 = LD32(r14 + 4);
     return r0;
 }
 
@@ -4996,70 +4374,6 @@ int f06071924(int r4)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f060758C4(int r4, int r5)
-{
-    int r0, r7, r8, r9, r10, r11, r12, r13, c2, c1003, c1006, c1011;
-    FRAME(sp, 32);
-
-    r12 = r5;
-    r13 = r4;
-    if ((r12 & r12) == 0) {
-        r11 = 0;
-        if (r13 >= 0) {
-            r10 = 0x7FFFFFFF;
-            c1011 = 1;
-        } else {
-            r10 = (int)0x80000000;
-            c1011 = 0;
-        }
-    } else {
-        r0 = GCALL1(0x0607596C, r4);
-        r9 = r0;
-        r0 = GCALL1(0x0607596C, r12);
-        r0 = GCALL2(0x0607286C, r9, r0);
-        r10 = r0;
-        r0 = GCALL1(0x0607596C, r13);
-        r8 = r0;
-        r0 = GCALL1(0x0607596C, r12);
-        r7 = r0;
-        r0 = GCALL2(0x0607286C, r8, r7);
-        c2 = r13 >= 0;
-        r11 = r8 - (r0 * r7);
-        c1003 = c2;
-        if (c2) {
-            c1006 = c1003;
-            if (c1003) {
-                c1006 = r13 >= 0;
-                if (!(r12 >= 0)) {
-                    r10 = -r10;
-                    c1006 = r13 >= 0;
-                }
-            }
-        } else {
-            c1003 = r13 >= 0;
-            if (r12 > 0) {
-                r10 = -r10;
-                c1006 = r13 >= 0;
-            } else {
-                c1006 = c1003;
-                if (c1003) {
-                    c1006 = r13 >= 0;
-                    if (!(r12 >= 0)) {
-                        r10 = -r10;
-                        c1006 = r13 >= 0;
-                    }
-                }
-            }
-        }
-        c1011 = c1006;
-        if (!(c1006)) {
-            r11 = -r11;
-        }
-    }
-    return r10;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
 int f06072CD4(int r4, int r5)
 {
     int r0, r9, r14, c2008;
@@ -5247,30 +4561,6 @@ int f060734BC(int r4)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f060739C0(int r4, int r5, int r6, int r7)
-{
-    int r0, r1, r9, r10, r14, c2008;
-    FRAME(sp, 96);
-
-    r14 = sp - 96;
-    r1 = r14 + 60;
-    ST32(r1, r4);
-    ST32(r1 + 4, r5);
-    r10 = r14 + 68;
-    ST32(r10, r6);
-    ST32(r10 + 4, r7);
-    r0 = GCALL2(0x060736D8, r1, r14);
-    r9 = r14 + 20;
-    r0 = GCALL2(0x060736D8, r10, r9);
-    r0 = GCALL3(0x060737D4, r14, r9, (r14 + 40));
-    c2008 = R(8);
-    SETR(8, 0x060736D8);
-    r0 = GCALL1(0x06073520, r0);
-    SETR(8, c2008);
-    return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
 int f06073A20(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r9, r10, r14, c2008;
@@ -5289,54 +4579,6 @@ int f06073A20(int r4, int r5, int r6, int r7)
     r0 = LD32(r14 + 24);
     ST32(r14 + 24, (r0 ^ 1));
     r0 = GCALL3(0x060737D4, r14, r10, (r14 + 40));
-    c2008 = R(8);
-    SETR(8, 0x060736D8);
-    r0 = GCALL1(0x06073520, r0);
-    SETR(8, c2008);
-    return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f06073E18(int r4, int r5, int r6, int r7)
-{
-    int r0, r1, r9, r10, r14, c2008;
-    FRAME(sp, 96);
-
-    r14 = sp - 96;
-    r1 = r14 + 60;
-    ST32(r1, r4);
-    ST32(r1 + 4, r5);
-    r10 = r14 + 68;
-    ST32(r10, r6);
-    ST32(r10 + 4, r7);
-    r0 = GCALL2(0x060736D8, r1, r14);
-    r9 = r14 + 20;
-    r0 = GCALL2(0x060736D8, r10, r9);
-    r0 = GCALL3(0x06073AA4, r14, r9, (r14 + 40));
-    c2008 = R(8);
-    SETR(8, 0x060736D8);
-    r0 = GCALL1(0x06073520, r0);
-    SETR(8, c2008);
-    return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f06073FDC(int r4, int r5, int r6, int r7)
-{
-    int r0, r1, r9, r10, r14, c2008;
-    FRAME(sp, 96);
-
-    r14 = sp - 96;
-    r1 = r14 + 60;
-    ST32(r1, r4);
-    ST32(r1 + 4, r5);
-    r10 = r14 + 68;
-    ST32(r10, r6);
-    ST32(r10 + 4, r7);
-    r0 = GCALL2(0x060736D8, r1, r14);
-    r9 = r14 + 20;
-    r0 = GCALL2(0x060736D8, r10, r9);
-    r0 = GCALL2(0x06073E80, r14, r9);
     c2008 = R(8);
     SETR(8, 0x060736D8);
     r0 = GCALL1(0x06073520, r0);
@@ -5421,41 +4663,6 @@ int f060746CC(int r4, int r5)
         r0 = GCALL2(0x06074454, r4, r9);
     }
     return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f06074888(int r4, int r5, int r6, int r7)
-{
-    int r0, r1, r3, r8, r14;
-    FRAME(sp, 40);
-
-    r14 = sp - 36;
-    ST32(r14, 0);
-    if (!(r4 >= 0)) {
-        ST32(r14, -1);
-        r1 = -r5;
-        r4 = (-r4) - (((r1 & r1) == 0) ^ 1);
-        r5 = r1;
-    }
-    r3 = LD32(r14);
-    if (!(r6 >= 0)) {
-        ST32(r14, (~r3));
-        r1 = -r7;
-        r6 = (-r6) - (((r1 & r1) == 0) ^ 1);
-        r7 = r1;
-    }
-    ST32((sp - 40), 0);
-    r0 = GCALL5(0x06074A9C, r4, r5, r6, r7, LD32((sp - 40)));
-    r3 = LD32(r14);
-    r7 = r0;
-    r1 = R(1);
-    r8 = r1;
-    if (!((r3 & r3) == 0)) {
-        r1 = -r8;
-        r7 = (-r7) - (((r1 & r1) == 0) ^ 1);
-        r8 = r1;
-    }
-    return r7;
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
@@ -5983,83 +5190,6 @@ void f060736D8(int r4, int r5)
             }
         }
     }
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f060743C8(int r4)
-{
-    int r0, r1, r2, r14, c4, c5, c6, c8, c9, c10, c1007;
-    FRAME(sp, 28);
-
-    r14 = sp - 28;
-    ST32(r14, 3);
-    r2 = (int)((unsigned)r4 >> 31);
-    ST32(r14 + 4, r2);
-    if (!((r4 & r4) == 0)) {
-        ST32(r14 + 8, 60);
-        if ((r2 & r2) == 0) {
-            r1 = r4;
-            r2 = r4;
-            c8 = (unsigned)r1 >> 31;
-            r1 = r1 << 1;
-            c9 = r1;
-            c10 = c9 - r1;
-            r1 = c10 - c8;
-            ST32(r14 + 12, r1);
-            c1007 = ((unsigned)c9 < (unsigned)c10) | ((unsigned)c10 < (unsigned)r1);
-            ST32(r14 + 16, r2);
-            while (1) {
-                r1 = LD32(r14 + 12);
-                if ((unsigned)r1 > (unsigned)0x0FFFFFFF) {
-                    break;
-                } else {
-                    r1 = LD32(r14 + 12);
-                    r2 = LD32(r14 + 16);
-                    ST32(r14 + 12, ((r1 << 1) | ((unsigned)r2 >> 31)));
-                    ST32(r14 + 16, (r2 << 1));
-                    r1 = LD32(r14 + 8);
-                    ST32(r14 + 8, (r1 - 1));
-                }
-                POLL();
-            }
-            r0 = GCALL1(0x06073520, r14);
-        } else {
-            if (!(r4 == ((int)0x80000000))) {
-                r1 = -r4;
-                r2 = r1;
-                c4 = (unsigned)r1 >> 31;
-                r1 = r1 << 1;
-                c5 = r1;
-                c6 = c5 - r1;
-                r1 = c6 - c4;
-                ST32(r14 + 12, r1);
-                c1007 = ((unsigned)c5 < (unsigned)c6) | ((unsigned)c6 < (unsigned)r1);
-                ST32(r14 + 16, r2);
-                while (1) {
-                    r1 = LD32(r14 + 12);
-                    if ((unsigned)r1 > (unsigned)0x0FFFFFFF) {
-                        break;
-                    } else {
-                        r1 = LD32(r14 + 12);
-                        r2 = LD32(r14 + 16);
-                        ST32(r14 + 12, ((r1 << 1) | ((unsigned)r2 >> 31)));
-                        ST32(r14 + 16, (r2 << 1));
-                        r1 = LD32(r14 + 8);
-                        ST32(r14 + 8, (r1 - 1));
-                    }
-                    POLL();
-                }
-                r0 = GCALL1(0x06073520, r14);
-            } else {
-                r0 = LD32(0x060743C0);
-                r1 = LD32(0x060743C4);
-            }
-        }
-    } else {
-        ST32(r14, 2);
-        r0 = GCALL1(0x06073520, r14);
-    }
-    return r0;
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
@@ -7893,4 +7023,926 @@ int f0607555C(int r4)
         } while (AGAIN(!(r2 >= 0)));
     }
     return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f0607277E(int r4)
+{
+    SETR(4, ((signed char)((int)((unsigned)((int)((unsigned)r4 >> 16)) >> 8))));
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060727A2(int r4)
+{
+    SETR(4, (((((((((((r4 >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1));
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060727A4(int r4)
+{
+    SETR(4, ((((((((((r4 >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1));
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060727A6(int r4)
+{
+    SETR(4, (((((((((r4 >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1));
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060727A8(int r4)
+{
+    SETR(4, ((((((((r4 >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1));
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060727AA(int r4)
+{
+    SETR(4, (((((((r4 >> 1) >> 1) >> 1) >> 1) >> 1) >> 1) >> 1));
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060727AC(int r4)
+{
+    SETR(4, ((((((r4 >> 1) >> 1) >> 1) >> 1) >> 1) >> 1));
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060739C0(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r9, r10, r14, c2008;
+    FRAME(sp, 96);
+
+    r14 = sp - 96;
+    r1 = r14 + 60;
+    ST32(r1, r4);
+    ST32(r1 + 4, r5);
+    r10 = r14 + 68;
+    ST32(r10, r6);
+    ST32(r10 + 4, r7);
+    r0 = GCALL2(0x060736D8, r1, r14);
+    r9 = r14 + 20;
+    r0 = GCALL2(0x060736D8, r10, r9);
+    r0 = GCALL3(0x060737D4, r14, r9, (r14 + 40));
+    c2008 = R(8);
+    SETR(8, 0x060736D8);
+    r0 = GCALL1(0x06073520, r0);
+    SETR(8, c2008);
+    r1 = R(1);
+    SETR(1, r1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06073E18(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r9, r10, r14, c2008;
+    FRAME(sp, 96);
+
+    r14 = sp - 96;
+    r1 = r14 + 60;
+    ST32(r1, r4);
+    ST32(r1 + 4, r5);
+    r10 = r14 + 68;
+    ST32(r10, r6);
+    ST32(r10 + 4, r7);
+    r0 = GCALL2(0x060736D8, r1, r14);
+    r9 = r14 + 20;
+    r0 = GCALL2(0x060736D8, r10, r9);
+    r0 = GCALL3(0x06073AA4, r14, r9, (r14 + 40));
+    c2008 = R(8);
+    SETR(8, 0x060736D8);
+    r0 = GCALL1(0x06073520, r0);
+    SETR(8, c2008);
+    r1 = R(1);
+    SETR(1, r1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06073FDC(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r9, r10, r14, c2008;
+    FRAME(sp, 96);
+
+    r14 = sp - 96;
+    r1 = r14 + 60;
+    ST32(r1, r4);
+    ST32(r1 + 4, r5);
+    r10 = r14 + 68;
+    ST32(r10, r6);
+    ST32(r10 + 4, r7);
+    r0 = GCALL2(0x060736D8, r1, r14);
+    r9 = r14 + 20;
+    r0 = GCALL2(0x060736D8, r10, r9);
+    r0 = GCALL2(0x06073E80, r14, r9);
+    c2008 = R(8);
+    SETR(8, 0x060736D8);
+    r0 = GCALL1(0x06073520, r0);
+    SETR(8, c2008);
+    r1 = R(1);
+    SETR(1, r1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060743C8(int r4)
+{
+    int r0, r1, r2, r14, c4, c5, c6, c8, c9, c10, c1007;
+    FRAME(sp, 28);
+
+    r14 = sp - 28;
+    ST32(r14, 3);
+    r2 = (int)((unsigned)r4 >> 31);
+    ST32(r14 + 4, r2);
+    if (!((r4 & r4) == 0)) {
+        ST32(r14 + 8, 60);
+        if ((r2 & r2) == 0) {
+            r1 = r4;
+            r2 = r4;
+            c8 = (unsigned)r1 >> 31;
+            r1 = r1 << 1;
+            c9 = r1;
+            c10 = c9 - r1;
+            r1 = c10 - c8;
+            ST32(r14 + 12, r1);
+            c1007 = ((unsigned)c9 < (unsigned)c10) | ((unsigned)c10 < (unsigned)r1);
+            ST32(r14 + 16, r2);
+            while (1) {
+                r1 = LD32(r14 + 12);
+                if ((unsigned)r1 > (unsigned)0x0FFFFFFF) {
+                    break;
+                } else {
+                    r1 = LD32(r14 + 12);
+                    r2 = LD32(r14 + 16);
+                    ST32(r14 + 12, ((r1 << 1) | ((unsigned)r2 >> 31)));
+                    ST32(r14 + 16, (r2 << 1));
+                    r1 = LD32(r14 + 8);
+                    ST32(r14 + 8, (r1 - 1));
+                }
+                POLL();
+            }
+            r0 = GCALL1(0x06073520, r14);
+        } else {
+            if (!(r4 == ((int)0x80000000))) {
+                r1 = -r4;
+                r2 = r1;
+                c4 = (unsigned)r1 >> 31;
+                r1 = r1 << 1;
+                c5 = r1;
+                c6 = c5 - r1;
+                r1 = c6 - c4;
+                ST32(r14 + 12, r1);
+                c1007 = ((unsigned)c5 < (unsigned)c6) | ((unsigned)c6 < (unsigned)r1);
+                ST32(r14 + 16, r2);
+                while (1) {
+                    r1 = LD32(r14 + 12);
+                    if ((unsigned)r1 > (unsigned)0x0FFFFFFF) {
+                        break;
+                    } else {
+                        r1 = LD32(r14 + 12);
+                        r2 = LD32(r14 + 16);
+                        ST32(r14 + 12, ((r1 << 1) | ((unsigned)r2 >> 31)));
+                        ST32(r14 + 16, (r2 << 1));
+                        r1 = LD32(r14 + 8);
+                        ST32(r14 + 8, (r1 - 1));
+                    }
+                    POLL();
+                }
+                r0 = GCALL1(0x06073520, r14);
+            } else {
+                r0 = LD32(0x060743C0);
+                r1 = LD32(0x060743C4);
+            }
+        }
+    } else {
+        ST32(r14, 2);
+        r0 = GCALL1(0x06073520, r14);
+    }
+    r1 = R(1);
+    SETR(1, r1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060747B8(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r14;
+    FRAME(sp, 20);
+
+    r14 = sp - 16;
+    ST32((sp - 20), r14);
+    r0 = GCALL5(0x06074A9C, r4, r5, r6, r7, LD32((sp - 20)));
+    r0 = LD32(r14);
+    r1 = LD32(r14 + 4);
+    SETR(1, r1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060747D8(int r4, int r5, int r6, int r7)
+{
+    int r0, r1;
+    FRAME(sp, 12);
+
+    ST32((sp - 12), 0);
+    r0 = GCALL5(0x06074A9C, r4, r5, r6, r7, LD32((sp - 12)));
+    r1 = R(1);
+    SETR(1, r1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060747F4(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r14;
+    FRAME(sp, 48);
+
+    r14 = sp - 44;
+    ST32(r14 + 8, 0);
+    if (!(r4 >= 0)) {
+        ST32(r14 + 8, -1);
+        r1 = -r5;
+        r4 = (-r4) - (((r1 & r1) == 0) ^ 1);
+        r5 = r1;
+    }
+    r1 = -r7;
+    if (!(r6 >= 0)) {
+        r6 = (-r6) - (((r1 & r1) == 0) ^ 1);
+        r7 = r1;
+    }
+    ST32((sp - 48), r14);
+    r0 = GCALL5(0x06074A9C, r4, r5, r6, r7, LD32((sp - 48)));
+    r3 = LD32(r14 + 8);
+    r1 = LD32(r14);
+    if (!((r3 & r3) == 0)) {
+        r2 = LD32(r14 + 4);
+        r3 = -r2;
+        ST32(r14, ((-r1) - (((r3 & r3) == 0) ^ 1)));
+        ST32(r14 + 4, r3);
+    }
+    r0 = LD32(r14);
+    r1 = LD32(r14 + 4);
+    SETR(1, r1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06074888(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r3, r8, r14;
+    FRAME(sp, 40);
+
+    r14 = sp - 36;
+    ST32(r14, 0);
+    if (!(r4 >= 0)) {
+        ST32(r14, -1);
+        r1 = -r5;
+        r4 = (-r4) - (((r1 & r1) == 0) ^ 1);
+        r5 = r1;
+    }
+    r3 = LD32(r14);
+    if (!(r6 >= 0)) {
+        ST32(r14, (~r3));
+        r1 = -r7;
+        r6 = (-r6) - (((r1 & r1) == 0) ^ 1);
+        r7 = r1;
+    }
+    ST32((sp - 40), 0);
+    r0 = GCALL5(0x06074A9C, r4, r5, r6, r7, LD32((sp - 40)));
+    r3 = LD32(r14);
+    r7 = r0;
+    r1 = R(1);
+    r8 = r1;
+    if (!((r3 & r3) == 0)) {
+        r1 = -r8;
+        r7 = (-r7) - (((r1 & r1) == 0) ^ 1);
+        r8 = r1;
+    }
+    SETR(1, r8);
+    return r7;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06074924(int r4, int r5, int r6)
+{
+    int r0, r1, r9, r10, r11, r12, r13, r14;
+    FRAME(sp, 36);
+
+    r14 = sp - 36;
+    r11 = r4;
+    r13 = r6;
+    r12 = r5;
+    if (!((r13 & r13) == 0)) {
+        r5 = (-r13) + 32;
+        r9 = 0;
+        if (r5 > 0) {
+            r0 = GCALL2(0x0607290C, r11, r5);
+            ST32(r14, r0);
+            r0 = GCALL2(0x0607462C, r11, r13);
+            r9 = r0;
+            r0 = GCALL2(0x0607462C, r12, r13);
+            r10 = LD32(r14);
+            r10 = r10 | r0;
+        } else {
+            r0 = GCALL2(0x0607462C, r11, (-r5));
+            r10 = r0;
+        }
+        r0 = r9;
+        r1 = r10;
+    } else {
+        r0 = r11;
+        r1 = r12;
+    }
+    SETR(1, r1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06074A9C(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14, c2, c7, c12, c14, c15, c16, c21, c28, c29, c30, c31, c36, c38, c39, c40, c52, c68, c70, c1019, c1037, c1046, c1080;
+    FRAME(sp, 80);
+
+    r14 = sp - 80;
+    r9 = r7;
+    r10 = r6;
+    ST32(r14 + 16, r5);
+    ST32(r14 + 44, r4);
+    if ((r10 & r10) == 0) {
+        c2 = (r9 & r9) == 0;
+        if ((unsigned)r9 > (unsigned)r4) {
+            r2 = r9;
+            if ((unsigned)r9 > (unsigned)0xFFFF) {
+                r8 = 24;
+                if (!((unsigned)r9 > (unsigned)0x00FFFFFF)) {
+                    r8 = 16;
+                }
+            } else {
+                r8 = 0;
+                if ((unsigned)r9 > (unsigned)255) {
+                    r8 = 8;
+                }
+            }
+            r11 = 0x0607462C;
+            r0 = GCALL2(0x0607462C, r2, r8);
+            r2 = LD8(0x0607499C + r0);
+            ST8(36 + r14, r2);
+            r1 = LD8((36 + r14));
+            r1 = r1 & 255;
+            ST32(r14 + 36, r1);
+            r12 = (-(r1 + r8)) + 32;
+            ST32(r14 + 40, r12);
+            if (!((r12 & r12) == 0)) {
+                r5 = LD32(r14 + 40);
+                r0 = GCALL2(0x0607290C, r9, r5);
+                r5 = LD32(r14 + 40);
+                r4 = LD32(r14 + 44);
+                r9 = r0;
+                r0 = GCALL2(0x0607290C, r4, r5);
+                r10 = r0;
+                r4 = LD32(r14 + 16);
+                r0 = GCALL2(r11, r4, ((-r12) + 32));
+                r5 = LD32(r14 + 40);
+                r4 = LD32(r14 + 16);
+                ST32(r14 + 44, (r10 | r0));
+                r0 = GCALL2(0x0607290C, r4, r5);
+                ST32(r14 + 16, r0);
+            }
+            r8 = (int)((unsigned)r9 >> 16);
+            r11 = r9 & 0xFFFF;
+            r5 = r8;
+            r4 = LD32(r14 + 44);
+            r7 = LD32(r14 + 44);
+            r0 = GCALL2(0x060745A0, r4, r5);
+            r4 = LD32(r14 + 44);
+            c7 = r0 * r8;
+            r0 = GCALL2(0x060745A0, r4, r5);
+            r10 = r0;
+            r1 = LD32(r14 + 16);
+            r7 = ((r7 - c7) << 16) | ((int)((unsigned)r1 >> 16));
+            r6 = r10 * r11;
+            if (!((unsigned)r7 >= (unsigned)r6)) {
+                r7 = r7 + r9;
+                r10 = r10 - 1;
+                if ((unsigned)r7 >= (unsigned)r9) {
+                    if (!((unsigned)r7 >= (unsigned)r6)) {
+                        r10 = r10 - 1;
+                        r7 = r7 + r9;
+                    }
+                }
+            }
+            r7 = r7 - r6;
+            r5 = r8;
+            r0 = GCALL2(0x060745A0, r7, r5);
+            c12 = r0 * r8;
+            r0 = GCALL2(0x060745A0, r7, r5);
+            r3 = r7 - c12;
+            r7 = r0;
+            r1 = LD16((18 + r14));
+            r1 = r1 & 0xFFFF;
+            r3 = r1 | (r3 << 16);
+            r6 = r7 * r11;
+            c14 = (unsigned)r3 >= (unsigned)r6;
+            ST32(r14 + 36, r1);
+            c1019 = c14;
+            if (!(c14)) {
+                r3 = r3 + r9;
+                c15 = (unsigned)r3 >= (unsigned)r9;
+                r7 = r7 - 1;
+                c1019 = c15;
+                if (c15) {
+                    c16 = (unsigned)r3 >= (unsigned)r6;
+                    c1019 = c16;
+                    if (!(c16)) {
+                        r7 = r7 - 1;
+                        r3 = r3 + r9;
+                        c1019 = 0;
+                    }
+                }
+            }
+            r10 = r10 << 16;
+            ST32(r14 + 36, r10);
+            r11 = r10 | r7;
+            ST32(r14 + 16, (r3 - r6));
+            ST32(r14 + 20, 0);
+        } else {
+            r4 = c2;
+            if (c2) {
+                r0 = GCALL2(0x060745A0, r4, r9);
+                r9 = r0;
+            }
+            r2 = r9;
+            if ((unsigned)r9 > (unsigned)0xFFFF) {
+                r8 = 24;
+                if (!((unsigned)r9 > (unsigned)0x00FFFFFF)) {
+                    r8 = 16;
+                }
+            } else {
+                r8 = 0;
+                if ((unsigned)r9 > (unsigned)255) {
+                    r8 = 8;
+                }
+            }
+            r0 = GCALL2(0x0607462C, r2, r8);
+            r2 = LD8(0x0607499C + r0);
+            ST8(36 + r14, r2);
+            r1 = LD8((36 + r14));
+            r1 = r1 & 255;
+            ST32(r14 + 36, r1);
+            r12 = (-(r1 + r8)) + 32;
+            ST32(r14 + 40, r12);
+            if (!((r12 & r12) == 0)) {
+                r1 = LD32(r14 + 40);
+                r5 = LD32(r14 + 40);
+                r1 = -r1;
+                ST32(r14 + 24, r1);
+                ST32(r14 + 24, (r1 + 32));
+                r0 = GCALL2(0x0607290C, r9, r5);
+                r5 = LD32(r14 + 24);
+                r9 = r0;
+                r4 = LD32(r14 + 44);
+                r0 = GCALL2(0x0607462C, r4, r5);
+                r5 = LD32(r14 + 40);
+                r4 = LD32(r14 + 44);
+                r11 = r0;
+                r0 = GCALL2(0x0607290C, r4, r5);
+                r5 = LD32(r14 + 24);
+                r4 = LD32(r14 + 16);
+                r10 = r0;
+                r0 = GCALL2(0x0607462C, r4, r5);
+                r5 = LD32(r14 + 40);
+                r4 = LD32(r14 + 16);
+                ST32(r14 + 44, (r10 | r0));
+                r0 = GCALL2(0x0607290C, r4, r5);
+                ST32(r14 + 16, r0);
+                r8 = (int)((unsigned)r9 >> 16);
+                r13 = r9 & 0xFFFF;
+                ST32(r14 + 28, r13);
+                r5 = r8;
+                r0 = GCALL2(0x060745A0, r11, r5);
+                c21 = r0 * r8;
+                r0 = GCALL2(0x060745A0, r11, r5);
+                r10 = r0;
+                r1 = LD32(r14 + 44);
+                r7 = ((int)((unsigned)r1 >> 16)) | ((r11 - c21) << 16);
+                r6 = r10 * r13;
+                if (!((unsigned)r7 >= (unsigned)r6)) {
+                    r7 = r7 + r9;
+                    r10 = r10 - 1;
+                    if ((unsigned)r7 >= (unsigned)r9) {
+                        if (!((unsigned)r7 >= (unsigned)r6)) {
+                            r10 = r10 - 1;
+                            r7 = r7 + r9;
+                        }
+                    }
+                }
+                r7 = r7 - r6;
+                r5 = r8;
+                r0 = GCALL2(0x060745A0, r7, r5);
+                r3 = r0;
+                r0 = GCALL2(0x060745A0, r7, r5);
+                r12 = LD16((46 + r14));
+                r12 = r12 & 0xFFFF;
+                ST32(r14 + 36, r12);
+                r3 = r7 - (r3 * r8);
+                r7 = r0;
+                r1 = LD32(r14 + 28);
+                r3 = r12 | (r3 << 16);
+                r6 = r7 * r1;
+                c28 = (unsigned)r3 >= (unsigned)r6;
+                c1037 = c28;
+                if (!(c28)) {
+                    r3 = r3 + r9;
+                    c29 = (unsigned)r3 >= (unsigned)r9;
+                    r7 = r7 - 1;
+                    c1037 = c29;
+                    if (c29) {
+                        c30 = (unsigned)r3 >= (unsigned)r6;
+                        c1037 = c30;
+                        if (!(c30)) {
+                            r7 = r7 - 1;
+                            r3 = r3 + r9;
+                            c1037 = 0;
+                        }
+                    }
+                }
+                ST32(r14 + 20, ((r10 << 16) | r7));
+                ST32(r14 + 44, (r3 - r6));
+            } else {
+                r13 = LD32(r14 + 44);
+                ST32(r14 + 44, (r13 - r9));
+                ST32(r14 + 20, 1);
+            }
+            r8 = (int)((unsigned)r9 >> 16);
+            r11 = r9 & 0xFFFF;
+            r5 = r8;
+            r4 = LD32(r14 + 44);
+            r7 = LD32(r14 + 44);
+            r0 = GCALL2(0x060745A0, r4, r5);
+            r4 = LD32(r14 + 44);
+            c31 = r0 * r8;
+            r0 = GCALL2(0x060745A0, r4, r5);
+            r10 = r0;
+            r1 = LD32(r14 + 16);
+            r7 = ((r7 - c31) << 16) | ((int)((unsigned)r1 >> 16));
+            r6 = r10 * r11;
+            if (!((unsigned)r7 >= (unsigned)r6)) {
+                r7 = r7 + r9;
+                r10 = r10 - 1;
+                if ((unsigned)r7 >= (unsigned)r9) {
+                    if (!((unsigned)r7 >= (unsigned)r6)) {
+                        r10 = r10 - 1;
+                        r7 = r7 + r9;
+                    }
+                }
+            }
+            r7 = r7 - r6;
+            r5 = r8;
+            r0 = GCALL2(0x060745A0, r7, r5);
+            c36 = r0 * r8;
+            r0 = GCALL2(0x060745A0, r7, r5);
+            r3 = r7 - c36;
+            r7 = r0;
+            r1 = LD16((18 + r14));
+            r1 = r1 & 0xFFFF;
+            r3 = r1 | (r3 << 16);
+            r6 = r7 * r11;
+            c38 = (unsigned)r3 >= (unsigned)r6;
+            ST32(r14 + 36, r1);
+            c1046 = c38;
+            if (!(c38)) {
+                r3 = r3 + r9;
+                c39 = (unsigned)r3 >= (unsigned)r9;
+                r7 = r7 - 1;
+                c1046 = c39;
+                if (c39) {
+                    c40 = (unsigned)r3 >= (unsigned)r6;
+                    c1046 = c40;
+                    if (!(c40)) {
+                        r7 = r7 - 1;
+                        r3 = r3 + r9;
+                        c1046 = 0;
+                    }
+                }
+            }
+            r11 = (r10 << 16) | r7;
+            ST32(r14 + 16, (r3 - r6));
+        }
+        r12 = LD32((80 + r14));
+        r5 = LD32(r14 + 40);
+        if (!((r12 & r12) == 0)) {
+            r4 = LD32(r14 + 16);
+            r0 = GCALL2(0x0607462C, r4, r5);
+            ST32(r14 + 12, r0);
+            ST32(r14 + 8, 0);
+            r0 = LD32(r14 + 8);
+            r1 = LD32(r14 + 12);
+            r13 = LD32((80 + r14));
+            ST32(r13, r0);
+            ST32(r13 + 4, r1);
+        }
+    } else {
+        r0 = LD32(r14 + 44);
+        r1 = 0;
+        if (!((unsigned)r10 > (unsigned)r0)) {
+            r4 = r10;
+            if ((unsigned)r10 > (unsigned)0xFFFF) {
+                r8 = 24;
+                if (!((unsigned)r10 > (unsigned)0x00FFFFFF)) {
+                    r8 = 16;
+                }
+            } else {
+                r8 = 0;
+                if ((unsigned)r10 > (unsigned)255) {
+                    r8 = 8;
+                }
+            }
+            r0 = GCALL2(0x0607462C, r4, r8);
+            r2 = LD8(0x0607499C + r0);
+            ST8(36 + r14, r2);
+            r1 = LD8((36 + r14));
+            r1 = r1 & 255;
+            ST32(r14 + 36, r1);
+            r12 = (-(r1 + r8)) + 32;
+            ST32(r14 + 40, r12);
+            if (!((r12 & r12) == 0)) {
+                r0 = LD32(r14 + 40);
+                r5 = LD32(r14 + 40);
+                r0 = -r0;
+                ST32(r14 + 24, r0);
+                ST32(r14 + 24, (r0 + 32));
+                r0 = GCALL2(0x0607290C, r10, r5);
+                r10 = r0;
+                r5 = LD32(r14 + 24);
+                r0 = GCALL2(0x0607462C, r9, r5);
+                r10 = r10 | r0;
+                r5 = LD32(r14 + 40);
+                r0 = GCALL2(0x0607290C, r9, r5);
+                r5 = LD32(r14 + 24);
+                r9 = r0;
+                r4 = LD32(r14 + 44);
+                r0 = GCALL2(0x0607462C, r4, r5);
+                r5 = LD32(r14 + 40);
+                r4 = LD32(r14 + 44);
+                r11 = r0;
+                r0 = GCALL2(0x0607290C, r4, r5);
+                r5 = LD32(r14 + 24);
+                r4 = LD32(r14 + 16);
+                ST32(r14 + 44, r0);
+                r0 = GCALL2(0x0607462C, r4, r5);
+                r13 = LD32(r14 + 44);
+                r5 = LD32(r14 + 40);
+                r4 = LD32(r14 + 16);
+                r13 = r13 | r0;
+                ST32(r14 + 44, r13);
+                r0 = GCALL2(0x0607290C, r4, r5);
+                ST32(r14 + 16, r0);
+                r8 = (int)((unsigned)r10 >> 16);
+                ST32(r14 + 32, (r10 & 0xFFFF));
+                r5 = r8;
+                r0 = GCALL2(0x060745A0, r11, r5);
+                r7 = r11;
+                c52 = r0 * r8;
+                r0 = GCALL2(0x060745A0, r11, r5);
+                r11 = r0;
+                r1 = LD32(r14 + 32);
+                r7 = ((int)((unsigned)r13 >> 16)) | ((r7 - c52) << 16);
+                r6 = r11 * r1;
+                if (!((unsigned)r7 >= (unsigned)r6)) {
+                    r7 = r7 + r10;
+                    r11 = r11 - 1;
+                    if ((unsigned)r7 >= (unsigned)r10) {
+                        if (!((unsigned)r7 >= (unsigned)r6)) {
+                            r11 = r11 - 1;
+                            r7 = r7 + r10;
+                        }
+                    }
+                }
+                r7 = r7 - r6;
+                r5 = r8;
+                r0 = GCALL2(0x060745A0, r7, r5);
+                r3 = r0;
+                r0 = GCALL2(0x060745A0, r7, r5);
+                r12 = LD16((46 + r14));
+                r12 = r12 & 0xFFFF;
+                ST32(r14 + 36, r12);
+                r3 = r7 - (r3 * r8);
+                r7 = r0;
+                r1 = LD32(r14 + 32);
+                r3 = r12 | (r3 << 16);
+                r6 = r7 * r1;
+                if (!((unsigned)r3 >= (unsigned)r6)) {
+                    r3 = r3 + r10;
+                    r7 = r7 - 1;
+                    if ((unsigned)r3 >= (unsigned)r10) {
+                        if (!((unsigned)r3 >= (unsigned)r6)) {
+                            r7 = r7 - 1;
+                            r3 = r3 + r10;
+                        }
+                    }
+                }
+                r11 = (r11 << 16) | r7;
+                ST32(r14 + 44, (r3 - r6));
+                r4 = 0xFFFF;
+                r1 = r11 & 0xFFFF;
+                r7 = (int)((unsigned)r11 >> 16);
+                r2 = r9 & 0xFFFF;
+                r3 = (int)((unsigned)r9 >> 16);
+                r5 = r1 * r2;
+                r2 = r7 * r2;
+                r6 = ((r1 * r3) + ((int)((unsigned)r5 >> 16))) + r2;
+                r3 = r7 * r3;
+                if (!((unsigned)r6 >= (unsigned)r2)) {
+                    r3 = r3 + 0x00010000;
+                }
+                r7 = ((int)((unsigned)r6 >> 16)) + r3;
+                r6 = r6 & r4;
+                ST32(r14 + 36, r6);
+                r1 = LD32(r14 + 44);
+                r6 = (r6 << 16) + (r5 & r4);
+                if ((unsigned)r7 > (unsigned)r1) {
+                    r11 = r11 - 1;
+                    r3 = r6 - r9;
+                    c70 = (unsigned)r3 > (unsigned)r6;
+                    r7 = (r7 - r10) - c70;
+                    r6 = r3;
+                    c1080 = c70;
+                    r13 = 0;
+                } else {
+                    c68 = r7 == r1;
+                    c1080 = c68;
+                    if (!(c68)) {
+                        r13 = 0;
+                    } else {
+                        r12 = LD32(r14 + 16);
+                        r13 = 0;
+                        if ((unsigned)r6 > (unsigned)r12) {
+                            r11 = r11 - 1;
+                            r3 = r6 - r9;
+                            c70 = (unsigned)r3 > (unsigned)r6;
+                            r7 = (r7 - r10) - c70;
+                            r6 = r3;
+                            c1080 = c70;
+                            r13 = 0;
+                        }
+                    }
+                }
+                ST32(r14 + 20, r13);
+                r0 = LD32(80 + r14);
+                r3 = LD32(r14 + 16);
+                if (!((r0 & r0) == 0)) {
+                    r2 = LD32(r14 + 44);
+                    r3 = r3 - r6;
+                    r1 = LD32(r14 + 16);
+                    ST32(r14 + 44, ((r2 - r7) - ((unsigned)r3 > (unsigned)r1)));
+                    ST32(r14 + 16, r3);
+                    r5 = LD32(r14 + 24);
+                    r4 = LD32(r14 + 44);
+                    r0 = GCALL2(0x0607290C, r4, r5);
+                    r5 = LD32(r14 + 40);
+                    r9 = r0;
+                    r4 = LD32(r14 + 16);
+                    r0 = GCALL2(0x0607462C, r4, r5);
+                    r5 = LD32(r14 + 40);
+                    r4 = LD32(r14 + 44);
+                    ST32(r14 + 12, (r9 | r0));
+                    r0 = GCALL2(0x0607462C, r4, r5);
+                    ST32(r14 + 8, r0);
+                    r0 = LD32(r14 + 8);
+                    r1 = LD32(r14 + 12);
+                    r13 = LD32((80 + r14));
+                    ST32(r13, r0);
+                    ST32(r13 + 4, r1);
+                }
+            } else {
+                r13 = LD32(r14 + 44);
+                r0 = LD32(r14 + 16);
+                if ((unsigned)r13 > (unsigned)r10) {
+                    r11 = 1;
+                    r3 = LD32(r14 + 16);
+                    r2 = LD32(r14 + 44);
+                    r3 = r3 - r9;
+                    r1 = LD32(r14 + 16);
+                    ST32(r14 + 44, ((r2 - r10) - ((unsigned)r3 > (unsigned)r1)));
+                    ST32(r14 + 16, r3);
+                } else {
+                    r11 = 0;
+                    if ((unsigned)r0 >= (unsigned)r9) {
+                        r11 = 1;
+                        r3 = LD32(r14 + 16);
+                        r2 = LD32(r14 + 44);
+                        r3 = r3 - r9;
+                        r1 = LD32(r14 + 16);
+                        ST32(r14 + 44, ((r2 - r10) - ((unsigned)r3 > (unsigned)r1)));
+                        ST32(r14 + 16, r3);
+                    }
+                }
+                ST32(r14 + 20, 0);
+                r0 = LD32(80 + r14);
+                r1 = LD32(r14 + 16);
+                if (!((r0 & r0) == 0)) {
+                    r12 = LD32(r14 + 44);
+                    ST32(r14 + 12, r1);
+                    ST32(r14 + 8, r12);
+                    r0 = LD32(r14 + 8);
+                    r1 = LD32(r14 + 12);
+                    r13 = LD32((80 + r14));
+                    ST32(r13, r0);
+                    ST32(r13 + 4, r1);
+                }
+            }
+        } else {
+            ST32(r14 + 20, r1);
+            r12 = LD32((80 + r14));
+            r11 = 0;
+            if (!((r12 & r12) == 0)) {
+                r13 = LD32(r14 + 16);
+                ST32(r14 + 12, r13);
+                ST32(r14 + 8, r0);
+                r0 = LD32(r14 + 8);
+                r1 = LD32(r14 + 12);
+                r13 = LD32((80 + r14));
+                ST32(r13, r0);
+                ST32(r13 + 4, r1);
+            }
+        }
+    }
+    r0 = LD32(r14 + 20);
+    ST32(r14 + 4, r11);
+    ST32(r14, r0);
+    r0 = LD32(r14);
+    r1 = LD32(r14 + 4);
+    SETR(1, r1);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060758C4(int r4, int r5)
+{
+    int r0, r7, r8, r9, r10, r11, r12, r13, c2, c1003, c1006, c1011;
+    FRAME(sp, 32);
+
+    r12 = r5;
+    r13 = r4;
+    if ((r12 & r12) == 0) {
+        r11 = 0;
+        if (r13 >= 0) {
+            r10 = 0x7FFFFFFF;
+            c1011 = 1;
+        } else {
+            r10 = (int)0x80000000;
+            c1011 = 0;
+        }
+    } else {
+        r0 = GCALL1(0x0607596C, r4);
+        r9 = r0;
+        r0 = GCALL1(0x0607596C, r12);
+        r0 = GCALL2(0x0607286C, r9, r0);
+        r10 = r0;
+        r0 = GCALL1(0x0607596C, r13);
+        r8 = r0;
+        r0 = GCALL1(0x0607596C, r12);
+        r7 = r0;
+        r0 = GCALL2(0x0607286C, r8, r7);
+        c2 = r13 >= 0;
+        r11 = r8 - (r0 * r7);
+        c1003 = c2;
+        if (c2) {
+            c1006 = c1003;
+            if (c1003) {
+                c1006 = r13 >= 0;
+                if (!(r12 >= 0)) {
+                    r10 = -r10;
+                    c1006 = r13 >= 0;
+                }
+            }
+        } else {
+            c1003 = r13 >= 0;
+            if (r12 > 0) {
+                r10 = -r10;
+                c1006 = r13 >= 0;
+            } else {
+                c1006 = c1003;
+                if (c1003) {
+                    c1006 = r13 >= 0;
+                    if (!(r12 >= 0)) {
+                        r10 = -r10;
+                        c1006 = r13 >= 0;
+                    }
+                }
+            }
+        }
+        c1011 = c1006;
+        if (!(c1006)) {
+            r11 = -r11;
+        }
+    }
+    SETR(1, r11);
+    return r10;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060727A0(int r4)
+{
 }

@@ -12,6 +12,7 @@ one of them and a caller whose own instructions read it before writing it, as a 
 cannot be swapped as C that returns one value.
 """
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -26,6 +27,8 @@ from saturnrecomp import sh2  # noqa: E402
 LOOKAHEAD = 14      # instructions between loading a function's address and the jsr through that register
 SCAN_MAX = 400      # instructions a caller is followed for after a call, at most
 _BRANCHES = ("bt", "bf", "bt/s", "bf/s")
+_SETR = re.compile(r"\bSETR\(([1-7]),")
+_LEFT: dict[int, tuple[dict[int, set[int]], dict[int, frozenset[int]]]] = {}
 _ENDS = ("jsr", "bsr", "bsrf", "rts", "jmp", "rte", "braf")
 
 
@@ -41,12 +44,15 @@ def readers(image: sh2.Image, code: dict[int, set[int]], voids: set[int]) -> dic
     return found
 
 
-def outputs(image: sh2.Image, code: dict[int, set[int]], swapped: set[int]) -> dict[int, list[tuple[int, list[int]]]]:
+def outputs(image: sh2.Image, code: dict[int, set[int]], swapped: set[int],
+            given: dict[int, set[int]] | None = None) -> dict[int, list[tuple[int, list[int]]]]:
     """For each swapped function with code that writes r1 to r7, the return addresses after which an instruction of the
-    caller's reads one of them before writing it, with those registers."""
+    caller's reads one of them before writing it, with those registers. A register the function's C sets in the
+    context (`SETR`, `given`) is its own to give, so it does not count."""
     written = {}
+    given = given_registers() if given is None else given
     for a in swapped & code.keys():
-        regs = {r for pc in code[a] for r in registers.defs(image.insn(pc)) if 1 <= r <= 7}
+        regs = {r for pc in code[a] for r in registers.defs(image.insn(pc)) if 1 <= r <= 7} - given.get(a, set())
         if regs:
             written[a] = frozenset(regs)
     pcs = set().union(*code.values())
@@ -57,6 +63,21 @@ def outputs(image: sh2.Image, code: dict[int, set[int]], swapped: set[int]) -> d
             if reading:
                 found.setdefault(callee, []).append((after, sorted(reading)))
     return found
+
+
+def given_registers() -> dict[int, set[int]]:
+    """The registers r1 to r7 each function's C sets in the context, by address."""
+    return {int(name[1:], 16): {int(n) for n in _SETR.findall(text)} for name, text in status.definitions().items()
+            if _SETR.search(text)}
+
+
+def left_for_callers(image: sh2.Image, code: dict[int, set[int]]) -> dict[int, frozenset[int]]:
+    """The registers r1 to r7 that callers read after a call to each function, as the function leaves them."""
+    key = id(code)
+    if _LEFT.get(key, (None,))[0] is not code:
+        sites = outputs(image, code, set(code), {})
+        _LEFT[key] = (code, {callee: frozenset(r for _, regs in found for r in regs) for callee, found in sites.items()})
+    return _LEFT[key][1]
 
 
 def swapped(kind: str | None = None) -> set[int]:

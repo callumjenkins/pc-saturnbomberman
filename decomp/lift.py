@@ -21,6 +21,7 @@ import modules  # noqa: E402
 import registers  # noqa: E402
 import status  # noqa: E402
 import structure  # noqa: E402
+from returns import left_for_callers  # noqa: E402
 from saturnrecomp import sh2  # noqa: E402
 from state import (LOCAL_TYPES, MAC, NO_FLAG, VAR, Copies, State, Stmt, Unsupported, const, fold_frame, framed,  # noqa: E402
                    number, restored, sp_change, step, strip, track)
@@ -241,16 +242,17 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
     stack what the code after each call that can switch tasks reads."""
     stops = leaders(image, entry, code, parked)
     params: set[int] = set()
+    gives = tuple(sorted(left_for_callers(image, functions).get(entry, ()))) if functions else ()
     framed = parked
     if not parked:
         try:
-            read_blocks(image, entry, stops, params, code, functions)
+            read_blocks(image, entry, stops, params, code, functions, gives=gives)
         except Unsupported as e:
             if "address of a local" not in str(e) and "argument passed on the stack" not in str(e):
                 raise
             framed = True
     for attempt in range(2):
-        reads, slots = read_blocks(image, entry, stops, params, code, functions, framed, parked)
+        reads, slots = read_blocks(image, entry, stops, params, code, functions, framed, parked, gives)
         returns = any(s.var == "r0" for r in reads.values() for s in r.stmts)
         live_in, live_out = liveness(reads, returns)
         if returns and "r0" in live_in[entry]:
@@ -344,7 +346,7 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
                functions: dict[int, set[int]] | None = None, framed: bool = False,
                stored: set[int] | None = None, saved: set[int] | None = None, parked: bool = False,
                clobbered: set[int] = frozenset(), flag: str | None = None,
-               merged: dict[int, str] | None = None) -> tuple[Read, int]:
+               merged: dict[int, str] | None = None, gives: tuple[int, ...] = ()) -> tuple[Read, int]:
     st = State(flags=flags, sp=stops[start], copies=stops.copies, slots=slots, fresh=set(fresh), framed=framed, parked=parked,
                clobbered=set(clobbered), flag=flag,
                touched=registers.written(image, code) if code is not None else frozenset(range(8, 15)),
@@ -386,6 +388,8 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
             break
         if ins.op == "rts":
             step(slot, st, image)
+            for reg in gives:                   # what callers read of r1 to r7 after the call, which the context carries back
+                st.effect("SETR(%d, %s);" % (reg, strip(st.get(reg))))
             block.kind = "return"
             break
         if ins.op == "jmp" and ins.pc in status.jump_targets():
@@ -429,7 +433,7 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
 
 def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], code: set[int] | None,
                 functions: dict[int, set[int]] | None = None, framed: bool = False,
-                parked: bool = False) -> tuple[dict[int, Read], dict[int, int]]:
+                parked: bool = False, gives: tuple[int, ...] = ()) -> tuple[dict[int, Read], dict[int, int]]:
     """Every block, read until the registers a call may pass settle: those written since the last call
     on every path into a block, so an argument set before a branch reaches the call after it, and those a call
     overwrote on some path into it, which the block may not read."""
@@ -445,7 +449,7 @@ def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], 
         saved: set[int] = set()
         for at in sorted(stops):
             reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions, framed,
-                                          stored, saved, parked, clobbered[at], carried[at], merged)
+                                          stored, saved, parked, clobbered[at], carried[at], merged, gives)
         into: dict[int, list[set[int]]] = {at: [] for at in stops}
         after: dict[int, list[set[int]]] = {at: [] for at in stops}
         holding: dict[int, list[str | None]] = {at: [] for at in stops}

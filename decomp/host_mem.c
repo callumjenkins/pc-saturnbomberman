@@ -14,6 +14,7 @@ int g_fault;
 int g_polls;                /* g_poll()s and g_call()s, which check.py compares with the game's */
 uint32_t g_sp;              /* the game's r15, which check.py sets before each trial and g_call passes on */
 
+uint32_t g_regs_set;        /* bit n is set once g_reg_set(n) has run, so check.py compares the r1 to r7 a function gives back */
 uint32_t g_regs[16];        /* r8 to r14 in the context, which check.py sets from the game's side and compares afterwards */
 uint32_t g_pr_value;        /* pr, the same */
 uint32_t g_mac_regs[2];     /* MACL and MACH, the same */
@@ -73,6 +74,7 @@ uint32_t g_reg(int n)
 void g_reg_set(int n, uint32_t value)
 {
     g_regs[n] = value;
+    g_regs_set |= 1u << n;
 }
 
 uint32_t g_pr(void)
