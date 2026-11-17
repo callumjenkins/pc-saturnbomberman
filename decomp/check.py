@@ -252,7 +252,7 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
     the game, whose registers hold something else."""
     @CALL_HOOK
     def hook(addr, args, n):
-        if len(state["snaps"]) > CALLS_MAX:
+        if len(state.get("snaps", ())) > CALLS_MAX:
             state["error"] = "more than %d calls" % CALLS_MAX
             return 0
         regs = (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")
