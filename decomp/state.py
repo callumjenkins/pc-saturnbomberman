@@ -74,6 +74,8 @@ class State:
         return self._get(reg)
 
     def _get(self, reg: int) -> str:
+        if reg in self.clobbered and 1 <= reg <= 7:
+            self.put(reg, "R(%d)" % reg, False)         # what the callee left in the context, which the game's code reads
         if reg in self.clobbered:
             raise Unsupported("r%d is read after a call%s overwrote it" % (reg, " to " + self.callee if self.callee else ""))
         return const(self.known[reg]) if reg in self.known else "r%d" % reg

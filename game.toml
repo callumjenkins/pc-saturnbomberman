@@ -20149,6 +20149,11 @@ symbol = "swap_boot_f06010598"
 
 [[replace]]
 module = "BOOT"
+at = 0x060105B4
+symbol = "swap_boot_f060105B4"
+
+[[replace]]
+module = "BOOT"
 at = 0x06010820
 symbol = "swap_boot_f06010820"
 
@@ -20176,6 +20181,21 @@ symbol = "swap_boot_f06010B20"
 module = "BOOT"
 at = 0x06010B38
 symbol = "swap_boot_f06010B38"
+
+[[replace]]
+module = "BOOT"
+at = 0x06010C44
+symbol = "swap_boot_f06010C44"
+
+[[replace]]
+module = "BOOT"
+at = 0x06010DDC
+symbol = "swap_boot_f06010DDC"
+
+[[replace]]
+module = "BOOT"
+at = 0x06010E54
+symbol = "swap_boot_f06010E54"
 
 [[replace]]
 module = "BOOT"
@@ -20224,6 +20244,11 @@ symbol = "swap_boot_f0601213C"
 
 [[replace]]
 module = "BOOT"
+at = 0x06012194
+symbol = "swap_boot_f06012194"
+
+[[replace]]
+module = "BOOT"
 at = 0x060122D0
 symbol = "swap_boot_f060122D0"
 
@@ -20259,13 +20284,28 @@ symbol = "swap_boot_f0601263C"
 
 [[replace]]
 module = "BOOT"
+at = 0x0601265C
+symbol = "swap_boot_f0601265C"
+
+[[replace]]
+module = "BOOT"
 at = 0x060126E4
 symbol = "swap_boot_f060126E4"
 
 [[replace]]
 module = "BOOT"
+at = 0x06012730
+symbol = "swap_boot_f06012730"
+
+[[replace]]
+module = "BOOT"
 at = 0x060127B4
 symbol = "swap_boot_f060127B4"
+
+[[replace]]
+module = "BOOT"
+at = 0x06012810
+symbol = "swap_boot_f06012810"
 
 [[replace]]
 module = "BOOT"
@@ -20416,6 +20456,21 @@ symbol = "swap_boot_f060161C4"
 module = "BOOT"
 at = 0x060162B4
 symbol = "swap_boot_f060162B4"
+
+[[replace]]
+module = "BOOT"
+at = 0x0601637C
+symbol = "swap_boot_f0601637C"
+
+[[replace]]
+module = "BOOT"
+at = 0x06016478
+symbol = "swap_boot_f06016478"
+
+[[replace]]
+module = "BOOT"
+at = 0x060166F0
+symbol = "swap_boot_f060166F0"
 
 [[replace]]
 module = "BOOT"
@@ -20664,6 +20719,11 @@ symbol = "swap_boot_f0601A314"
 
 [[replace]]
 module = "BOOT"
+at = 0x0601A514
+symbol = "swap_boot_f0601A514"
+
+[[replace]]
+module = "BOOT"
 at = 0x0601A9B4
 symbol = "swap_boot_f0601A9B4"
 
@@ -20771,6 +20831,11 @@ symbol = "swap_boot_f0601CB70"
 module = "BOOT"
 at = 0x0601CB88
 symbol = "swap_boot_f0601CB88"
+
+[[replace]]
+module = "BOOT"
+at = 0x0601CB9C
+symbol = "swap_boot_f0601CB9C"
 
 [[replace]]
 module = "BOOT"
@@ -20969,6 +21034,11 @@ symbol = "swap_boot_f0601F760"
 
 [[replace]]
 module = "BOOT"
+at = 0x0601FAA0
+symbol = "swap_boot_f0601FAA0"
+
+[[replace]]
+module = "BOOT"
 at = 0x06020218
 symbol = "swap_boot_f06020218"
 
@@ -21036,6 +21106,11 @@ symbol = "swap_boot_f06022690"
 module = "BOOT"
 at = 0x06022750
 symbol = "swap_boot_f06022750"
+
+[[replace]]
+module = "BOOT"
+at = 0x06022928
+symbol = "swap_boot_f06022928"
 
 [[replace]]
 module = "BOOT"
@@ -21156,6 +21231,11 @@ symbol = "swap_boot_f06025AB4"
 module = "BOOT"
 at = 0x06025B44
 symbol = "swap_boot_f06025B44"
+
+[[replace]]
+module = "BOOT"
+at = 0x06025B8C
+symbol = "swap_boot_f06025B8C"
 
 [[replace]]
 module = "BOOT"
@@ -21304,6 +21384,11 @@ symbol = "swap_boot_f060288E0"
 
 [[replace]]
 module = "BOOT"
+at = 0x06028A64
+symbol = "swap_boot_f06028A64"
+
+[[replace]]
+module = "BOOT"
 at = 0x06028FE0
 symbol = "swap_boot_f06028FE0"
 
@@ -21331,6 +21416,16 @@ symbol = "swap_boot_f060290DC"
 module = "BOOT"
 at = 0x06029100
 symbol = "swap_boot_f06029100"
+
+[[replace]]
+module = "BOOT"
+at = 0x06029274
+symbol = "swap_boot_f06029274"
+
+[[replace]]
+module = "BOOT"
+at = 0x06029288
+symbol = "swap_boot_f06029288"
 
 [[replace]]
 module = "BOOT"
@@ -21476,6 +21571,11 @@ symbol = "swap_boot_f0602B100"
 module = "BOOT"
 at = 0x0602B1B8
 symbol = "swap_boot_f0602B1B8"
+
+[[replace]]
+module = "BOOT"
+at = 0x0602B244
+symbol = "swap_boot_f0602B244"
 
 [[replace]]
 module = "BOOT"
@@ -21689,8 +21789,33 @@ symbol = "swap_boot_f060306D0"
 
 [[replace]]
 module = "BOOT"
+at = 0x06030738
+symbol = "swap_boot_f06030738"
+
+[[replace]]
+module = "BOOT"
+at = 0x06030914
+symbol = "swap_boot_f06030914"
+
+[[replace]]
+module = "BOOT"
+at = 0x06030B38
+symbol = "swap_boot_f06030B38"
+
+[[replace]]
+module = "BOOT"
+at = 0x06030C94
+symbol = "swap_boot_f06030C94"
+
+[[replace]]
+module = "BOOT"
 at = 0x06030E28
 symbol = "swap_boot_f06030E28"
+
+[[replace]]
+module = "BOOT"
+at = 0x0603104C
+symbol = "swap_boot_f0603104C"
 
 [[replace]]
 module = "BOOT"
@@ -21721,6 +21846,11 @@ symbol = "swap_boot_f060314EC"
 module = "BOOT"
 at = 0x0603157C
 symbol = "swap_boot_f0603157C"
+
+[[replace]]
+module = "BOOT"
+at = 0x06031ABC
+symbol = "swap_boot_f06031ABC"
 
 [[replace]]
 module = "BOOT"
@@ -21794,6 +21924,11 @@ symbol = "swap_boot_f0603262C"
 
 [[replace]]
 module = "BOOT"
+at = 0x06032718
+symbol = "swap_boot_f06032718"
+
+[[replace]]
+module = "BOOT"
 at = 0x0603277C
 symbol = "swap_boot_f0603277C"
 
@@ -21806,6 +21941,11 @@ symbol = "swap_boot_f0603285C"
 module = "BOOT"
 at = 0x06032914
 symbol = "swap_boot_f06032914"
+
+[[replace]]
+module = "BOOT"
+at = 0x06032944
+symbol = "swap_boot_f06032944"
 
 [[replace]]
 module = "BOOT"
@@ -21861,6 +22001,11 @@ symbol = "swap_boot_f0603313C"
 module = "BOOT"
 at = 0x06033168
 symbol = "swap_boot_f06033168"
+
+[[replace]]
+module = "BOOT"
+at = 0x0603328C
+symbol = "swap_boot_f0603328C"
 
 [[replace]]
 module = "BOOT"
@@ -22229,6 +22374,16 @@ symbol = "swap_boot_f0603807C"
 
 [[replace]]
 module = "BOOT"
+at = 0x060382AC
+symbol = "swap_boot_f060382AC"
+
+[[replace]]
+module = "BOOT"
+at = 0x06038384
+symbol = "swap_boot_f06038384"
+
+[[replace]]
+module = "BOOT"
 at = 0x060387C8
 symbol = "swap_boot_f060387C8"
 
@@ -22444,6 +22599,11 @@ symbol = "swap_boot_f0603A76C"
 
 [[replace]]
 module = "BOOT"
+at = 0x0603A890
+symbol = "swap_boot_f0603A890"
+
+[[replace]]
+module = "BOOT"
 at = 0x0603A9AC
 symbol = "swap_boot_f0603A9AC"
 
@@ -22466,6 +22626,11 @@ symbol = "swap_boot_f0603AB10"
 module = "BOOT"
 at = 0x0603AB28
 symbol = "swap_boot_f0603AB28"
+
+[[replace]]
+module = "BOOT"
+at = 0x0603ABAC
+symbol = "swap_boot_f0603ABAC"
 
 [[replace]]
 module = "BOOT"
@@ -22546,6 +22711,21 @@ symbol = "swap_boot_f0603D62C"
 module = "BOOT"
 at = 0x0603D67C
 symbol = "swap_boot_f0603D67C"
+
+[[replace]]
+module = "BOOT"
+at = 0x0603D720
+symbol = "swap_boot_f0603D720"
+
+[[replace]]
+module = "BOOT"
+at = 0x0603D880
+symbol = "swap_boot_f0603D880"
+
+[[replace]]
+module = "BOOT"
+at = 0x0603E514
+symbol = "swap_boot_f0603E514"
 
 [[replace]]
 module = "BOOT"
@@ -22769,6 +22949,11 @@ symbol = "swap_boot_f06041B44"
 
 [[replace]]
 module = "BOOT"
+at = 0x06041BDC
+symbol = "swap_boot_f06041BDC"
+
+[[replace]]
+module = "BOOT"
 at = 0x06041D58
 symbol = "swap_boot_f06041D58"
 
@@ -22806,6 +22991,11 @@ symbol = "swap_boot_f060426AC"
 module = "BOOT"
 at = 0x060426FC
 symbol = "swap_boot_f060426FC"
+
+[[replace]]
+module = "BOOT"
+at = 0x06042B28
+symbol = "swap_boot_f06042B28"
 
 [[replace]]
 module = "BOOT"
@@ -23064,6 +23254,11 @@ symbol = "swap_boot_f06046DD8"
 
 [[replace]]
 module = "BOOT"
+at = 0x060473B4
+symbol = "swap_boot_f060473B4"
+
+[[replace]]
+module = "BOOT"
 at = 0x06047668
 symbol = "swap_boot_f06047668"
 
@@ -23081,6 +23276,11 @@ symbol = "swap_boot_f06048818"
 module = "BOOT"
 at = 0x06048B28
 symbol = "swap_boot_f06048B28"
+
+[[replace]]
+module = "BOOT"
+at = 0x06048C08
+symbol = "swap_boot_f06048C08"
 
 [[replace]]
 module = "BOOT"
@@ -23179,6 +23379,26 @@ symbol = "swap_boot_f06049548"
 
 [[replace]]
 module = "BOOT"
+at = 0x060496CC
+symbol = "swap_boot_f060496CC"
+
+[[replace]]
+module = "BOOT"
+at = 0x06049858
+symbol = "swap_boot_f06049858"
+
+[[replace]]
+module = "BOOT"
+at = 0x06049910
+symbol = "swap_boot_f06049910"
+
+[[replace]]
+module = "BOOT"
+at = 0x0604999C
+symbol = "swap_boot_f0604999C"
+
+[[replace]]
+module = "BOOT"
 at = 0x06049ED0
 symbol = "swap_boot_f06049ED0"
 
@@ -23186,6 +23406,11 @@ symbol = "swap_boot_f06049ED0"
 module = "BOOT"
 at = 0x0604A218
 symbol = "swap_boot_f0604A218"
+
+[[replace]]
+module = "BOOT"
+at = 0x0604A250
+symbol = "swap_boot_f0604A250"
 
 [[replace]]
 module = "BOOT"
@@ -23416,6 +23641,11 @@ symbol = "swap_boot_f060533F8"
 module = "BOOT"
 at = 0x06053404
 symbol = "swap_boot_f06053404"
+
+[[replace]]
+module = "BOOT"
+at = 0x06053480
+symbol = "swap_boot_f06053480"
 
 [[replace]]
 module = "BOOT"
@@ -23669,6 +23899,11 @@ symbol = "swap_boot_f06055A2C"
 
 [[replace]]
 module = "BOOT"
+at = 0x06055A9C
+symbol = "swap_boot_f06055A9C"
+
+[[replace]]
+module = "BOOT"
 at = 0x06055C3C
 symbol = "swap_boot_f06055C3C"
 
@@ -23824,6 +24059,11 @@ symbol = "swap_boot_f06057704"
 
 [[replace]]
 module = "BOOT"
+at = 0x06057948
+symbol = "swap_boot_f06057948"
+
+[[replace]]
+module = "BOOT"
 at = 0x060579FC
 symbol = "swap_boot_f060579FC"
 
@@ -23871,6 +24111,11 @@ symbol = "swap_boot_f060582D0"
 module = "BOOT"
 at = 0x060583A4
 symbol = "swap_boot_f060583A4"
+
+[[replace]]
+module = "BOOT"
+at = 0x06058454
+symbol = "swap_boot_f06058454"
 
 [[replace]]
 module = "BOOT"
@@ -24029,6 +24274,11 @@ symbol = "swap_boot_f06059FE0"
 
 [[replace]]
 module = "BOOT"
+at = 0x0605A15C
+symbol = "swap_boot_f0605A15C"
+
+[[replace]]
+module = "BOOT"
 at = 0x0605A290
 symbol = "swap_boot_f0605A290"
 
@@ -24096,6 +24346,11 @@ symbol = "swap_boot_f0605AE6C"
 module = "BOOT"
 at = 0x0605AF48
 symbol = "swap_boot_f0605AF48"
+
+[[replace]]
+module = "BOOT"
+at = 0x0605B0D8
+symbol = "swap_boot_f0605B0D8"
 
 [[replace]]
 module = "BOOT"
@@ -24221,6 +24476,11 @@ symbol = "swap_boot_f0605BD7C"
 module = "BOOT"
 at = 0x0605BDEC
 symbol = "swap_boot_f0605BDEC"
+
+[[replace]]
+module = "BOOT"
+at = 0x0605BE88
+symbol = "swap_boot_f0605BE88"
 
 [[replace]]
 module = "BOOT"
@@ -24509,6 +24769,11 @@ symbol = "swap_boot_f0605D360"
 
 [[replace]]
 module = "BOOT"
+at = 0x0605D734
+symbol = "swap_boot_f0605D734"
+
+[[replace]]
+module = "BOOT"
 at = 0x0605D8E4
 symbol = "swap_boot_f0605D8E4"
 
@@ -24639,6 +24904,11 @@ symbol = "swap_boot_f0605E714"
 
 [[replace]]
 module = "BOOT"
+at = 0x0605E74C
+symbol = "swap_boot_f0605E74C"
+
+[[replace]]
+module = "BOOT"
 at = 0x0605E800
 symbol = "swap_boot_f0605E800"
 
@@ -24701,6 +24971,16 @@ symbol = "swap_boot_f0605EFC8"
 module = "BOOT"
 at = 0x0605F0E4
 symbol = "swap_boot_f0605F0E4"
+
+[[replace]]
+module = "BOOT"
+at = 0x0605F150
+symbol = "swap_boot_f0605F150"
+
+[[replace]]
+module = "BOOT"
+at = 0x0605F1D4
+symbol = "swap_boot_f0605F1D4"
 
 [[replace]]
 module = "BOOT"
@@ -25394,6 +25674,11 @@ symbol = "swap_boot_f06067F58"
 
 [[replace]]
 module = "BOOT"
+at = 0x06067FA4
+symbol = "swap_boot_f06067FA4"
+
+[[replace]]
+module = "BOOT"
 at = 0x06067FFC
 symbol = "swap_boot_f06067FFC"
 
@@ -25426,6 +25711,11 @@ symbol = "swap_boot_f060683F0"
 module = "BOOT"
 at = 0x06068428
 symbol = "swap_boot_f06068428"
+
+[[replace]]
+module = "BOOT"
+at = 0x060688A0
+symbol = "swap_boot_f060688A0"
 
 [[replace]]
 module = "BOOT"
@@ -25486,6 +25776,11 @@ symbol = "swap_boot_f06069C28"
 module = "BOOT"
 at = 0x06069C78
 symbol = "swap_boot_f06069C78"
+
+[[replace]]
+module = "BOOT"
+at = 0x06069CC8
+symbol = "swap_boot_f06069CC8"
 
 [[replace]]
 module = "BOOT"
@@ -25731,6 +26026,11 @@ symbol = "swap_boot_f0606BD38"
 module = "BOOT"
 at = 0x0606BEF8
 symbol = "swap_boot_f0606BEF8"
+
+[[replace]]
+module = "BOOT"
+at = 0x0606BF80
+symbol = "swap_boot_f0606BF80"
 
 [[replace]]
 module = "BOOT"
@@ -27404,6 +27704,11 @@ symbol = "swap_boot_f0606EF98"
 
 [[replace]]
 module = "BOOT"
+at = 0x0606EFA4
+symbol = "swap_boot_f0606EFA4"
+
+[[replace]]
+module = "BOOT"
 at = 0x0606F040
 symbol = "swap_boot_f0606F040"
 
@@ -28134,6 +28439,26 @@ symbol = "swap_boot_f06072AC0"
 
 [[replace]]
 module = "BOOT"
+at = 0x06072CD4
+symbol = "swap_boot_f06072CD4"
+
+[[replace]]
+module = "BOOT"
+at = 0x06072D28
+symbol = "swap_boot_f06072D28"
+
+[[replace]]
+module = "BOOT"
+at = 0x06072EA8
+symbol = "swap_boot_f06072EA8"
+
+[[replace]]
+module = "BOOT"
+at = 0x06072FC4
+symbol = "swap_boot_f06072FC4"
+
+[[replace]]
+module = "BOOT"
 at = 0x060730F0
 symbol = "swap_boot_f060730F0"
 
@@ -28169,6 +28494,31 @@ symbol = "swap_boot_f06073308"
 
 [[replace]]
 module = "BOOT"
+at = 0x06073368
+symbol = "swap_boot_f06073368"
+
+[[replace]]
+module = "BOOT"
+at = 0x06073464
+symbol = "swap_boot_f06073464"
+
+[[replace]]
+module = "BOOT"
+at = 0x06073498
+symbol = "swap_boot_f06073498"
+
+[[replace]]
+module = "BOOT"
+at = 0x060734BC
+symbol = "swap_boot_f060734BC"
+
+[[replace]]
+module = "BOOT"
+at = 0x06073A20
+symbol = "swap_boot_f06073A20"
+
+[[replace]]
+module = "BOOT"
 at = 0x06074130
 symbol = "swap_boot_f06074130"
 
@@ -28201,6 +28551,26 @@ symbol = "swap_boot_f06074300"
 module = "BOOT"
 at = 0x06074360
 symbol = "swap_boot_f06074360"
+
+[[replace]]
+module = "BOOT"
+at = 0x060744E8
+symbol = "swap_boot_f060744E8"
+
+[[replace]]
+module = "BOOT"
+at = 0x06074520
+symbol = "swap_boot_f06074520"
+
+[[replace]]
+module = "BOOT"
+at = 0x06074550
+symbol = "swap_boot_f06074550"
+
+[[replace]]
+module = "BOOT"
+at = 0x060746CC
+symbol = "swap_boot_f060746CC"
 
 [[replace]]
 module = "BOOT"

@@ -90,11 +90,19 @@ def test_code_that_reads_a_register_its_caller_keeps_is_the_middle_of_a_function
     assert registers.saved(image, BASE, code) == needs
 
 
-def test_a_call_into_the_middle_of_a_function_is_refused():
+def test_a_call_into_the_middle_of_a_function_leaves_it_the_registers_the_function_did_not_touch():
     # caller: bsr piece ; nop ; rts ; nop                piece: mov r14,r0 ; rts ; nop
     image, code = program((0xB002, NOP, RTS, NOP), (encode("mov Rm,Rn", 0, 14), RTS, NOP))
-    with pytest.raises(lift.Unsupported, match="middle of a function that reads r14"):
-        lift.lift(image, BASE, code[BASE], code)
+    text = lift.lift(image, BASE, code[BASE], code)
+    assert "GCALL0(0x06006008)" in text and "SETR" not in text
+
+
+def test_a_call_into_the_middle_of_a_function_sets_the_registers_it_has_written_and_gives_the_caller_its_own_back():
+    # caller: mov #1,r14 ; bsr piece ; nop ; rts ; nop                piece: mov r14,r0 ; rts ; nop
+    image, code = program((encode("mov #imm,Rn", 14, low=1), 0xB002, NOP, RTS, NOP), (encode("mov Rm,Rn", 0, 14), RTS, NOP))
+    lines = [line.strip() for line in lift.lift(image, BASE, code[BASE], code).splitlines()]
+    assert lines[lines.index("SETR(14, 1);") - 1:lines.index("SETR(14, c2014);")] == [
+        "c2014 = R(14);", "SETR(14, 1);", "r0 = GCALL0(0x0600600A);"]
 
 
 def test_a_branch_into_the_middle_of_a_function_leaves_it_the_registers_the_function_did_not_touch():
@@ -171,10 +179,9 @@ def test_a_register_read_after_a_call_to_a_runtime_routine_is_still_the_callers(
     assert registers.reads(image, BASE, code) == {4, 6}
 
 
-def test_a_register_a_call_overwrote_is_refused_when_a_later_block_reads_it():
+def test_a_register_a_call_overwrote_is_read_from_the_context_when_a_later_block_reads_it():
     # caller: bsr callee ; nop ; tst r0,r0 ; bt over ; mov r6,r4 ; over: rts ; nop       callee: mov #0,r6 ; rts ; nop
     caller = (0xB005, NOP, encode("tst Rm,Rn", 0, 0), 0x8900, encode("mov Rm,Rn", 4, 6), RTS, NOP)
     callee = (encode("mov #imm,Rn", 6, low=0), RTS, NOP)
     image, code = program(caller, callee)
-    with pytest.raises(lift.Unsupported, match="r6 is read after a call"):
-        lift.lift(image, BASE, code[BASE], code)
+    assert "r6 = R(6);" in lift.lift(image, BASE, code[BASE], code)

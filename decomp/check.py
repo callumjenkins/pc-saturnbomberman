@@ -12,6 +12,7 @@ import ctypes
 import json
 import os
 import random
+import re
 import resource
 import runpy
 import subprocess
@@ -283,6 +284,7 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
             state["error"] = str(e)
             return 0
         finally:
+            regs[1:8] = cpu.r[1:8]                              # what the callee left, which R(n) reads
             if ctypes.c_int.in_dll(lib, "g_tail").value:        # a tail call: what it leaves is the function's own
                 regs[8:15] = cpu.r[8:15]
                 ctypes.c_uint32.in_dll(lib, "g_pr_value").value = cpu.pr
@@ -290,6 +292,27 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
             controls[:] = [cpu.sr & ~1, cpu.gbr, cpu.vbr]
             state["calls"].append(addr)
     return hook
+
+
+_READ_AFTER_CALL = re.compile(r"\bR\([1-7]\)")
+_DEFINITION_START = re.compile(r"^(?:int|void) (f[0-9A-F]{8})\(", re.MULTILINE)
+_reading: set[str] | None = None
+
+
+def reads_callee_registers() -> set[str]:
+    """The functions of the module whose C reads a register r1 to r7 as its last callee left it, which an answered
+    call does not set, so their trials run the callees."""
+    global _reading
+    if _reading is None:
+        _reading = set()
+        for path in status.sources():
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+            starts = list(_DEFINITION_START.finditer(text))
+            for here, following in zip(starts, starts[1:] + [None]):
+                if _READ_AFTER_CALL.search(text, here.end(), following.start() if following else len(text)):
+                    _reading.add(here.group(1))
+    return _reading
 
 
 def limit_memory() -> float:
@@ -360,7 +383,7 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     ahead = random.Random()                     # a copy of r's state, so a trial with no arguments still varies and r's draws stay as they were
     ahead.setstate(r.getstate())
     salt = ahead.getrandbits(64)
-    if name not in cases.UNSTUBBED and random.Random("stub:%r:%d" % (vals, salt)).random() < STUBBED:
+    if name not in cases.UNSTUBBED and name not in reads_callee_registers() and random.Random("stub:%r:%d" % (vals, salt)).random() < STUBBED:
         answers = random.Random("answers:%r:%d" % (vals, salt))
         state["stub"] = cpu.stub = [value(("any",), answers) & 0xFFFFFFFF for _ in range(16)]
     keep = machine.point(lib, host)

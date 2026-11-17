@@ -27,6 +27,7 @@ from state import (LOCAL_TYPES, MAC, NO_FLAG, VAR, Copies, State, Stmt, Unsuppor
 
 _CALLS = ("bsr", "jsr")
 TABLE_LOAD = re.compile(r"mov\.w @\(r0,r\d+\),r(\d+)$")     # the load of an entry of a jump table of words
+SAVED = 2000                            # variables from here hold a register of the caller while a call into the middle of a function borrows it
 MERGED = 1000                           # flag variables from here are made for a block entered with T in different variables
 MAX_ROUNDS = 12                         # times read_blocks reads every block again before it gives up
 
@@ -72,13 +73,18 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         spill(ins, st, image, functions)
     known = functions is not None and number(where) is not None
     needs = sorted(registers.saved(image, number(where), functions)) if known else []
+    restore: list[str] = []
     if needs:
-        if not tail or not (st.parked or st.sp == 0):
+        if tail and not (st.parked or st.sp == 0):
             raise Unsupported("goes to %s, the middle of a function that reads r%d from its caller" % (where, needs[0]))
         for reg in needs:
             if reg in st.touched:
+                if not tail:                    # the context holds the caller's value, which this function gives back
+                    kept = "c%d" % (SAVED + reg)
+                    st.stmts.append(Stmt(kept, "R(%d)" % reg, False))
+                    restore.append("SETR(%d, %s);" % (reg, kept))
                 st.effect("SETR(%d, %s);" % (reg, strip(st.get(reg))))
-        if st.sp:
+        if st.sp and tail:
             st.effect("SETSP(%s);" % st.get(15))
     helper = registers.routine(image, number(where), functions) if known and not tail else None
     if helper:
@@ -116,6 +122,8 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         st.effect("UNFRAME(sp);")
     written = registers.writes(image, number(where), functions) - {0} if known else registers.EVERY - {0}
     st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in written}))
+    for line in restore:
+        st.effect(line)
     st.clobbered |= written
     st.callee = where
     st.clobbered.discard(0)

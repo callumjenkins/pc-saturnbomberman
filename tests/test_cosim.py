@@ -433,3 +433,13 @@ def test_mach_and_macl_are_compared_where_the_games_code_gives_them_back(game_ma
     (ctypes.c_uint32 * 2).in_dll(lib, "g_mac_regs")[:] = [host_macl, 7]
     game = types.SimpleNamespace(r=[0] * 16, pr=0, macl=game_macl, mach=7)
     assert check.register_differences(lib, game, (7, 5)) == expected
+
+
+def test_a_function_that_reads_a_register_its_callee_left_has_its_calls_run(tmp_path, monkeypatch):
+    source = tmp_path / "some.c"
+    source.write_text("int f06006000(int r4)\n{\n    int r5;\n\n    GCALL0(0x06007000);\n    r5 = R(5);\n    return r5;\n}\n\n"
+                      "int f06006010(int r4)\n{\n    return R(14) + r4;\n}\n\n"
+                      "void f06006020(void)\n{\n    int r0;\n\n    r0 = GCALL0(0x06007000);\n}\n")
+    monkeypatch.setattr(status, "sources", lambda folder=None: [str(source)])
+    monkeypatch.setattr(check, "_reading", None)
+    assert check.reads_callee_registers() == {"f06006000"}
