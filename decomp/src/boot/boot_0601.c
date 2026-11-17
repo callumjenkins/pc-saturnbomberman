@@ -11897,3 +11897,7104 @@ int f0601FAA0(int r4, int r5, int r6)
     }
     return r12;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0601288C(int r4)
+{
+    int r0, r5, r8, r9, r10, r11, r12, c2011;
+
+    r11 = R(11);
+    r8 = r4;
+    r10 = 0x060759B4;
+    r4 = LD32(0x060759B4);
+    r0 = GCALL1(0x0604922C, r4);
+    c2011 = R(11);
+    SETR(11, r11);
+    r0 = GCALL1(0x06010DDC, 25);
+    SETR(11, c2011);
+    r12 = 0x060766C0;
+    r9 = LD32(0x060766C0);
+    r11 = 0;
+    if (r9 == -1) {
+        ST32(r10, r11);
+        r5 = LD32(r8 + 8);
+        r4 = LD32(r8 + 12);
+        r0 = GCALL4(0x06048DE0, r4, (r5 + 100), (r5 + 104), 0x06089A24);
+        if ((r0 & r0) == 0) {
+            ST32(r12, r11);
+        }
+    }
+    return r9;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06013CA0(void)
+{
+    int r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, c9, c15, c2008, c2009;
+
+    r8 = R(8);
+    r9 = R(9);
+    r1 = LD32(0x06089CB8);
+    ST32(0x06089CB8, (r1 + 1));
+    r2 = LD32(0x06089CB8);
+    if (r2 > 1) {
+        r2 = LD8(-494);
+        r1 = LD8(-493);
+        r2 = ((r2 & 255) << 8) | (r1 & 255);
+        r1 = LD32(0x06089CC0);
+        r2 = r2 - r1;
+        if (!(r2 >= 0)) {
+            r1 = LD32(0x0608B9B8);
+            r2 = r2 + r1;
+        }
+        if (r2 > 0xF00) {
+            r2 = LD32(0x06089CAC);
+            ST32(0x06089CAC, (r2 + 1));
+            r1 = LD32(0x06089CAC);
+        }
+    }
+    r2 = LD8(-494);
+    r1 = LD8(-493);
+    ST32(0x06089CC0, (((r2 & 255) << 8) | (r1 & 255)));
+    r0 = GCALL0(0x06013F7C);
+    r0 = GCALL0(0x06062304);
+    r1 = LD32(0x060759A8);
+    if (!((r1 & r1) == 0)) {
+        r1 = LD32(0x060759AC);
+        if ((r1 & r1) == 0) {
+            r0 = LD16(0x25D00010);
+            r0 = r0 & 1;
+            if ((r0 & r0) == 0) {
+                r3 = LD16(0x25D00014);
+                ST16(0x25C00000, 0x1000);
+                ST16(0x25C00002, r3);
+            }
+        }
+    }
+    r2 = 0x060759AC;
+    r1 = LD32(0x060759AC);
+    if ((r1 & r1) == 0) {
+        r0 = LD16(0x25D00010);
+        r0 = r0 & 3;
+        if (r0 == 3) {
+            r9 = 1;
+            ST32(r2, 1);
+        }
+    }
+    r1 = LD32(0x060759A8);
+    if (!((r1 & r1) == 0)) {
+        r3 = 0x060759AC;
+        r1 = LD32(0x060759AC);
+        c9 = (r1 & r1) == 0;
+        r1 = 2;
+        if (!(c9)) {
+            ST16(0x25D00004, r1);
+            ST32(0x06079FC4, 1);
+            ST32(r3, 0);
+        }
+    }
+    r1 = LD32(0x06089CBC);
+    if ((r1 & r1) == 0) {
+        r0 = LD8(-490);
+        r0 = GCALL2(0x0607290C, 8, ((r0 & 3) + (r0 & 3)));
+        c2008 = R(8);
+        SETR(8, r8);
+        r0 = GCALL1(0x06073368, r0);
+        SETR(8, c2008);
+        r2 = r0;
+        r0 = LD16(0x25F80004);
+        if (((r0 & 1) & (r0 & 1)) == 0) {
+            r1 = LD32(0x06000324);
+            if (!((r1 & r1) == 0)) {
+                r4 = LD32(0x06013C9C);
+            } else {
+                r4 = LD32(0x06013C98);
+            }
+        } else {
+            r1 = LD32(0x06000324);
+            if (!((r1 & r1) == 0)) {
+                r4 = LD32(0x06013C94);
+            } else {
+                r4 = LD32(0x06013C90);
+            }
+        }
+        r0 = GCALL2(0x06072FC4, r4, r2);
+        r0 = GCALL1(0x060733D8, r0);
+        r5 = -494;
+        r6 = -493;
+        r7 = 0x06089CC0;
+        r3 = 0x0608B9B8;
+        do {
+            r1 = LD8(r5);
+            r2 = LD8(r6);
+            r1 = ((r1 & 255) << 8) | (r2 & 255);
+            r2 = LD32(r7);
+            r1 = r1 - r2;
+            if (!(r1 >= 0)) {
+                r2 = LD32(r3);
+                r1 = r1 + r2;
+                do {
+                    c15 = r1 >= 0;
+                    r1 = r1 + r2;
+                } while (AGAIN(!(c15)));
+                r1 = r1 - r2;
+            }
+        } while (AGAIN(!(r1 >= r0)));
+        r0 = LD8(0x20100063);
+        r0 = r0 & 1;
+        if ((r0 & r0) == 0) {
+            r0 = GCALL0(0x06016FE4);
+            r0 = GCALL0(0x06016F08);
+            r0 = GCALL0(0x06016A78);
+        }
+    }
+    r8 = 0x0607599C;
+    r1 = LD32(0x0607599C);
+    if (!((r1 & r1) == 0)) {
+        r6 = LD32(0x060759A4);
+        r5 = LD32(0x060759A0);
+        r4 = LD32(r8);
+        c2009 = R(9);
+        SETR(9, r9);
+        r0 = GCALL3(0x06069CC8, r4, r5, r6);
+        SETR(9, c2009);
+        ST32(r8, 0);
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06015D00(int r4, int r5)
+{
+    int r0, r1, r2, r3, r6, r7, r8, r9, r10, r11, r12, r13, c11, c13, c15;
+
+    r9 = r4;
+    r0 = r9;
+    r1 = LD32(r0 + 152);
+    r7 = 144;
+    r2 = LD32(r0 + 144);
+    r13 = LD32(r0 + 156);
+    r1 = r1 - r2;
+    ST32(r0 + 156, r1);
+    r3 = 160;
+    r6 = LD32(r0 + 160);
+    r12 = 0;
+    if (!((r1 + r5) > r6)) {
+        ST32(0x06075A70, (144 + r9));
+        if (!((r12 & r12) == 0)) {
+            r0 = GCALL1(0x06027F48, r12);
+        }
+        r0 = 1;
+    } else {
+        r11 = r6;
+        r2 = r11 + ((((((int)(((long long)r11 * 0x66666667) >> 32)) >> 1) >> 1) >> 1) - (((r11 << 1) - (r11 << 1)) - ((unsigned)r11 >> 31)));
+        r1 = 0x800;
+        if (!(r5 >= 0x800)) {
+            r5 = r1;
+        }
+        r10 = r11 + r5;
+        if (r10 > r2) {
+            r10 = r2;
+        }
+        r0 = r9;
+        ST32(r0 + r3, r10);
+        r5 = LD32(r0 + r7);
+        r6 = r10;
+        if ((r5 & r5) == 0) {
+            r0 = GCALL4(0x060279E0, 0, r10, 4, 1);
+            r8 = r0;
+        } else {
+            r0 = GCALL4(0x06027C18, 0, r5, r6, r7);
+            r8 = r0;
+        }
+        c11 = (r8 & r8) == 0;
+        r7 = c11;
+        if (!(c11)) {
+            r0 = r9;
+            r1 = LD32(r0 + 144);
+            r2 = r8 - r1;
+            r1 = LD32(r0 + 152);
+            ST32(r0 + 152, (r1 + r2));
+            r3 = 148;
+            r1 = LD32(r0 + 148);
+            c13 = (r1 & r1) == 0;
+            r1 = r1 + r2;
+            if (!(c13)) {
+                ST32(r0 + r3, r1);
+            }
+            r3 = r8;
+            if (!((r8 & r8) == 0)) {
+                do {
+                    r1 = LD32(r3 + 4);
+                    c15 = (r1 & r1) == 0;
+                    r1 = r1 + r2;
+                    if (!(c15)) {
+                        ST32(r3 + 4, r1);
+                    }
+                    r3 = LD32(r3 + 4);
+                } while (AGAIN(!((r3 & r3) == 0)));
+            }
+            ST32(144 + r9, r8);
+            ST32(0x06075A70, (144 + r9));
+            if (!((r12 & r12) == 0)) {
+                r0 = GCALL1(0x06027F48, r12);
+            }
+            r0 = 1;
+        } else {
+            r0 = GCALL4(0x060279E0, 1, r10, 4, r7);
+            r8 = r0;
+            r6 = r11;
+            if (!((r8 & r8) == 0)) {
+                r5 = LD32(r9 + 144);
+                r0 = GCALL3(0x0604B358, r8, r5, r6);
+                r12 = LD32(r9 + 144);
+                r0 = r9;
+                r1 = LD32(r0 + 144);
+                r2 = r8 - r1;
+                r1 = LD32(r0 + 152);
+                ST32(r0 + 152, (r1 + r2));
+                r3 = 148;
+                r1 = LD32(r0 + 148);
+                c13 = (r1 & r1) == 0;
+                r1 = r1 + r2;
+                if (!(c13)) {
+                    ST32(r0 + r3, r1);
+                }
+                r3 = r8;
+                if (!((r8 & r8) == 0)) {
+                    do {
+                        r1 = LD32(r3 + 4);
+                        c15 = (r1 & r1) == 0;
+                        r1 = r1 + r2;
+                        if (!(c15)) {
+                            ST32(r3 + 4, r1);
+                        }
+                        r3 = LD32(r3 + 4);
+                    } while (AGAIN(!((r3 & r3) == 0)));
+                }
+                ST32(144 + r9, r8);
+                ST32(0x06075A70, (144 + r9));
+                if (!((r12 & r12) == 0)) {
+                    r0 = GCALL1(0x06027F48, r12);
+                }
+                r0 = 1;
+            } else {
+                r0 = GCALL3(0x06045264, 0x0608B9D0, 0x06015CE4, r6);
+                r0 = GCALL1(0x0602BA00, 0x0608B9D0);
+                ST32(160 + r9, r11);
+                ST32(156 + r9, r13);
+                r0 = 0;
+            }
+        }
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06017468(void)
+{
+    int r0, r1, r2, r3, r4, r7, r8, r9, r10, r11, r12;
+
+    r3 = 0x06086F94;
+    r2 = 0;
+    r7 = 0;
+    r1 = 240;
+    do {
+        r0 = r7;
+        r7 = r7 + 4;
+        ST32(r0 + r3, r2);
+    } while (AGAIN(!(r7 > r1)));
+    r10 = 0;
+    r12 = 0x0608708C;
+    r11 = 0x06086F94;
+    r8 = 0x0608708C;
+    r9 = 0;
+    do {
+        ST32(r9 + r12, (0x06075C74 + r9));
+        r0 = r10 << 2;
+        r1 = LD32(r0 + 0x060761B0);
+        ST32(r8 + 4, r1);
+        r1 = LD32(r0 + 0x060762BC);
+        ST32(r8 + 8, r1);
+        r1 = LD32(r0 + 0x060763C8);
+        ST32(r8 + 12, r1);
+        ST32(r8 + 16, 0);
+        r4 = LD32(r9 + r12);
+        r0 = GCALL1(0x06017450, r4);
+        r2 = ((signed char)(((signed char)r0) - ((int)((((long long)((signed char)r0) * 0x4325C53F) & ~0xFFFFFFFFLL) | (unsigned)((((((((int)(((long long)((signed char)r0) * 0x4325C53F) >> 32)) >> 1) >> 1) >> 1) >> 1) - (((((signed char)r0) << 1) - (((signed char)r0) << 1)) - ((unsigned)((signed char)r0) >> 31))) * 61))))) << 2;
+        r0 = r2;
+        r1 = LD32(r0 + r11);
+        if (!((r1 & r1) == 0)) {
+            ST32(r8 + 16, r1);
+            r0 = r2;
+        }
+        ST32(r0 + r11, r8);
+        r8 = r8 + 20;
+        r10 = r10 + 1;
+        r9 = r9 + 20;
+    } while (AGAIN(!(r10 > 66)));
+    return 1;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060176FC(int r4)
+{
+    int r0, r1, r2, r5, r6, r8, r9, r10;
+
+    r9 = r4;
+    r1 = LD8(r9);
+    r6 = 3;
+    if (!((r1 & r1) == 0)) {
+        r0 = GCALL3(0x060752FC, 0x060176F8, r9, r6);
+        r2 = r9;
+        if ((r0 & r0) == 0) {
+            ST8((r2 + 3), 0);
+        }
+        r0 = GCALL1(0x06017450, r9);
+        r8 = LD32(((((signed char)r0) - ((int)((((long long)((signed char)r0) * 0x4325C53F) & ~0xFFFFFFFFLL) | (unsigned)((((((((int)(((long long)((signed char)r0) * 0x4325C53F) >> 32)) >> 1) >> 1) >> 1) >> 1) - (((((signed char)r0) << 1) - (((signed char)r0) << 1)) - ((unsigned)((signed char)r0) >> 31))) * 61)))) << 2) + 0x06086F94);
+        r0 = r8;
+        if (!((r8 & r8) == 0)) {
+            r10 = 0x06075104;
+            while (1) {
+                r5 = LD32(r8);
+                r0 = GCALL2(r10, r9, r5);
+                if ((r0 & r0) == 0) {
+                    break;
+                } else {
+                    r8 = LD32(r8 + 16);
+                    if (!((r8 & r8) == 0)) {
+                        POLL();
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+                POLL();
+            }
+            r0 = r8;
+        }
+    } else {
+        r0 = 0;
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0601B2C8(int r4, int r5)
+{
+    int r0, r1, r9, r10;
+
+    r10 = r4;
+    r9 = r5;
+    if (!(r5 >= 0)) {
+        r9 = -r9;
+    }
+    ST8(r10, 0);
+    r4 = HELPER((int)((int)(((long long)r9 * 0x10624DD3) >> 32)) >> 6);
+    r1 = r4 - (((r9 << 1) - (r9 << 1)) - ((unsigned)r9 >> 31));
+    r9 = r9 - r1;
+    r5 = LD32((r1 << 2) + 0x0607654C);
+    r0 = GCALL2(0x06075408, r10, r5);
+    r1 = (((((((int)(((long long)r9 * 0x51EB851F) >> 32)) >> 1) >> 1) >> 1) >> 1) >> 1) - (((r9 << 1) - (r9 << 1)) - ((unsigned)r9 >> 31));
+    r9 = r9 - r1;
+    r5 = LD32((r1 << 2) + 0x06076524);
+    r0 = GCALL2(0x06075408, r10, r5);
+    r1 = ((((int)(((long long)r9 * 0x66666667) >> 32)) >> 1) >> 1) - (((r9 << 1) - (r9 << 1)) - ((unsigned)r9 >> 31));
+    r9 = r9 - r1;
+    r5 = LD32((r1 << 2) + 0x060764FC);
+    r0 = GCALL2(0x06075408, r10, r5);
+    r5 = LD32((r9 << 2) + 0x060764D4);
+    r0 = GCALL2(0x06075408, r10, r5);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0601D898(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, r10, r11, c1, c1003;
+    long long m0;
+    int v24;
+    int v28;
+
+    r11 = r4;
+    r8 = r5;
+    r4 = LD32(0x10B4 + r11);
+    r0 = GCALL4(0x0601CC78, r4, 128, 0, r7);
+    r9 = LD32(r0 + 40);
+    r10 = LD32(r0 + 36);
+    r1 = LD32(0x10B8 + r11);
+    r4 = LD16(r1);
+    r0 = LD8((r1 + 2));
+    if (!(((r0 & 128) & (r0 & 128)) == 0)) {
+        r0 = GCALL1(0x0601EFA4, (r4 & 255));
+        c1 = r0 > 49;
+        r1 = 0;
+        c1003 = c1;
+        if (!(c1)) {
+            r1 = 255;
+            c1003 = 0;
+        }
+        r4 = r1;
+    }
+    r1 = r8;
+    if ((unsigned)r8 > (unsigned)3) {
+        r0 = 0;
+    } else {
+        r1 = LD16(0x0601D8EC + (r1 + r1));
+        switch (r1) {
+        case 200:
+            r0 = 0;
+            break;
+        case 8:
+            r2 = ((r9 << 1) - (r9 << 1)) - ((unsigned)r9 >> 31);
+            m0 = (long long)r9 * 0x55555556;
+            r0 = 0x06014E74;
+            r6 = LD32(r11 + 12);
+            r5 = LD32(r11 + 8);
+            r0 = GCALL5(r0, r11, (r5 + ((r9 - r2) >> 1)), (r6 + ((((int)((unsigned)r10 >> 31)) + r10) >> 1)), (((int)(m0 >> 32)) - r2), ((signed char)r4));
+            r0 = (((r9 + r9) + r9) + ((int)((unsigned)((r9 + r9) + r9) >> 31))) >> 1;
+            break;
+        case 24:
+            r2 = ((r9 << 1) - (r9 << 1)) - ((unsigned)r9 >> 31);
+            m0 = (long long)r9 * 0x55555556;
+            r6 = LD32(r11 + 12);
+            r0 = 0x06014FE4;
+            r5 = LD32(r11 + 8);
+            r0 = GCALL5(r0, r11, (r5 + ((r9 - r2) >> 1)), (r6 + ((((int)((unsigned)r10 >> 31)) + r10) >> 1)), (((int)(m0 >> 32)) - r2), ((signed char)r4));
+            r0 = (((r9 + r9) + r9) + ((int)((unsigned)((r9 + r9) + r9) >> 31))) >> 1;
+            break;
+        case 94:
+            r5 = LD32(r11 + 8);
+            r6 = LD32(r11 + 12);
+            r8 = r9 + r9;
+            r0 = GCALL6(0x06015154, r11, (r5 + (((int)(((long long)r9 * 0x2AAAAAAB) >> 32)) - (((r9 << 1) - (r9 << 1)) - ((unsigned)r9 >> 31)))), (r6 - (((int)(((long long)((r10 << 2) + r10) * 0x2AAAAAAB) >> 32)) - (((((r10 << 2) + r10) << 1) - (((r10 << 2) + r10) << 1)) - ((unsigned)((r10 << 2) + r10) >> 31)))), ((r5 + (((int)(((long long)r9 * 0x2AAAAAAB) >> 32)) - (((r9 << 1) - (r9 << 1)) - ((unsigned)r9 >> 31)))) + (((int)(((long long)r8 * 0x55555556) >> 32)) - (((r8 << 1) - (r8 << 1)) - ((unsigned)r8 >> 31)))), ((((int)(((long long)(r10 + r10) * 0x55555556) >> 32)) - ((((r10 + r10) << 1) - ((r10 + r10) << 1)) - ((unsigned)(r10 + r10) >> 31))) + (r6 - (((int)(((long long)((r10 << 2) + r10) * 0x2AAAAAAB) >> 32)) - (((((r10 << 2) + r10) << 1) - (((r10 << 2) + r10) << 1)) - ((unsigned)((r10 << 2) + r10) >> 31))))), ((signed char)r4));
+            r0 = ((r8 + r9) + ((int)((unsigned)(r8 + r9) >> 31))) >> 1;
+            break;
+        }
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0601EFA4(int r4)
+{
+    return ((((((((int)(((long long)(((((((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2)) + ((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2))) + ((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2))) + (28 & (r4 & 255))) + (((r4 & 255) & 3) + ((r4 & 255) & 3))) * 100) * ((int)0x92492493)) >> 32)) + (((((((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2)) + ((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2))) + ((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2))) + (28 & (r4 & 255))) + (((r4 & 255) & 3) + ((r4 & 255) & 3))) * 100)) >> 1) >> 1) >> 1) >> 1) >> 1) - ((((((((((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2)) + ((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2))) + ((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2))) + (28 & (r4 & 255))) + (((r4 & 255) & 3) + ((r4 & 255) & 3))) * 100) << 1) - ((((((((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2)) + ((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2))) + ((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2))) + (28 & (r4 & 255))) + (((r4 & 255) & 3) + ((r4 & 255) & 3))) * 100) << 1)) - ((unsigned)(((((((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2)) + ((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2))) + ((int)((unsigned)((int)((unsigned)((int)((unsigned)(r4 & 255) >> 2)) >> 1)) >> 2))) + (28 & (r4 & 255))) + (((r4 & 255) & 3) + ((r4 & 255) & 3))) * 100) >> 31));
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f060106BC(int r4, int r5)
+{
+    int r0, r1, r2, r3, r6, r7, r8, r10, c5, c11, c14, c1013, c1020, c1027, c1028;
+
+    r1 = LD32(r4 + 20);
+    r8 = 0x1FF;
+    r5 = (r5 + 8) & -16;
+    if (r1 > 0x1FF) {
+        r7 = 0x060759B4;
+        r2 = LD32(0x060759B4);
+        r3 = 0x060759B8;
+        r1 = LD32(0x060759B8);
+        if (r2 == r1) {
+            r0 = (SR() & ~1) | 1;
+            r6 = (int)((unsigned)((int)((unsigned)(r0 & 240) >> 2)) >> 2);
+            r0 = (SR() & ~1) | 1;
+            SETSR((r0 | 240));
+            r10 = r5 + -256;
+            r2 = 0x060759C0;
+            r1 = LD32(0x060759C0);
+            if (r10 > r1) {
+                r10 = LD32(r2);
+            }
+            if (!(r10 >= 0)) {
+                r10 = 0;
+            }
+            r1 = LD32(r3);
+            r10 = r10 - r1;
+            c5 = r10 >= 0;
+            c1028 = c5;
+            if (!((r10 & r10) == 0)) {
+                r1 = r10;
+                if (!(c5)) {
+                    r1 = -r10;
+                }
+                c1020 = r10 >= 0;
+                if (r1 > r8) {
+                    r3 = 0x200;
+                    c1013 = r10 > 0;
+                    do {
+                        if (!(c1013)) {
+                            r1 = LD32(r7);
+                            ST32(r7, (r1 + -512));
+                            r1 = LD32(r4 + 16);
+                            r10 = r10 + r3;
+                            r1 = r1 + r3;
+                        } else {
+                            r1 = LD32(r7);
+                            ST32(r7, (r1 + r3));
+                            r1 = LD32(r4 + 16);
+                            r10 = r10 - r3;
+                            r1 = r1 - r3;
+                        }
+                        ST32(r4 + 16, r1);
+                        r2 = r10;
+                        if (!(r10 >= 0)) {
+                            r2 = -r10;
+                        }
+                        c11 = r10 > 0;
+                        c1013 = c11;
+                    } while (AGAIN(r2 > 0x1FF));
+                    r1 = LD32(0x060759B4);
+                    ST32(0x060759B8, r1);
+                    r1 = LD32(0x060759B8);
+                    ST32(0x060759BC, r1);
+                    r1 = (SR() & ~1) | c11;
+                    SETSR(((r1 & -241) | ((r6 << 2) << 2)));
+                    ST32(0x0607668C, 2);
+                    r0 = GCALL4(0x060166F0, r4, r5, r6, r7);
+                    r0 = GCALL0(0x06043AC0);
+                    ST32(0x0607668C, 0);
+                    r0 = SR();
+                    r6 = (int)((unsigned)((int)((unsigned)(r0 & 240) >> 2)) >> 2);
+                    r1 = SR();
+                    SETSR(((r1 & -241) | 240));
+                    c1020 = r10 >= 0;
+                }
+                r2 = r10;
+                if (!(c1020)) {
+                    r2 = -r10;
+                }
+                c14 = r10 >= 0;
+                if (!(r2 > 15)) {
+                    r2 = 0x060759B8;
+                    r1 = LD32(0x060759B8);
+                    r1 = r1 + r10;
+                    c1027 = c14;
+                } else {
+                    if (c14) {
+                        r1 = LD32(0x060759B8);
+                        ST32(0x060759B8, (r1 + 16));
+                        r2 = 0x060759C4;
+                        r1 = r10 - 16;
+                        c1027 = 1;
+                    } else {
+                        r1 = LD32(0x060759B8);
+                        ST32(0x060759B8, (r1 - 16));
+                        r2 = 0x060759C4;
+                        r1 = r10 + 16;
+                        c1027 = 0;
+                    }
+                }
+                ST32(r2, r1);
+                c1028 = c1027;
+            }
+            r1 = (SR() & ~1) | c1028;
+            SETSR(((r1 & -241) | ((r6 << 2) << 2)));
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06014708(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2;
+    long long m0;
+
+    r1 = LD32(r4 + 16);
+    r0 = 0x10C8;
+    r6 = r6 + r1;
+    r1 = LD32(0x10C8 + r4);
+    r7 = r7 & 255;
+    if ((r1 & r1) == 0) {
+        if (!(r5 >= 0)) {
+            return r0;
+        } else {
+            r2 = LD32(r4 + 44);
+            if (r5 >= r2) {
+                return r0;
+            } else {
+                r1 = LD32(r4 + 28);
+                if (!(r6 >= r1)) {
+                    return r0;
+                } else {
+                    r1 = LD32(r4 + 24);
+                    m0 = (unsigned)(r6 * r2);
+                    if (r6 >= r1) {
+                        return r0;
+                    } else {
+                        r2 = LD32(r4 + 40);
+                        r0 = r2;
+                        ST8(r0 + (((int)m0) + r5), r7);
+                        return r0;
+                    }
+                }
+            }
+        }
+    } else {
+        r0 = 0x10CC;
+        r2 = LD32(0x10CC + r4);
+        if (!(r2 > 2)) {
+            return r0;
+        } else {
+            if (!(r5 >= 0)) {
+                return r0;
+            } else {
+                r2 = LD32(r4 + 44);
+                if (r5 >= r2) {
+                    return r0;
+                } else {
+                    r1 = LD32(r4 + 28);
+                    if (!(r6 >= r1)) {
+                        return r0;
+                    } else {
+                        r1 = LD32(r4 + 24);
+                        m0 = (unsigned)(r6 * r2);
+                        if (r6 >= r1) {
+                            return r0;
+                        } else {
+                            r2 = LD32(r4 + 40);
+                            r0 = r2;
+                            ST8(r0 + (((int)m0) + r5), r7);
+                            return r0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0601474C(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9, r10, r11;
+    long long m0;
+    FRAME(sp, 80);
+
+    r8 = r4;
+    r4 = LD32(80 + (sp - 80));
+    r3 = LD32(r8 + 16);
+    r10 = LD32(r8 + 40);
+    r9 = LD32(r8 + 44);
+    r1 = LD32((84 + (sp - 80)));
+    r2 = (r6 + r4) + r3;
+    r11 = r1 & 255;
+    ST32(sp - 80, r2);
+    r1 = (r6 + r7) + r3;
+    ST32(sp - 76, r1);
+    ST32(sp - 72, r1);
+    ST32(sp - 68, r2);
+    r1 = (r6 - r4) + r3;
+    ST32(sp - 64, r1);
+    r6 = (r6 - r7) + r3;
+    ST32(sp - 60, r6);
+    ST32(sp - 56, r6);
+    ST32(sp - 52, r1);
+    r3 = r5 + r7;
+    ST32(sp - 48, r3);
+    r2 = r5 + r4;
+    ST32(sp - 44, r2);
+    r1 = r5 - r4;
+    ST32(sp - 40, r1);
+    r5 = r5 - r7;
+    ST32(sp - 36, r5);
+    ST32(sp - 32, r5);
+    ST32(sp - 28, r1);
+    ST32(sp - 24, r2);
+    ST32(sp - 20, r3);
+    r7 = sp - 80;
+    r6 = 0;
+    r5 = (sp - 80) + 28;
+    do {
+        r3 = LD32(r7 + 32);
+        r0 = r6;
+        r2 = LD32(r0 + (sp - 80));
+        if (r3 >= 0) {
+            if (!(r3 >= r9)) {
+                r1 = LD32(r8 + 28);
+                if (r2 >= r1) {
+                    r1 = LD32(r8 + 24);
+                    m0 = (unsigned)(r2 * r9);
+                    if (!(r2 >= r1)) {
+                        r0 = ((int)m0) + r3;
+                        ST8(r0 + r10, r11);
+                    }
+                }
+            }
+        }
+        r7 = r7 + 4;
+        r6 = r6 + 4;
+    } while (AGAIN(!(r7 > r5)));
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06014C4C(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14, c6, c15, c21, c1009, c1012, c1032, c1040;
+    FRAME(sp, 56);
+
+    r11 = r4;
+    r9 = r5;
+    ST32(sp - 52, r7);
+    r1 = LD32(sp + 4);
+    ST32(sp - 48, ((signed char)r1));
+    r1 = LD32(136 + r11);
+    r8 = r6;
+    r12 = LD32(sp);
+    if ((r1 & r1) == 0) {
+        c1012 = r8 == r12;
+        r0 = LD32(sp - 52);
+        if (!(c1012)) {
+            r13 = LD32(sp - 52);
+            if (!(r9 == r0)) {
+                r1 = LD32(sp - 52);
+                if (!(r13 >= r9)) {
+                    ST32(sp - 52, r9);
+                    r9 = r1;
+                    r1 = r12;
+                    r12 = r8;
+                    r8 = r1;
+                }
+                r3 = LD32(sp - 52);
+                r2 = r12 - r8;
+                r3 = r3 - r9;
+                r14 = 1;
+                if (!(r3 >= 0)) {
+                    r14 = -1;
+                }
+                ST32(sp - 36, 1);
+                if (!(r2 >= 0)) {
+                    ST32(sp - 36, -1);
+                }
+                r7 = r3;
+                if (!(r3 >= 0)) {
+                    r7 = -r3;
+                }
+                r1 = r2;
+                if (!(r2 >= 0)) {
+                    r1 = -r2;
+                }
+                c15 = r7 > r1;
+                r1 = r3;
+                if (!(c15)) {
+                    r1 = r1 + r1;
+                    r10 = r1 - r2;
+                    ST32(sp - 44, r1);
+                    ST32(sp - 40, ((r3 - r2) + (r3 - r2)));
+                    while (1) {
+                        r13 = LD8((7 + (sp - 52)));
+                        r0 = GCALL8(0x06014708, r11, r9, r8, (r13 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                        c21 = r10 > 0;
+                        if (!(r8 == r12)) {
+                            POLL();
+                            r13 = LD32(sp - 44);
+                            c1040 = c21;
+                            if (c21) {
+                                r13 = LD32(sp - 40);
+                                r9 = r9 + r14;
+                                c1040 = 1;
+                            }
+                            r0 = LD32(sp - 36);
+                            r10 = r10 + r13;
+                            r8 = r8 + r0;
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                    r0 = 1;
+                    return r0;
+                } else {
+                    r1 = r2 + r2;
+                    r10 = r1 - r3;
+                    ST32(sp - 44, r1);
+                    ST32(sp - 40, ((r2 - r3) + (r2 - r3)));
+                    r12 = 0x06014708;
+                    r0 = LD8((7 + (sp - 52)));
+                    r0 = GCALL8(0x06014708, r11, r9, r8, (r0 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                    r13 = LD32(sp - 52);
+                    r0 = 1;
+                    if (!(r9 == r13)) {
+                        c1032 = r10 > 0;
+                        do {
+                            r0 = LD32(sp - 44);
+                            if (c1032) {
+                                r13 = LD32(sp - 40);
+                                r9 = r9 + r14;
+                                r0 = LD32(sp - 36);
+                                r10 = r10 + r13;
+                                r8 = r8 + r0;
+                            } else {
+                                r10 = r10 + r0;
+                                r9 = r9 + r14;
+                            }
+                            r13 = LD8((7 + (sp - 52)));
+                            r0 = GCALL8(r12, r11, r9, r8, (r13 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                            r0 = LD32(sp - 52);
+                            c1032 = r10 > 0;
+                        } while (AGAIN(!(r9 == r0)));
+                        r0 = 1;
+                    }
+                    return r0;
+                }
+            } else {
+                r13 = 7;
+                if (r12 >= r8) {
+                    r0 = LD8(7 + (sp - 52));
+                    r7 = r12;
+                    r6 = r8;
+                    r5 = r9;
+                    r4 = r11;
+                    ST32((sp - 56), (r0 & 255));
+                    r1 = 0x060146A4;
+                } else {
+                    r13 = LD8((r13 + (sp - 52)));
+                    ST32((sp - 56), (r13 & 255));
+                    r1 = 0x060146A4;
+                    r7 = r8;
+                    r6 = r12;
+                    r5 = r9;
+                    r4 = r11;
+                }
+                r0 = GCALL7(r1, r4, r5, r6, r7, LD32((sp - 56)), LD32((sp - 52)), LD32((sp - 48)));
+                r0 = 1;
+                return r0;
+            }
+        } else {
+            r13 = LD8((7 + (sp - 52)));
+            ST32((sp - 56), (r13 & 255));
+            r1 = 0x06014638;
+            r7 = r8;
+            r6 = LD32(sp - 52);
+            r5 = r9;
+            r4 = r11;
+            r0 = GCALL7(r1, r4, r5, r6, r7, LD32((sp - 56)), LD32((sp - 52)), LD32((sp - 48)));
+            r0 = 1;
+            return r0;
+        }
+    } else {
+        r1 = LD32(0x10C8 + r11);
+        if ((r1 & r1) == 0) {
+            r0 = GCALL6(0x06015D00, r11, 40, 0, 0, LD32((sp - 52)), LD32((sp - 48)));
+            r5 = 0;
+            if ((r0 & r0) == 0) {
+                r0 = 0;
+                return r0;
+            } else {
+                r0 = GCALL6(0x06013C60, r11, r5, 0, 0, LD32((sp - 52)), LD32((sp - 48)));
+                r3 = r0;
+                ST16((r3 + 24), r9);
+                r13 = LD16((2 + (sp - 52)));
+                ST16((r3 + 26), r13);
+                ST32(r3 + 28, r8);
+                ST32(r3 + 32, r12);
+                r0 = LD16((6 + (sp - 52)));
+                ST16((r3 + 36), r0);
+                if (!(r8 > r12)) {
+                    ST32(r3 + 16, r12);
+                    ST32(r3 + 12, r8);
+                } else {
+                    ST32(r3 + 16, r8);
+                    ST32(r3 + 12, r12);
+                }
+                r2 = 148;
+                r1 = LD32(r11 + 148);
+                c6 = (r1 & r1) == 0;
+                c1009 = c6;
+                if (!(c6)) {
+                    ST32(r1, r3);
+                    c1009 = 0;
+                }
+                r0 = r11;
+                ST32(r0 + r2, (r3 + 4));
+                r1 = LD32(r0 + 152);
+                ST32(r0 + 152, (r1 + 40));
+                r1 = LD32(r0 + 164);
+                ST32(r0 + 164, (r1 + 1));
+                c1012 = r8 == r12;
+                r0 = LD32(sp - 52);
+                if (!(c1012)) {
+                    r13 = LD32(sp - 52);
+                    if (!(r9 == r0)) {
+                        r1 = LD32(sp - 52);
+                        if (!(r13 >= r9)) {
+                            ST32(sp - 52, r9);
+                            r9 = r1;
+                            r1 = r12;
+                            r12 = r8;
+                            r8 = r1;
+                        }
+                        r3 = LD32(sp - 52);
+                        r2 = r12 - r8;
+                        r3 = r3 - r9;
+                        r14 = 1;
+                        if (!(r3 >= 0)) {
+                            r14 = -1;
+                        }
+                        ST32(sp - 36, 1);
+                        if (!(r2 >= 0)) {
+                            ST32(sp - 36, -1);
+                        }
+                        r7 = r3;
+                        if (!(r3 >= 0)) {
+                            r7 = -r3;
+                        }
+                        r1 = r2;
+                        if (!(r2 >= 0)) {
+                            r1 = -r2;
+                        }
+                        c15 = r7 > r1;
+                        r1 = r3;
+                        if (!(c15)) {
+                            r1 = r1 + r1;
+                            r10 = r1 - r2;
+                            ST32(sp - 44, r1);
+                            ST32(sp - 40, ((r3 - r2) + (r3 - r2)));
+                            while (1) {
+                                r13 = LD8((7 + (sp - 52)));
+                                r0 = GCALL8(0x06014708, r11, r9, r8, (r13 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                                c21 = r10 > 0;
+                                if (!(r8 == r12)) {
+                                    POLL();
+                                    r13 = LD32(sp - 44);
+                                    c1040 = c21;
+                                    if (c21) {
+                                        r13 = LD32(sp - 40);
+                                        r9 = r9 + r14;
+                                        c1040 = 1;
+                                    }
+                                    r0 = LD32(sp - 36);
+                                    r10 = r10 + r13;
+                                    r8 = r8 + r0;
+                                    continue;
+                                } else {
+                                    break;
+                                }
+                            }
+                            r0 = 1;
+                            return r0;
+                        } else {
+                            r1 = r2 + r2;
+                            r10 = r1 - r3;
+                            ST32(sp - 44, r1);
+                            ST32(sp - 40, ((r2 - r3) + (r2 - r3)));
+                            r12 = 0x06014708;
+                            r0 = LD8((7 + (sp - 52)));
+                            r0 = GCALL8(0x06014708, r11, r9, r8, (r0 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                            r13 = LD32(sp - 52);
+                            r0 = 1;
+                            if (!(r9 == r13)) {
+                                c1032 = r10 > 0;
+                                do {
+                                    r0 = LD32(sp - 44);
+                                    if (c1032) {
+                                        r13 = LD32(sp - 40);
+                                        r9 = r9 + r14;
+                                        r0 = LD32(sp - 36);
+                                        r10 = r10 + r13;
+                                        r8 = r8 + r0;
+                                    } else {
+                                        r10 = r10 + r0;
+                                        r9 = r9 + r14;
+                                    }
+                                    r13 = LD8((7 + (sp - 52)));
+                                    r0 = GCALL8(r12, r11, r9, r8, (r13 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                                    r0 = LD32(sp - 52);
+                                    c1032 = r10 > 0;
+                                } while (AGAIN(!(r9 == r0)));
+                                r0 = 1;
+                            }
+                            return r0;
+                        }
+                    } else {
+                        r13 = 7;
+                        if (r12 >= r8) {
+                            r0 = LD8(7 + (sp - 52));
+                            r7 = r12;
+                            r6 = r8;
+                            r5 = r9;
+                            r4 = r11;
+                            ST32((sp - 56), (r0 & 255));
+                            r1 = 0x060146A4;
+                        } else {
+                            r13 = LD8((r13 + (sp - 52)));
+                            ST32((sp - 56), (r13 & 255));
+                            r1 = 0x060146A4;
+                            r7 = r8;
+                            r6 = r12;
+                            r5 = r9;
+                            r4 = r11;
+                        }
+                        r0 = GCALL7(r1, r4, r5, r6, r7, LD32((sp - 56)), LD32((sp - 52)), LD32((sp - 48)));
+                        r0 = 1;
+                        return r0;
+                    }
+                } else {
+                    r13 = LD8((7 + (sp - 52)));
+                    ST32((sp - 56), (r13 & 255));
+                    r1 = 0x06014638;
+                    r7 = r8;
+                    r6 = LD32(sp - 52);
+                    r5 = r9;
+                    r4 = r11;
+                    r0 = GCALL7(r1, r4, r5, r6, r7, LD32((sp - 56)), LD32((sp - 52)), LD32((sp - 48)));
+                    r0 = 1;
+                    return r0;
+                }
+            }
+        } else {
+            r0 = LD32(0x10CC + r11);
+            c1012 = r8 == r12;
+            if (!(r0 == 3)) {
+                r0 = LD32(sp - 52);
+                if (!(c1012)) {
+                    r13 = LD32(sp - 52);
+                    if (!(r9 == r0)) {
+                        r1 = LD32(sp - 52);
+                        if (!(r13 >= r9)) {
+                            ST32(sp - 52, r9);
+                            r9 = r1;
+                            r1 = r12;
+                            r12 = r8;
+                            r8 = r1;
+                        }
+                        r3 = LD32(sp - 52);
+                        r2 = r12 - r8;
+                        r3 = r3 - r9;
+                        r14 = 1;
+                        if (!(r3 >= 0)) {
+                            r14 = -1;
+                        }
+                        ST32(sp - 36, 1);
+                        if (!(r2 >= 0)) {
+                            ST32(sp - 36, -1);
+                        }
+                        r7 = r3;
+                        if (!(r3 >= 0)) {
+                            r7 = -r3;
+                        }
+                        r1 = r2;
+                        if (!(r2 >= 0)) {
+                            r1 = -r2;
+                        }
+                        c15 = r7 > r1;
+                        r1 = r3;
+                        if (!(c15)) {
+                            r1 = r1 + r1;
+                            r10 = r1 - r2;
+                            ST32(sp - 44, r1);
+                            ST32(sp - 40, ((r3 - r2) + (r3 - r2)));
+                            while (1) {
+                                r13 = LD8((7 + (sp - 52)));
+                                r0 = GCALL8(0x06014708, r11, r9, r8, (r13 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                                c21 = r10 > 0;
+                                if (!(r8 == r12)) {
+                                    POLL();
+                                    r13 = LD32(sp - 44);
+                                    c1040 = c21;
+                                    if (c21) {
+                                        r13 = LD32(sp - 40);
+                                        r9 = r9 + r14;
+                                        c1040 = 1;
+                                    }
+                                    r0 = LD32(sp - 36);
+                                    r10 = r10 + r13;
+                                    r8 = r8 + r0;
+                                    continue;
+                                } else {
+                                    break;
+                                }
+                            }
+                            r0 = 1;
+                            return r0;
+                        } else {
+                            r1 = r2 + r2;
+                            r10 = r1 - r3;
+                            ST32(sp - 44, r1);
+                            ST32(sp - 40, ((r2 - r3) + (r2 - r3)));
+                            r12 = 0x06014708;
+                            r0 = LD8((7 + (sp - 52)));
+                            r0 = GCALL8(0x06014708, r11, r9, r8, (r0 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                            r13 = LD32(sp - 52);
+                            r0 = 1;
+                            if (!(r9 == r13)) {
+                                c1032 = r10 > 0;
+                                do {
+                                    r0 = LD32(sp - 44);
+                                    if (c1032) {
+                                        r13 = LD32(sp - 40);
+                                        r9 = r9 + r14;
+                                        r0 = LD32(sp - 36);
+                                        r10 = r10 + r13;
+                                        r8 = r8 + r0;
+                                    } else {
+                                        r10 = r10 + r0;
+                                        r9 = r9 + r14;
+                                    }
+                                    r13 = LD8((7 + (sp - 52)));
+                                    r0 = GCALL8(r12, r11, r9, r8, (r13 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                                    r0 = LD32(sp - 52);
+                                    c1032 = r10 > 0;
+                                } while (AGAIN(!(r9 == r0)));
+                                r0 = 1;
+                            }
+                            return r0;
+                        }
+                    } else {
+                        r13 = 7;
+                        if (r12 >= r8) {
+                            r0 = LD8(7 + (sp - 52));
+                            r7 = r12;
+                            r6 = r8;
+                            r5 = r9;
+                            r4 = r11;
+                            ST32((sp - 56), (r0 & 255));
+                            r1 = 0x060146A4;
+                        } else {
+                            r13 = LD8((r13 + (sp - 52)));
+                            ST32((sp - 56), (r13 & 255));
+                            r1 = 0x060146A4;
+                            r7 = r8;
+                            r6 = r12;
+                            r5 = r9;
+                            r4 = r11;
+                        }
+                        r0 = GCALL7(r1, r4, r5, r6, r7, LD32((sp - 56)), LD32((sp - 52)), LD32((sp - 48)));
+                        r0 = 1;
+                        return r0;
+                    }
+                } else {
+                    r13 = LD8((7 + (sp - 52)));
+                    ST32((sp - 56), (r13 & 255));
+                    r1 = 0x06014638;
+                    r7 = r8;
+                    r6 = LD32(sp - 52);
+                    r5 = r9;
+                    r4 = r11;
+                    r0 = GCALL7(r1, r4, r5, r6, r7, LD32((sp - 56)), LD32((sp - 52)), LD32((sp - 48)));
+                    r0 = 1;
+                    return r0;
+                }
+            } else {
+                r0 = GCALL6(0x06015D00, r11, 40, 0, 0, LD32((sp - 52)), LD32((sp - 48)));
+                r5 = 0;
+                if ((r0 & r0) == 0) {
+                    r0 = 0;
+                    return r0;
+                } else {
+                    r0 = GCALL6(0x06013C60, r11, r5, 0, 0, LD32((sp - 52)), LD32((sp - 48)));
+                    r3 = r0;
+                    ST16((r3 + 24), r9);
+                    r13 = LD16((2 + (sp - 52)));
+                    ST16((r3 + 26), r13);
+                    ST32(r3 + 28, r8);
+                    ST32(r3 + 32, r12);
+                    r0 = LD16((6 + (sp - 52)));
+                    ST16((r3 + 36), r0);
+                    if (!(r8 > r12)) {
+                        ST32(r3 + 16, r12);
+                        ST32(r3 + 12, r8);
+                    } else {
+                        ST32(r3 + 16, r8);
+                        ST32(r3 + 12, r12);
+                    }
+                    r2 = 148;
+                    r1 = LD32(r11 + 148);
+                    c6 = (r1 & r1) == 0;
+                    c1009 = c6;
+                    if (!(c6)) {
+                        ST32(r1, r3);
+                        c1009 = 0;
+                    }
+                    r0 = r11;
+                    ST32(r0 + r2, (r3 + 4));
+                    r1 = LD32(r0 + 152);
+                    ST32(r0 + 152, (r1 + 40));
+                    r1 = LD32(r0 + 164);
+                    ST32(r0 + 164, (r1 + 1));
+                    c1012 = r8 == r12;
+                    r0 = LD32(sp - 52);
+                    if (!(c1012)) {
+                        r13 = LD32(sp - 52);
+                        if (!(r9 == r0)) {
+                            r1 = LD32(sp - 52);
+                            if (!(r13 >= r9)) {
+                                ST32(sp - 52, r9);
+                                r9 = r1;
+                                r1 = r12;
+                                r12 = r8;
+                                r8 = r1;
+                            }
+                            r3 = LD32(sp - 52);
+                            r2 = r12 - r8;
+                            r3 = r3 - r9;
+                            r14 = 1;
+                            if (!(r3 >= 0)) {
+                                r14 = -1;
+                            }
+                            ST32(sp - 36, 1);
+                            if (!(r2 >= 0)) {
+                                ST32(sp - 36, -1);
+                            }
+                            r7 = r3;
+                            if (!(r3 >= 0)) {
+                                r7 = -r3;
+                            }
+                            r1 = r2;
+                            if (!(r2 >= 0)) {
+                                r1 = -r2;
+                            }
+                            c15 = r7 > r1;
+                            r1 = r3;
+                            if (!(c15)) {
+                                r1 = r1 + r1;
+                                r10 = r1 - r2;
+                                ST32(sp - 44, r1);
+                                ST32(sp - 40, ((r3 - r2) + (r3 - r2)));
+                                while (1) {
+                                    r13 = LD8((7 + (sp - 52)));
+                                    r0 = GCALL8(0x06014708, r11, r9, r8, (r13 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                                    c21 = r10 > 0;
+                                    if (!(r8 == r12)) {
+                                        POLL();
+                                        r13 = LD32(sp - 44);
+                                        c1040 = c21;
+                                        if (c21) {
+                                            r13 = LD32(sp - 40);
+                                            r9 = r9 + r14;
+                                            c1040 = 1;
+                                        }
+                                        r0 = LD32(sp - 36);
+                                        r10 = r10 + r13;
+                                        r8 = r8 + r0;
+                                        continue;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                r0 = 1;
+                                return r0;
+                            } else {
+                                r1 = r2 + r2;
+                                r10 = r1 - r3;
+                                ST32(sp - 44, r1);
+                                ST32(sp - 40, ((r2 - r3) + (r2 - r3)));
+                                r12 = 0x06014708;
+                                r0 = LD8((7 + (sp - 52)));
+                                r0 = GCALL8(0x06014708, r11, r9, r8, (r0 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                                r13 = LD32(sp - 52);
+                                r0 = 1;
+                                if (!(r9 == r13)) {
+                                    c1032 = r10 > 0;
+                                    do {
+                                        r0 = LD32(sp - 44);
+                                        if (c1032) {
+                                            r13 = LD32(sp - 40);
+                                            r9 = r9 + r14;
+                                            r0 = LD32(sp - 36);
+                                            r10 = r10 + r13;
+                                            r8 = r8 + r0;
+                                        } else {
+                                            r10 = r10 + r0;
+                                            r9 = r9 + r14;
+                                        }
+                                        r13 = LD8((7 + (sp - 52)));
+                                        r0 = GCALL8(r12, r11, r9, r8, (r13 & 255), LD32((sp - 52)), LD32((sp - 48)), LD32((sp - 44)), LD32((sp - 40)));
+                                        r0 = LD32(sp - 52);
+                                        c1032 = r10 > 0;
+                                    } while (AGAIN(!(r9 == r0)));
+                                    r0 = 1;
+                                }
+                                return r0;
+                            }
+                        } else {
+                            r13 = 7;
+                            if (r12 >= r8) {
+                                r0 = LD8(7 + (sp - 52));
+                                r7 = r12;
+                                r6 = r8;
+                                r5 = r9;
+                                r4 = r11;
+                                ST32((sp - 56), (r0 & 255));
+                                r1 = 0x060146A4;
+                            } else {
+                                r13 = LD8((r13 + (sp - 52)));
+                                ST32((sp - 56), (r13 & 255));
+                                r1 = 0x060146A4;
+                                r7 = r8;
+                                r6 = r12;
+                                r5 = r9;
+                                r4 = r11;
+                            }
+                            r0 = GCALL7(r1, r4, r5, r6, r7, LD32((sp - 56)), LD32((sp - 52)), LD32((sp - 48)));
+                            r0 = 1;
+                            return r0;
+                        }
+                    } else {
+                        r13 = LD8((7 + (sp - 52)));
+                        ST32((sp - 56), (r13 & 255));
+                        r1 = 0x06014638;
+                        r7 = r8;
+                        r6 = LD32(sp - 52);
+                        r5 = r9;
+                        r4 = r11;
+                        r0 = GCALL7(r1, r4, r5, r6, r7, LD32((sp - 56)), LD32((sp - 52)), LD32((sp - 48)));
+                        r0 = 1;
+                        return r0;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06015610(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14, c2, c7, c14, c16, c22, c28, c35, c41, c43, c47, c1006, c1019, c1033, c1038, c1051, c1055, c1059;
+    FRAME(sp, 120);
+
+    ST32(sp - 120, r4);
+    ST32(sp - 116, r5);
+    ST32(sp - 112, r6);
+    ST32(sp - 108, r7);
+    r0 = LD32(r4 + 16);
+    ST32(sp - 100, r0);
+    r11 = LD32(r4 + 44);
+    ST32(sp - 96, r11);
+    r0 = LD32(r4 + 40);
+    ST32(sp - 92, r0);
+    r11 = LD32(r6 + 4);
+    ST32(sp - 88, r11);
+    r0 = LD32(r6 + 8);
+    ST32(sp - 84, r0);
+    r11 = LD32(r6 + 12);
+    ST32(sp - 80, r11);
+    ST32(sp - 76, 0);
+    ST32(sp - 72, 0);
+    ST32(sp - 68, 0);
+    ST32(sp - 64, 0);
+    r0 = LD32(r6);
+    ST32(sp - 60, r0);
+    ST32((64 + (sp - 120)), 0);
+    r0 = LD32(sp - 120);
+    r1 = LD32(r0 + 0x10D4);
+    ST32(68 + (sp - 120), r1);
+    r0 = LD32(sp - 108);
+    ST32((72 + (sp - 120)), r0);
+    r11 = LD32(sp - 112);
+    r0 = LD32(r11 + 20);
+    ST32((76 + (sp - 120)), r0);
+    r1 = LD32(sp - 112);
+    r1 = LD8((r1 + 16));
+    ST32((80 + (sp - 120)), (r1 & 255));
+    r0 = LD32((68 + (sp - 120)));
+    r11 = LD32(sp - 108);
+    if ((r0 & r0) == 0) {
+        r4 = LD32(sp - 116);
+        r0 = GCALL8(0x0601CC78, r4, 128, 0, r7, LD32((sp - 120)), LD32((sp - 116)), LD32((sp - 112)), LD32((sp - 108)));
+        ST32((64 + (sp - 120)), r0);
+        r11 = LD32(64 + (sp - 120));
+        r0 = LD32(r11 + 8);
+        ST32(sp - 76, r0);
+        r11 = LD32(sp - 108);
+    }
+    r1 = LD8(r11);
+    while (1) {
+        r9 = r1 & 255;
+        r0 = 68;
+        if ((r9 & r9) == 0) {
+            break;
+        } else {
+            POLL();
+            r0 = LD32(r0 + (sp - 120));
+            r11 = 72;
+            if ((r0 & r0) == 0) {
+                r11 = LD32(sp - 108);
+                ST32(sp - 108, (r11 + 1));
+            } else {
+                r11 = r11 + (sp - 120);
+                r0 = LD32(r11);
+                r0 = r0 + 2;
+                ST32(r11, r0);
+                r9 = LD16((r0 - 2));
+                r11 = LD32(sp - 108);
+                r4 = LD32(sp - 116);
+                r9 = r9 & 0xFFFF;
+                ST32(sp - 108, (r11 + 2));
+                r8 = (int)((unsigned)r9 >> 8);
+                r7 = R(7);
+                r0 = GCALL8(0x0601CC78, r4, r8, 0, 0, LD32((sp - 120)), LD32((sp - 116)), LD32((sp - 112)), LD32((sp - 108)));
+                ST32((64 + (sp - 120)), r0);
+                r9 = r9 & 255;
+                r11 = LD32((64 + (sp - 120)));
+                r0 = LD32(r11 + 8);
+                c2 = (r8 & 0xFFFF) == 128;
+                ST32(sp - 76, r0);
+                c1006 = c2;
+                if (c2) {
+                    c1006 = (unsigned)r9 > (unsigned)127;
+                }
+                r11 = LD32(sp - 112);
+                r0 = LD32(sp - 80);
+                r1 = LD32(r11 + 8);
+                r1 = r1 + r0;
+                r0 = LD32((64 + (sp - 120)));
+                r2 = LD32(r0 + 32);
+                ST32(sp - 84, (r1 - r2));
+            }
+            r0 = r9;
+            if ((unsigned)r9 > (unsigned)32) {
+                r4 = LD32((64 + (sp - 120)));
+                r6 = R(6);
+                r7 = R(7);
+                r0 = GCALL8(0x06043454, r4, r9, 0, 0, LD32((sp - 120)), LD32((sp - 116)), LD32((sp - 112)), LD32((sp - 108)));
+                r13 = r0;
+                r14 = 0;
+                r7 = 0;
+                r0 = LD32(sp - 76);
+                r3 = 0;
+                r1 = LD8(r0 + r9);
+                ST32(sp - 104, (r1 & 255));
+                if ((r13 & r13) == 0) {
+                    c1019 = r14 > 0;
+                } else {
+                    r0 = LD32(sp - 120);
+                    r1 = LD32(r0 + 140);
+                    c7 = (r1 & r1) == 0;
+                    r1 = r13;
+                    if (c7) {
+                        ST8((r13 + 14), 1);
+                        r1 = LD8((r13 + 6));
+                        r14 = r1 & 255;
+                        r1 = LD8((r13 + 7));
+                        ST32(sp - 72, (r1 & 255));
+                        ST32(sp - 60, 0);
+                        r0 = LD32(r13 + 20);
+                        ST32(sp - 68, r0);
+                        r1 = LD8((r13 + 8));
+                        ST32(sp - 64, (r1 & 255));
+                        r1 = LD8((r13 + 11));
+                        ST32(sp - 104, (r1 & 255));
+                        r1 = LD32(sp - 88);
+                        r11 = LD32(sp - 96);
+                        r3 = (r1 >> 1) >> 1;
+                        c14 = r3 >= 0;
+                        if ((r3 + r14) > r11) {
+                            r14 = (short)(r11 - r3);
+                        }
+                        r1 = r14;
+                        if (!(c14)) {
+                            r14 = (short)(r1 + r3);
+                            r7 = -r3;
+                            r3 = 0;
+                        }
+                        c1019 = r14 > 0;
+                    } else {
+                        r1 = LD8((r1 + 13));
+                        if (((r1 & 255) & (r1 & 255)) == 0) {
+                            c1019 = r14 > 0;
+                        } else {
+                            r1 = LD32(r13 + 20);
+                            c1019 = r14 > 0;
+                            if (!((r1 & r1) == 0)) {
+                                ST8((r13 + 14), 1);
+                                r1 = LD8((r13 + 6));
+                                r14 = r1 & 255;
+                                r1 = LD8((r13 + 7));
+                                ST32(sp - 72, (r1 & 255));
+                                ST32(sp - 60, 0);
+                                r0 = LD32(r13 + 20);
+                                ST32(sp - 68, r0);
+                                r1 = LD8((r13 + 8));
+                                ST32(sp - 64, (r1 & 255));
+                                r1 = LD8((r13 + 11));
+                                ST32(sp - 104, (r1 & 255));
+                                r1 = LD32(sp - 88);
+                                r11 = LD32(sp - 96);
+                                r3 = (r1 >> 1) >> 1;
+                                c14 = r3 >= 0;
+                                if ((r3 + r14) > r11) {
+                                    r14 = (short)(r11 - r3);
+                                }
+                                r1 = r14;
+                                if (!(c14)) {
+                                    r14 = (short)(r1 + r3);
+                                    r7 = -r3;
+                                    r3 = 0;
+                                }
+                                c1019 = r14 > 0;
+                            }
+                        }
+                    }
+                }
+                c16 = (r13 & r13) == 0;
+                if (c1019) {
+                    r1 = LD32(sp - 84);
+                    r0 = LD32(sp - 72);
+                    r9 = LD32(sp - 100);
+                    r11 = LD32(sp - 64);
+                    r1 = (r1 - 1) + r0;
+                    r0 = LD32(sp - 60);
+                    r9 = r9 + r1;
+                    r12 = r11 * r0;
+                    r11 = LD32(sp - 96);
+                    r12 = r12 + (r7 >> 1);
+                    r1 = r11 * r9;
+                    r11 = LD32(sp - 92);
+                    ST32((84 + (sp - 120)), (r11 + (r1 + r3)));
+                    r0 = LD32(76 + (sp - 120));
+                    r8 = LD32(sp - 72);
+                    if ((r0 & r0) == 0) {
+                        c35 = (r13 & r13) == 0;
+                        c1059 = c35;
+                        if (r8 > 0) {
+                            r10 = 255;
+                            do {
+                                r11 = LD32(sp - 120);
+                                r1 = LD32(r11 + 28);
+                                if (r9 >= r1) {
+                                    r1 = LD32(r11 + 24);
+                                    if (!(r9 >= r1)) {
+                                        r5 = LD32(sp - 68);
+                                        r5 = r5 + r12;
+                                        r4 = r14;
+                                        r6 = LD32((84 + (sp - 120)));
+                                        if (r4 > 0) {
+                                            do {
+                                                r1 = LD8(r5);
+                                                r5 = r5 + 1;
+                                                r1 = LD16(((r1 & 255) + (r1 & 255)) + 0x06086D90);
+                                                r7 = r1 & 0xFFFF;
+                                                r1 = r7;
+                                                if (!((r7 & r7) == 0)) {
+                                                    r1 = (int)((unsigned)r1 >> 8);
+                                                    if (!((r1 & r1) == 0)) {
+                                                        r3 = LD32((80 + (sp - 120)));
+                                                        r3 = r3 & r1;
+                                                        c41 = r1 == r10;
+                                                        r2 = r3;
+                                                        c1051 = c41;
+                                                        if (!(c41)) {
+                                                            r1 = LD8(r6);
+                                                            r2 = r1 | r3;
+                                                            c1051 = 0;
+                                                        }
+                                                        ST8(r6, r2);
+                                                    }
+                                                    r1 = r7 & r10;
+                                                    r7 = r6;
+                                                    if (!((r1 & r1) == 0)) {
+                                                        r7 = r7 + 1;
+                                                        r3 = LD32(80 + (sp - 120));
+                                                        c43 = r1 == r10;
+                                                        r3 = r3 & r1;
+                                                        r2 = r3;
+                                                        c1055 = c43;
+                                                        if (!(c43)) {
+                                                            r1 = LD8(r7);
+                                                            r2 = r1 | r3;
+                                                            c1055 = 0;
+                                                        }
+                                                        ST8(r7, r2);
+                                                    }
+                                                }
+                                                r4 = r4 - 2;
+                                                r6 = r6 + 2;
+                                            } while (AGAIN(r4 > 0));
+                                        }
+                                    }
+                                }
+                                r9 = r9 - 1;
+                                r11 = LD32(sp - 64);
+                                r12 = r12 + r11;
+                                r11 = LD32((84 + (sp - 120)));
+                                r8 = r8 - 1;
+                                r0 = LD32(sp - 96);
+                                ST32((84 + (sp - 120)), (r11 - r0));
+                            } while (AGAIN(r8 > 0));
+                            c1059 = (r13 & r13) == 0;
+                        }
+                    } else {
+                        c22 = (r13 & r13) == 0;
+                        if (r8 > 0) {
+                            r10 = 255;
+                            do {
+                                r11 = LD32(sp - 120);
+                                r1 = LD32(r11 + 28);
+                                if (r9 >= r1) {
+                                    r1 = LD32(r11 + 24);
+                                    if (!(r9 >= r1)) {
+                                        r5 = LD32(sp - 68);
+                                        r5 = r5 + r12;
+                                        r4 = r14;
+                                        r6 = LD32((84 + (sp - 120)));
+                                        if (r4 > 0) {
+                                            do {
+                                                r1 = LD8(r5);
+                                                r5 = r5 + 1;
+                                                r1 = LD16(((r1 & 255) + (r1 & 255)) + 0x06086D90);
+                                                r7 = r1 & 0xFFFF;
+                                                r1 = r7;
+                                                if (!((r7 & r7) == 0)) {
+                                                    r1 = (int)((unsigned)r1 >> 8);
+                                                    c28 = r1 == r10;
+                                                    if (!((r1 & r1) == 0)) {
+                                                        r2 = r1;
+                                                        if (c28) {
+                                                            r11 = LD32((80 + (sp - 120)));
+                                                            r1 = r1 & r11;
+                                                            c1033 = 1;
+                                                        } else {
+                                                            r1 = LD8(r6);
+                                                            r1 = r1 & (r2 ^ r10);
+                                                            c1033 = 0;
+                                                        }
+                                                        ST8(r6, r1);
+                                                    }
+                                                    r1 = r7 & r10;
+                                                    r3 = r6;
+                                                    if (!((r1 & r1) == 0)) {
+                                                        r3 = r3 + 1;
+                                                        if (r1 == r10) {
+                                                            r0 = LD32(80 + (sp - 120));
+                                                            r1 = r1 & r0;
+                                                            c1038 = 1;
+                                                        } else {
+                                                            r2 = r1 ^ r10;
+                                                            r1 = LD8(r3);
+                                                            r1 = r1 & r2;
+                                                            c1038 = 0;
+                                                        }
+                                                        ST8(r3, r1);
+                                                    }
+                                                }
+                                                r4 = r4 - 2;
+                                                r6 = r6 + 2;
+                                            } while (AGAIN(r4 > 0));
+                                        }
+                                    }
+                                }
+                                r9 = r9 - 1;
+                                r11 = LD32(sp - 64);
+                                r12 = r12 + r11;
+                                r11 = LD32((84 + (sp - 120)));
+                                r8 = r8 - 1;
+                                r0 = LD32(sp - 96);
+                                ST32((84 + (sp - 120)), (r11 - r0));
+                            } while (AGAIN(r8 > 0));
+                            c1059 = (r13 & r13) == 0;
+                        } else {
+                            c1059 = c22;
+                        }
+                    }
+                } else {
+                    c1059 = c16;
+                }
+                if (!(c1059)) {
+                    r0 = GCALL8(0x06043340, r13, 0, 0, 0, LD32((sp - 120)), LD32((sp - 116)), LD32((sp - 112)), LD32((sp - 108)));
+                }
+                r11 = LD32(sp - 88);
+                r0 = LD32(sp - 104);
+                r11 = r11 + r0;
+                ST32(sp - 88, r11);
+                r0 = LD32(sp - 108);
+            } else {
+                c47 = r0 == 32;
+                r0 = LD32(sp - 108);
+                if (c47) {
+                    r0 = LD32(sp - 76);
+                    r1 = LD8(r0 + r9);
+                    r11 = LD32(sp - 88);
+                    r11 = r11 + (r1 & 255);
+                    ST32(sp - 88, r11);
+                    r0 = LD32(sp - 108);
+                }
+            }
+            r1 = LD8(r0);
+        }
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06015A5C(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14, c4, c11, c16;
+    int v36;
+    int v40;
+    int v44;
+    int v48;
+    int v52;
+    int v56;
+
+    r14 = r4;
+    r11 = r5;
+    r12 = r6;
+    r8 = r7;
+    v36 = 0;
+    r0 = LD32(r14 + 16);
+    r13 = 200;
+    v40 = r0;
+    r3 = r0 + r8;
+    r0 = r11;
+    r1 = LD32(r0 + 200);
+    r2 = r3 + r1;
+    r1 = LD32(r14 + 28);
+    r9 = 0;
+    if (r2 >= r1) {
+        r1 = LD32(r14 + 24);
+        if (!(r3 >= r1)) {
+            r0 = GCALL6(0x06025AE0, r11, r5, r6, r7, v40, v36);
+            r1 = LD32(192 + r11);
+            if ((r1 & r1) == 0) {
+                r9 = 1;
+            }
+            r10 = 216;
+            r3 = LD16(r11 + 216);
+            r2 = (short)r3;
+            c4 = (r9 & r9) == 0;
+            if (!((r2 & r2) == 0)) {
+                r2 = r2 + r2;
+                r1 = LD32(196 + r11);
+                r7 = ((r1 + r12) + r2) - 1;
+                r1 = LD16(220 + r11);
+                r6 = r8 + r1;
+                r1 = LD16(218 + r11);
+                r5 = r12 + r1;
+                v44 = 1;
+                v48 = (r3 + 2) & 255;
+                r1 = 123;
+                if (!((r9 & r9) == 0)) {
+                    r1 = -1;
+                }
+                v52 = r1;
+                r1 = LD32(r11 + r13);
+                r0 = GCALL8(0x060153C8, r14, r5, r6, r7, (((r1 + r8) + r2) - 1), v52, v48, v44);
+                r1 = LD16(r11 + r10);
+                r12 = r12 + r1;
+                r8 = r8 + r1;
+            } else {
+                if (!(c4)) {
+                    r2 = r2 + r2;
+                    r1 = LD32(196 + r11);
+                    r7 = ((r1 + r12) + r2) - 1;
+                    r1 = LD16(220 + r11);
+                    r6 = r8 + r1;
+                    r1 = LD16(218 + r11);
+                    r5 = r12 + r1;
+                    v44 = 1;
+                    v48 = (r3 + 2) & 255;
+                    r1 = 123;
+                    if (!((r9 & r9) == 0)) {
+                        r1 = -1;
+                    }
+                    v52 = r1;
+                    r1 = LD32(r11 + r13);
+                    r0 = GCALL8(0x060153C8, r14, r5, r6, r7, (((r1 + r8) + r2) - 1), v52, v48, v44);
+                    r1 = LD16(r11 + r10);
+                    r12 = r12 + r1;
+                    r8 = r8 + r1;
+                }
+            }
+            r1 = LD16(218 + r11);
+            r12 = r12 + r1;
+            r1 = LD16(220 + r11);
+            r8 = r8 + r1;
+            if ((r9 & r9) == 0) {
+                r6 = LD32(224 + r11);
+                r1 = LD32(228 + r11);
+                c11 = r12 >= 0;
+                if (!((r1 & r1) == 0)) {
+                    r0 = LD32(232 + r11);
+                    v36 = r0;
+                }
+                r7 = 0;
+                if (!(c11)) {
+                    r7 = -r12;
+                    r12 = 0;
+                }
+                r13 = 0x400 - r12;
+                r1 = LD32(196 + r11);
+                r1 = r1 - r7;
+                if (r13 > r1) {
+                    r13 = r1;
+                }
+                r1 = LD32(r14 + 28);
+                r2 = v40 + r8;
+                r3 = r1;
+                if (r2 >= r1) {
+                    r10 = r2;
+                    r3 = 0;
+                } else {
+                    r3 = r3 - r2;
+                    r10 = r1;
+                }
+                r1 = LD32(r14 + 24);
+                r10 = r1 - r10;
+                r1 = r3;
+                if (r10 >= 0) {
+                    r2 = LD32(200 + r11);
+                    r1 = r1 + r10;
+                    c16 = (r6 & r6) == 0;
+                    if (r1 > r2) {
+                        r10 = r10 - (r1 - r2);
+                    }
+                    r0 = v36;
+                    if (c16) {
+                        r9 = r7;
+                        if ((r0 & r0) == 0) {
+                            r1 = LD32(212 + r11);
+                            r9 = r9 + (r3 * r1);
+                        }
+                        r2 = LD32(r14 + 44);
+                        r8 = (((r8 + r3) + v40) * r2) + r12;
+                        if (r10 > 0) {
+                            r12 = r3 << 2;
+                            do {
+                                r0 = v36;
+                                if ((r0 & r0) == 0) {
+                                    r1 = LD32(192 + r11);
+                                    r5 = r1;
+                                } else {
+                                    r1 = LD32(r0 + r12);
+                                    r5 = r1;
+                                }
+                                r5 = r5 + r9;
+                                r1 = LD32(r14 + 40);
+                                r4 = r1 + r8;
+                                if (r13 > 0) {
+                                    r0 = GCALL6(0x0604B358, r4, r5, r13, 0, v40, v36);
+                                }
+                                if ((v36 & v36) == 0) {
+                                    r1 = LD32(212 + r11);
+                                    r9 = r9 + r1;
+                                }
+                                r1 = LD32(r14 + 44);
+                                r12 = r12 + 4;
+                                r10 = r10 - 1;
+                                r8 = r8 + r1;
+                            } while (AGAIN(r10 > 0));
+                        }
+                    } else {
+                        r9 = r7;
+                        if ((r0 & r0) == 0) {
+                            r1 = LD32(212 + r11);
+                            r9 = r9 + (r3 * r1);
+                        }
+                        r2 = LD32(r14 + 44);
+                        r8 = (((r8 + r3) + v40) * r2) + r12;
+                        if (r10 > 0) {
+                            r2 = r3 << 2;
+                            do {
+                                r0 = v36;
+                                if ((r0 & r0) == 0) {
+                                    r1 = LD32(192 + r11);
+                                    r5 = r1;
+                                } else {
+                                    r1 = LD32(r0 + r2);
+                                    r5 = r1;
+                                }
+                                r5 = r5 + r9;
+                                r1 = LD32(r14 + 40);
+                                r3 = 0;
+                                r4 = r1 + r8;
+                                if (!(0 >= r13)) {
+                                    do {
+                                        r1 = LD8(r5);
+                                        r5 = r5 + 1;
+                                        r1 = r1 & 255;
+                                        if (!((r1 & r1) == 0)) {
+                                            ST8(r4 + r3, r1);
+                                        }
+                                        r3 = r3 + 1;
+                                    } while (AGAIN(!(r3 >= r13)));
+                                }
+                                if ((v36 & v36) == 0) {
+                                    r1 = LD32(212 + r11);
+                                    r9 = r9 + r1;
+                                }
+                                r1 = LD32(r14 + 44);
+                                r2 = r2 + 4;
+                                r10 = r10 - 1;
+                                r8 = r8 + r1;
+                            } while (AGAIN(r10 > 0));
+                        }
+                    }
+                }
+                r5 = R(5);
+                r6 = R(6);
+                r7 = R(7);
+                r0 = GCALL6(0x06025AB4, r11, 0, 0, 0, v40, v36);
+            } else {
+                r5 = R(5);
+                r6 = R(6);
+                r7 = R(7);
+                r0 = GCALL6(0x06025AB4, r11, 0, 0, 0, v40, v36);
+                r3 = LD32(0x060791C4);
+                if (!((r3 & r3) == 0)) {
+                    r0 = 196;
+                    r2 = LD32(196 + r11);
+                    r1 = LD32(196 + r3);
+                    if (r2 >= r1) {
+                        r0 = 200;
+                        r2 = LD32(200 + r11);
+                        r1 = LD32(200 + r3);
+                        r11 = r3;
+                        if (r2 >= r1) {
+                            r6 = LD32(224 + r11);
+                            r1 = LD32(228 + r11);
+                            c11 = r12 >= 0;
+                            if (!((r1 & r1) == 0)) {
+                                r0 = LD32(232 + r11);
+                                v36 = r0;
+                            }
+                            r7 = 0;
+                            if (!(c11)) {
+                                r7 = -r12;
+                                r12 = 0;
+                            }
+                            r13 = 0x400 - r12;
+                            r1 = LD32(196 + r11);
+                            r1 = r1 - r7;
+                            if (r13 > r1) {
+                                r13 = r1;
+                            }
+                            r1 = LD32(r14 + 28);
+                            r2 = v40 + r8;
+                            r3 = r1;
+                            if (r2 >= r1) {
+                                r10 = r2;
+                                r3 = 0;
+                            } else {
+                                r3 = r3 - r2;
+                                r10 = r1;
+                            }
+                            r1 = LD32(r14 + 24);
+                            r10 = r1 - r10;
+                            r1 = r3;
+                            if (r10 >= 0) {
+                                r2 = LD32(200 + r11);
+                                r1 = r1 + r10;
+                                c16 = (r6 & r6) == 0;
+                                if (r1 > r2) {
+                                    r10 = r10 - (r1 - r2);
+                                }
+                                r0 = v36;
+                                if (c16) {
+                                    r9 = r7;
+                                    if ((r0 & r0) == 0) {
+                                        r1 = LD32(212 + r11);
+                                        r9 = r9 + (r3 * r1);
+                                    }
+                                    r2 = LD32(r14 + 44);
+                                    r8 = (((r8 + r3) + v40) * r2) + r12;
+                                    if (r10 > 0) {
+                                        r12 = r3 << 2;
+                                        do {
+                                            r0 = v36;
+                                            if ((r0 & r0) == 0) {
+                                                r1 = LD32(192 + r11);
+                                                r5 = r1;
+                                            } else {
+                                                r1 = LD32(r0 + r12);
+                                                r5 = r1;
+                                            }
+                                            r5 = r5 + r9;
+                                            r1 = LD32(r14 + 40);
+                                            r4 = r1 + r8;
+                                            if (r13 > 0) {
+                                                r0 = GCALL6(0x0604B358, r4, r5, r13, 0, v40, v36);
+                                            }
+                                            if ((v36 & v36) == 0) {
+                                                r1 = LD32(212 + r11);
+                                                r9 = r9 + r1;
+                                            }
+                                            r1 = LD32(r14 + 44);
+                                            r12 = r12 + 4;
+                                            r10 = r10 - 1;
+                                            r8 = r8 + r1;
+                                        } while (AGAIN(r10 > 0));
+                                    }
+                                } else {
+                                    r9 = r7;
+                                    if ((r0 & r0) == 0) {
+                                        r1 = LD32(212 + r11);
+                                        r9 = r9 + (r3 * r1);
+                                    }
+                                    r2 = LD32(r14 + 44);
+                                    r8 = (((r8 + r3) + v40) * r2) + r12;
+                                    if (r10 > 0) {
+                                        r2 = r3 << 2;
+                                        do {
+                                            r0 = v36;
+                                            if ((r0 & r0) == 0) {
+                                                r1 = LD32(192 + r11);
+                                                r5 = r1;
+                                            } else {
+                                                r1 = LD32(r0 + r2);
+                                                r5 = r1;
+                                            }
+                                            r5 = r5 + r9;
+                                            r1 = LD32(r14 + 40);
+                                            r3 = 0;
+                                            r4 = r1 + r8;
+                                            if (!(0 >= r13)) {
+                                                do {
+                                                    r1 = LD8(r5);
+                                                    r5 = r5 + 1;
+                                                    r1 = r1 & 255;
+                                                    if (!((r1 & r1) == 0)) {
+                                                        ST8(r4 + r3, r1);
+                                                    }
+                                                    r3 = r3 + 1;
+                                                } while (AGAIN(!(r3 >= r13)));
+                                            }
+                                            if ((v36 & v36) == 0) {
+                                                r1 = LD32(212 + r11);
+                                                r9 = r9 + r1;
+                                            }
+                                            r1 = LD32(r14 + 44);
+                                            r2 = r2 + 4;
+                                            r10 = r10 - 1;
+                                            r8 = r8 + r1;
+                                        } while (AGAIN(r10 > 0));
+                                    }
+                                }
+                            }
+                            r5 = R(5);
+                            r6 = R(6);
+                            r7 = R(7);
+                            r0 = GCALL6(0x06025AB4, r11, 0, 0, 0, v40, v36);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06016918(int r4)
+{
+    int r0, r1, r2, r3, r5, r6, r7, r8, r9, r10, r11, c0;
+    long long m0;
+
+    r10 = r4;
+    r1 = LD32(0x06000344);
+    r0 = GCALL2(r1, -1, 0x100);
+    r0 = GCALL2(0x06069E6C, 71, 0x06016F50);
+    r0 = GCALL0(0x0601742C);
+    r1 = LD32(0x06000344);
+    r0 = GCALL2(r1, -129, 0);
+    r11 = 0x060279E0;
+    c0 = r10 * 28;
+    m0 = (unsigned)c0;
+    r9 = c0;
+    r0 = GCALL4(0x060279E0, 0, c0, -1, 1);
+    ST32(0x06089CD0, r0);
+    if ((r0 & r0) == 0) {
+        r0 = 0;
+    } else {
+        r0 = GCALL4(r11, 0, ((int)((m0 & ~0xFFFFFFFFLL) | (unsigned)r9)), -1, 1);
+        ST32(0x06089CCC, r0);
+        if (!((r0 & r0) == 0)) {
+            ST32(0x06089CC8, r10);
+            r5 = 0;
+            ST32(0x06089CC4, 0);
+            if (!(0 >= r10)) {
+                r4 = 0;
+                r6 = 0;
+                do {
+                    r0 = r6;
+                    r7 = LD32(0x06089CD0);
+                    r3 = r6;
+                    r2 = r6 + r7;
+                    ST32(r0 + r7, r4);
+                    ST32(r2 + 8, r4);
+                    ST32(r2 + 12, r4);
+                    ST32(r2 + 16, r4);
+                    ST16((r2 + 24), r4);
+                    r8 = LD32(0x06089CCC);
+                    r6 = r6 + 28;
+                    r1 = LD32(r0 + r7);
+                    r5 = r5 + 1;
+                    ST32(r0 + r8, r1);
+                    r1 = LD32(r2 + 4);
+                    r3 = r3 + r8;
+                    ST32(r3 + 4, r1);
+                    r2 = r2 + 8;
+                    r1 = LD32(r2);
+                    r2 = r2 + 4;
+                    r3 = r3 + 8;
+                    ST32(r3, r1);
+                    r1 = LD32(r2);
+                    r2 = r2 + 4;
+                    r3 = r3 + 4;
+                    ST32(r3, r1);
+                    r1 = LD32(r2);
+                    r2 = r2 + 4;
+                    r3 = r3 + 4;
+                    ST32(r3, r1);
+                    r1 = LD32(r2);
+                    r3 = r3 + 4;
+                    ST32(r3, r1);
+                    r1 = LD32((r2 + 4));
+                    ST32(r3 + 4, r1);
+                } while (AGAIN(!(r5 >= r10)));
+            }
+            r0 = 1;
+        } else {
+            r0 = 0;
+        }
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06016A78(void)
+{
+    int r0, r1, r2, r3, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, c0, c1, c3, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c24, c44, c49, c59, c64, c1005, c1006, c1073, c1075, c1079;
+
+    r1 = LD8(0x06089E03);
+    r2 = r1 & 255;
+    r0 = r2;
+    c0 = r0 == 2;
+    r11 = 0;
+    c1005 = c0;
+    if (c0) {
+        r1 = 28;
+        c1006 = c1005;
+        r14 = 0;
+        r12 = 0x06089CD0;
+        r9 = r11 * r1;
+        r1 = 112;
+        while (1) {
+            r7 = (r14 * r1) + 0x06089DD0;
+            r1 = LD8((r7 + 51));
+            r2 = r7;
+            if (!((r1 & 255) == 255)) {
+                r2 = r2 + 72;
+                r1 = LD8(r2);
+                r5 = 0;
+                if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                    r5 = 1;
+                }
+                r1 = LD8((r7 + 73));
+                if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                    r5 = r5 | 2;
+                }
+                r1 = LD8((r7 + 74));
+                if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                    r5 = r5 | 4;
+                }
+                r1 = LD8((r7 + 75));
+                if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                    r5 = r5 | 8;
+                }
+                r1 = LD8((r7 + 76));
+                if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                    r5 = r5 | 16;
+                }
+                r1 = LD8((r7 + 77));
+                if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                    r5 = r5 | 32;
+                }
+                r1 = LD8((r7 + 83));
+                c13 = ((r1 & 255) & (r1 & 255)) == 0;
+                r1 = r7;
+                if (!(c13)) {
+                    r5 = r5 | 64;
+                    r1 = r2;
+                } else {
+                    r1 = LD8((r1 + 89));
+                    c14 = ((r1 & 255) & (r1 & 255)) == 0;
+                    r1 = r2;
+                    if (!(c14)) {
+                        r5 = r5 | 64;
+                        r1 = r2;
+                    }
+                }
+                r1 = LD8((r1 + 12));
+                c15 = ((r1 & 255) & (r1 & 255)) == 0;
+                r1 = r2;
+                if (!(c15)) {
+                    r5 = r5 | 0x100;
+                    r1 = r2;
+                } else {
+                    r1 = LD8((r1 + 18));
+                    c16 = ((r1 & 255) & (r1 & 255)) == 0;
+                    r1 = r2;
+                    if (!(c16)) {
+                        r5 = r5 | 0x100;
+                        r1 = r2;
+                    }
+                }
+                r1 = LD8((r1 + 19));
+                c17 = ((r1 & 255) & (r1 & 255)) == 0;
+                r1 = r2;
+                if (!(c17)) {
+                    r5 = r5 | 128;
+                }
+                r1 = LD8((r1 + 6));
+                c18 = ((r1 & 255) & (r1 & 255)) == 0;
+                r1 = r2;
+                if (!(c18)) {
+                    r5 = r5 | 0x200;
+                    r1 = r2;
+                }
+                r1 = LD8((r1 + 7));
+                c19 = ((r1 & 255) & (r1 & 255)) == 0;
+                r1 = r2;
+                if (!(c19)) {
+                    r5 = r5 | 0x1000;
+                    r1 = r2;
+                }
+                r1 = LD8((r1 + 8));
+                c20 = ((r1 & 255) & (r1 & 255)) == 0;
+                r1 = r2;
+                if (!(c20)) {
+                    r5 = r5 | 0x2000;
+                    r1 = r2;
+                }
+                r1 = LD8((r1 + 9));
+                c21 = ((r1 & 255) & (r1 & 255)) == 0;
+                r1 = r2;
+                if (!(c21)) {
+                    r5 = r5 | 0x400;
+                    r1 = r2;
+                }
+                r1 = LD8((r1 + 10));
+                c22 = ((r1 & 255) & (r1 & 255)) == 0;
+                r1 = r7;
+                if (!(c22)) {
+                    r5 = r5 | 0x800;
+                    r1 = r7;
+                }
+                r1 = LD8((r1 + 51));
+                r2 = r1 & 255;
+                r0 = r2;
+                if (!(r0 == 2)) {
+                    c24 = r0 == 21;
+                    r0 = r2;
+                    if (!(c24)) {
+                        r6 = r9;
+                        if (!(r0 == 22)) {
+                            r0 = r2;
+                            if (!(r2 == 227)) {
+                                r3 = r9;
+                                if (r0 == 52) {
+                                    r0 = LD32(r12);
+                                    ST32(r0 + r9, 5);
+                                    r1 = LD8((r7 + 54));
+                                    r3 = r3 + r0;
+                                    r10 = r1 & 255;
+                                    ST16((r3 + 20), r10);
+                                    r1 = LD8((r7 + 55));
+                                    r8 = r1 & 255;
+                                    r13 = r8;
+                                    if (((1 & r10) & (1 & r10)) == 0) {
+                                        r1 = 32;
+                                        if (!(((8 & r10) & (8 & r10)) == 0)) {
+                                            r1 = LD8(((r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255) + 0x06075A74);
+                                            r1 = r1 & 255;
+                                            r0 = r1;
+                                            c49 = r0 == 3;
+                                            if (!(r0 == 1)) {
+                                                r0 = r1;
+                                                if (!(c49)) {
+                                                    r1 = 32;
+                                                    if (!(r0 == 2)) {
+                                                        r0 = GCALL1(0x06032164, 9);
+                                                        r1 = 32;
+                                                    }
+                                                } else {
+                                                    r1 = r3 + 24;
+                                                    r0 = LD16(r1);
+                                                    ST16(r1, (r0 | 2));
+                                                    r1 = 32;
+                                                }
+                                            } else {
+                                                r1 = r3 + 24;
+                                                r0 = LD16(r1);
+                                                ST16(r1, (r0 | 1));
+                                                r1 = 32;
+                                            }
+                                        }
+                                    } else {
+                                        r1 = LD8(((r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255) + 0x06075A74);
+                                        r0 = r1 & 255;
+                                        c44 = r0 == 3;
+                                        if (!(r0 == 1)) {
+                                            r1 = 32;
+                                            if (c44) {
+                                                r1 = r3 + 24;
+                                                r2 = LD16(r1);
+                                                r3 = -3;
+                                                ST16(r1, (r2 & r3));
+                                                r1 = 32;
+                                            }
+                                        } else {
+                                            r1 = r3 + 24;
+                                            r2 = LD16(r1);
+                                            r3 = -2;
+                                            ST16(r1, (r2 & r3));
+                                            r1 = 32;
+                                        }
+                                    }
+                                    if (((r1 & r10) & (r1 & r10)) == 0) {
+                                        r0 = GCALL1(0x0602F7F4, r8);
+                                        if (!((r0 & r0) == 0)) {
+                                            r0 = GCALL1(0x0602F830, r8);
+                                            r8 = r0 & 255;
+                                        }
+                                    }
+                                    r1 = LD32(r12);
+                                    r0 = LD16(((r1 + r9) + 24));
+                                    r13 = r8;
+                                    if (((r0 & 1) & (r0 & 1)) == 0) {
+                                        r1 = 0x06075A74;
+                                        r0 = (r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255;
+                                    } else {
+                                        r1 = 0x06075B74;
+                                        r0 = (r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255;
+                                    }
+                                    r1 = LD8(r0 + r1);
+                                    r0 = r10 & 64;
+                                    r7 = r1 & 255;
+                                    if ((r0 & r0) == 0) {
+                                        r1 = LD32(r12);
+                                        r3 = (r9 + r1) + 24;
+                                        r1 = LD16(r3);
+                                        ST16(r3, (r1 & -65));
+                                        c1075 = 1;
+                                    } else {
+                                        r1 = LD8(r7 + 0x06075135);
+                                        c59 = ((r1 & 2) & (r1 & 2)) == 0;
+                                        r2 = r7;
+                                        c1073 = c59;
+                                        if (!(c59)) {
+                                            r2 = r2 - 32;
+                                            c1073 = 0;
+                                        }
+                                        r1 = LD32(r12);
+                                        r1 = (r1 + r9) + 24;
+                                        r0 = LD16(r1);
+                                        r7 = r2 & 255;
+                                        r0 = r0 | 64;
+                                        ST16(r1, r0);
+                                        c1075 = c1073;
+                                    }
+                                    r1 = LD32(r12);
+                                    r5 = 0;
+                                    ST16(((r9 + r1) + 22), ((r7 << 8) | r8));
+                                } else {
+                                    r1 = 7;
+                                    if (!(r2 == 255)) {
+                                        r0 = LD32(r12);
+                                        c1079 = 0;
+                                    } else {
+                                        r0 = LD32(r12);
+                                        r1 = 0;
+                                        c1079 = 1;
+                                    }
+                                    ST32(r0 + r9, r1);
+                                }
+                            } else {
+                                r0 = LD32(r12);
+                                r2 = r9 + r0;
+                                ST32(r0 + r9, 4);
+                                r1 = LD8((r7 + 53));
+                                ST16((r2 + 20), r1);
+                                r1 = LD8((r7 + 54));
+                                ST16((r2 + 22), r1);
+                            }
+                        } else {
+                            r0 = LD32(r12);
+                            ST32(r0 + r9, 6);
+                            r2 = LD8((r7 + 54));
+                            r6 = r6 + r0;
+                            r7 = LD8((r7 + 55));
+                            ST16((r6 + 20), (((((int)(((long long)((r2 & 255) - 128) * 0x2AAAAAAB) >> 32)) >> 1) >> 1) - (((((r2 & 255) - 128) << 1) - (((r2 & 255) - 128) << 1)) - ((unsigned)((r2 & 255) - 128) >> 31))));
+                            ST16((r6 + 22), ((((((r7 & 255) - 128) << 1) - (((r7 & 255) - 128) << 1)) - ((unsigned)((r7 & 255) - 128) >> 31)) - ((((int)(((long long)((r7 & 255) - 128) * 0x2AAAAAAB) >> 32)) >> 1) >> 1)));
+                        }
+                    } else {
+                        r0 = LD32(r12);
+                        r1 = 3;
+                        c1079 = 1;
+                        ST32(r0 + r9, r1);
+                    }
+                } else {
+                    r1 = LD32(r12);
+                    r0 = r9;
+                    ST32(r0 + r1, 1);
+                }
+                r1 = LD32(r12);
+                r3 = r9 + r1;
+                r1 = LD32(r3 + 16);
+                ST32(r3 + 8, r5);
+                r2 = (r5 ^ r1) & r5;
+                r1 = LD32(r3 + 12);
+                ST32(r3 + 16, r5);
+                ST32(r3 + 12, (r1 | r2));
+                r1 = LD32(0x06089CC8);
+                r11 = r11 + 1;
+                r9 = r9 + 28;
+                if (r11 >= r1) {
+                    break;
+                } else {
+                    r14 = r14 + 1;
+                    r1 = 112;
+                    if (r14 > 29) {
+                        break;
+                    } else {
+                        POLL();
+                        continue;
+                    }
+                }
+            } else {
+                r14 = r14 + 1;
+                r1 = 112;
+                if (r14 > 29) {
+                    break;
+                }
+            }
+            POLL();
+        }
+    } else {
+        r3 = 1;
+        c1 = (unsigned)(r2 - 21) > (unsigned)1;
+        r1 = 28;
+        c1006 = c1;
+        if (!(c1)) {
+            r14 = 0;
+            r12 = 0x06089CD0;
+            r9 = r11 * r1;
+            r1 = 112;
+            while (1) {
+                r7 = (r14 * r1) + 0x06089DD0;
+                r1 = LD8((r7 + 51));
+                r2 = r7;
+                if (!((r1 & 255) == 255)) {
+                    r2 = r2 + 72;
+                    r1 = LD8(r2);
+                    r5 = 0;
+                    if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                        r5 = 1;
+                    }
+                    r1 = LD8((r7 + 73));
+                    if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                        r5 = r5 | 2;
+                    }
+                    r1 = LD8((r7 + 74));
+                    if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                        r5 = r5 | 4;
+                    }
+                    r1 = LD8((r7 + 75));
+                    if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                        r5 = r5 | 8;
+                    }
+                    r1 = LD8((r7 + 76));
+                    if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                        r5 = r5 | 16;
+                    }
+                    r1 = LD8((r7 + 77));
+                    if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                        r5 = r5 | 32;
+                    }
+                    r1 = LD8((r7 + 83));
+                    c13 = ((r1 & 255) & (r1 & 255)) == 0;
+                    r1 = r7;
+                    if (!(c13)) {
+                        r5 = r5 | 64;
+                        r1 = r2;
+                    } else {
+                        r1 = LD8((r1 + 89));
+                        c14 = ((r1 & 255) & (r1 & 255)) == 0;
+                        r1 = r2;
+                        if (!(c14)) {
+                            r5 = r5 | 64;
+                            r1 = r2;
+                        }
+                    }
+                    r1 = LD8((r1 + 12));
+                    c15 = ((r1 & 255) & (r1 & 255)) == 0;
+                    r1 = r2;
+                    if (!(c15)) {
+                        r5 = r5 | 0x100;
+                        r1 = r2;
+                    } else {
+                        r1 = LD8((r1 + 18));
+                        c16 = ((r1 & 255) & (r1 & 255)) == 0;
+                        r1 = r2;
+                        if (!(c16)) {
+                            r5 = r5 | 0x100;
+                            r1 = r2;
+                        }
+                    }
+                    r1 = LD8((r1 + 19));
+                    c17 = ((r1 & 255) & (r1 & 255)) == 0;
+                    r1 = r2;
+                    if (!(c17)) {
+                        r5 = r5 | 128;
+                    }
+                    r1 = LD8((r1 + 6));
+                    c18 = ((r1 & 255) & (r1 & 255)) == 0;
+                    r1 = r2;
+                    if (!(c18)) {
+                        r5 = r5 | 0x200;
+                        r1 = r2;
+                    }
+                    r1 = LD8((r1 + 7));
+                    c19 = ((r1 & 255) & (r1 & 255)) == 0;
+                    r1 = r2;
+                    if (!(c19)) {
+                        r5 = r5 | 0x1000;
+                        r1 = r2;
+                    }
+                    r1 = LD8((r1 + 8));
+                    c20 = ((r1 & 255) & (r1 & 255)) == 0;
+                    r1 = r2;
+                    if (!(c20)) {
+                        r5 = r5 | 0x2000;
+                        r1 = r2;
+                    }
+                    r1 = LD8((r1 + 9));
+                    c21 = ((r1 & 255) & (r1 & 255)) == 0;
+                    r1 = r2;
+                    if (!(c21)) {
+                        r5 = r5 | 0x400;
+                        r1 = r2;
+                    }
+                    r1 = LD8((r1 + 10));
+                    c22 = ((r1 & 255) & (r1 & 255)) == 0;
+                    r1 = r7;
+                    if (!(c22)) {
+                        r5 = r5 | 0x800;
+                        r1 = r7;
+                    }
+                    r1 = LD8((r1 + 51));
+                    r2 = r1 & 255;
+                    r0 = r2;
+                    if (!(r0 == 2)) {
+                        c24 = r0 == 21;
+                        r0 = r2;
+                        if (!(c24)) {
+                            r6 = r9;
+                            if (!(r0 == 22)) {
+                                r0 = r2;
+                                if (!(r2 == 227)) {
+                                    r3 = r9;
+                                    if (r0 == 52) {
+                                        r0 = LD32(r12);
+                                        ST32(r0 + r9, 5);
+                                        r1 = LD8((r7 + 54));
+                                        r3 = r3 + r0;
+                                        r10 = r1 & 255;
+                                        ST16((r3 + 20), r10);
+                                        r1 = LD8((r7 + 55));
+                                        r8 = r1 & 255;
+                                        r13 = r8;
+                                        if (((1 & r10) & (1 & r10)) == 0) {
+                                            r1 = 32;
+                                            if (!(((8 & r10) & (8 & r10)) == 0)) {
+                                                r1 = LD8(((r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255) + 0x06075A74);
+                                                r1 = r1 & 255;
+                                                r0 = r1;
+                                                c49 = r0 == 3;
+                                                if (!(r0 == 1)) {
+                                                    r0 = r1;
+                                                    if (!(c49)) {
+                                                        r1 = 32;
+                                                        if (!(r0 == 2)) {
+                                                            r0 = GCALL1(0x06032164, 9);
+                                                            r1 = 32;
+                                                        }
+                                                    } else {
+                                                        r1 = r3 + 24;
+                                                        r0 = LD16(r1);
+                                                        ST16(r1, (r0 | 2));
+                                                        r1 = 32;
+                                                    }
+                                                } else {
+                                                    r1 = r3 + 24;
+                                                    r0 = LD16(r1);
+                                                    ST16(r1, (r0 | 1));
+                                                    r1 = 32;
+                                                }
+                                            }
+                                        } else {
+                                            r1 = LD8(((r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255) + 0x06075A74);
+                                            r0 = r1 & 255;
+                                            c44 = r0 == 3;
+                                            if (!(r0 == 1)) {
+                                                r1 = 32;
+                                                if (c44) {
+                                                    r1 = r3 + 24;
+                                                    r2 = LD16(r1);
+                                                    r3 = -3;
+                                                    ST16(r1, (r2 & r3));
+                                                    r1 = 32;
+                                                }
+                                            } else {
+                                                r1 = r3 + 24;
+                                                r2 = LD16(r1);
+                                                r3 = -2;
+                                                ST16(r1, (r2 & r3));
+                                                r1 = 32;
+                                            }
+                                        }
+                                        if (((r1 & r10) & (r1 & r10)) == 0) {
+                                            r0 = GCALL1(0x0602F7F4, r8);
+                                            if (!((r0 & r0) == 0)) {
+                                                r0 = GCALL1(0x0602F830, r8);
+                                                r8 = r0 & 255;
+                                            }
+                                        }
+                                        r1 = LD32(r12);
+                                        r0 = LD16(((r1 + r9) + 24));
+                                        r13 = r8;
+                                        if (((r0 & 1) & (r0 & 1)) == 0) {
+                                            r1 = 0x06075A74;
+                                            r0 = (r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255;
+                                        } else {
+                                            r1 = 0x06075B74;
+                                            r0 = (r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255;
+                                        }
+                                        r1 = LD8(r0 + r1);
+                                        r0 = r10 & 64;
+                                        r7 = r1 & 255;
+                                        if ((r0 & r0) == 0) {
+                                            r1 = LD32(r12);
+                                            r3 = (r9 + r1) + 24;
+                                            r1 = LD16(r3);
+                                            ST16(r3, (r1 & -65));
+                                            c1075 = 1;
+                                        } else {
+                                            r1 = LD8(r7 + 0x06075135);
+                                            c59 = ((r1 & 2) & (r1 & 2)) == 0;
+                                            r2 = r7;
+                                            c1073 = c59;
+                                            if (!(c59)) {
+                                                r2 = r2 - 32;
+                                                c1073 = 0;
+                                            }
+                                            r1 = LD32(r12);
+                                            r1 = (r1 + r9) + 24;
+                                            r0 = LD16(r1);
+                                            r7 = r2 & 255;
+                                            r0 = r0 | 64;
+                                            ST16(r1, r0);
+                                            c1075 = c1073;
+                                        }
+                                        r1 = LD32(r12);
+                                        r5 = 0;
+                                        ST16(((r9 + r1) + 22), ((r7 << 8) | r8));
+                                    } else {
+                                        r1 = 7;
+                                        if (!(r2 == 255)) {
+                                            r0 = LD32(r12);
+                                            c1079 = 0;
+                                        } else {
+                                            r0 = LD32(r12);
+                                            r1 = 0;
+                                            c1079 = 1;
+                                        }
+                                        ST32(r0 + r9, r1);
+                                    }
+                                } else {
+                                    r0 = LD32(r12);
+                                    r2 = r9 + r0;
+                                    ST32(r0 + r9, 4);
+                                    r1 = LD8((r7 + 53));
+                                    ST16((r2 + 20), r1);
+                                    r1 = LD8((r7 + 54));
+                                    ST16((r2 + 22), r1);
+                                }
+                            } else {
+                                r0 = LD32(r12);
+                                ST32(r0 + r9, 6);
+                                r2 = LD8((r7 + 54));
+                                r6 = r6 + r0;
+                                r7 = LD8((r7 + 55));
+                                ST16((r6 + 20), (((((int)(((long long)((r2 & 255) - 128) * 0x2AAAAAAB) >> 32)) >> 1) >> 1) - (((((r2 & 255) - 128) << 1) - (((r2 & 255) - 128) << 1)) - ((unsigned)((r2 & 255) - 128) >> 31))));
+                                ST16((r6 + 22), ((((((r7 & 255) - 128) << 1) - (((r7 & 255) - 128) << 1)) - ((unsigned)((r7 & 255) - 128) >> 31)) - ((((int)(((long long)((r7 & 255) - 128) * 0x2AAAAAAB) >> 32)) >> 1) >> 1)));
+                            }
+                        } else {
+                            r0 = LD32(r12);
+                            r1 = 3;
+                            c1079 = 1;
+                            ST32(r0 + r9, r1);
+                        }
+                    } else {
+                        r1 = LD32(r12);
+                        r0 = r9;
+                        ST32(r0 + r1, 1);
+                    }
+                    r1 = LD32(r12);
+                    r3 = r9 + r1;
+                    r1 = LD32(r3 + 16);
+                    ST32(r3 + 8, r5);
+                    r2 = (r5 ^ r1) & r5;
+                    r1 = LD32(r3 + 12);
+                    ST32(r3 + 16, r5);
+                    ST32(r3 + 12, (r1 | r2));
+                    r1 = LD32(0x06089CC8);
+                    r11 = r11 + 1;
+                    r9 = r9 + 28;
+                    if (r11 >= r1) {
+                        break;
+                    } else {
+                        r14 = r14 + 1;
+                        r1 = 112;
+                        if (r14 > 29) {
+                            break;
+                        } else {
+                            POLL();
+                            continue;
+                        }
+                    }
+                } else {
+                    r14 = r14 + 1;
+                    r1 = 112;
+                    if (r14 > 29) {
+                        break;
+                    }
+                }
+                POLL();
+            }
+        } else {
+            c3 = r0 == 52;
+            c1005 = c3;
+            if (r2 == 227) {
+                r1 = 28;
+                c1006 = c1005;
+                r14 = 0;
+                r12 = 0x06089CD0;
+                r9 = r11 * r1;
+                r1 = 112;
+                while (1) {
+                    r7 = (r14 * r1) + 0x06089DD0;
+                    r1 = LD8((r7 + 51));
+                    r2 = r7;
+                    if (!((r1 & 255) == 255)) {
+                        r2 = r2 + 72;
+                        r1 = LD8(r2);
+                        r5 = 0;
+                        if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                            r5 = 1;
+                        }
+                        r1 = LD8((r7 + 73));
+                        if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                            r5 = r5 | 2;
+                        }
+                        r1 = LD8((r7 + 74));
+                        if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                            r5 = r5 | 4;
+                        }
+                        r1 = LD8((r7 + 75));
+                        if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                            r5 = r5 | 8;
+                        }
+                        r1 = LD8((r7 + 76));
+                        if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                            r5 = r5 | 16;
+                        }
+                        r1 = LD8((r7 + 77));
+                        if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                            r5 = r5 | 32;
+                        }
+                        r1 = LD8((r7 + 83));
+                        c13 = ((r1 & 255) & (r1 & 255)) == 0;
+                        r1 = r7;
+                        if (!(c13)) {
+                            r5 = r5 | 64;
+                            r1 = r2;
+                        } else {
+                            r1 = LD8((r1 + 89));
+                            c14 = ((r1 & 255) & (r1 & 255)) == 0;
+                            r1 = r2;
+                            if (!(c14)) {
+                                r5 = r5 | 64;
+                                r1 = r2;
+                            }
+                        }
+                        r1 = LD8((r1 + 12));
+                        c15 = ((r1 & 255) & (r1 & 255)) == 0;
+                        r1 = r2;
+                        if (!(c15)) {
+                            r5 = r5 | 0x100;
+                            r1 = r2;
+                        } else {
+                            r1 = LD8((r1 + 18));
+                            c16 = ((r1 & 255) & (r1 & 255)) == 0;
+                            r1 = r2;
+                            if (!(c16)) {
+                                r5 = r5 | 0x100;
+                                r1 = r2;
+                            }
+                        }
+                        r1 = LD8((r1 + 19));
+                        c17 = ((r1 & 255) & (r1 & 255)) == 0;
+                        r1 = r2;
+                        if (!(c17)) {
+                            r5 = r5 | 128;
+                        }
+                        r1 = LD8((r1 + 6));
+                        c18 = ((r1 & 255) & (r1 & 255)) == 0;
+                        r1 = r2;
+                        if (!(c18)) {
+                            r5 = r5 | 0x200;
+                            r1 = r2;
+                        }
+                        r1 = LD8((r1 + 7));
+                        c19 = ((r1 & 255) & (r1 & 255)) == 0;
+                        r1 = r2;
+                        if (!(c19)) {
+                            r5 = r5 | 0x1000;
+                            r1 = r2;
+                        }
+                        r1 = LD8((r1 + 8));
+                        c20 = ((r1 & 255) & (r1 & 255)) == 0;
+                        r1 = r2;
+                        if (!(c20)) {
+                            r5 = r5 | 0x2000;
+                            r1 = r2;
+                        }
+                        r1 = LD8((r1 + 9));
+                        c21 = ((r1 & 255) & (r1 & 255)) == 0;
+                        r1 = r2;
+                        if (!(c21)) {
+                            r5 = r5 | 0x400;
+                            r1 = r2;
+                        }
+                        r1 = LD8((r1 + 10));
+                        c22 = ((r1 & 255) & (r1 & 255)) == 0;
+                        r1 = r7;
+                        if (!(c22)) {
+                            r5 = r5 | 0x800;
+                            r1 = r7;
+                        }
+                        r1 = LD8((r1 + 51));
+                        r2 = r1 & 255;
+                        r0 = r2;
+                        if (!(r0 == 2)) {
+                            c24 = r0 == 21;
+                            r0 = r2;
+                            if (!(c24)) {
+                                r6 = r9;
+                                if (!(r0 == 22)) {
+                                    r0 = r2;
+                                    if (!(r2 == 227)) {
+                                        r3 = r9;
+                                        if (r0 == 52) {
+                                            r0 = LD32(r12);
+                                            ST32(r0 + r9, 5);
+                                            r1 = LD8((r7 + 54));
+                                            r3 = r3 + r0;
+                                            r10 = r1 & 255;
+                                            ST16((r3 + 20), r10);
+                                            r1 = LD8((r7 + 55));
+                                            r8 = r1 & 255;
+                                            r13 = r8;
+                                            if (((1 & r10) & (1 & r10)) == 0) {
+                                                r1 = 32;
+                                                if (!(((8 & r10) & (8 & r10)) == 0)) {
+                                                    r1 = LD8(((r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255) + 0x06075A74);
+                                                    r1 = r1 & 255;
+                                                    r0 = r1;
+                                                    c49 = r0 == 3;
+                                                    if (!(r0 == 1)) {
+                                                        r0 = r1;
+                                                        if (!(c49)) {
+                                                            r1 = 32;
+                                                            if (!(r0 == 2)) {
+                                                                r0 = GCALL1(0x06032164, 9);
+                                                                r1 = 32;
+                                                            }
+                                                        } else {
+                                                            r1 = r3 + 24;
+                                                            r0 = LD16(r1);
+                                                            ST16(r1, (r0 | 2));
+                                                            r1 = 32;
+                                                        }
+                                                    } else {
+                                                        r1 = r3 + 24;
+                                                        r0 = LD16(r1);
+                                                        ST16(r1, (r0 | 1));
+                                                        r1 = 32;
+                                                    }
+                                                }
+                                            } else {
+                                                r1 = LD8(((r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255) + 0x06075A74);
+                                                r0 = r1 & 255;
+                                                c44 = r0 == 3;
+                                                if (!(r0 == 1)) {
+                                                    r1 = 32;
+                                                    if (c44) {
+                                                        r1 = r3 + 24;
+                                                        r2 = LD16(r1);
+                                                        r3 = -3;
+                                                        ST16(r1, (r2 & r3));
+                                                        r1 = 32;
+                                                    }
+                                                } else {
+                                                    r1 = r3 + 24;
+                                                    r2 = LD16(r1);
+                                                    r3 = -2;
+                                                    ST16(r1, (r2 & r3));
+                                                    r1 = 32;
+                                                }
+                                            }
+                                            if (((r1 & r10) & (r1 & r10)) == 0) {
+                                                r0 = GCALL1(0x0602F7F4, r8);
+                                                if (!((r0 & r0) == 0)) {
+                                                    r0 = GCALL1(0x0602F830, r8);
+                                                    r8 = r0 & 255;
+                                                }
+                                            }
+                                            r1 = LD32(r12);
+                                            r0 = LD16(((r1 + r9) + 24));
+                                            r13 = r8;
+                                            if (((r0 & 1) & (r0 & 1)) == 0) {
+                                                r1 = 0x06075A74;
+                                                r0 = (r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255;
+                                            } else {
+                                                r1 = 0x06075B74;
+                                                r0 = (r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255;
+                                            }
+                                            r1 = LD8(r0 + r1);
+                                            r0 = r10 & 64;
+                                            r7 = r1 & 255;
+                                            if ((r0 & r0) == 0) {
+                                                r1 = LD32(r12);
+                                                r3 = (r9 + r1) + 24;
+                                                r1 = LD16(r3);
+                                                ST16(r3, (r1 & -65));
+                                                c1075 = 1;
+                                            } else {
+                                                r1 = LD8(r7 + 0x06075135);
+                                                c59 = ((r1 & 2) & (r1 & 2)) == 0;
+                                                r2 = r7;
+                                                c1073 = c59;
+                                                if (!(c59)) {
+                                                    r2 = r2 - 32;
+                                                    c1073 = 0;
+                                                }
+                                                r1 = LD32(r12);
+                                                r1 = (r1 + r9) + 24;
+                                                r0 = LD16(r1);
+                                                r7 = r2 & 255;
+                                                r0 = r0 | 64;
+                                                ST16(r1, r0);
+                                                c1075 = c1073;
+                                            }
+                                            r1 = LD32(r12);
+                                            r5 = 0;
+                                            ST16(((r9 + r1) + 22), ((r7 << 8) | r8));
+                                        } else {
+                                            r1 = 7;
+                                            if (!(r2 == 255)) {
+                                                r0 = LD32(r12);
+                                                c1079 = 0;
+                                            } else {
+                                                r0 = LD32(r12);
+                                                r1 = 0;
+                                                c1079 = 1;
+                                            }
+                                            ST32(r0 + r9, r1);
+                                        }
+                                    } else {
+                                        r0 = LD32(r12);
+                                        r2 = r9 + r0;
+                                        ST32(r0 + r9, 4);
+                                        r1 = LD8((r7 + 53));
+                                        ST16((r2 + 20), r1);
+                                        r1 = LD8((r7 + 54));
+                                        ST16((r2 + 22), r1);
+                                    }
+                                } else {
+                                    r0 = LD32(r12);
+                                    ST32(r0 + r9, 6);
+                                    r2 = LD8((r7 + 54));
+                                    r6 = r6 + r0;
+                                    r7 = LD8((r7 + 55));
+                                    ST16((r6 + 20), (((((int)(((long long)((r2 & 255) - 128) * 0x2AAAAAAB) >> 32)) >> 1) >> 1) - (((((r2 & 255) - 128) << 1) - (((r2 & 255) - 128) << 1)) - ((unsigned)((r2 & 255) - 128) >> 31))));
+                                    ST16((r6 + 22), ((((((r7 & 255) - 128) << 1) - (((r7 & 255) - 128) << 1)) - ((unsigned)((r7 & 255) - 128) >> 31)) - ((((int)(((long long)((r7 & 255) - 128) * 0x2AAAAAAB) >> 32)) >> 1) >> 1)));
+                                }
+                            } else {
+                                r0 = LD32(r12);
+                                r1 = 3;
+                                c1079 = 1;
+                                ST32(r0 + r9, r1);
+                            }
+                        } else {
+                            r1 = LD32(r12);
+                            r0 = r9;
+                            ST32(r0 + r1, 1);
+                        }
+                        r1 = LD32(r12);
+                        r3 = r9 + r1;
+                        r1 = LD32(r3 + 16);
+                        ST32(r3 + 8, r5);
+                        r2 = (r5 ^ r1) & r5;
+                        r1 = LD32(r3 + 12);
+                        ST32(r3 + 16, r5);
+                        ST32(r3 + 12, (r1 | r2));
+                        r1 = LD32(0x06089CC8);
+                        r11 = r11 + 1;
+                        r9 = r9 + 28;
+                        if (r11 >= r1) {
+                            break;
+                        } else {
+                            r14 = r14 + 1;
+                            r1 = 112;
+                            if (r14 > 29) {
+                                break;
+                            } else {
+                                POLL();
+                                continue;
+                            }
+                        }
+                    } else {
+                        r14 = r14 + 1;
+                        r1 = 112;
+                        if (r14 > 29) {
+                            break;
+                        }
+                    }
+                    POLL();
+                }
+            } else {
+                c1005 = c3;
+                if (c3) {
+                    r1 = 28;
+                    c1006 = c1005;
+                    r14 = 0;
+                    r12 = 0x06089CD0;
+                    r9 = r11 * r1;
+                    r1 = 112;
+                    while (1) {
+                        r7 = (r14 * r1) + 0x06089DD0;
+                        r1 = LD8((r7 + 51));
+                        r2 = r7;
+                        if (!((r1 & 255) == 255)) {
+                            r2 = r2 + 72;
+                            r1 = LD8(r2);
+                            r5 = 0;
+                            if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                                r5 = 1;
+                            }
+                            r1 = LD8((r7 + 73));
+                            if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                                r5 = r5 | 2;
+                            }
+                            r1 = LD8((r7 + 74));
+                            if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                                r5 = r5 | 4;
+                            }
+                            r1 = LD8((r7 + 75));
+                            if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                                r5 = r5 | 8;
+                            }
+                            r1 = LD8((r7 + 76));
+                            if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                                r5 = r5 | 16;
+                            }
+                            r1 = LD8((r7 + 77));
+                            if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                                r5 = r5 | 32;
+                            }
+                            r1 = LD8((r7 + 83));
+                            c13 = ((r1 & 255) & (r1 & 255)) == 0;
+                            r1 = r7;
+                            if (!(c13)) {
+                                r5 = r5 | 64;
+                                r1 = r2;
+                            } else {
+                                r1 = LD8((r1 + 89));
+                                c14 = ((r1 & 255) & (r1 & 255)) == 0;
+                                r1 = r2;
+                                if (!(c14)) {
+                                    r5 = r5 | 64;
+                                    r1 = r2;
+                                }
+                            }
+                            r1 = LD8((r1 + 12));
+                            c15 = ((r1 & 255) & (r1 & 255)) == 0;
+                            r1 = r2;
+                            if (!(c15)) {
+                                r5 = r5 | 0x100;
+                                r1 = r2;
+                            } else {
+                                r1 = LD8((r1 + 18));
+                                c16 = ((r1 & 255) & (r1 & 255)) == 0;
+                                r1 = r2;
+                                if (!(c16)) {
+                                    r5 = r5 | 0x100;
+                                    r1 = r2;
+                                }
+                            }
+                            r1 = LD8((r1 + 19));
+                            c17 = ((r1 & 255) & (r1 & 255)) == 0;
+                            r1 = r2;
+                            if (!(c17)) {
+                                r5 = r5 | 128;
+                            }
+                            r1 = LD8((r1 + 6));
+                            c18 = ((r1 & 255) & (r1 & 255)) == 0;
+                            r1 = r2;
+                            if (!(c18)) {
+                                r5 = r5 | 0x200;
+                                r1 = r2;
+                            }
+                            r1 = LD8((r1 + 7));
+                            c19 = ((r1 & 255) & (r1 & 255)) == 0;
+                            r1 = r2;
+                            if (!(c19)) {
+                                r5 = r5 | 0x1000;
+                                r1 = r2;
+                            }
+                            r1 = LD8((r1 + 8));
+                            c20 = ((r1 & 255) & (r1 & 255)) == 0;
+                            r1 = r2;
+                            if (!(c20)) {
+                                r5 = r5 | 0x2000;
+                                r1 = r2;
+                            }
+                            r1 = LD8((r1 + 9));
+                            c21 = ((r1 & 255) & (r1 & 255)) == 0;
+                            r1 = r2;
+                            if (!(c21)) {
+                                r5 = r5 | 0x400;
+                                r1 = r2;
+                            }
+                            r1 = LD8((r1 + 10));
+                            c22 = ((r1 & 255) & (r1 & 255)) == 0;
+                            r1 = r7;
+                            if (!(c22)) {
+                                r5 = r5 | 0x800;
+                                r1 = r7;
+                            }
+                            r1 = LD8((r1 + 51));
+                            r2 = r1 & 255;
+                            r0 = r2;
+                            if (!(r0 == 2)) {
+                                c24 = r0 == 21;
+                                r0 = r2;
+                                if (!(c24)) {
+                                    r6 = r9;
+                                    if (!(r0 == 22)) {
+                                        r0 = r2;
+                                        if (!(r2 == 227)) {
+                                            r3 = r9;
+                                            if (r0 == 52) {
+                                                r0 = LD32(r12);
+                                                ST32(r0 + r9, 5);
+                                                r1 = LD8((r7 + 54));
+                                                r3 = r3 + r0;
+                                                r10 = r1 & 255;
+                                                ST16((r3 + 20), r10);
+                                                r1 = LD8((r7 + 55));
+                                                r8 = r1 & 255;
+                                                r13 = r8;
+                                                if (((1 & r10) & (1 & r10)) == 0) {
+                                                    r1 = 32;
+                                                    if (!(((8 & r10) & (8 & r10)) == 0)) {
+                                                        r1 = LD8(((r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255) + 0x06075A74);
+                                                        r1 = r1 & 255;
+                                                        r0 = r1;
+                                                        c49 = r0 == 3;
+                                                        if (!(r0 == 1)) {
+                                                            r0 = r1;
+                                                            if (!(c49)) {
+                                                                r1 = 32;
+                                                                if (!(r0 == 2)) {
+                                                                    r0 = GCALL1(0x06032164, 9);
+                                                                    r1 = 32;
+                                                                }
+                                                            } else {
+                                                                r1 = r3 + 24;
+                                                                r0 = LD16(r1);
+                                                                ST16(r1, (r0 | 2));
+                                                                r1 = 32;
+                                                            }
+                                                        } else {
+                                                            r1 = r3 + 24;
+                                                            r0 = LD16(r1);
+                                                            ST16(r1, (r0 | 1));
+                                                            r1 = 32;
+                                                        }
+                                                    }
+                                                } else {
+                                                    r1 = LD8(((r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255) + 0x06075A74);
+                                                    r0 = r1 & 255;
+                                                    c44 = r0 == 3;
+                                                    if (!(r0 == 1)) {
+                                                        r1 = 32;
+                                                        if (c44) {
+                                                            r1 = r3 + 24;
+                                                            r2 = LD16(r1);
+                                                            r3 = -3;
+                                                            ST16(r1, (r2 & r3));
+                                                            r1 = 32;
+                                                        }
+                                                    } else {
+                                                        r1 = r3 + 24;
+                                                        r2 = LD16(r1);
+                                                        r3 = -2;
+                                                        ST16(r1, (r2 & r3));
+                                                        r1 = 32;
+                                                    }
+                                                }
+                                                if (((r1 & r10) & (r1 & r10)) == 0) {
+                                                    r0 = GCALL1(0x0602F7F4, r8);
+                                                    if (!((r0 & r0) == 0)) {
+                                                        r0 = GCALL1(0x0602F830, r8);
+                                                        r8 = r0 & 255;
+                                                    }
+                                                }
+                                                r1 = LD32(r12);
+                                                r0 = LD16(((r1 + r9) + 24));
+                                                r13 = r8;
+                                                if (((r0 & 1) & (r0 & 1)) == 0) {
+                                                    r1 = 0x06075A74;
+                                                    r0 = (r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255;
+                                                } else {
+                                                    r1 = 0x06075B74;
+                                                    r0 = (r13 - ((int)((((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) & ~0xFFFFFFFFLL) | (unsigned)(((int)((unsigned)((int)((unsigned)((int)((unsigned)((int)(((long long)((unsigned long long)(unsigned)r8 * (unsigned)0x38E38E39)) >> 32)) >> 2)) >> 1)) >> 2)) * 144)))) & 255;
+                                                }
+                                                r1 = LD8(r0 + r1);
+                                                r0 = r10 & 64;
+                                                r7 = r1 & 255;
+                                                if ((r0 & r0) == 0) {
+                                                    r1 = LD32(r12);
+                                                    r3 = (r9 + r1) + 24;
+                                                    r1 = LD16(r3);
+                                                    ST16(r3, (r1 & -65));
+                                                    c1075 = 1;
+                                                } else {
+                                                    r1 = LD8(r7 + 0x06075135);
+                                                    c59 = ((r1 & 2) & (r1 & 2)) == 0;
+                                                    r2 = r7;
+                                                    c1073 = c59;
+                                                    if (!(c59)) {
+                                                        r2 = r2 - 32;
+                                                        c1073 = 0;
+                                                    }
+                                                    r1 = LD32(r12);
+                                                    r1 = (r1 + r9) + 24;
+                                                    r0 = LD16(r1);
+                                                    r7 = r2 & 255;
+                                                    r0 = r0 | 64;
+                                                    ST16(r1, r0);
+                                                    c1075 = c1073;
+                                                }
+                                                r1 = LD32(r12);
+                                                r5 = 0;
+                                                ST16(((r9 + r1) + 22), ((r7 << 8) | r8));
+                                            } else {
+                                                r1 = 7;
+                                                if (!(r2 == 255)) {
+                                                    r0 = LD32(r12);
+                                                    c1079 = 0;
+                                                } else {
+                                                    r0 = LD32(r12);
+                                                    r1 = 0;
+                                                    c1079 = 1;
+                                                }
+                                                ST32(r0 + r9, r1);
+                                            }
+                                        } else {
+                                            r0 = LD32(r12);
+                                            r2 = r9 + r0;
+                                            ST32(r0 + r9, 4);
+                                            r1 = LD8((r7 + 53));
+                                            ST16((r2 + 20), r1);
+                                            r1 = LD8((r7 + 54));
+                                            ST16((r2 + 22), r1);
+                                        }
+                                    } else {
+                                        r0 = LD32(r12);
+                                        ST32(r0 + r9, 6);
+                                        r2 = LD8((r7 + 54));
+                                        r6 = r6 + r0;
+                                        r7 = LD8((r7 + 55));
+                                        ST16((r6 + 20), (((((int)(((long long)((r2 & 255) - 128) * 0x2AAAAAAB) >> 32)) >> 1) >> 1) - (((((r2 & 255) - 128) << 1) - (((r2 & 255) - 128) << 1)) - ((unsigned)((r2 & 255) - 128) >> 31))));
+                                        ST16((r6 + 22), ((((((r7 & 255) - 128) << 1) - (((r7 & 255) - 128) << 1)) - ((unsigned)((r7 & 255) - 128) >> 31)) - ((((int)(((long long)((r7 & 255) - 128) * 0x2AAAAAAB) >> 32)) >> 1) >> 1)));
+                                    }
+                                } else {
+                                    r0 = LD32(r12);
+                                    r1 = 3;
+                                    c1079 = 1;
+                                    ST32(r0 + r9, r1);
+                                }
+                            } else {
+                                r1 = LD32(r12);
+                                r0 = r9;
+                                ST32(r0 + r1, 1);
+                            }
+                            r1 = LD32(r12);
+                            r3 = r9 + r1;
+                            r1 = LD32(r3 + 16);
+                            ST32(r3 + 8, r5);
+                            r2 = (r5 ^ r1) & r5;
+                            r1 = LD32(r3 + 12);
+                            ST32(r3 + 16, r5);
+                            ST32(r3 + 12, (r1 | r2));
+                            r1 = LD32(0x06089CC8);
+                            r11 = r11 + 1;
+                            r9 = r9 + 28;
+                            if (r11 >= r1) {
+                                break;
+                            } else {
+                                r14 = r14 + 1;
+                                r1 = 112;
+                                if (r14 > 29) {
+                                    break;
+                                } else {
+                                    POLL();
+                                    continue;
+                                }
+                            }
+                        } else {
+                            r14 = r14 + 1;
+                            r1 = 112;
+                            if (r14 > 29) {
+                                break;
+                            }
+                        }
+                        POLL();
+                    }
+                } else {
+                    if (!(r2 == 255)) {
+                        r11 = r3;
+                        r2 = LD32(0x06089CD0);
+                        ST32(r2, 7);
+                    }
+                }
+            }
+        }
+    }
+    ST32(0x06089CC4, r11);
+    r7 = 0x06089CC8;
+    r1 = LD32(0x06089CC8);
+    c64 = r11 >= r1;
+    r1 = 28;
+    if (!(c64)) {
+        r6 = 0x06089CD0;
+        r3 = 0;
+        r5 = r11 * r1;
+        do {
+            r0 = r5;
+            r2 = LD32(r6);
+            r1 = r5 + r2;
+            ST32(r0 + r2, r3);
+            ST32(r1 + 8, r3);
+            ST32(r1 + 12, r3);
+            ST32(r1 + 16, r3);
+            r1 = LD32(r7);
+            r11 = r11 + 1;
+            r5 = r5 + 28;
+        } while (AGAIN(!(r11 >= r1)));
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060170B4(int r4, int r5)
+{
+    int r0, r1, r2, r3, r6, r7, r8, r9, r10, r11, c0, c4, c6;
+    long long m0;
+
+    r10 = r4 & 255;
+    r11 = r5 & 255;
+    r8 = 0x06089D70;
+    c0 = r10 * 42;
+    m0 = (unsigned)c0;
+    r3 = c0 + 0x06089D70;
+    r1 = LD8(0x06089CE0);
+    r2 = LD8(r3);
+    r1 = LD8((r1 & 255) + 0x06089CF0);
+    ST8((r3 + 41), (((r2 & 255) == (r1 & 255)) ^ 1));
+    r1 = LD8(0x06089CE0);
+    r1 = LD8((r1 & 255) + 0x06089CF0);
+    ST8(c0 + 0x06089D70, r1);
+    r1 = LD8(r3);
+    r2 = r1 & 255;
+    r0 = r2;
+    r9 = 0;
+    if (r0 == 22) {
+        r9 = 6;
+        r5 = 0x0601706C;
+        r4 = ((int)m0) + (r8 + 1);
+        r0 = GCALL3(0x0604B358, r4, r5, 21);
+        r2 = 14;
+    } else {
+        c4 = r0 == 4;
+        if (r2 > 22) {
+            r4 = (int)m0;
+            if (r2 == 240) {
+                r5 = 0x0601703C;
+                r4 = r4 + (r8 + 1);
+                r0 = GCALL3(0x0604B358, r4, r5, 21);
+                r2 = 14;
+            } else {
+                c6 = r2 == 241;
+                r9 = c6;
+                if (c6) {
+                    r5 = 0x06017054;
+                    r4 = r4 + (r8 + 1);
+                    r0 = GCALL3(0x0604B358, r4, r5, 21);
+                    r2 = 14;
+                } else {
+                    r1 = 42;
+                    r0 = GCALL3(0x0604B358, ((r10 * r1) + 0x06089D71), 0x0601709C, 21);
+                    r9 = 0;
+                    r2 = 14;
+                }
+            }
+        } else {
+            r9 = 4;
+            if (c4) {
+                r4 = ((int)m0) + (r8 + 1);
+                r5 = 0x06017084;
+                r0 = GCALL3(0x0604B358, r4, r5, 21);
+                r2 = 14;
+            } else {
+                r1 = 42;
+                r0 = GCALL3(0x0604B358, ((r10 * r1) + 0x06089D71), 0x0601709C, 21);
+                r9 = 0;
+                r2 = 14;
+            }
+        }
+    }
+    r8 = r9;
+    if (!((unsigned)r9 > (unsigned)r2)) {
+        r5 = 0x06089DD0;
+        r6 = 15;
+        r7 = 112;
+        r3 = -1;
+        m0 = (unsigned)(r10 * 15);
+        do {
+            ST8(((((((int)m0) + r8) * r7) + r5) + 51), r3);
+            r8 = (r8 + 1) & 255;
+            m0 = (unsigned)(r10 * r6);
+        } while (AGAIN(!((unsigned)r8 > (unsigned)r2)));
+    }
+    r8 = 0;
+    r1 = r9;
+    if (!((unsigned)0 >= (unsigned)r9)) {
+        r10 = 0x06017204;
+        do {
+            r0 = GCALL1(r10, r11);
+            r8 = (r8 + 1) & 255;
+            r11 = r0;
+        } while (AGAIN(!((unsigned)r8 >= (unsigned)r9)));
+        r1 = r9;
+    }
+    return (r11 - (r1 - 15)) & 255;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06017204(int r4)
+{
+    int r0, r1, r2, r3, r5, r6, r7, r8, r9, r10, r11, c3;
+    long long m0;
+
+    r4 = r4 & 255;
+    r9 = 0x06089CE0;
+    r11 = 0x06089DD0;
+    r10 = 112;
+    r8 = 0x06089CF0;
+    r2 = LD8(0x06089CE0);
+    r2 = r2 + 1;
+    ST8(0x06089CE0, r2);
+    r0 = r2 & 255;
+    r6 = (r4 * 112) + 0x06089DD0;
+    r5 = r6 + 51;
+    r2 = LD8(r5);
+    r1 = LD8(r0 + 0x06089CF0);
+    ST8((r6 + 71), (((r2 & 255) == (r1 & 255)) ^ 1));
+    r1 = LD8(0x06089CE0);
+    r1 = LD8((r1 & 255) + 0x06089CF0);
+    ST8(r5, r1);
+    r7 = 0;
+    if (!((unsigned)(r1 & 255) > (unsigned)239)) {
+        ST8((r6 + 50), 0);
+        r0 = LD8(r5);
+        r0 = r0 & 7;
+        ST8((r6 + 68), r0);
+        if (!((unsigned)r7 >= (unsigned)r0)) {
+            r6 = r9;
+            r9 = r11;
+            r5 = r8;
+            do {
+                r1 = LD8(r6);
+                r1 = r1 + 1;
+                ST8(r6, r1);
+                r1 = LD8((r1 & 255) + r5);
+                r3 = (r4 * r10) + r9;
+                ST8(((r3 + r7) + 52), r1);
+                r7 = (r7 + 1) & 255;
+                r1 = LD8((r3 + 68));
+            } while (AGAIN(!((unsigned)r7 >= (unsigned)(r1 & 255))));
+        }
+        r1 = r4;
+    } else {
+        ST8((r6 + 68), 0);
+        r5 = 4;
+        r3 = r11;
+        r2 = -1;
+        c3 = r4 * r10;
+        m0 = (unsigned)c3;
+        r1 = c3;
+        do {
+            ST8((((r1 + r3) + r7) + 52), r2);
+            r7 = (r7 + 1) & 255;
+            r1 = (int)m0;
+        } while (AGAIN(!((unsigned)r7 > (unsigned)r5)));
+        r1 = r4;
+    }
+    return (r1 + 1) & 255;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06017AA4(int r4)
+{
+    int r0, r1, r2, r3, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, c11, c13, c17, c19, c23, c25, c1038, c1040, c1047;
+    FRAME(sp, 44);
+
+    ST32(sp - 36, r4);
+    r11 = LD32(r4);
+    r11 = r11 + 1;
+    r1 = LD8(r11);
+    r13 = 32;
+    if (!((r1 & 255) == 35)) {
+        r9 = r11;
+        r3 = 7;
+        r2 = 0x06075135;
+        while (1) {
+            r1 = LD8(r9);
+            r0 = LD8((r1 & 255) + r2);
+            if (((r0 & 7) & (r0 & 7)) == 0) {
+                break;
+            } else {
+                r9 = r9 + 1;
+                if (!((r9 - r11) > r3)) {
+                    POLL();
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            POLL();
+        }
+        r10 = r9 - r11;
+        r8 = 0x06075238;
+        r0 = GCALL3(0x06075238, 0x06017A90, r11, 2);
+        r6 = 2;
+        if (!((r0 & r0) == 0)) {
+            r0 = GCALL3(r8, 0x06017A94, r11, r6);
+            r6 = 3;
+            if (!((r0 & r0) == 0)) {
+                r0 = GCALL3(r8, 0x06017A98, r11, r6);
+                r6 = 4;
+                if (!((r0 & r0) == 0)) {
+                    r0 = GCALL3(r8, 0x06017A9C, r11, r6);
+                    r1 = 0;
+                    if (!((r0 & r0) == 0)) {
+                        ST32(sp - 40, r1);
+                        ST32(sp - 44, r1);
+                        r0 = GCALL7(0x0604B358, (sp - 44), r11, r10, 0, LD32((sp - 44)), LD32((sp - 40)), LD32((sp - 36)));
+                        r12 = 0;
+                        if (r10 > 0) {
+                            r14 = 95;
+                            while (1) {
+                                r3 = 0x06017790;
+                                r7 = LD32(sp - 44);
+                                r8 = 0;
+                                r2 = LD32(sp - 40);
+                                while (1) {
+                                    r1 = LD32(r3);
+                                    if (!(r7 == r1)) {
+                                        r8 = r8 + 1;
+                                        r3 = r3 + 8;
+                                        if (!(r8 > r14)) {
+                                            POLL();
+                                            continue;
+                                        } else {
+                                            break;
+                                        }
+                                    } else {
+                                        r1 = LD32(r3 + 4);
+                                        c11 = r2 == r1;
+                                        r1 = r8;
+                                        if (!(c11)) {
+                                            r8 = r8 + 1;
+                                            r3 = r3 + 8;
+                                            if (!(r8 > r14)) {
+                                                POLL();
+                                                continue;
+                                            } else {
+                                                break;
+                                            }
+                                        } else {
+                                            r13 = (r1 - 96) & 255;
+                                            r12 = 1;
+                                            break;
+                                        }
+                                    }
+                                    POLL();
+                                }
+                                c13 = r8 > r14;
+                                r1 = 0;
+                                c1038 = c13;
+                                if (c13) {
+                                    ST32(sp - 40, r1);
+                                    ST32(sp - 44, r1);
+                                    r6 = 0x06075135;
+                                    r2 = sp - 44;
+                                    r7 = (sp - 44) + 7;
+                                    do {
+                                        r1 = LD8(r2);
+                                        r1 = r1 & 255;
+                                        r5 = LD8(r1 + r6);
+                                        if (!(((r5 & 1) & (r5 & 1)) == 0)) {
+                                            r1 = r1 + 32;
+                                        }
+                                        ST8(r2, r1);
+                                        r2 = r2 + 1;
+                                    } while (AGAIN(!(r2 > r7)));
+                                    r8 = 0;
+                                    r7 = LD32(sp - 44);
+                                    r6 = 95;
+                                    r2 = LD32(sp - 40);
+                                    while (1) {
+                                        r1 = LD32(r3);
+                                        if (!(r7 == r1)) {
+                                            r8 = r8 + 1;
+                                            r3 = r3 + 8;
+                                            if (!(r8 > r6)) {
+                                                POLL();
+                                                continue;
+                                            } else {
+                                                break;
+                                            }
+                                        } else {
+                                            r1 = LD32(r3 + 4);
+                                            c17 = r2 == r1;
+                                            r1 = r8;
+                                            if (!(c17)) {
+                                                r8 = r8 + 1;
+                                                r3 = r3 + 8;
+                                                if (!(r8 > r6)) {
+                                                    POLL();
+                                                    continue;
+                                                } else {
+                                                    break;
+                                                }
+                                            } else {
+                                                r13 = (r1 - 96) & 255;
+                                                r12 = 1;
+                                                break;
+                                            }
+                                        }
+                                        POLL();
+                                    }
+                                    c19 = r8 > r14;
+                                    r6 = r10;
+                                    c1038 = c19;
+                                    if (c19) {
+                                        r0 = GCALL7(0x0604B358, (sp - 44), r11, r6, 0, LD32((sp - 44)), LD32((sp - 40)), LD32((sp - 36)));
+                                        c1038 = r8 > r14;
+                                    }
+                                }
+                                c1040 = r10 > 0;
+                                if (c1038) {
+                                    r10 = r10 - 1;
+                                    r9 = r9 - 1;
+                                    ST8((sp - 44) + r10, 0);
+                                    c1040 = r10 > 0;
+                                }
+                                c23 = (r12 & r12) == 0;
+                                if (!(c1040)) {
+                                    break;
+                                } else {
+                                    if (c23) {
+                                        POLL();
+                                        continue;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                POLL();
+                            }
+                        }
+                        r1 = r11;
+                        if (!((r10 & r10) == 0)) {
+                            r1 = LD8(r9);
+                            c25 = (r1 & 255) == 59;
+                            c1047 = c25;
+                            if (c25) {
+                                r9 = r9 + 1;
+                                c1047 = 1;
+                            }
+                            r0 = LD32(sp - 36);
+                            ST32(r0, (r9 - 1));
+                            r0 = r13;
+                        } else {
+                            r0 = LD32(sp - 36);
+                            r1 = r1 - 1;
+                            ST32(r0, r1);
+                            r0 = 38;
+                        }
+                    } else {
+                        r13 = 34;
+                        r9 = r11 + 4;
+                        r1 = LD8(r9);
+                        c25 = (r1 & 255) == 59;
+                        c1047 = c25;
+                        if (c25) {
+                            r9 = r9 + 1;
+                            c1047 = 1;
+                        }
+                        r0 = LD32(sp - 36);
+                        ST32(r0, (r9 - 1));
+                        r0 = r13;
+                    }
+                } else {
+                    r13 = 38;
+                    r9 = r11 + 3;
+                    r1 = LD8(r9);
+                    c25 = (r1 & 255) == 59;
+                    c1047 = c25;
+                    if (c25) {
+                        r9 = r9 + 1;
+                        c1047 = 1;
+                    }
+                    r0 = LD32(sp - 36);
+                    ST32(r0, (r9 - 1));
+                    r0 = r13;
+                }
+            } else {
+                r13 = 62;
+                r9 = r11 + 2;
+                r1 = LD8(r9);
+                c25 = (r1 & 255) == 59;
+                c1047 = c25;
+                if (c25) {
+                    r9 = r9 + 1;
+                    c1047 = 1;
+                }
+                r0 = LD32(sp - 36);
+                ST32(r0, (r9 - 1));
+                r0 = r13;
+            }
+        } else {
+            r13 = 60;
+            r9 = r11 + 2;
+            r1 = LD8(r9);
+            c25 = (r1 & 255) == 59;
+            c1047 = c25;
+            if (c25) {
+                r9 = r9 + 1;
+                c1047 = 1;
+            }
+            r0 = LD32(sp - 36);
+            ST32(r0, (r9 - 1));
+            r0 = r13;
+        }
+    } else {
+        r9 = r11 + 1;
+        r1 = LD8(r9);
+        r2 = 0x06075135;
+        r0 = LD8((r1 & 255) + 0x06075135);
+        r11 = r9;
+        while (1) {
+            r9 = r9 + 1;
+            if (!(((r0 & 4) & (r0 & 4)) == 0)) {
+                POLL();
+                r1 = LD8(r9);
+                r0 = LD8((r1 & 255) + r2);
+                continue;
+            } else {
+                break;
+            }
+        }
+        r9 = r9 - 1;
+        r1 = r11;
+        if (!(r11 == r9)) {
+            r0 = GCALL1(0x06075438, r11);
+            r13 = r0 & 255;
+            r1 = LD8(r9);
+            c25 = (r1 & 255) == 59;
+            c1047 = c25;
+            if (c25) {
+                r9 = r9 + 1;
+                c1047 = 1;
+            }
+            r0 = LD32(sp - 36);
+            ST32(r0, (r9 - 1));
+            r0 = r13;
+        } else {
+            r0 = LD32(sp - 36);
+            r1 = r1 - 2;
+            ST32(r0, r1);
+            r0 = 38;
+        }
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06017DD4(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14, c5, c9, c20, c22, c24, c26, c31, c38, c57, c58, c68, c70, c72, c74, c76, c77, c78, c81, c82, c84, c91, c92, c93, c96, c97, c103, c1013, c1015, c1027, c1030, c2012;
+    FRAME(sp, 116);
+
+    ST32(sp - 80, r4);
+    r12 = r5;
+    ST32(sp - 76, r6);
+    ST32(sp - 72, r7);
+    ST32(sp - 68, 1);
+    ST32(sp - 60, 0);
+    ST32(sp - 56, 0);
+    ST32(sp - 52, 0);
+    ST32(sp - 48, 0);
+    ST32(sp - 44, r4);
+    ST32(sp - 40, 0);
+    ST32(r12 + 0x10D4, r6);
+    r3 = LD32(sp - 76);
+    r1 = 0;
+    if ((r3 & r3) == 0) {
+        ST8(r12 + 0x10D8, r1);
+        ST32((64 + (sp - 100)), 0);
+    } else {
+        r4 = LD32(sp - 44);
+        r0 = GCALL1(0x06045560, r4);
+        r2 = r0;
+        ST8(r12 + 0x10D8, r2);
+        ST32((64 + (sp - 100)), ((signed char)r2));
+    }
+    r0 = GCALL2(0x06028380, 0x2000, -1);
+    r14 = r0;
+    r1 = LD32(sp - 80);
+    if (!((r14 & r14) == 0)) {
+        r13 = r14;
+        r1 = LD8(r1);
+        r9 = 0;
+        while (1) {
+            r8 = r1 & 255;
+            if ((r8 & r8) == 0) {
+                break;
+            } else {
+                POLL();
+                r3 = LD32(sp - 68);
+                if (!((r3 & r3) == 0)) {
+                    r0 = GCALL0(0x0605299C);
+                    r1 = LD32(sp - 80);
+                    ST32(0x0608AB64, r1);
+                    r0 = LD32(sp - 76);
+                    if ((r0 & r0) == 0) {
+                        r0 = LD32(sp - 76);
+                        if (r9 > 0x1FFC) {
+                            r9 = r9 - 4;
+                            ST8(r14 + r9, 0);
+                            c1013 = 1;
+                            r0 = LD32(sp - 76);
+                        }
+                        c1015 = (r0 & r0) == 0;
+                    } else {
+                        c5 = (r0 & r0) == 0;
+                        c1015 = c5;
+                        if (r9 > 0xFFC) {
+                            r9 = r9 - 4;
+                            ST16((r9 + r9) + r13, 0);
+                            c1013 = c5;
+                            r0 = LD32(sp - 76);
+                            c1015 = (r0 & r0) == 0;
+                        }
+                    }
+                    r3 = 64;
+                    if (c1015) {
+                        r11 = 0;
+                        ST32(sp - 64, 1);
+                    } else {
+                        r5 = LD32((r3 + (sp - 100)));
+                        r4 = LD32(sp - 80);
+                        r0 = GCALL2(0x06045760, r4, r5);
+                        r11 = r0 & 0xFFFF;
+                        r8 = 0;
+                        if (!(((int)((unsigned)r11 >> 8)) == 128)) {
+                            ST32(sp - 64, 2);
+                        } else {
+                            r8 = r11 & 255;
+                            ST32(sp - 64, 1);
+                        }
+                    }
+                    r0 = LD32(sp - 76);
+                    c9 = (r0 & r0) == 0;
+                    r0 = LD32(sp - 64);
+                    if (c9) {
+                        r10 = 0;
+                        if (r8 == 60) {
+                            r1 = LD32(sp - 80);
+                            r1 = LD8((r1 + 1));
+                            r0 = LD8((r1 & 255) + 0x06075135);
+                            c1027 = ((r0 & 8) & (r0 & 8)) == 0;
+                            if (c1027) {
+                                r10 = 1;
+                            }
+                        }
+                        c1030 = (r10 & r10) == 0;
+                    } else {
+                        r10 = 0;
+                        if (!(r0 == 1)) {
+                            c1030 = (r10 & r10) == 0;
+                        } else {
+                            c1030 = (r10 & r10) == 0;
+                            if (r8 == 60) {
+                                r4 = LD32(sp - 80);
+                                r3 = LD32(sp - 64);
+                                r5 = LD32((64 + (sp - 100)));
+                                r0 = GCALL2(0x06045760, (r4 + r3), r5);
+                                r0 = GCALL1(0x060455C4, (r0 & 0xFFFF));
+                                c1027 = (r0 & r0) == 0;
+                                if (c1027) {
+                                    r10 = 1;
+                                }
+                                c1030 = (r10 & r10) == 0;
+                            }
+                        }
+                    }
+                    r10 = LD32(sp - 80);
+                    if (c1030) {
+                        r3 = LD32(sp - 76);
+                        r1 = LD32(r12);
+                        if ((r3 & r3) == 0) {
+                            r0 = r8;
+                            if ((r1 & r1) == 0) {
+                                r1 = r8;
+                                if (r0 == 32) {
+                                    r1 = 32;
+                                    if (!(r9 > 0)) {
+                                        r0 = r14;
+                                        ST8(r0 + r9, r1);
+                                        r9 = r9 + 1;
+                                    } else {
+                                        r1 = LD8(((r9 + r14) - 1));
+                                        c38 = (r1 & 255) == 32;
+                                        r1 = 32;
+                                        if (!(c38)) {
+                                            ST8(r9 + r14, r1);
+                                            r9 = r9 + 1;
+                                        }
+                                    }
+                                } else {
+                                    r2 = r8;
+                                    if (!((unsigned)((r1 - 9) & 255) > (unsigned)1)) {
+                                        r1 = 32;
+                                        if (!(r9 > 0)) {
+                                            r0 = r14;
+                                            ST8(r0 + r9, r1);
+                                            r9 = r9 + 1;
+                                        } else {
+                                            r1 = LD8(((r9 + r14) - 1));
+                                            c38 = (r1 & 255) == 32;
+                                            r1 = 32;
+                                            if (!(c38)) {
+                                                ST8(r9 + r14, r1);
+                                                r9 = r9 + 1;
+                                            }
+                                        }
+                                    } else {
+                                        r10 = r14;
+                                        if (!(r0 == 13)) {
+                                            r10 = r10 + r9;
+                                            r9 = r9 + 1;
+                                            if (!(r8 == 38)) {
+                                                ST8(r10, r2);
+                                            } else {
+                                                r0 = GCALL1(0x06017AA4, (sp - 80));
+                                                ST8(r10, r0);
+                                            }
+                                        } else {
+                                            r1 = 32;
+                                            if (!(r9 > 0)) {
+                                                r0 = r14;
+                                                ST8(r0 + r9, r1);
+                                                r9 = r9 + 1;
+                                            } else {
+                                                r1 = LD8(((r9 + r14) - 1));
+                                                c38 = (r1 & 255) == 32;
+                                                r1 = 32;
+                                                if (!(c38)) {
+                                                    ST8(r9 + r14, r1);
+                                                    r9 = r9 + 1;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                c31 = r0 == 9;
+                                if (!(r0 == 10)) {
+                                    r0 = r8;
+                                    if (!(c31)) {
+                                        r10 = r14;
+                                        if (!(r0 == 13)) {
+                                            r10 = r10 + r9;
+                                            r9 = r9 + 1;
+                                            if (r0 == 38) {
+                                                r0 = GCALL1(0x06017AA4, (sp - 80));
+                                                ST8(r10, r0);
+                                            } else {
+                                                ST8(r10, r8);
+                                            }
+                                        }
+                                    } else {
+                                        r1 = 32;
+                                        r0 = r14;
+                                        ST8(r0 + r9, 32);
+                                        r9 = r9 + 1;
+                                        ST8(r0 + r9, 32);
+                                        r9 = r9 + 1;
+                                        ST8(r0 + r9, r1);
+                                        r9 = r9 + 1;
+                                    }
+                                } else {
+                                    ST8(r14 + r9, 0);
+                                    r6 = LD32(sp - 76);
+                                    r0 = GCALL3(0x0601DD98, r12, r14, r6);
+                                    r0 = GCALL2(0x060193B0, r12, 0);
+                                    r9 = 0;
+                                    ST16(r13, 0);
+                                }
+                            }
+                        } else {
+                            r0 = r8;
+                            if ((r1 & r1) == 0) {
+                                r0 = GCALL1(0x060455C4, r11);
+                                c24 = r9 > 0;
+                                if ((r0 & r0) == 0) {
+                                    r0 = r9;
+                                    if (!(r8 == 38)) {
+                                        ST16((r0 + r0) + r13, r11);
+                                        r9 = r9 + 1;
+                                    } else {
+                                        r4 = sp - 100;
+                                        r0 = GCALL1(0x06017AA4, (r4 + 20));
+                                        r1 = (r0 & 255) | -32768;
+                                        r0 = r9 + r9;
+                                        ST16(r0 + r13, r1);
+                                        r9 = r9 + 1;
+                                    }
+                                } else {
+                                    r2 = r9;
+                                    if (!(c24)) {
+                                        r1 = -32448;
+                                        r0 = r9;
+                                        if (!(r11 == 0x8140)) {
+                                            r1 = -32736;
+                                            r0 = r0 + r0;
+                                        } else {
+                                            r0 = r0 + r0;
+                                        }
+                                        ST16(r0 + r13, r1);
+                                        r9 = r9 + 1;
+                                    } else {
+                                        r2 = r2 + r2;
+                                        r1 = LD16(((r2 + r13) - 2));
+                                        c26 = r11 == 0x8140;
+                                        if (!((r1 & 0xFFFF) == 0x8140)) {
+                                            r0 = r2;
+                                            if (!(c26)) {
+                                                ST16(r0 + r13, -32736);
+                                                r9 = r9 + 1;
+                                            } else {
+                                                ST16(r0 + r13, -32448);
+                                                r9 = r9 + 1;
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                c20 = r0 == 9;
+                                if (!(r0 == 10)) {
+                                    r0 = r9;
+                                    if (!(c20)) {
+                                        r0 = r8;
+                                        c22 = r0 == 38;
+                                        if (!(r0 == 13)) {
+                                            r4 = sp - 100;
+                                            if (c22) {
+                                                r0 = GCALL1(0x06017AA4, (r4 + 20));
+                                                r1 = (r0 & 255) | -32768;
+                                                r0 = r9 + r9;
+                                                ST16(r0 + r13, r1);
+                                                r9 = r9 + 1;
+                                            } else {
+                                                r0 = r9;
+                                                ST16((r0 + r0) + r13, r11);
+                                                r9 = r9 + 1;
+                                            }
+                                        }
+                                    } else {
+                                        r1 = -32736;
+                                        ST16((r0 + r0) + r13, -32736);
+                                        r9 = r9 + 1;
+                                        ST16((r9 + r9) + r13, -32736);
+                                        r9 = r9 + 1;
+                                        r0 = r9 + r9;
+                                        ST16(r0 + r13, r1);
+                                        r9 = r9 + 1;
+                                    }
+                                } else {
+                                    ST16((r9 + r9) + r13, 0);
+                                    r6 = LD32(sp - 76);
+                                    r0 = GCALL3(0x0601DD98, r12, r14, r6);
+                                    r0 = GCALL2(0x060193B0, r12, 0);
+                                    r9 = 0;
+                                    ST16(r13, 0);
+                                }
+                            }
+                        }
+                        r1 = LD32(sp - 80);
+                        r3 = LD32(sp - 64);
+                        ST32(sp - 80, (r1 + r3));
+                    } else {
+                        r6 = LD32(sp - 64);
+                        r6 = r6 + r10;
+                        ST32(sp - 80, r6);
+                        r0 = GCALL3(0x06017534, r12, (sp - 100), r6);
+                        r1 = LD8(sp - 100);
+                        ST32(sp - 80, r0);
+                        r8 = 0;
+                        if (!((r1 & 255) == 47)) {
+                            r0 = 0x060176FC;
+                            r4 = sp - 100;
+                        } else {
+                            r8 = 1;
+                            r0 = 0x060176FC;
+                            r4 = (sp - 100) + 1;
+                        }
+                        r0 = GCALL1(r0, r4);
+                        r1 = r0;
+                        if (!((r1 & r1) == 0)) {
+                            r0 = LD32(sp - 60);
+                            if (!((r0 & r0) == 0)) {
+                                r3 = LD32(sp - 60);
+                                r0 = LD32(sp - 56);
+                                ST32(sp - 52, r3);
+                                ST32(sp - 48, r0);
+                            }
+                        }
+                        ST32(sp - 60, r1);
+                        ST32(sp - 56, r8);
+                        if ((r1 & r1) == 0) {
+                            r3 = LD32(sp - 72);
+                        } else {
+                            r1 = LD32(r1 + 4);
+                            r3 = LD32(sp - 72);
+                            if (r1 == 46) {
+                                ST32(sp - 80, (r10 + 4));
+                                r3 = LD32(sp - 72);
+                            }
+                        }
+                        r0 = LD32(sp - 76);
+                        if ((r3 & r3) == 0) {
+                            r3 = LD32(sp - 76);
+                            r1 = r9;
+                            if ((r3 & r3) == 0) {
+                                ST8(r14 + r9, 0);
+                            } else {
+                                ST16((r1 + r1) + r13, 0);
+                            }
+                            r0 = GCALL3(0x060750A0, (r12 + 0x1B0), r14, 255);
+                            ST8(r12 + 0x2AF, 0);
+                            r9 = 0;
+                            ST16(r13, 0);
+                            r3 = LD32(sp - 56);
+                        } else {
+                            r1 = r9;
+                            if ((r0 & r0) == 0) {
+                                ST8(r14 + r9, 0);
+                            } else {
+                                ST16((r1 + r1) + r13, 0);
+                            }
+                            r3 = LD32(sp - 56);
+                            if (r9 > 0) {
+                                ST32((sp - 104), r10);
+                                r0 = LD32(sp - 44);
+                                ST32((sp - 108), r0);
+                                ST32((sp - 112), r14);
+                                r3 = LD32((64 + (sp - 112)));
+                                ST32((sp - 116), r3);
+                                r7 = LD32(64 + (sp - 116));
+                                r6 = LD32(sp - 56);
+                                r5 = LD32(sp - 60);
+                                r0 = GCALL8(0x06017D08, r12, r5, r6, r7, LD32((sp - 116)), LD32((sp - 112)), LD32((sp - 108)), LD32((sp - 104)));
+                                if ((r0 & r0) == 0) {
+                                    r9 = 0;
+                                } else {
+                                    r6 = LD32(sp - 76);
+                                    r0 = GCALL3(0x0601DD98, r12, r14, r6);
+                                    r9 = 0;
+                                }
+                                ST16(r13, 0);
+                                r3 = LD32(sp - 56);
+                            }
+                        }
+                        if (!((r3 & r3) == 0)) {
+                            r3 = LD32(sp - 60);
+                        } else {
+                            r0 = LD32(sp - 60);
+                            if ((r0 & r0) == 0) {
+                                r3 = LD32(sp - 60);
+                            } else {
+                                r2 = LD32(r0 + 4);
+                                r3 = LD32(sp - 60);
+                                if ((unsigned)r2 > (unsigned)8) {
+                                    r3 = LD32(sp - 72);
+                                    if ((r3 & r3) == 0) {
+                                        r5 = 0;
+                                        if (!(r2 == 46)) {
+                                            r0 = GCALL2(0x0601B558, r12, r5);
+                                            ST32(sp - 72, 1);
+                                        }
+                                    }
+                                    r3 = LD32(sp - 60);
+                                }
+                            }
+                        }
+                        if (!((r3 & r3) == 0)) {
+                            r1 = LD32(r3 + 4);
+                            r0 = r1;
+                            c57 = r0 == 3;
+                            if (!(r0 == 8)) {
+                                if (c57) {
+                                    r3 = LD32(sp - 56);
+                                    r0 = LD32(sp - 72);
+                                    if ((r3 & r3) == 0) {
+                                        r3 = 0;
+                                        if (!((r0 & r0) == 0)) {
+                                            r0 = GCALL1(0x0601D4D8, r12);
+                                            r3 = 0;
+                                        }
+                                        ST32(sp - 72, r3);
+                                    }
+                                }
+                            } else {
+                                r3 = LD32(sp - 56);
+                                c58 = (r3 & r3) == 0;
+                                r3 = 1;
+                                if (c58) {
+                                    r9 = 0;
+                                    ST16(r13, 0);
+                                }
+                                ST32(sp - 72, r3);
+                            }
+                            r1 = LD32(0x10C8 + r12);
+                            r0 = LD32(sp - 56);
+                            if ((r1 & r1) == 0) {
+                                r3 = LD32(sp - 68);
+                            } else {
+                                r3 = LD32(sp - 68);
+                                if ((r0 & r0) == 0) {
+                                    r3 = LD32(sp - 60);
+                                    r1 = LD32(r3 + 4);
+                                    r3 = LD32(sp - 68);
+                                    if (r1 == 50) {
+                                        r3 = LD32(sp - 52);
+                                        r0 = LD32(sp - 52);
+                                        if ((r3 & r3) == 0) {
+                                            c2012 = R(12);
+                                            SETR(12, r12);
+                                            r0 = GCALL2(0x06029288, r12, 0);
+                                            SETR(12, c2012);
+                                            r0 = GCALL1(0x0602929C, r12);
+                                            ST32(sp - 68, r0);
+                                            r3 = LD32(sp - 68);
+                                        } else {
+                                            r1 = LD32(r0 + 4);
+                                            r3 = LD32(sp - 68);
+                                            if (r1 == 50) {
+                                                c2012 = R(12);
+                                                SETR(12, r12);
+                                                r0 = GCALL2(0x06029288, r12, 0);
+                                                SETR(12, c2012);
+                                                r0 = GCALL1(0x0602929C, r12);
+                                                ST32(sp - 68, r0);
+                                                r3 = LD32(sp - 68);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            r0 = LD32(sp - 68);
+                            if (!((r3 & r3) == 0)) {
+                                r1 = LD32(0x10C8 + r12);
+                                r0 = LD32(sp - 56);
+                                if ((r1 & r1) == 0) {
+                                    r0 = LD32(sp - 68);
+                                } else {
+                                    c68 = (r0 & r0) == 0;
+                                    r0 = LD32(sp - 68);
+                                    if (c68) {
+                                        r0 = GCALL1(0x060290B8, r12);
+                                        r3 = LD32(sp - 60);
+                                        if ((r0 & r0) == 0) {
+                                            r8 = LD32(r3 + 4);
+                                            r0 = GCALL1(0x06029058, r12);
+                                            c70 = (r0 & r0) == 0;
+                                            r0 = r8;
+                                            if (c70) {
+                                                r1 = r8;
+                                                if (!(r0 == 46)) {
+                                                    r3 = 1;
+                                                    c72 = (unsigned)(r1 - 51) > (unsigned)1;
+                                                    r1 = r8;
+                                                    if (c72) {
+                                                        c74 = r0 == 55;
+                                                        if ((unsigned)(r1 - 53) > (unsigned)r3) {
+                                                            r1 = r8;
+                                                            if (!(c74)) {
+                                                                c76 = r0 == 56;
+                                                                if ((unsigned)(r1 - 47) > (unsigned)r3) {
+                                                                    r5 = 0;
+                                                                    if (!(c76)) {
+                                                                        c2012 = R(12);
+                                                                        SETR(12, r12);
+                                                                        r0 = GCALL2(0x06029288, r12, r5);
+                                                                        SETR(12, c2012);
+                                                                        ST32(sp - 68, r0);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        r0 = GCALL1(0x060290DC, r12);
+                                        c77 = (r0 & r0) == 0;
+                                        r0 = LD32(sp - 68);
+                                        if (c77) {
+                                            r0 = LD32(sp - 60);
+                                            r8 = LD32(r0 + 4);
+                                            r0 = GCALL1(0x06029058, r12);
+                                            c78 = (r0 & r0) == 0;
+                                            r0 = LD32(sp - 68);
+                                            if (c78) {
+                                                r0 = r8;
+                                                if (!(r0 == 46)) {
+                                                    r3 = 1;
+                                                    if ((unsigned)(r8 - 51) > (unsigned)1) {
+                                                        c81 = (unsigned)(r8 - 53) > (unsigned)r3;
+                                                        c82 = r0 == 55;
+                                                        if (c81) {
+                                                            if (!(c82)) {
+                                                                c84 = r0 == 56;
+                                                                if ((unsigned)(r8 - 47) > (unsigned)r3) {
+                                                                    if (!(c84)) {
+                                                                        c2012 = R(12);
+                                                                        SETR(12, r12);
+                                                                        r0 = GCALL2(0x06029288, r12, 0);
+                                                                        SETR(12, c2012);
+                                                                        ST32(sp - 68, r0);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                r0 = LD32(sp - 68);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            r3 = LD32(sp - 56);
+                            if (!((r0 & r0) == 0)) {
+                                r0 = LD32(sp - 60);
+                                if (!((r3 & r3) == 0)) {
+                                    r3 = LD32(sp - 60);
+                                    r1 = LD32(r3 + 12);
+                                } else {
+                                    r1 = LD32(r0 + 8);
+                                }
+                                r5 = LD32(sp - 80);
+                                if (!((r1 & r1) == 0)) {
+                                    r0 = GCALL2(r1, r12, r5);
+                                    ST32(sp - 68, r0);
+                                }
+                            }
+                        }
+                        r0 = LD32(sp - 68);
+                        r3 = LD32(sp - 60);
+                        if ((r0 & r0) == 0) {
+                            r4 = LD32(sp - 80);
+                            r0 = GCALL1(0x060176CC, r4);
+                            ST32(sp - 80, r0);
+                            r3 = LD32(sp - 80);
+                        } else {
+                            if ((r3 & r3) == 0) {
+                                r4 = LD32(sp - 80);
+                                r0 = GCALL1(0x060176CC, r4);
+                                ST32(sp - 80, r0);
+                                r3 = LD32(sp - 80);
+                            } else {
+                                r1 = LD32(r3 + 4);
+                                r7 = LD32(sp - 80);
+                                if (!(r1 == 46)) {
+                                    r4 = LD32(sp - 80);
+                                    r0 = GCALL1(0x060176CC, r4);
+                                    ST32(sp - 80, r0);
+                                    r3 = LD32(sp - 80);
+                                } else {
+                                    r1 = LD8(r7);
+                                    r2 = r7;
+                                    while (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                                        POLL();
+                                        r1 = LD8(r2);
+                                        c91 = (r1 & 255) == 45;
+                                        r1 = LD32(sp - 80);
+                                        if (!(c91)) {
+                                            r1 = r1 + 1;
+                                            ST32(sp - 80, r1);
+                                            r2 = r1;
+                                            r1 = LD8(r2);
+                                            continue;
+                                        } else {
+                                            r1 = LD8((r2 + 1));
+                                            c92 = (r1 & 255) == 45;
+                                            r1 = LD32(sp - 80);
+                                            if (!(c92)) {
+                                                r1 = r1 + 1;
+                                                ST32(sp - 80, r1);
+                                                r2 = r1;
+                                                r1 = LD8(r2);
+                                                continue;
+                                            } else {
+                                                r1 = LD8((r2 + 2));
+                                                c93 = (r1 & 255) == 62;
+                                                r1 = LD32(sp - 80);
+                                                if (c93) {
+                                                    break;
+                                                } else {
+                                                    r1 = r1 + 1;
+                                                    ST32(sp - 80, r1);
+                                                    r2 = r1;
+                                                    r1 = LD8(r2);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    r2 = LD32(sp - 80);
+                                    r1 = LD8(r2);
+                                    r1 = r1 & 255;
+                                    c96 = (r1 & r1) == 0;
+                                    if (!(r1 == 45)) {
+                                        r3 = LD32(sp - 80);
+                                        if (c96) {
+                                            ST32(sp - 80, r7);
+                                            r1 = LD8(r7);
+                                            while (1) {
+                                                r2 = LD32(sp - 80);
+                                                if (!(((r1 & 255) & (r1 & 255)) == 0)) {
+                                                    POLL();
+                                                    r1 = LD8(r2);
+                                                    c97 = (r1 & 255) == 62;
+                                                    r1 = r2;
+                                                    if (c97) {
+                                                        break;
+                                                    } else {
+                                                        r1 = r1 + 1;
+                                                        ST32(sp - 80, r1);
+                                                        r1 = LD8(r1);
+                                                        continue;
+                                                    }
+                                                } else {
+                                                    break;
+                                                }
+                                            }
+                                            r2 = LD32(sp - 80);
+                                            r1 = LD8(r2);
+                                            r3 = LD32(sp - 80);
+                                            if ((r1 & 255) == 62) {
+                                                ST32(sp - 80, (r2 + 1));
+                                                r3 = LD32(sp - 80);
+                                            }
+                                        }
+                                    } else {
+                                        ST32(sp - 80, (r2 + 3));
+                                        r3 = LD32(sp - 80);
+                                    }
+                                }
+                            }
+                        }
+                        r2 = LD32(sp - 40);
+                        ST32(sp - 44, r3);
+                        ST32(sp - 40, (r2 + 1));
+                        if (r2 > 30) {
+                            r0 = GCALL0(0x0605299C);
+                            ST32(sp - 40, 0);
+                        }
+                    }
+                    r1 = LD32(sp - 80);
+                    r1 = LD8(r1);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        }
+        r2 = 0x10C8;
+        r1 = LD32(r12 + 0x10C8);
+        if (!((r1 & r1) == 0)) {
+            r8 = r2;
+            r9 = 0x0602929C;
+            while (1) {
+                r0 = GCALL2(r9, r12, 0x06017DD0);
+                c103 = (r0 & r0) == 0;
+                r0 = r12;
+                if (c103) {
+                    break;
+                } else {
+                    r1 = LD32(r0 + r8);
+                    if (!((r1 & r1) == 0)) {
+                        POLL();
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+                POLL();
+            }
+        }
+        r0 = GCALL1(0x0601D4D8, r12);
+        r9 = 0x06027F48;
+        r0 = GCALL1(0x06027F48, r14);
+        r2 = r12 + 80;
+        r1 = LD32(r2);
+        if (!((r1 & r1) == 0)) {
+            r8 = r2;
+            do {
+                r4 = LD32(r8);
+                r1 = LD32(r4 + 12);
+                ST32(r8, r1);
+                r2 = LD32(r4);
+                if (!(r2 == 0x7FFFFFFF)) {
+                    ST32(r12 + 12, r2);
+                }
+                r0 = GCALL1(r9, r4);
+                r1 = LD32(r8);
+            } while (AGAIN(!((r1 & r1) == 0)));
+        }
+        r9 = r12 + 84;
+        r1 = LD32(r9);
+        if (!((r1 & r1) == 0)) {
+            r10 = 0x06027F48;
+            do {
+                r4 = LD32(r9);
+                r1 = LD32(r4 + 12);
+                ST32(r9, r1);
+                r0 = GCALL1(r10, r4);
+                r1 = LD32(r9);
+            } while (AGAIN(!((r1 & r1) == 0)));
+        }
+        r7 = 136;
+        r0 = r12;
+        r1 = LD32(r0 + 136);
+        if (!((r1 & r1) == 0)) {
+            r1 = LD32(r12 + 12);
+            ST32(r12 + 20, (r1 + 240));
+            r0 = r12;
+        }
+        r1 = LD32(r0 + r7);
+        if (!((r1 & r1) == 0)) {
+            r0 = 156;
+            r1 = LD32(156 + r12);
+            if (r1 > 0) {
+                r0 = GCALL1(0x0604476C, r12);
+            }
+        }
+    } else {
+        ST32(r12 + 20, 0);
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06018688(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r8, r9, r10, r11, r12, r13, r14, c3, c5, c6, c7, c9, c11, c12, c17, c18, c23, c24, c25, c35, c36, c37, c39, c41, c42, c43, c44, c47, c48, c49, c50, c53, c54, c55, c1021, c1030, c1043, c1065, c1067, c1074, c1077;
+    FRAME(sp, 40);
+
+    ST32(sp - 36, r4);
+    r12 = r5;
+    r11 = r6;
+    r13 = r7;
+    ST32(r4, 0);
+    r9 = 0;
+    ST32(sp - 40, 0);
+    if (!((r12 & r12) == 0)) {
+        r10 = r12;
+        if (!((r13 & r13) == 0)) {
+            r9 = 5;
+        }
+        r1 = LD8(r10);
+        r8 = r1 & 255;
+        c3 = (r9 & r9) == 0;
+        c1043 = c3;
+        if (!((r8 & r8) == 0)) {
+            r14 = 0x06018588;
+            r0 = r8;
+            do {
+                c5 = r0 == 60;
+                if (r0 == 62) {
+                    r0 = GCALL6(0x0601852C, r8, 0, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                    r9 = (r9 + 3) + ((signed char)r0);
+                } else {
+                    c6 = r0 == 38;
+                    if (c5) {
+                        r0 = GCALL6(0x0601852C, r8, 0, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                        r9 = (r9 + 3) + ((signed char)r0);
+                    } else {
+                        c7 = r0 == 34;
+                        if (c6) {
+                            r0 = GCALL6(0x0601852C, r8, 0, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                            r9 = (r9 + 3) + ((signed char)r0);
+                        } else {
+                            r1 = 127;
+                            if (c7) {
+                                r0 = GCALL6(0x0601852C, r8, 0, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                r9 = (r9 + 3) + ((signed char)r0);
+                            } else {
+                                c9 = (r11 & r11) == 0;
+                                if (!((unsigned)r8 > (unsigned)r1)) {
+                                    r0 = r8;
+                                    if (c9) {
+                                        c1021 = (r13 & r13) == 0;
+                                        r0 = r8;
+                                        if (c1021) {
+                                            c1030 = (r11 & r11) == 0;
+                                            r0 = r8;
+                                            if (c1030) {
+                                                r9 = r9 + 1;
+                                            } else {
+                                                c23 = r0 == 72;
+                                                if (r0 == 104) {
+                                                    r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                    r6 = 7;
+                                                    if ((r0 & r0) == 0) {
+                                                        ST32(sp - 40, 0);
+                                                        r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                        if ((r0 & r0) == 0) {
+                                                            r9 = r9 + 1;
+                                                        }
+                                                        r2 = LD32(sp - 40);
+                                                        r9 = (r9 + 15) + (r2 + r2);
+                                                        r10 = r10 + (r2 - 1);
+                                                    } else {
+                                                        r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                        if (!((r0 & r0) == 0)) {
+                                                            r9 = r9 + 1;
+                                                        } else {
+                                                            ST32(sp - 40, 0);
+                                                            r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                            if ((r0 & r0) == 0) {
+                                                                r9 = r9 + 1;
+                                                            }
+                                                            r2 = LD32(sp - 40);
+                                                            r9 = (r9 + 15) + (r2 + r2);
+                                                            r10 = r10 + (r2 - 1);
+                                                        }
+                                                    }
+                                                } else {
+                                                    c24 = r0 == 109;
+                                                    if (c23) {
+                                                        r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                        r6 = 7;
+                                                        if ((r0 & r0) == 0) {
+                                                            ST32(sp - 40, 0);
+                                                            r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                            if ((r0 & r0) == 0) {
+                                                                r9 = r9 + 1;
+                                                            }
+                                                            r2 = LD32(sp - 40);
+                                                            r9 = (r9 + 15) + (r2 + r2);
+                                                            r10 = r10 + (r2 - 1);
+                                                        } else {
+                                                            r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                            if (!((r0 & r0) == 0)) {
+                                                                r9 = r9 + 1;
+                                                            } else {
+                                                                ST32(sp - 40, 0);
+                                                                r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                if ((r0 & r0) == 0) {
+                                                                    r9 = r9 + 1;
+                                                                }
+                                                                r2 = LD32(sp - 40);
+                                                                r9 = (r9 + 15) + (r2 + r2);
+                                                                r10 = r10 + (r2 - 1);
+                                                            }
+                                                        }
+                                                    } else {
+                                                        c25 = r0 == 77;
+                                                        if (c24) {
+                                                            r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                            r6 = 7;
+                                                            if ((r0 & r0) == 0) {
+                                                                ST32(sp - 40, 0);
+                                                                r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                if ((r0 & r0) == 0) {
+                                                                    r9 = r9 + 1;
+                                                                }
+                                                                r2 = LD32(sp - 40);
+                                                                r9 = (r9 + 15) + (r2 + r2);
+                                                                r10 = r10 + (r2 - 1);
+                                                            } else {
+                                                                r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                if (!((r0 & r0) == 0)) {
+                                                                    r9 = r9 + 1;
+                                                                } else {
+                                                                    ST32(sp - 40, 0);
+                                                                    r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                    if ((r0 & r0) == 0) {
+                                                                        r9 = r9 + 1;
+                                                                    }
+                                                                    r2 = LD32(sp - 40);
+                                                                    r9 = (r9 + 15) + (r2 + r2);
+                                                                    r10 = r10 + (r2 - 1);
+                                                                }
+                                                            }
+                                                        } else {
+                                                            if (!(c25)) {
+                                                                r9 = r9 + 1;
+                                                            } else {
+                                                                r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                r6 = 7;
+                                                                if ((r0 & r0) == 0) {
+                                                                    ST32(sp - 40, 0);
+                                                                    r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                    if ((r0 & r0) == 0) {
+                                                                        r9 = r9 + 1;
+                                                                    }
+                                                                    r2 = LD32(sp - 40);
+                                                                    r9 = (r9 + 15) + (r2 + r2);
+                                                                    r10 = r10 + (r2 - 1);
+                                                                } else {
+                                                                    r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    if (!((r0 & r0) == 0)) {
+                                                                        r9 = r9 + 1;
+                                                                    } else {
+                                                                        ST32(sp - 40, 0);
+                                                                        r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if ((r0 & r0) == 0) {
+                                                                            r9 = r9 + 1;
+                                                                        }
+                                                                        r2 = LD32(sp - 40);
+                                                                        r9 = (r9 + 15) + (r2 + r2);
+                                                                        r10 = r10 + (r2 - 1);
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            c17 = r0 == 10;
+                                            if (r0 == 13) {
+                                                r2 = r10;
+                                                if (r0 == 13) {
+                                                    r2 = r2 + 1;
+                                                    r1 = LD8(r2);
+                                                    if ((r1 & 255) == 10) {
+                                                        r10 = r2;
+                                                    }
+                                                }
+                                                r9 = r9 + 7;
+                                            } else {
+                                                c18 = (r11 & r11) == 0;
+                                                c1030 = c18;
+                                                if (!(c17)) {
+                                                    r0 = r8;
+                                                    if (c1030) {
+                                                        r9 = r9 + 1;
+                                                    } else {
+                                                        c23 = r0 == 72;
+                                                        if (r0 == 104) {
+                                                            r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                            r6 = 7;
+                                                            if ((r0 & r0) == 0) {
+                                                                ST32(sp - 40, 0);
+                                                                r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                if ((r0 & r0) == 0) {
+                                                                    r9 = r9 + 1;
+                                                                }
+                                                                r2 = LD32(sp - 40);
+                                                                r9 = (r9 + 15) + (r2 + r2);
+                                                                r10 = r10 + (r2 - 1);
+                                                            } else {
+                                                                r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                if (!((r0 & r0) == 0)) {
+                                                                    r9 = r9 + 1;
+                                                                } else {
+                                                                    ST32(sp - 40, 0);
+                                                                    r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                    if ((r0 & r0) == 0) {
+                                                                        r9 = r9 + 1;
+                                                                    }
+                                                                    r2 = LD32(sp - 40);
+                                                                    r9 = (r9 + 15) + (r2 + r2);
+                                                                    r10 = r10 + (r2 - 1);
+                                                                }
+                                                            }
+                                                        } else {
+                                                            c24 = r0 == 109;
+                                                            if (c23) {
+                                                                r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                r6 = 7;
+                                                                if ((r0 & r0) == 0) {
+                                                                    ST32(sp - 40, 0);
+                                                                    r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                    if ((r0 & r0) == 0) {
+                                                                        r9 = r9 + 1;
+                                                                    }
+                                                                    r2 = LD32(sp - 40);
+                                                                    r9 = (r9 + 15) + (r2 + r2);
+                                                                    r10 = r10 + (r2 - 1);
+                                                                } else {
+                                                                    r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    if (!((r0 & r0) == 0)) {
+                                                                        r9 = r9 + 1;
+                                                                    } else {
+                                                                        ST32(sp - 40, 0);
+                                                                        r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if ((r0 & r0) == 0) {
+                                                                            r9 = r9 + 1;
+                                                                        }
+                                                                        r2 = LD32(sp - 40);
+                                                                        r9 = (r9 + 15) + (r2 + r2);
+                                                                        r10 = r10 + (r2 - 1);
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                c25 = r0 == 77;
+                                                                if (c24) {
+                                                                    r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    r6 = 7;
+                                                                    if ((r0 & r0) == 0) {
+                                                                        ST32(sp - 40, 0);
+                                                                        r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if ((r0 & r0) == 0) {
+                                                                            r9 = r9 + 1;
+                                                                        }
+                                                                        r2 = LD32(sp - 40);
+                                                                        r9 = (r9 + 15) + (r2 + r2);
+                                                                        r10 = r10 + (r2 - 1);
+                                                                    } else {
+                                                                        r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if (!((r0 & r0) == 0)) {
+                                                                            r9 = r9 + 1;
+                                                                        } else {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if ((r0 & r0) == 0) {
+                                                                                r9 = r9 + 1;
+                                                                            }
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = (r9 + 15) + (r2 + r2);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    if (!(c25)) {
+                                                                        r9 = r9 + 1;
+                                                                    } else {
+                                                                        r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        r6 = 7;
+                                                                        if ((r0 & r0) == 0) {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if ((r0 & r0) == 0) {
+                                                                                r9 = r9 + 1;
+                                                                            }
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = (r9 + 15) + (r2 + r2);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        } else {
+                                                                            r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if (!((r0 & r0) == 0)) {
+                                                                                r9 = r9 + 1;
+                                                                            } else {
+                                                                                ST32(sp - 40, 0);
+                                                                                r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                if ((r0 & r0) == 0) {
+                                                                                    r9 = r9 + 1;
+                                                                                }
+                                                                                r2 = LD32(sp - 40);
+                                                                                r9 = (r9 + 15) + (r2 + r2);
+                                                                                r10 = r10 + (r2 - 1);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                } else {
+                                                    r0 = r8;
+                                                    r2 = r10;
+                                                    if (r0 == 13) {
+                                                        r2 = r2 + 1;
+                                                        r1 = LD8(r2);
+                                                        if ((r1 & 255) == 10) {
+                                                            r10 = r2;
+                                                        }
+                                                    }
+                                                    r9 = r9 + 7;
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        c11 = r0 == 10;
+                                        if (r0 == 13) {
+                                            r2 = r10;
+                                            if (r0 == 13) {
+                                                r2 = r2 + 1;
+                                                r1 = LD8(r2);
+                                                if ((r1 & 255) == 10) {
+                                                    r10 = r2;
+                                                }
+                                            }
+                                            r9 = r9 + 4;
+                                        } else {
+                                            c12 = (r13 & r13) == 0;
+                                            c1021 = c12;
+                                            if (!(c11)) {
+                                                r0 = r8;
+                                                if (c1021) {
+                                                    c1030 = (r11 & r11) == 0;
+                                                    r0 = r8;
+                                                    if (c1030) {
+                                                        r9 = r9 + 1;
+                                                    } else {
+                                                        c23 = r0 == 72;
+                                                        if (r0 == 104) {
+                                                            r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                            r6 = 7;
+                                                            if ((r0 & r0) == 0) {
+                                                                ST32(sp - 40, 0);
+                                                                r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                if ((r0 & r0) == 0) {
+                                                                    r9 = r9 + 1;
+                                                                }
+                                                                r2 = LD32(sp - 40);
+                                                                r9 = (r9 + 15) + (r2 + r2);
+                                                                r10 = r10 + (r2 - 1);
+                                                            } else {
+                                                                r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                if (!((r0 & r0) == 0)) {
+                                                                    r9 = r9 + 1;
+                                                                } else {
+                                                                    ST32(sp - 40, 0);
+                                                                    r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                    if ((r0 & r0) == 0) {
+                                                                        r9 = r9 + 1;
+                                                                    }
+                                                                    r2 = LD32(sp - 40);
+                                                                    r9 = (r9 + 15) + (r2 + r2);
+                                                                    r10 = r10 + (r2 - 1);
+                                                                }
+                                                            }
+                                                        } else {
+                                                            c24 = r0 == 109;
+                                                            if (c23) {
+                                                                r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                r6 = 7;
+                                                                if ((r0 & r0) == 0) {
+                                                                    ST32(sp - 40, 0);
+                                                                    r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                    if ((r0 & r0) == 0) {
+                                                                        r9 = r9 + 1;
+                                                                    }
+                                                                    r2 = LD32(sp - 40);
+                                                                    r9 = (r9 + 15) + (r2 + r2);
+                                                                    r10 = r10 + (r2 - 1);
+                                                                } else {
+                                                                    r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    if (!((r0 & r0) == 0)) {
+                                                                        r9 = r9 + 1;
+                                                                    } else {
+                                                                        ST32(sp - 40, 0);
+                                                                        r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if ((r0 & r0) == 0) {
+                                                                            r9 = r9 + 1;
+                                                                        }
+                                                                        r2 = LD32(sp - 40);
+                                                                        r9 = (r9 + 15) + (r2 + r2);
+                                                                        r10 = r10 + (r2 - 1);
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                c25 = r0 == 77;
+                                                                if (c24) {
+                                                                    r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    r6 = 7;
+                                                                    if ((r0 & r0) == 0) {
+                                                                        ST32(sp - 40, 0);
+                                                                        r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if ((r0 & r0) == 0) {
+                                                                            r9 = r9 + 1;
+                                                                        }
+                                                                        r2 = LD32(sp - 40);
+                                                                        r9 = (r9 + 15) + (r2 + r2);
+                                                                        r10 = r10 + (r2 - 1);
+                                                                    } else {
+                                                                        r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if (!((r0 & r0) == 0)) {
+                                                                            r9 = r9 + 1;
+                                                                        } else {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if ((r0 & r0) == 0) {
+                                                                                r9 = r9 + 1;
+                                                                            }
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = (r9 + 15) + (r2 + r2);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    if (!(c25)) {
+                                                                        r9 = r9 + 1;
+                                                                    } else {
+                                                                        r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        r6 = 7;
+                                                                        if ((r0 & r0) == 0) {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if ((r0 & r0) == 0) {
+                                                                                r9 = r9 + 1;
+                                                                            }
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = (r9 + 15) + (r2 + r2);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        } else {
+                                                                            r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if (!((r0 & r0) == 0)) {
+                                                                                r9 = r9 + 1;
+                                                                            } else {
+                                                                                ST32(sp - 40, 0);
+                                                                                r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                if ((r0 & r0) == 0) {
+                                                                                    r9 = r9 + 1;
+                                                                                }
+                                                                                r2 = LD32(sp - 40);
+                                                                                r9 = (r9 + 15) + (r2 + r2);
+                                                                                r10 = r10 + (r2 - 1);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                } else {
+                                                    c17 = r0 == 10;
+                                                    if (r0 == 13) {
+                                                        r2 = r10;
+                                                        if (r0 == 13) {
+                                                            r2 = r2 + 1;
+                                                            r1 = LD8(r2);
+                                                            if ((r1 & 255) == 10) {
+                                                                r10 = r2;
+                                                            }
+                                                        }
+                                                        r9 = r9 + 7;
+                                                    } else {
+                                                        c18 = (r11 & r11) == 0;
+                                                        c1030 = c18;
+                                                        if (!(c17)) {
+                                                            r0 = r8;
+                                                            if (c1030) {
+                                                                r9 = r9 + 1;
+                                                            } else {
+                                                                c23 = r0 == 72;
+                                                                if (r0 == 104) {
+                                                                    r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    r6 = 7;
+                                                                    if ((r0 & r0) == 0) {
+                                                                        ST32(sp - 40, 0);
+                                                                        r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if ((r0 & r0) == 0) {
+                                                                            r9 = r9 + 1;
+                                                                        }
+                                                                        r2 = LD32(sp - 40);
+                                                                        r9 = (r9 + 15) + (r2 + r2);
+                                                                        r10 = r10 + (r2 - 1);
+                                                                    } else {
+                                                                        r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if (!((r0 & r0) == 0)) {
+                                                                            r9 = r9 + 1;
+                                                                        } else {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if ((r0 & r0) == 0) {
+                                                                                r9 = r9 + 1;
+                                                                            }
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = (r9 + 15) + (r2 + r2);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    c24 = r0 == 109;
+                                                                    if (c23) {
+                                                                        r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        r6 = 7;
+                                                                        if ((r0 & r0) == 0) {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if ((r0 & r0) == 0) {
+                                                                                r9 = r9 + 1;
+                                                                            }
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = (r9 + 15) + (r2 + r2);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        } else {
+                                                                            r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if (!((r0 & r0) == 0)) {
+                                                                                r9 = r9 + 1;
+                                                                            } else {
+                                                                                ST32(sp - 40, 0);
+                                                                                r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                if ((r0 & r0) == 0) {
+                                                                                    r9 = r9 + 1;
+                                                                                }
+                                                                                r2 = LD32(sp - 40);
+                                                                                r9 = (r9 + 15) + (r2 + r2);
+                                                                                r10 = r10 + (r2 - 1);
+                                                                            }
+                                                                        }
+                                                                    } else {
+                                                                        c25 = r0 == 77;
+                                                                        if (c24) {
+                                                                            r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                            r6 = 7;
+                                                                            if ((r0 & r0) == 0) {
+                                                                                ST32(sp - 40, 0);
+                                                                                r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                if ((r0 & r0) == 0) {
+                                                                                    r9 = r9 + 1;
+                                                                                }
+                                                                                r2 = LD32(sp - 40);
+                                                                                r9 = (r9 + 15) + (r2 + r2);
+                                                                                r10 = r10 + (r2 - 1);
+                                                                            } else {
+                                                                                r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                if (!((r0 & r0) == 0)) {
+                                                                                    r9 = r9 + 1;
+                                                                                } else {
+                                                                                    ST32(sp - 40, 0);
+                                                                                    r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    if ((r0 & r0) == 0) {
+                                                                                        r9 = r9 + 1;
+                                                                                    }
+                                                                                    r2 = LD32(sp - 40);
+                                                                                    r9 = (r9 + 15) + (r2 + r2);
+                                                                                    r10 = r10 + (r2 - 1);
+                                                                                }
+                                                                            }
+                                                                        } else {
+                                                                            if (!(c25)) {
+                                                                                r9 = r9 + 1;
+                                                                            } else {
+                                                                                r0 = GCALL6(0x06075238, r10, 0x06018660, 7, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                r6 = 7;
+                                                                                if ((r0 & r0) == 0) {
+                                                                                    ST32(sp - 40, 0);
+                                                                                    r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    if ((r0 & r0) == 0) {
+                                                                                        r9 = r9 + 1;
+                                                                                    }
+                                                                                    r2 = LD32(sp - 40);
+                                                                                    r9 = (r9 + 15) + (r2 + r2);
+                                                                                    r10 = r10 + (r2 - 1);
+                                                                                } else {
+                                                                                    r0 = GCALL6(0x06075238, r10, 0x06018668, r6, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    if (!((r0 & r0) == 0)) {
+                                                                                        r9 = r9 + 1;
+                                                                                    } else {
+                                                                                        ST32(sp - 40, 0);
+                                                                                        r0 = GCALL6(r14, 0, r10, 1, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                        if ((r0 & r0) == 0) {
+                                                                                            r9 = r9 + 1;
+                                                                                        }
+                                                                                        r2 = LD32(sp - 40);
+                                                                                        r9 = (r9 + 15) + (r2 + r2);
+                                                                                        r10 = r10 + (r2 - 1);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        } else {
+                                                            r0 = r8;
+                                                            r2 = r10;
+                                                            if (r0 == 13) {
+                                                                r2 = r2 + 1;
+                                                                r1 = LD8(r2);
+                                                                if ((r1 & 255) == 10) {
+                                                                    r10 = r2;
+                                                                }
+                                                            }
+                                                            r9 = r9 + 7;
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                r0 = r8;
+                                                r2 = r10;
+                                                if (r0 == 13) {
+                                                    r2 = r2 + 1;
+                                                    r1 = LD8(r2);
+                                                    if ((r1 & 255) == 10) {
+                                                        r10 = r2;
+                                                    }
+                                                }
+                                                r9 = r9 + 4;
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    r0 = GCALL6(0x0601852C, r8, 0, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                    r9 = (r9 + 3) + ((signed char)r0);
+                                }
+                            }
+                        }
+                    }
+                }
+                r10 = r10 + 1;
+                r1 = LD8(r10);
+                r8 = r1 & 255;
+                r0 = r8;
+            } while (AGAIN(!((r8 & r8) == 0)));
+            c1043 = (r9 & r9) == 0;
+        }
+        r5 = r9;
+        if (!(c1043)) {
+            r0 = GCALL6(0x060279E0, 0, (r5 + 1), 3, 1, LD32((sp - 40)), LD32((sp - 36)));
+            r1 = r0;
+            r0 = LD32(sp - 36);
+            ST32(r0, r1);
+            if (!((r1 & r1) == 0)) {
+                r10 = r12;
+                r9 = r1;
+                ST8(r9, 0);
+                if (!((r13 & r13) == 0)) {
+                    r6 = R(6);
+                    r7 = R(7);
+                    r0 = GCALL6(0x06045264, r9, 0x06018670, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                    r9 = r9 + r0;
+                }
+                r1 = LD8(r10);
+                r8 = r1 & 255;
+                r1 = 0;
+                if (!((r8 & r8) == 0)) {
+                    r14 = 0x06075238;
+                    r12 = 0x06018588;
+                    r0 = r8;
+                    while (1) {
+                        c35 = r0 == 60;
+                        if (r0 == 62) {
+                            r7 = R(7);
+                            r0 = GCALL6(0x06018550, r9, r8, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                            r9 = r0;
+                        } else {
+                            c36 = r0 == 38;
+                            if (c35) {
+                                r7 = R(7);
+                                r0 = GCALL6(0x06018550, r9, r8, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                r9 = r0;
+                            } else {
+                                c37 = r0 == 34;
+                                if (c36) {
+                                    r7 = R(7);
+                                    r0 = GCALL6(0x06018550, r9, r8, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                    r9 = r0;
+                                } else {
+                                    r1 = 127;
+                                    if (c37) {
+                                        r7 = R(7);
+                                        r0 = GCALL6(0x06018550, r9, r8, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                        r9 = r0;
+                                    } else {
+                                        c39 = (r11 & r11) == 0;
+                                        if (!((unsigned)r8 > (unsigned)r1)) {
+                                            r0 = r8;
+                                            if (c39) {
+                                                c1067 = (r13 & r13) == 0;
+                                                r0 = r8;
+                                                if (c1067) {
+                                                    c1077 = (r11 & r11) == 0;
+                                                    r0 = r8;
+                                                    if (c1077) {
+                                                        ST8(r9, r8);
+                                                        r9 = r9 + 1;
+                                                    } else {
+                                                        c53 = r0 == 72;
+                                                        if (r0 == 104) {
+                                                            r7 = R(7);
+                                                            r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                            r6 = 7;
+                                                            if ((r0 & r0) == 0) {
+                                                                ST32(sp - 40, 0);
+                                                                r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                r2 = LD32(sp - 40);
+                                                                r9 = r9 + ((r2 + r2) + 15);
+                                                                r10 = r10 + (r2 - 1);
+                                                            } else {
+                                                                r7 = R(7);
+                                                                r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                if (!((r0 & r0) == 0)) {
+                                                                    ST8(r9, r8);
+                                                                    r9 = r9 + 1;
+                                                                } else {
+                                                                    ST32(sp - 40, 0);
+                                                                    r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                    r2 = LD32(sp - 40);
+                                                                    r9 = r9 + ((r2 + r2) + 15);
+                                                                    r10 = r10 + (r2 - 1);
+                                                                }
+                                                            }
+                                                        } else {
+                                                            c54 = r0 == 109;
+                                                            if (c53) {
+                                                                r7 = R(7);
+                                                                r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                r6 = 7;
+                                                                if ((r0 & r0) == 0) {
+                                                                    ST32(sp - 40, 0);
+                                                                    r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                    r2 = LD32(sp - 40);
+                                                                    r9 = r9 + ((r2 + r2) + 15);
+                                                                    r10 = r10 + (r2 - 1);
+                                                                } else {
+                                                                    r7 = R(7);
+                                                                    r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    if (!((r0 & r0) == 0)) {
+                                                                        ST8(r9, r8);
+                                                                        r9 = r9 + 1;
+                                                                    } else {
+                                                                        ST32(sp - 40, 0);
+                                                                        r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                        r2 = LD32(sp - 40);
+                                                                        r9 = r9 + ((r2 + r2) + 15);
+                                                                        r10 = r10 + (r2 - 1);
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                c55 = r0 == 77;
+                                                                if (c54) {
+                                                                    r7 = R(7);
+                                                                    r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    r6 = 7;
+                                                                    if ((r0 & r0) == 0) {
+                                                                        ST32(sp - 40, 0);
+                                                                        r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                        r2 = LD32(sp - 40);
+                                                                        r9 = r9 + ((r2 + r2) + 15);
+                                                                        r10 = r10 + (r2 - 1);
+                                                                    } else {
+                                                                        r7 = R(7);
+                                                                        r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if (!((r0 & r0) == 0)) {
+                                                                            ST8(r9, r8);
+                                                                            r9 = r9 + 1;
+                                                                        } else {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = r9 + ((r2 + r2) + 15);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    if (!(c55)) {
+                                                                        ST8(r9, r8);
+                                                                        r9 = r9 + 1;
+                                                                    } else {
+                                                                        r7 = R(7);
+                                                                        r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        r6 = 7;
+                                                                        if ((r0 & r0) == 0) {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = r9 + ((r2 + r2) + 15);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        } else {
+                                                                            r7 = R(7);
+                                                                            r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if (!((r0 & r0) == 0)) {
+                                                                                ST8(r9, r8);
+                                                                                r9 = r9 + 1;
+                                                                            } else {
+                                                                                ST32(sp - 40, 0);
+                                                                                r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                r2 = LD32(sp - 40);
+                                                                                r9 = r9 + ((r2 + r2) + 15);
+                                                                                r10 = r10 + (r2 - 1);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                } else {
+                                                    c47 = r0 == 10;
+                                                    if (r0 == 13) {
+                                                        c49 = r0 == 13;
+                                                        r2 = r10;
+                                                        c1074 = c49;
+                                                        if (c49) {
+                                                            r2 = r2 + 1;
+                                                            r1 = LD8(r2);
+                                                            c50 = (r1 & 255) == 10;
+                                                            c1074 = c50;
+                                                            if (c50) {
+                                                                r10 = r2;
+                                                                c1074 = 1;
+                                                            }
+                                                        }
+                                                        r5 = 0x06018680;
+                                                        r6 = R(6);
+                                                        r7 = R(7);
+                                                        r0 = GCALL6(0x06045264, r9, r5, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                        r9 = r9 + r0;
+                                                    } else {
+                                                        c48 = (r11 & r11) == 0;
+                                                        c1077 = c48;
+                                                        if (!(c47)) {
+                                                            r0 = r8;
+                                                            if (c1077) {
+                                                                ST8(r9, r8);
+                                                                r9 = r9 + 1;
+                                                            } else {
+                                                                c53 = r0 == 72;
+                                                                if (r0 == 104) {
+                                                                    r7 = R(7);
+                                                                    r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    r6 = 7;
+                                                                    if ((r0 & r0) == 0) {
+                                                                        ST32(sp - 40, 0);
+                                                                        r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                        r2 = LD32(sp - 40);
+                                                                        r9 = r9 + ((r2 + r2) + 15);
+                                                                        r10 = r10 + (r2 - 1);
+                                                                    } else {
+                                                                        r7 = R(7);
+                                                                        r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if (!((r0 & r0) == 0)) {
+                                                                            ST8(r9, r8);
+                                                                            r9 = r9 + 1;
+                                                                        } else {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = r9 + ((r2 + r2) + 15);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    c54 = r0 == 109;
+                                                                    if (c53) {
+                                                                        r7 = R(7);
+                                                                        r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        r6 = 7;
+                                                                        if ((r0 & r0) == 0) {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = r9 + ((r2 + r2) + 15);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        } else {
+                                                                            r7 = R(7);
+                                                                            r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if (!((r0 & r0) == 0)) {
+                                                                                ST8(r9, r8);
+                                                                                r9 = r9 + 1;
+                                                                            } else {
+                                                                                ST32(sp - 40, 0);
+                                                                                r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                r2 = LD32(sp - 40);
+                                                                                r9 = r9 + ((r2 + r2) + 15);
+                                                                                r10 = r10 + (r2 - 1);
+                                                                            }
+                                                                        }
+                                                                    } else {
+                                                                        c55 = r0 == 77;
+                                                                        if (c54) {
+                                                                            r7 = R(7);
+                                                                            r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                            r6 = 7;
+                                                                            if ((r0 & r0) == 0) {
+                                                                                ST32(sp - 40, 0);
+                                                                                r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                r2 = LD32(sp - 40);
+                                                                                r9 = r9 + ((r2 + r2) + 15);
+                                                                                r10 = r10 + (r2 - 1);
+                                                                            } else {
+                                                                                r7 = R(7);
+                                                                                r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                if (!((r0 & r0) == 0)) {
+                                                                                    ST8(r9, r8);
+                                                                                    r9 = r9 + 1;
+                                                                                } else {
+                                                                                    ST32(sp - 40, 0);
+                                                                                    r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    r2 = LD32(sp - 40);
+                                                                                    r9 = r9 + ((r2 + r2) + 15);
+                                                                                    r10 = r10 + (r2 - 1);
+                                                                                }
+                                                                            }
+                                                                        } else {
+                                                                            if (!(c55)) {
+                                                                                ST8(r9, r8);
+                                                                                r9 = r9 + 1;
+                                                                            } else {
+                                                                                r7 = R(7);
+                                                                                r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                r6 = 7;
+                                                                                if ((r0 & r0) == 0) {
+                                                                                    ST32(sp - 40, 0);
+                                                                                    r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    r2 = LD32(sp - 40);
+                                                                                    r9 = r9 + ((r2 + r2) + 15);
+                                                                                    r10 = r10 + (r2 - 1);
+                                                                                } else {
+                                                                                    r7 = R(7);
+                                                                                    r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    if (!((r0 & r0) == 0)) {
+                                                                                        ST8(r9, r8);
+                                                                                        r9 = r9 + 1;
+                                                                                    } else {
+                                                                                        ST32(sp - 40, 0);
+                                                                                        r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                        r2 = LD32(sp - 40);
+                                                                                        r9 = r9 + ((r2 + r2) + 15);
+                                                                                        r10 = r10 + (r2 - 1);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        } else {
+                                                            r0 = r8;
+                                                            c49 = r0 == 13;
+                                                            r2 = r10;
+                                                            c1074 = c49;
+                                                            if (c49) {
+                                                                r2 = r2 + 1;
+                                                                r1 = LD8(r2);
+                                                                c50 = (r1 & 255) == 10;
+                                                                c1074 = c50;
+                                                                if (c50) {
+                                                                    r10 = r2;
+                                                                    c1074 = 1;
+                                                                }
+                                                            }
+                                                            r5 = 0x06018680;
+                                                            r6 = R(6);
+                                                            r7 = R(7);
+                                                            r0 = GCALL6(0x06045264, r9, r5, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                            r9 = r9 + r0;
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                c41 = r0 == 10;
+                                                if (r0 == 13) {
+                                                    c43 = r0 == 13;
+                                                    r2 = r10;
+                                                    c1065 = c43;
+                                                    if (c43) {
+                                                        r2 = r2 + 1;
+                                                        r1 = LD8(r2);
+                                                        c44 = (r1 & 255) == 10;
+                                                        c1065 = c44;
+                                                        if (c44) {
+                                                            r10 = r2;
+                                                            c1065 = 1;
+                                                        }
+                                                    }
+                                                    r5 = 0x06018678;
+                                                    r6 = R(6);
+                                                    r7 = R(7);
+                                                    r0 = GCALL6(0x06045264, r9, r5, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                    r9 = r9 + r0;
+                                                } else {
+                                                    c42 = (r13 & r13) == 0;
+                                                    c1067 = c42;
+                                                    if (!(c41)) {
+                                                        r0 = r8;
+                                                        if (c1067) {
+                                                            c1077 = (r11 & r11) == 0;
+                                                            r0 = r8;
+                                                            if (c1077) {
+                                                                ST8(r9, r8);
+                                                                r9 = r9 + 1;
+                                                            } else {
+                                                                c53 = r0 == 72;
+                                                                if (r0 == 104) {
+                                                                    r7 = R(7);
+                                                                    r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    r6 = 7;
+                                                                    if ((r0 & r0) == 0) {
+                                                                        ST32(sp - 40, 0);
+                                                                        r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                        r2 = LD32(sp - 40);
+                                                                        r9 = r9 + ((r2 + r2) + 15);
+                                                                        r10 = r10 + (r2 - 1);
+                                                                    } else {
+                                                                        r7 = R(7);
+                                                                        r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        if (!((r0 & r0) == 0)) {
+                                                                            ST8(r9, r8);
+                                                                            r9 = r9 + 1;
+                                                                        } else {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = r9 + ((r2 + r2) + 15);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    c54 = r0 == 109;
+                                                                    if (c53) {
+                                                                        r7 = R(7);
+                                                                        r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                        r6 = 7;
+                                                                        if ((r0 & r0) == 0) {
+                                                                            ST32(sp - 40, 0);
+                                                                            r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                            r2 = LD32(sp - 40);
+                                                                            r9 = r9 + ((r2 + r2) + 15);
+                                                                            r10 = r10 + (r2 - 1);
+                                                                        } else {
+                                                                            r7 = R(7);
+                                                                            r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                            if (!((r0 & r0) == 0)) {
+                                                                                ST8(r9, r8);
+                                                                                r9 = r9 + 1;
+                                                                            } else {
+                                                                                ST32(sp - 40, 0);
+                                                                                r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                r2 = LD32(sp - 40);
+                                                                                r9 = r9 + ((r2 + r2) + 15);
+                                                                                r10 = r10 + (r2 - 1);
+                                                                            }
+                                                                        }
+                                                                    } else {
+                                                                        c55 = r0 == 77;
+                                                                        if (c54) {
+                                                                            r7 = R(7);
+                                                                            r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                            r6 = 7;
+                                                                            if ((r0 & r0) == 0) {
+                                                                                ST32(sp - 40, 0);
+                                                                                r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                r2 = LD32(sp - 40);
+                                                                                r9 = r9 + ((r2 + r2) + 15);
+                                                                                r10 = r10 + (r2 - 1);
+                                                                            } else {
+                                                                                r7 = R(7);
+                                                                                r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                if (!((r0 & r0) == 0)) {
+                                                                                    ST8(r9, r8);
+                                                                                    r9 = r9 + 1;
+                                                                                } else {
+                                                                                    ST32(sp - 40, 0);
+                                                                                    r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    r2 = LD32(sp - 40);
+                                                                                    r9 = r9 + ((r2 + r2) + 15);
+                                                                                    r10 = r10 + (r2 - 1);
+                                                                                }
+                                                                            }
+                                                                        } else {
+                                                                            if (!(c55)) {
+                                                                                ST8(r9, r8);
+                                                                                r9 = r9 + 1;
+                                                                            } else {
+                                                                                r7 = R(7);
+                                                                                r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                r6 = 7;
+                                                                                if ((r0 & r0) == 0) {
+                                                                                    ST32(sp - 40, 0);
+                                                                                    r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    r2 = LD32(sp - 40);
+                                                                                    r9 = r9 + ((r2 + r2) + 15);
+                                                                                    r10 = r10 + (r2 - 1);
+                                                                                } else {
+                                                                                    r7 = R(7);
+                                                                                    r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    if (!((r0 & r0) == 0)) {
+                                                                                        ST8(r9, r8);
+                                                                                        r9 = r9 + 1;
+                                                                                    } else {
+                                                                                        ST32(sp - 40, 0);
+                                                                                        r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                        r2 = LD32(sp - 40);
+                                                                                        r9 = r9 + ((r2 + r2) + 15);
+                                                                                        r10 = r10 + (r2 - 1);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        } else {
+                                                            c47 = r0 == 10;
+                                                            if (r0 == 13) {
+                                                                c49 = r0 == 13;
+                                                                r2 = r10;
+                                                                c1074 = c49;
+                                                                if (c49) {
+                                                                    r2 = r2 + 1;
+                                                                    r1 = LD8(r2);
+                                                                    c50 = (r1 & 255) == 10;
+                                                                    c1074 = c50;
+                                                                    if (c50) {
+                                                                        r10 = r2;
+                                                                        c1074 = 1;
+                                                                    }
+                                                                }
+                                                                r5 = 0x06018680;
+                                                                r6 = R(6);
+                                                                r7 = R(7);
+                                                                r0 = GCALL6(0x06045264, r9, r5, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                r9 = r9 + r0;
+                                                            } else {
+                                                                c48 = (r11 & r11) == 0;
+                                                                c1077 = c48;
+                                                                if (!(c47)) {
+                                                                    r0 = r8;
+                                                                    if (c1077) {
+                                                                        ST8(r9, r8);
+                                                                        r9 = r9 + 1;
+                                                                    } else {
+                                                                        c53 = r0 == 72;
+                                                                        if (r0 == 104) {
+                                                                            r7 = R(7);
+                                                                            r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                            r6 = 7;
+                                                                            if ((r0 & r0) == 0) {
+                                                                                ST32(sp - 40, 0);
+                                                                                r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                r2 = LD32(sp - 40);
+                                                                                r9 = r9 + ((r2 + r2) + 15);
+                                                                                r10 = r10 + (r2 - 1);
+                                                                            } else {
+                                                                                r7 = R(7);
+                                                                                r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                if (!((r0 & r0) == 0)) {
+                                                                                    ST8(r9, r8);
+                                                                                    r9 = r9 + 1;
+                                                                                } else {
+                                                                                    ST32(sp - 40, 0);
+                                                                                    r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    r2 = LD32(sp - 40);
+                                                                                    r9 = r9 + ((r2 + r2) + 15);
+                                                                                    r10 = r10 + (r2 - 1);
+                                                                                }
+                                                                            }
+                                                                        } else {
+                                                                            c54 = r0 == 109;
+                                                                            if (c53) {
+                                                                                r7 = R(7);
+                                                                                r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                r6 = 7;
+                                                                                if ((r0 & r0) == 0) {
+                                                                                    ST32(sp - 40, 0);
+                                                                                    r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    r2 = LD32(sp - 40);
+                                                                                    r9 = r9 + ((r2 + r2) + 15);
+                                                                                    r10 = r10 + (r2 - 1);
+                                                                                } else {
+                                                                                    r7 = R(7);
+                                                                                    r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    if (!((r0 & r0) == 0)) {
+                                                                                        ST8(r9, r8);
+                                                                                        r9 = r9 + 1;
+                                                                                    } else {
+                                                                                        ST32(sp - 40, 0);
+                                                                                        r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                        r2 = LD32(sp - 40);
+                                                                                        r9 = r9 + ((r2 + r2) + 15);
+                                                                                        r10 = r10 + (r2 - 1);
+                                                                                    }
+                                                                                }
+                                                                            } else {
+                                                                                c55 = r0 == 77;
+                                                                                if (c54) {
+                                                                                    r7 = R(7);
+                                                                                    r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                    r6 = 7;
+                                                                                    if ((r0 & r0) == 0) {
+                                                                                        ST32(sp - 40, 0);
+                                                                                        r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                        r2 = LD32(sp - 40);
+                                                                                        r9 = r9 + ((r2 + r2) + 15);
+                                                                                        r10 = r10 + (r2 - 1);
+                                                                                    } else {
+                                                                                        r7 = R(7);
+                                                                                        r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                        if (!((r0 & r0) == 0)) {
+                                                                                            ST8(r9, r8);
+                                                                                            r9 = r9 + 1;
+                                                                                        } else {
+                                                                                            ST32(sp - 40, 0);
+                                                                                            r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                            r2 = LD32(sp - 40);
+                                                                                            r9 = r9 + ((r2 + r2) + 15);
+                                                                                            r10 = r10 + (r2 - 1);
+                                                                                        }
+                                                                                    }
+                                                                                } else {
+                                                                                    if (!(c55)) {
+                                                                                        ST8(r9, r8);
+                                                                                        r9 = r9 + 1;
+                                                                                    } else {
+                                                                                        r7 = R(7);
+                                                                                        r0 = GCALL6(r14, r10, 0x06018660, 7, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                        r6 = 7;
+                                                                                        if ((r0 & r0) == 0) {
+                                                                                            ST32(sp - 40, 0);
+                                                                                            r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                            r2 = LD32(sp - 40);
+                                                                                            r9 = r9 + ((r2 + r2) + 15);
+                                                                                            r10 = r10 + (r2 - 1);
+                                                                                        } else {
+                                                                                            r7 = R(7);
+                                                                                            r0 = GCALL6(r14, r10, 0x06018668, r6, r7, LD32((sp - 40)), LD32((sp - 36)));
+                                                                                            if (!((r0 & r0) == 0)) {
+                                                                                                ST8(r9, r8);
+                                                                                                r9 = r9 + 1;
+                                                                                            } else {
+                                                                                                ST32(sp - 40, 0);
+                                                                                                r0 = GCALL6(r12, r9, r10, 0, (sp - 40), LD32((sp - 40)), LD32((sp - 36)));
+                                                                                                r2 = LD32(sp - 40);
+                                                                                                r9 = r9 + ((r2 + r2) + 15);
+                                                                                                r10 = r10 + (r2 - 1);
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    r0 = r8;
+                                                                    c49 = r0 == 13;
+                                                                    r2 = r10;
+                                                                    c1074 = c49;
+                                                                    if (c49) {
+                                                                        r2 = r2 + 1;
+                                                                        r1 = LD8(r2);
+                                                                        c50 = (r1 & 255) == 10;
+                                                                        c1074 = c50;
+                                                                        if (c50) {
+                                                                            r10 = r2;
+                                                                            c1074 = 1;
+                                                                        }
+                                                                    }
+                                                                    r5 = 0x06018680;
+                                                                    r6 = R(6);
+                                                                    r7 = R(7);
+                                                                    r0 = GCALL6(0x06045264, r9, r5, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                                    r9 = r9 + r0;
+                                                                }
+                                                            }
+                                                        }
+                                                    } else {
+                                                        r0 = r8;
+                                                        c43 = r0 == 13;
+                                                        r2 = r10;
+                                                        c1065 = c43;
+                                                        if (c43) {
+                                                            r2 = r2 + 1;
+                                                            r1 = LD8(r2);
+                                                            c44 = (r1 & 255) == 10;
+                                                            c1065 = c44;
+                                                            if (c44) {
+                                                                r10 = r2;
+                                                                c1065 = 1;
+                                                            }
+                                                        }
+                                                        r5 = 0x06018678;
+                                                        r6 = R(6);
+                                                        r7 = R(7);
+                                                        r0 = GCALL6(0x06045264, r9, r5, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                                        r9 = r9 + r0;
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            r7 = R(7);
+                                            r0 = GCALL6(0x06018550, r9, r8, 0, 0, LD32((sp - 40)), LD32((sp - 36)));
+                                            r9 = r0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        r10 = r10 + 1;
+                        r1 = LD8(r10);
+                        r8 = r1 & 255;
+                        r0 = r8;
+                        if ((r8 & r8) == 0) {
+                            break;
+                        }
+                        POLL();
+                    }
+                    r1 = 0;
+                }
+                ST8(r9, r1);
+                r0 = 1;
+            } else {
+                r0 = 0;
+            }
+        } else {
+            r0 = 1;
+        }
+    } else {
+        r0 = 0;
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0601D4D8(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14, c3, c4, c6, c10, c12, c14, c18, c1019, c1020, c1021, c1027, c1029, c1045;
+    FRAME(sp, 64);
+
+    r10 = r4;
+    ST32(sp - 48, 0);
+    ST32(sp - 40, 0);
+    r14 = LD32(r10 + 0x10D4);
+    if ((r14 & r14) == 0) {
+        r8 = LD32(r10 + 56);
+        r0 = GCALL1(0x0607507C, (r10 + 0x1B0));
+        r11 = r0;
+        ST16(((r8 + r8) + r10) + 0xEB0, r11);
+    } else {
+        r0 = GCALL1(0x060455FC, (r4 + 0x1B0));
+        r7 = r0;
+        r1 = LD32(r10 + 56);
+        r11 = r7;
+        ST16(((r1 + r1) + r10) + 0xEB0, r11);
+    }
+    r0 = r10;
+    r1 = LD32(r0 + 0x10B4);
+    ST32(sp - 64, r1);
+    r1 = LD32(r0 + 0x10B8);
+    ST32(sp - 60, r1);
+    r1 = LD32((r10 + 88));
+    r4 = LD32(sp - 64);
+    ST32(sp - 56, r1);
+    r0 = GCALL7(0x0601CC78, r4, 128, 0, r7, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)));
+    r1 = 0x1B0;
+    ST32(sp - 52, (r10 + 0x1B0));
+    r3 = LD32(sp - 52);
+    ST32(sp - 44, r3);
+    if ((r14 & r14) == 0) {
+        r1 = LD8(r10 + r1);
+        ST32(sp - 48, (r1 & 255));
+        r0 = LD32(sp - 48);
+        r1 = LD8(r0 + 0x06075135);
+        r1 = r1 & 8;
+    } else {
+        r1 = LD16(r10 + r1);
+        ST32(sp - 40, (r1 & 0xFFFF));
+        r4 = LD32(sp - 40);
+        r0 = GCALL8(0x060455C4, r4, 0, 0, 0, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+        r1 = r0;
+    }
+    r7 = 1;
+    c3 = (r1 & r1) == 0;
+    if (r11 > 1) {
+        r1 = LD32(r10 + 48);
+        c4 = r1 > 0;
+        r1 = r10;
+        if (c4) {
+            r3 = LD32((r1 + 68));
+            r1 = LD32((r10 + 64));
+            r2 = r3 - r1;
+            r1 = LD32((r10 + 104));
+            c6 = r1 > r7;
+            if (r1 == 1) {
+                r1 = LD32(r10 + 52);
+                r2 = (r2 - r1) + ((int)((unsigned)(r2 - r1) >> 31));
+                r1 = LD32(r10 + 8);
+                r2 = r2 >> 1;
+                r1 = r1 + r2;
+                c10 = r1 >= 0;
+                ST32(r10 + 8, r1);
+                c1019 = c10;
+                if (!(c10)) {
+                    ST32(r10 + 8, 0);
+                    c1019 = 0;
+                }
+                r9 = 0;
+                c1020 = c1019;
+                r13 = r10;
+                c1021 = c1020;
+            } else {
+                r9 = 0;
+                c1020 = c6;
+                if (!(c6)) {
+                    r13 = r10;
+                    c1021 = c1020;
+                } else {
+                    r13 = r10;
+                    if (r1 == 2) {
+                        r1 = LD32(r10 + 52);
+                        r2 = r2 - r1;
+                        r1 = LD32(r10 + 8);
+                        r1 = r1 + r2;
+                        c10 = r1 >= 0;
+                        ST32(r10 + 8, r1);
+                        c1019 = c10;
+                        if (!(c10)) {
+                            ST32(r10 + 8, 0);
+                            c1019 = 0;
+                        }
+                        r9 = 0;
+                        c1020 = c1019;
+                        r13 = r10;
+                        c1021 = c1020;
+                    } else {
+                        c1021 = 0;
+                    }
+                }
+            }
+            r13 = r13 + 88;
+            ST32(sp - 36, 0);
+            r12 = r10;
+            r11 = r10;
+            while (1) {
+                r0 = r11;
+                if ((r14 & r14) == 0) {
+                    r1 = LD16(r0 + 0xEB0);
+                    r0 = LD32(sp - 52);
+                    r1 = LD8(r0 + r1);
+                    ST32(sp - 48, (r1 & 255));
+                } else {
+                    r1 = LD16(r0 + 0xEB0);
+                    r0 = LD32(sp - 44);
+                    r1 = LD16(r0 + (r1 + r1));
+                    ST32(sp - 40, (r1 & 0xFFFF));
+                }
+                c12 = (r14 & r14) == 0;
+                r8 = 1;
+                c1027 = c12;
+                if (c12) {
+                    r7 = 0;
+                    if (!(c1027)) {
+                        r8 = 0;
+                    } else {
+                        c1029 = (r14 & r14) == 0;
+                        r3 = 27;
+                        if (c1029) {
+                            r2 = LD32(sp - 48);
+                        } else {
+                            r3 = LD8((r3 + (sp - 64)));
+                            r2 = r3 & 255;
+                        }
+                        r2 = r2 - 1;
+                        r1 = r2;
+                        if ((unsigned)r2 > (unsigned)4) {
+                            r8 = 0;
+                            r7 = 0;
+                        } else {
+                            r1 = LD16(0x0601D67C + (r1 + r1));
+                            switch (r1) {
+                            case 10:
+                                r0 = 0x0601D1F4;
+                                r5 = r9;
+                                r4 = r10;
+                                break;
+                            case 18:
+                                r0 = 0x0601D390;
+                                r5 = r9;
+                                r4 = r10;
+                                break;
+                            case 26:
+                                r0 = 0x0601D3B8;
+                                r5 = r9;
+                                r4 = r10;
+                                break;
+                            case 34:
+                                r0 = 0x0601D3E0;
+                                r5 = r9;
+                                r4 = r10;
+                                break;
+                            case 42:
+                                r5 = LD16(0x2B0 + r12);
+                                r4 = r10;
+                                r0 = 0x0601D898;
+                                break;
+                            }
+                            r0 = GCALL8(r0, r4, r5, 0, r7, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+                            r7 = r0;
+                        }
+                    }
+                } else {
+                    r2 = LD32(sp - 40);
+                    c14 = (r14 & r14) == 0;
+                    c1029 = c14;
+                    c1027 = c14;
+                    if (((int)((unsigned)r2 >> 8)) == 128) {
+                        r3 = 27;
+                        if (c1029) {
+                            r2 = LD32(sp - 48);
+                        } else {
+                            r3 = LD8((r3 + (sp - 64)));
+                            r2 = r3 & 255;
+                        }
+                        r2 = r2 - 1;
+                        r1 = r2;
+                        if ((unsigned)r2 > (unsigned)4) {
+                            r8 = 0;
+                            r7 = 0;
+                        } else {
+                            r1 = LD16(0x0601D67C + (r1 + r1));
+                            switch (r1) {
+                            case 10:
+                                r0 = 0x0601D1F4;
+                                r5 = r9;
+                                r4 = r10;
+                                break;
+                            case 18:
+                                r0 = 0x0601D390;
+                                r5 = r9;
+                                r4 = r10;
+                                break;
+                            case 26:
+                                r0 = 0x0601D3B8;
+                                r5 = r9;
+                                r4 = r10;
+                                break;
+                            case 34:
+                                r0 = 0x0601D3E0;
+                                r5 = r9;
+                                r4 = r10;
+                                break;
+                            case 42:
+                                r5 = LD16(0x2B0 + r12);
+                                r4 = r10;
+                                r0 = 0x0601D898;
+                                break;
+                            }
+                            r0 = GCALL8(r0, r4, r5, 0, r7, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+                            r7 = r0;
+                        }
+                    } else {
+                        r7 = 0;
+                        if (!(c1027)) {
+                            r8 = 0;
+                        } else {
+                            c1029 = (r14 & r14) == 0;
+                            r3 = 27;
+                            if (c1029) {
+                                r2 = LD32(sp - 48);
+                            } else {
+                                r3 = LD8((r3 + (sp - 64)));
+                                r2 = r3 & 255;
+                            }
+                            r2 = r2 - 1;
+                            r1 = r2;
+                            if ((unsigned)r2 > (unsigned)4) {
+                                r8 = 0;
+                                r7 = 0;
+                            } else {
+                                r1 = LD16(0x0601D67C + (r1 + r1));
+                                switch (r1) {
+                                case 10:
+                                    r0 = 0x0601D1F4;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 18:
+                                    r0 = 0x0601D390;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 26:
+                                    r0 = 0x0601D3B8;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 34:
+                                    r0 = 0x0601D3E0;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 42:
+                                    r5 = LD16(0x2B0 + r12);
+                                    r4 = r10;
+                                    r0 = 0x0601D898;
+                                    break;
+                                }
+                                r0 = GCALL8(r0, r4, r5, 0, r7, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+                                r7 = r0;
+                            }
+                        }
+                    }
+                }
+                r0 = LD32(sp - 36);
+                if ((r8 & r8) == 0) {
+                    r4 = LD32(r12 + 0x2B4);
+                    ST32(0x10B4 + r10, r4);
+                    r0 = GCALL8(0x0601CC78, r4, 128, 0, r7, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+                    r8 = r0;
+                    r0 = LD32(sp - 36);
+                    ST32(0x10B8 + r10, ((0x2B0 + r0) + r10));
+                    r1 = LD32(r12 + 0x2B8);
+                    ST32(r13, r1);
+                    r0 = r11;
+                    r7 = LD16(r0 + 0xEB2);
+                    r6 = LD16(r0 + 0xEB0);
+                    r1 = LD32(0x10B4 + r10);
+                    ST32((sp - 68), r1);
+                    r1 = LD32(0x10B8 + r10);
+                    ST32((sp - 72), r1);
+                    r1 = LD32(r10 + 32);
+                    ST32((sp - 76), r1);
+                    r1 = LD32(r10 + 12);
+                    ST32((sp - 80), r1);
+                    r1 = LD32(r10 + 8);
+                    ST32((sp - 84), r1);
+                    r5 = LD32(sp - 52);
+                    r0 = GCALL8(0x06014880, r10, r5, r6, (r7 - 1), LD32((sp - 84)), LD32((sp - 80)), LD32((sp - 76)), LD32((sp - 72)));
+                    r7 = r0;
+                    r2 = LD32(r13);
+                    c18 = (r2 & r2) == 0;
+                    c1045 = c18;
+                    if (!(c18)) {
+                        r1 = LD32(r10 + 8);
+                        ST16((r2 + 4), r1);
+                        r2 = LD32(r10 + 12);
+                        r1 = LD32(r10 + 32);
+                        r2 = r2 + r1;
+                        r1 = LD32(r8 + 32);
+                        r3 = LD32(r13);
+                        ST32(r3 + 16, (r2 - r1));
+                        r1 = LD32(r13);
+                        ST16((r1 + 6), r7);
+                        r1 = LD32(r8 + 36);
+                        r2 = LD32(r13);
+                        ST32(r2 + 20, (r1 - 1));
+                        c1045 = 0;
+                    }
+                    r0 = LD32(sp - 36);
+                }
+                r12 = r12 + 12;
+                ST32(sp - 36, (r0 + 12));
+                r1 = LD32(r10 + 8);
+                ST32(r10 + 8, (r1 + r7));
+                r1 = LD32(r10 + 56);
+                r9 = r9 + 1;
+                r11 = r11 + 2;
+                if (r9 >= r1) {
+                    break;
+                }
+                POLL();
+            }
+            r1 = LD32((r10 + 64));
+            r7 = LD32(r10 + 36);
+            r2 = LD32(r10 + 32);
+            ST32(r10 + 8, r1);
+            if (!(r7 >= r2)) {
+                r1 = LD32(r10 + 12);
+                ST32(r10 + 12, (r1 + r2));
+            } else {
+                r1 = LD32(r10 + 12);
+                ST32(r10 + 12, (r1 + r7));
+            }
+        } else {
+            r1 = LD32((r1 + 64));
+            ST32(r10 + 8, r1);
+        }
+    } else {
+        r1 = r10;
+        if (c3) {
+            r1 = LD32(r10 + 48);
+            c4 = r1 > 0;
+            r1 = r10;
+            if (c4) {
+                r3 = LD32((r1 + 68));
+                r1 = LD32((r10 + 64));
+                r2 = r3 - r1;
+                r1 = LD32((r10 + 104));
+                c6 = r1 > r7;
+                if (r1 == 1) {
+                    r1 = LD32(r10 + 52);
+                    r2 = (r2 - r1) + ((int)((unsigned)(r2 - r1) >> 31));
+                    r1 = LD32(r10 + 8);
+                    r2 = r2 >> 1;
+                    r1 = r1 + r2;
+                    c10 = r1 >= 0;
+                    ST32(r10 + 8, r1);
+                    c1019 = c10;
+                    if (!(c10)) {
+                        ST32(r10 + 8, 0);
+                        c1019 = 0;
+                    }
+                    r9 = 0;
+                    c1020 = c1019;
+                    r13 = r10;
+                    c1021 = c1020;
+                } else {
+                    r9 = 0;
+                    c1020 = c6;
+                    if (!(c6)) {
+                        r13 = r10;
+                        c1021 = c1020;
+                    } else {
+                        r13 = r10;
+                        if (r1 == 2) {
+                            r1 = LD32(r10 + 52);
+                            r2 = r2 - r1;
+                            r1 = LD32(r10 + 8);
+                            r1 = r1 + r2;
+                            c10 = r1 >= 0;
+                            ST32(r10 + 8, r1);
+                            c1019 = c10;
+                            if (!(c10)) {
+                                ST32(r10 + 8, 0);
+                                c1019 = 0;
+                            }
+                            r9 = 0;
+                            c1020 = c1019;
+                            r13 = r10;
+                            c1021 = c1020;
+                        } else {
+                            c1021 = 0;
+                        }
+                    }
+                }
+                r13 = r13 + 88;
+                ST32(sp - 36, 0);
+                r12 = r10;
+                r11 = r10;
+                while (1) {
+                    r0 = r11;
+                    if ((r14 & r14) == 0) {
+                        r1 = LD16(r0 + 0xEB0);
+                        r0 = LD32(sp - 52);
+                        r1 = LD8(r0 + r1);
+                        ST32(sp - 48, (r1 & 255));
+                    } else {
+                        r1 = LD16(r0 + 0xEB0);
+                        r0 = LD32(sp - 44);
+                        r1 = LD16(r0 + (r1 + r1));
+                        ST32(sp - 40, (r1 & 0xFFFF));
+                    }
+                    c12 = (r14 & r14) == 0;
+                    r8 = 1;
+                    c1027 = c12;
+                    if (c12) {
+                        r7 = 0;
+                        if (!(c1027)) {
+                            r8 = 0;
+                        } else {
+                            c1029 = (r14 & r14) == 0;
+                            r3 = 27;
+                            if (c1029) {
+                                r2 = LD32(sp - 48);
+                            } else {
+                                r3 = LD8((r3 + (sp - 64)));
+                                r2 = r3 & 255;
+                            }
+                            r2 = r2 - 1;
+                            r1 = r2;
+                            if ((unsigned)r2 > (unsigned)4) {
+                                r8 = 0;
+                                r7 = 0;
+                            } else {
+                                r1 = LD16(0x0601D67C + (r1 + r1));
+                                switch (r1) {
+                                case 10:
+                                    r0 = 0x0601D1F4;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 18:
+                                    r0 = 0x0601D390;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 26:
+                                    r0 = 0x0601D3B8;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 34:
+                                    r0 = 0x0601D3E0;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 42:
+                                    r5 = LD16(0x2B0 + r12);
+                                    r4 = r10;
+                                    r0 = 0x0601D898;
+                                    break;
+                                }
+                                r0 = GCALL8(r0, r4, r5, 0, r7, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+                                r7 = r0;
+                            }
+                        }
+                    } else {
+                        r2 = LD32(sp - 40);
+                        c14 = (r14 & r14) == 0;
+                        c1029 = c14;
+                        c1027 = c14;
+                        if (((int)((unsigned)r2 >> 8)) == 128) {
+                            r3 = 27;
+                            if (c1029) {
+                                r2 = LD32(sp - 48);
+                            } else {
+                                r3 = LD8((r3 + (sp - 64)));
+                                r2 = r3 & 255;
+                            }
+                            r2 = r2 - 1;
+                            r1 = r2;
+                            if ((unsigned)r2 > (unsigned)4) {
+                                r8 = 0;
+                                r7 = 0;
+                            } else {
+                                r1 = LD16(0x0601D67C + (r1 + r1));
+                                switch (r1) {
+                                case 10:
+                                    r0 = 0x0601D1F4;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 18:
+                                    r0 = 0x0601D390;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 26:
+                                    r0 = 0x0601D3B8;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 34:
+                                    r0 = 0x0601D3E0;
+                                    r5 = r9;
+                                    r4 = r10;
+                                    break;
+                                case 42:
+                                    r5 = LD16(0x2B0 + r12);
+                                    r4 = r10;
+                                    r0 = 0x0601D898;
+                                    break;
+                                }
+                                r0 = GCALL8(r0, r4, r5, 0, r7, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+                                r7 = r0;
+                            }
+                        } else {
+                            r7 = 0;
+                            if (!(c1027)) {
+                                r8 = 0;
+                            } else {
+                                c1029 = (r14 & r14) == 0;
+                                r3 = 27;
+                                if (c1029) {
+                                    r2 = LD32(sp - 48);
+                                } else {
+                                    r3 = LD8((r3 + (sp - 64)));
+                                    r2 = r3 & 255;
+                                }
+                                r2 = r2 - 1;
+                                r1 = r2;
+                                if ((unsigned)r2 > (unsigned)4) {
+                                    r8 = 0;
+                                    r7 = 0;
+                                } else {
+                                    r1 = LD16(0x0601D67C + (r1 + r1));
+                                    switch (r1) {
+                                    case 10:
+                                        r0 = 0x0601D1F4;
+                                        r5 = r9;
+                                        r4 = r10;
+                                        break;
+                                    case 18:
+                                        r0 = 0x0601D390;
+                                        r5 = r9;
+                                        r4 = r10;
+                                        break;
+                                    case 26:
+                                        r0 = 0x0601D3B8;
+                                        r5 = r9;
+                                        r4 = r10;
+                                        break;
+                                    case 34:
+                                        r0 = 0x0601D3E0;
+                                        r5 = r9;
+                                        r4 = r10;
+                                        break;
+                                    case 42:
+                                        r5 = LD16(0x2B0 + r12);
+                                        r4 = r10;
+                                        r0 = 0x0601D898;
+                                        break;
+                                    }
+                                    r0 = GCALL8(r0, r4, r5, 0, r7, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+                                    r7 = r0;
+                                }
+                            }
+                        }
+                    }
+                    r0 = LD32(sp - 36);
+                    if ((r8 & r8) == 0) {
+                        r4 = LD32(r12 + 0x2B4);
+                        ST32(0x10B4 + r10, r4);
+                        r0 = GCALL8(0x0601CC78, r4, 128, 0, r7, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+                        r8 = r0;
+                        r0 = LD32(sp - 36);
+                        ST32(0x10B8 + r10, ((0x2B0 + r0) + r10));
+                        r1 = LD32(r12 + 0x2B8);
+                        ST32(r13, r1);
+                        r0 = r11;
+                        r7 = LD16(r0 + 0xEB2);
+                        r6 = LD16(r0 + 0xEB0);
+                        r1 = LD32(0x10B4 + r10);
+                        ST32((sp - 68), r1);
+                        r1 = LD32(0x10B8 + r10);
+                        ST32((sp - 72), r1);
+                        r1 = LD32(r10 + 32);
+                        ST32((sp - 76), r1);
+                        r1 = LD32(r10 + 12);
+                        ST32((sp - 80), r1);
+                        r1 = LD32(r10 + 8);
+                        ST32((sp - 84), r1);
+                        r5 = LD32(sp - 52);
+                        r0 = GCALL8(0x06014880, r10, r5, r6, (r7 - 1), LD32((sp - 84)), LD32((sp - 80)), LD32((sp - 76)), LD32((sp - 72)));
+                        r7 = r0;
+                        r2 = LD32(r13);
+                        c18 = (r2 & r2) == 0;
+                        c1045 = c18;
+                        if (!(c18)) {
+                            r1 = LD32(r10 + 8);
+                            ST16((r2 + 4), r1);
+                            r2 = LD32(r10 + 12);
+                            r1 = LD32(r10 + 32);
+                            r2 = r2 + r1;
+                            r1 = LD32(r8 + 32);
+                            r3 = LD32(r13);
+                            ST32(r3 + 16, (r2 - r1));
+                            r1 = LD32(r13);
+                            ST16((r1 + 6), r7);
+                            r1 = LD32(r8 + 36);
+                            r2 = LD32(r13);
+                            ST32(r2 + 20, (r1 - 1));
+                            c1045 = 0;
+                        }
+                        r0 = LD32(sp - 36);
+                    }
+                    r12 = r12 + 12;
+                    ST32(sp - 36, (r0 + 12));
+                    r1 = LD32(r10 + 8);
+                    ST32(r10 + 8, (r1 + r7));
+                    r1 = LD32(r10 + 56);
+                    r9 = r9 + 1;
+                    r11 = r11 + 2;
+                    if (r9 >= r1) {
+                        break;
+                    }
+                    POLL();
+                }
+                r1 = LD32((r10 + 64));
+                r7 = LD32(r10 + 36);
+                r2 = LD32(r10 + 32);
+                ST32(r10 + 8, r1);
+                if (!(r7 >= r2)) {
+                    r1 = LD32(r10 + 12);
+                    ST32(r10 + 12, (r1 + r2));
+                } else {
+                    r1 = LD32(r10 + 12);
+                    ST32(r10 + 12, (r1 + r7));
+                }
+            } else {
+                r1 = LD32((r1 + 64));
+                ST32(r10 + 8, r1);
+            }
+        } else {
+            r1 = LD32((r1 + 64));
+            ST32(r10 + 8, r1);
+        }
+    }
+    r0 = r10;
+    r3 = LD32(sp - 56);
+    ST32((r10 + 88), r3);
+    ST8(r0 + 0x1B0, 0);
+    ST32(r10 + 48, 0);
+    ST32(r10 + 52, 0);
+    ST32(r10 + 56, 0);
+    r3 = LD32(sp - 64);
+    ST32(r0 + 0x10B4, r3);
+    r3 = LD32(sp - 60);
+    ST32(r0 + 0x10B8, r3);
+    r4 = LD32(r0 + 0x10B4);
+    r0 = GCALL8(0x0601CC78, r4, 128, 0, r7, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+    r1 = LD32(r0 + 32);
+    ST32(r10 + 32, r1);
+    ST32(r10 + 36, r1);
+    r5 = R(5);
+    r6 = R(6);
+    r7 = R(7);
+    r0 = GCALL8(0x0601D408, r10, 0, 0, 0, LD32((sp - 64)), LD32((sp - 60)), LD32((sp - 56)), LD32((sp - 52)));
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0601E504(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14;
+    FRAME(sp, 1088);
+
+    ST32(0x400 + (sp - 1088), r4);
+    ST32((0x404 + (sp - 1088)), r5);
+    ST32((0x408 + (sp - 1088)), r6);
+    ST32((0x40C + (sp - 1088)), r7);
+    r7 = 0;
+    r14 = 1;
+    ST32(0x410 + (sp - 1088), 0);
+    while (1) {
+        r0 = LD32((0x410 + (sp - 1088)));
+        r13 = LD32((0x404 + (sp - 1088)));
+        r1 = LD32(r0 + r13);
+        r6 = ((int)((unsigned)r1 >> 16)) & 255;
+        r4 = ((int)((unsigned)r1 >> 8)) & 255;
+        r10 = r1 & 255;
+        r8 = r6 + 15;
+        r5 = r4 + 15;
+        r9 = r10 + 15;
+        if ((unsigned)r8 > (unsigned)255) {
+            r8 = 255;
+        }
+        if ((unsigned)r5 > (unsigned)255) {
+            r5 = 255;
+        }
+        r1 = r6;
+        if ((unsigned)r9 > (unsigned)255) {
+            r9 = 255;
+        }
+        ST32((0x418 + (sp - 1088)), (3 & ((int)((unsigned)((int)((unsigned)r1 >> 2)) >> 1))));
+        ST32((0x41C + (sp - 1088)), (3 & ((int)((unsigned)((int)((unsigned)r4 >> 2)) >> 1))));
+        ST32((0x420 + (sp - 1088)), (3 & ((int)((unsigned)((int)((unsigned)r10 >> 2)) >> 2))));
+        r1 = LD32((0x418 + (sp - 1088)));
+        r2 = r6;
+        if (!((unsigned)(r1 - 1) > (unsigned)r14)) {
+            r2 = r8;
+        }
+        r1 = LD32((0x41C + (sp - 1088)));
+        ST32((0x414 + (sp - 1088)), r4);
+        if (!((unsigned)(r1 - 1) > (unsigned)r14)) {
+            ST32(0x414 + (sp - 1088), r5);
+        }
+        r1 = LD32((0x420 + (sp - 1088)));
+        r3 = r10;
+        if (!((unsigned)(r1 - 1) > (unsigned)r14)) {
+            r3 = r9;
+        }
+        r1 = 224 & r2;
+        r2 = LD32((0x414 + (sp - 1088)));
+        r3 = (((int)((unsigned)((int)((unsigned)((int)((unsigned)r3 >> 2)) >> 2)) >> 2)) & 3) | (r1 | (((int)((unsigned)((int)((unsigned)r2 >> 2)) >> 1)) & 28));
+        if ((r3 & r3) == 0) {
+            r3 = 4;
+        }
+        ST8((sp - 1088) + r7, r3);
+        r0 = LD32(0x418 + (sp - 1088));
+        r2 = r6;
+        if (r0 == 3) {
+            r2 = r8;
+        }
+        r0 = LD32(0x41C + (sp - 1088));
+        ST32((0x414 + (sp - 1088)), r4);
+        if (r0 == 3) {
+            ST32((0x414 + (sp - 1088)), r5);
+        }
+        r0 = LD32(0x420 + (sp - 1088));
+        r3 = r10;
+        if (r0 == 3) {
+            r3 = r9;
+        }
+        r1 = 224 & r2;
+        r2 = LD32((0x414 + (sp - 1088)));
+        r3 = (((int)((unsigned)((int)((unsigned)((int)((unsigned)r3 >> 2)) >> 2)) >> 2)) & 3) | (r1 | (((int)((unsigned)((int)((unsigned)r2 >> 2)) >> 1)) & 28));
+        if ((r3 & r3) == 0) {
+            r3 = 4;
+        }
+        ST8((0x100 + (sp - 1088)) + r7, r3);
+        r11 = 0x418;
+        ST8((0x200 + (sp - 1088)) + r7, r3);
+        r11 = LD32((r11 + (sp - 1088)));
+        r2 = r6;
+        if ((unsigned)r11 > (unsigned)r14) {
+            r2 = r8;
+        }
+        r12 = LD32((0x41C + (sp - 1088)));
+        ST32((0x414 + (sp - 1088)), r4);
+        if ((unsigned)r12 > (unsigned)r14) {
+            ST32(0x414 + (sp - 1088), r5);
+        }
+        r11 = LD32((0x420 + (sp - 1088)));
+        r3 = r10;
+        if ((unsigned)r11 > (unsigned)r14) {
+            r3 = r9;
+        }
+        r1 = 224 & r2;
+        r2 = LD32((0x414 + (sp - 1088)));
+        r3 = (r1 | (((int)((unsigned)((int)((unsigned)r2 >> 2)) >> 1)) & 28)) | (((int)((unsigned)((int)((unsigned)((int)((unsigned)r3 >> 2)) >> 2)) >> 2)) & 3);
+        if ((r3 & r3) == 0) {
+            r3 = 4;
+        }
+        ST8((0x300 + (sp - 1088)) + r7, r3);
+        r11 = LD32((0x44C + (sp - 1088)));
+        if (r7 == r11) {
+            r3 = 0;
+            r8 = 3;
+            r2 = sp - 1088;
+            r11 = 0;
+            do {
+                ST8(r2 + r7, r11);
+                r3 = r3 + 1;
+                r2 = r2 + 0x100;
+            } while (AGAIN(!(r3 > r8)));
+        }
+        r12 = 0x410 + (sp - 1088);
+        r13 = LD32(r12);
+        r7 = r7 + 1;
+        ST32(r12, (r13 + 4));
+        if (r7 > 255) {
+            break;
+        }
+        POLL();
+    }
+    r11 = LD32(0x40C + (sp - 1088));
+    r0 = LD32(0x448 + (sp - 1088));
+    r7 = LD32((0x40C + (sp - 1088)));
+    r8 = LD32((0x400 + (sp - 1088)));
+    r8 = r8 + (r11 * r0);
+    r1 = LD32((0x444 + (sp - 1088)));
+    r1 = r1 + r7;
+    r9 = r1;
+    if (!(r7 >= r1)) {
+        do {
+            r0 = 0x408 + (sp - 1088);
+            r3 = LD32(r0);
+            r1 = LD32((0x440 + (sp - 1088)));
+            r1 = r1 + r3;
+            r4 = 2 & r7;
+            if (!(r3 >= r1)) {
+                r6 = r1;
+                r5 = r3 + r8;
+                do {
+                    r1 = (((1 & r3) | r4) << 8) + (sp - 1088);
+                    r2 = LD8(r5);
+                    r3 = r3 + 1;
+                    r0 = r2 & 255;
+                    r1 = LD8(r0 + r1);
+                    ST8(r5, r1);
+                    r5 = r5 + 1;
+                } while (AGAIN(!(r3 >= r6)));
+            }
+            r12 = LD32((0x448 + (sp - 1088)));
+            r7 = r7 + 1;
+            r8 = r8 + r12;
+        } while (AGAIN(!(r7 >= r9)));
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0601F210(int r4, int r5)
+{
+    int r0, r1, r2, r6, r7, r8, r9, r10, r11, r12, r13, r14, c1, c5;
+    long long m0;
+    int v36;
+    int v40;
+
+    r11 = r4;
+    r12 = r5;
+    v40 = 0;
+    r14 = 0;
+    v36 = 0;
+    r13 = 0;
+    while (1) {
+        r2 = v36;
+        if ((r12 & r12) == 0) {
+            break;
+        } else {
+            r0 = GCALL6(0x06028410, 1, 0, 0, 0, v40, v36);
+            c1 = r11 * r12;
+            m0 = (unsigned)c1;
+            r9 = r0;
+            r1 = c1;
+            r4 = r9;
+            if (!((unsigned)r9 > (unsigned)r1)) {
+                r0 = GCALL6(0x060745A0, r4, r11, 0, 0, v40, v36);
+                m0 = (unsigned)(r0 * r11);
+            }
+            r9 = (int)m0;
+            c5 = (r13 & r13) == 0;
+            if ((unsigned)r9 >= (unsigned)r11) {
+                r0 = GCALL6(0x060279E0, 1, r9, -1, 1, v40, v36);
+                r10 = r0;
+                if ((r10 & r10) == 0) {
+                    POLL();
+                    continue;
+                } else {
+                    r13 = 0;
+                    r0 = GCALL6(0x060279E0, 0, 12, -1, 1, v40, v36);
+                    r8 = r0;
+                    r6 = 12;
+                    if ((r8 & r8) == 0) {
+                        r5 = R(5);
+                        r7 = R(7);
+                        r0 = GCALL6(0x06027F48, r10, r5, r6, 0, v40, v36);
+                        v36 = 1;
+                        POLL();
+                        r2 = v36;
+                        break;
+                    } else {
+                        r0 = GCALL6(0x0604B3F0, r8, 0, r6, 0, v40, v36);
+                        ST32(r8 + 4, r10);
+                        r0 = GCALL6(0x060745A0, r9, r11, 0, 0, v40, v36);
+                        ST32(r8 + 8, r0);
+                        ST32(r8, r13);
+                        if (!((r14 & r14) == 0)) {
+                            ST32(r14, r8);
+                        } else {
+                            v40 = r8;
+                        }
+                        r14 = r8;
+                        r1 = LD32(r14 + 8);
+                        r12 = r12 - r1;
+                        POLL();
+                        continue;
+                    }
+                }
+            } else {
+                r9 = r1;
+                if (!(c5)) {
+                    v36 = 1;
+                    POLL();
+                    r2 = v36;
+                    break;
+                } else {
+                    r13 = 1;
+                    r0 = GCALL6(0x060279E0, 1, r9, -1, 1, v40, v36);
+                    r10 = r0;
+                    if ((r10 & r10) == 0) {
+                        POLL();
+                        continue;
+                    } else {
+                        r13 = 0;
+                        r0 = GCALL6(0x060279E0, 0, 12, -1, 1, v40, v36);
+                        r8 = r0;
+                        r6 = 12;
+                        if ((r8 & r8) == 0) {
+                            r5 = R(5);
+                            r7 = R(7);
+                            r0 = GCALL6(0x06027F48, r10, r5, r6, 0, v40, v36);
+                            v36 = 1;
+                            POLL();
+                            r2 = v36;
+                            break;
+                        } else {
+                            r0 = GCALL6(0x0604B3F0, r8, 0, r6, 0, v40, v36);
+                            ST32(r8 + 4, r10);
+                            r0 = GCALL6(0x060745A0, r9, r11, 0, 0, v40, v36);
+                            ST32(r8 + 8, r0);
+                            ST32(r8, r13);
+                            if (!((r14 & r14) == 0)) {
+                                ST32(r14, r8);
+                            } else {
+                                v40 = r8;
+                            }
+                            r14 = r8;
+                            r1 = LD32(r14 + 8);
+                            r12 = r12 - r1;
+                        }
+                    }
+                }
+            }
+        }
+        POLL();
+    }
+    r0 = v40;
+    if (!((r2 & r2) == 0)) {
+        r5 = R(5);
+        r6 = R(6);
+        r7 = R(7);
+        r0 = GCALL6(0x0601F1D0, v40, 0, 0, 0, v40, v36);
+        r0 = 0;
+    }
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0601FBC4(int r4, int r5, int r6)
+{
+    int r0, r1, r2, r3, r7, r8, r9, r10, r11, r12, r13, r14, c2, c22, c1002;
+    int v32;
+    int v36;
+    int v40;
+    int v44;
+    int v48;
+
+    v48 = r4;
+    v44 = r5;
+    if (!((r6 & r6) == 0)) {
+        r14 = v44;
+        r7 = 0;
+        v40 = v48;
+        while (1) {
+            r1 = LD8((v40 + 56));
+            r4 = r1 & 255;
+            r6 = r4 + 15;
+            r1 = LD8((v40 + 57));
+            r8 = r1 & 255;
+            r1 = LD8((v40 + 58));
+            r5 = r8 + 15;
+            r10 = r1 & 255;
+            r9 = r10 + 15;
+            if ((unsigned)r6 > (unsigned)255) {
+                r6 = 255;
+            }
+            if ((unsigned)r5 > (unsigned)255) {
+                r5 = 255;
+            }
+            r1 = r4;
+            if ((unsigned)r9 > (unsigned)255) {
+                r9 = 255;
+            }
+            r11 = 3 & ((int)((unsigned)((int)((unsigned)r1 >> 2)) >> 1));
+            v32 = r11;
+            r12 = 3 & ((int)((unsigned)((int)((unsigned)r8 >> 2)) >> 1));
+            r13 = 3 & ((int)((unsigned)((int)((unsigned)r10 >> 2)) >> 2));
+            v36 = r4;
+            if (!((unsigned)(r11 - 1) > (unsigned)1)) {
+                v36 = r6;
+            }
+            r3 = r8;
+            if (!((unsigned)(r12 - 1) > (unsigned)1)) {
+                r3 = r5;
+            }
+            r2 = r10;
+            if (!((unsigned)(r13 - 1) > (unsigned)1)) {
+                r2 = r9;
+            }
+            r1 = ((224 & v36) | (((int)((unsigned)((int)((unsigned)r3 >> 2)) >> 1)) & 28)) | (((int)((unsigned)((int)((unsigned)((int)((unsigned)r2 >> 2)) >> 2)) >> 2)) & 3);
+            if ((r1 & r1) == 0) {
+                r1 = 4;
+            }
+            ST8(r14, r1);
+            v36 = r4;
+            if (v32 == 3) {
+                v36 = r6;
+            }
+            r3 = r8;
+            if (r12 == 3) {
+                r3 = r5;
+            }
+            r2 = r10;
+            if (r13 == 3) {
+                r2 = r9;
+            }
+            r1 = ((224 & v36) | (((int)((unsigned)((int)((unsigned)r3 >> 2)) >> 1)) & 28)) | (((int)((unsigned)((int)((unsigned)((int)((unsigned)r2 >> 2)) >> 2)) >> 2)) & 3);
+            if ((r1 & r1) == 0) {
+                r1 = 4;
+            }
+            r0 = r14;
+            ST8(r0 + 0x100, r1);
+            ST8(r0 + 0x200, r1);
+            v36 = r4;
+            if ((unsigned)v32 > (unsigned)1) {
+                v36 = r6;
+            }
+            r3 = r8;
+            if ((unsigned)r12 > (unsigned)1) {
+                r3 = r5;
+            }
+            r2 = r10;
+            if ((unsigned)r13 > (unsigned)1) {
+                r2 = r9;
+            }
+            r1 = ((224 & v36) | (((int)((unsigned)((int)((unsigned)r3 >> 2)) >> 1)) & 28)) | (((int)((unsigned)((int)((unsigned)((int)((unsigned)r2 >> 2)) >> 2)) >> 2)) & 3);
+            c22 = (r1 & r1) == 0;
+            if (c22) {
+                r1 = 4;
+            }
+            ST8(r14 + 0x300, r1);
+            r1 = LD16(v48 + 0x346);
+            if (r7 == r1) {
+                r6 = 0;
+                r3 = 3;
+                r2 = v44;
+                r11 = 0;
+                do {
+                    ST8(r2 + r7, r11);
+                    r6 = r6 + 1;
+                    r2 = r2 + 0x100;
+                } while (AGAIN(!(r6 > r3)));
+            }
+            r14 = r14 + 1;
+            r7 = r7 + 1;
+            r0 = v40 + 3;
+            v40 = r0;
+            if (r7 > 255) {
+                break;
+            }
+            POLL();
+        }
+    } else {
+        r7 = 0;
+        r2 = 255;
+        r3 = 3;
+        r5 = v44;
+        c1002 = 1;
+        do {
+            r6 = 0;
+            r0 = r5;
+            do {
+                ST8(r0 + r6, r6);
+                r6 = r6 + 1;
+            } while (AGAIN(!(r6 > r2)));
+            r7 = r7 + 1;
+            c2 = r7 > r3;
+            r5 = r5 + 0x100;
+            c1002 = c2;
+        } while (AGAIN(!(c2)));
+    }
+    return r0;
+}

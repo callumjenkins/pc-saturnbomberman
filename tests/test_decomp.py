@@ -71,8 +71,13 @@ def test_a_jump_through_a_register_loaded_from_memory_is_a_tail_call_with_the_ar
 
 
 def test_reading_a_register_nobody_set_is_refused():
-    with pytest.raises(lift.Unsupported, match="r9"):
-        lifted(encode("mov Rm,Rn", 0, 9), RTS, NOP)
+    with pytest.raises(lift.Unsupported, match="r3"):
+        lifted(encode("mov Rm,Rn", 0, 3), RTS, NOP)
+
+
+def test_reading_a_register_among_r8_to_r14_nobody_set_takes_the_callers_from_the_context():
+    code = lifted(encode("mov Rm,Rn", 0, 9), RTS, NOP)
+    assert "r9 = R(9);" in code
 
 
 def test_a_stack_local_is_a_variable_not_a_pointer():
@@ -453,3 +458,9 @@ def test_a_loop_entered_at_its_test_advances_time_where_the_test_branches_back_i
     blocks[3].polls = [2]
     lines = [line.strip() for line in structure.Structurer(blocks, 1).run()]
     assert lines.count("POLL();") == 1 and lines.index("POLL();") == lines.index("work;") - 1
+
+
+def test_a_shift_sets_t_to_the_bit_it_shifts_out_for_a_later_subc():
+    # shll r5 ; subc r4,r4 ; mov r4,r0 ; rts ; nop   (r4 = -T)
+    code = lifted(encode("shll Rn", 5), encode("subc Rm,Rn", 4, 4), encode("mov Rm,Rn", 0, 4), RTS, NOP)
+    assert "((unsigned)r5 >> 31)" in code

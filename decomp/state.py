@@ -499,14 +499,17 @@ def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
         value = st.get(m)
         st.put(n, const(-number(value)) if number(value) is not None else "(-%s)" % value)
     elif op in ("shll", "shal"):
-        st.put(n, op2(st.get(n), "<<", "1"))
-        st.flag = None
+        value = st.get(n)
+        st.set_flag(op2(unsigned(value), ">>", "31"))
+        st.put(n, op2(value, "<<", "1"))
     elif op == "shar":
-        st.put(n, op2(st.get(n), ">>", "1"))
-        st.flag = None
+        value = st.get(n)
+        st.set_flag(op2(value, "&", "1"))
+        st.put(n, op2(value, ">>", "1"))
     elif op == "shlr":
-        st.put(n, signed(op2(unsigned(st.get(n)), ">>", "1")))
-        st.flag = None
+        value = st.get(n)
+        st.set_flag(op2(value, "&", "1"))
+        st.put(n, signed(op2(unsigned(value), ">>", "1")))
     elif op in ("shll2", "shll8", "shll16"):
         st.put(n, op2(st.get(n), "<<", op[4:]))
     elif op in ("shlr2", "shlr8", "shlr16"):
@@ -577,6 +580,7 @@ def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
             st.macl = None
         else:
             st.macl = st.temp(product)
+            st.stmts.append(Stmt(MAC, "(unsigned)%s" % st.macl))      # for a `sts macl` in a later block
     elif op in ("stc", "sts") and fmt.split(" ")[1].split(",")[0] in _CONTROL:
         st.put(n, control(fmt.split(" ")[1].split(",")[0], st), pure=False)
     elif op == "sts" and fmt.startswith("sts macl") and st.macl is not None:

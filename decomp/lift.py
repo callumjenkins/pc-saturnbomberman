@@ -29,7 +29,7 @@ _CALLS = ("bsr", "jsr")
 TABLE_LOAD = re.compile(r"mov\.w @\(r0,r\d+\),r(\d+)$")     # the load of an entry of a jump table of words
 SAVED = 2000                            # variables from here hold a register of the caller while a call into the middle of a function borrows it
 MERGED = 1000                           # flag variables from here are made for a block entered with T in different variables
-MAX_ROUNDS = 12                         # times read_blocks reads every block again before it gives up
+MAX_ROUNDS = 60                         # times read_blocks reads every block again before it gives up
 
 
 class Stops(dict):
@@ -257,6 +257,8 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
             returns = False
             live_in, live_out = liveness(reads, returns)
         stray = sorted(v for v in live_in[entry] if not (v[0] == "r" and 4 <= int(v[1:]) <= 7))
+        inherited = [v for v in stray if v[0] == "r" and 8 <= int(v[1:]) <= 14]     # its caller's, which the context holds
+        stray = [v for v in stray if v not in inherited]
         if stray and attempt == 1:
             raise Unsupported("reads %s before writing it: a piece of a larger function, or a task entry" % ", ".join(stray))
         params = {int(v[1:]) for v in live_in[entry] if v[0] == "r" and 4 <= int(v[1:]) <= 7}
@@ -275,7 +277,8 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
         elif block.kind == "return":
             block.value = strip(read.term) or ("r0" if returns else "")
         blocks[at] = block
-    lines = [fold_frame(line) for line in structure.Structurer(blocks, entry).run()]
+    lines = ["%s = R(%s);" % (v, v[1:]) for v in inherited]
+    lines += [fold_frame(line) for line in structure.Structurer(blocks, entry).run()]
     if lines and lines[-1] == "return;":
         lines.pop()
     body = "\n".join(lines)
