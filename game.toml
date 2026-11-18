@@ -70,6 +70,34 @@ show = [["Stage {}", "stage_2", "world-stage"], ["{} pts", "score", "u32"], ["Li
         ["Hearts +{}", "objects+0x37", "u8?"], ["{}", "objects+0x70", "bits:01=Kick,02=Glove?"],
         ["{} dino", "dino_colours", "names:,Pink,Blue,Green,Yellow,Purple?", "objects+0x5E&08"]]
 
+# The XBAND client's call through a playtest room (--modem session), as a launcher steers a player to it and
+# tests/netlink.py plays it: the NetLink loader's choice of the client, then QuickLink's Wait, or a dial of "1"
+# on its keyboard. The game hangs up and starts the client again after each match, for the rematch.
+[online.classic]
+boot = ["1500:UP", "1530:", "1550:A", "1556:"]   # from power-on
+program = "XS"
+starts = 1559                                   # the VBlank the client first starts at
+netband_code = "109"                            # what the US disc's dial screen shows, patched for NetBand
+wait = ["741:A", "747:", "941:RIGHT", "947:", "971:A", "977:"]   # from each start of the client
+dial = ["741:A", "747:", "941:A", "947:", "1141:LEFT", "1147:", "1155:LEFT", "1161:", "1169:LEFT", "1175:",
+        "1183:LEFT", "1189:", "1197:LEFT", "1203:", "1211:LEFT", "1217:", "1225:LEFT", "1231:", "1239:LEFT",
+        "1245:", "1253:LEFT", "1259:", "1267:LEFT", "1273:", "1281:LEFT", "1287:", "1295:LEFT", "1301:",
+        "1309:A", "1315:", "1323:RIGHT", "1329:", "1337:RIGHT", "1343:", "1351:RIGHT", "1357:", "1365:RIGHT",
+        "1371:", "1379:RIGHT", "1385:", "1393:RIGHT", "1399:", "1407:RIGHT", "1413:", "1421:RIGHT", "1427:",
+        "1435:RIGHT", "1441:", "1449:RIGHT", "1455:", "1463:RIGHT", "1469:", "1477:RIGHT", "1483:",
+        "1491:DOWN", "1497:", "1505:DOWN", "1511:", "1519:DOWN", "1525:", "1553:A", "1559:"]
+# A client that finds its save after a match opens a chat on the call, which ends once the call is hung up, then shows
+# its menu on the last choice. Taken late, the first press comes 2000 VBlanks after the offer is taken.
+saved = "XBAND____01"
+saved_wait = ["700:", "2700:A", "2706:"]
+saved_dial = ["700:", "2700:A", "2706:", "2900:LEFT", "2906:", "2914:LEFT", "2920:", "2928:LEFT", "2934:",
+        "2942:LEFT", "2948:", "2956:LEFT", "2962:", "2970:LEFT", "2976:", "2984:LEFT", "2990:", "2998:LEFT",
+        "3004:", "3012:LEFT", "3018:", "3026:LEFT", "3032:", "3040:LEFT", "3046:", "3054:LEFT", "3060:",
+        "3068:A", "3074:", "3082:RIGHT", "3088:", "3096:RIGHT", "3102:", "3110:RIGHT", "3116:", "3124:RIGHT",
+        "3130:", "3138:RIGHT", "3144:", "3152:RIGHT", "3158:", "3166:RIGHT", "3172:", "3180:RIGHT", "3186:",
+        "3194:RIGHT", "3200:", "3208:RIGHT", "3214:", "3222:RIGHT", "3228:", "3236:RIGHT", "3242:",
+        "3250:DOWN", "3256:", "3264:DOWN", "3270:", "3278:DOWN", "3284:", "3312:A", "3318:"]
+
 [symbols]
 krnl_setjmp = 0x060061C4
 krnl_longjmp = 0x060061E6
@@ -136,7 +164,8 @@ random_index = 0x060BF4F4           # the 55-entry random generator's index; its
 # The score already checked for extra-life thresholds, a long per pad.
 awarded_score = 0x060C0FDC
 # H2H's connection state (06002FB8), as its entry at 06002F24 returned it at boot: 0 unless the NetLink's UART
-# passed the scratch-register test, then 1 for the answering side and 2 for the side that dialled.
+# passed the scratch-register test. A call made through the XBAND client leaves it 2 on both sides; only H2H's own
+# answer sets 1, and nothing reaches that yet.
 # Battles, the bonus game and the results take their online paths when it is not 0.
 link_mode = 0x060C0AA8
 lives = 0x060C063E                  # a byte: pad 1's lives left in Normal Game: 3 at its start, 0 while the last is played

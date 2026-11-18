@@ -71,6 +71,17 @@ def main(argv=None):
     sub.add_parser("prepare")
     pl = sub.add_parser("play")
     pl.add_argument("--launcher", action="store_true", help="choose the players, controls and display in a menu first")
+    online = pl.add_mutually_exclusive_group()
+    online.add_argument("--room", nargs="?", const="new", metavar="CODE",
+                    help="play the NetLink battle through a playtest room: make one, or join CODE "
+                         "(SATURN_PLAYTEST_TOKEN or SATURN_PLAYTEST_TESTER names the tester)")
+    pl.add_argument("--sync", nargs="?", type=int, const=0, metavar="PLAYERS",
+                    help="with --room: one game for everyone in the room instead of the NetLink battle, which a new "
+                         "room's maker starts with Start, or which starts once PLAYERS are in")
+    pl.add_argument("--watch", action="store_true", help="with --room CODE --sync: watch the game, with no pad")
+    online.add_argument("--netband", metavar="wait|match|IP",
+                    help="play the NetLink battle against a real Saturn through the NetBand tunnel: wait for its call, "
+                         "find it waiting through the dreampipe.net match service, or call its address")
     rp = sub.add_parser("replay")
     rp.add_argument("session", nargs="?", default="latest")
     rp.add_argument("--video", action="store_true", help="record it as replay/video.mp4 in the session")
@@ -179,6 +190,11 @@ def main(argv=None):
     elif args.command == "play":
         prepare.check_prepared()
         run.build.ensure(run.GAME)
+        if args.room:
+            code = None if args.room == "new" else args.room.upper()
+            more = session.room_args(code, args.sync, args.watch) + more
+        elif args.netband:
+            more = run.GAME.classic.netband(args.netband) + more
         raise SystemExit(session.play(more, launcher=args.launcher))
     elif args.command == "replay":
         prepare.check_prepared()

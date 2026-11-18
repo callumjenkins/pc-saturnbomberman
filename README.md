@@ -76,6 +76,44 @@ is saved to `settings.ini` as it is made, so the next launch opens with the same
 session records the multitaps for `replay`. Rebinding takes one key or button per Saturn button;
 gamepads share one set. The disc is still `prepare`'s, as for every run.
 
+### Online
+
+`uv run bomberman play --room` plays the NetLink battle against another tester through a playtest
+room: it makes the room, shows its four-letter code in the window, and waits for the call.
+`uv run bomberman play --room CODE` joins that room and dials. Either way the runtime presses through
+the NetLink menus to the call (`[online.classic]` in `game.toml`), and after each match Start offers a
+rematch. `SATURN_PLAYTEST_TOKEN` or `SATURN_PLAYTEST_TESTER` says which tester you are, and both sides
+need the same build. `replay` plays such a session again from what its line heard, without the room.
+`uv run tests/netlink.py --room` checks a match, a rematch, and both replays through a room on this
+machine, under the playtest Worker's `wrangler dev`. With `--saved`, both sides start from a save the
+XBAND client has already written, as a returning player's is. A client back from a match finds its save either
+way and opens its chat on the held call, which taking the rematch hangs up.
+`uv run tests/netlink_sweep.py [SCENARIO...]` plays the classic scenarios that reach the kernel's online code a
+plain match leaves unrun: buttons pressed through the battle, a second match on one call, the Traditional link, and
+the practice game while waiting, with a call and without. Each checks the functions it has to reach, from its
+coverage. `--video` keeps each side's video.
+
+`uv run bomberman play --room --sync` plays one game with everyone in a new room, any mode, a pad each by default.
+The window shows the room's code and who is in, and Start begins the game once someone else has joined;
+`--sync 3` starts it by itself once three players are in. Every copy starts at power-on with the room maker's
+saves and the clock at 2000-01-01, so every copy runs the same machine. Only the maker's copy writes its saves
+back. `uv run bomberman play --room CODE --sync` joins it, and with `--watch` watches it without a pad; the game
+still waits for a watcher's connection as it does for a player's. A press applies 1 to 4 frames
+after it is made, depending on the slowest player's round trip. Until the other players' presses arrive, each copy
+guesses they are still holding what they held, up to 8 frames ahead, and when a guess was wrong it goes back and
+runs those frames again. The sound plays only once no guess can change it, so it can trail the picture by a few
+frames. A player who leaves has their pads go idle, and if two copies' work RAM ever differs, the shared game ends
+with the VBlank it was found at.
+`uv run tests/sync.py` checks two and three copies, on guesses and in lockstep, two copies whose messages take
+60 ms, a lost copy, a stray write, a late joiner, and a game started with Start, under `wrangler dev`.
+
+`uv run bomberman play --netband wait|match|IP` plays a real Saturn, or anyone else using SegaRPGFan's
+NetBand tunnel. `wait` waits for a call; `IP` calls that address directly, on TCP 65432 and UDP
+20001-20002; `match` finds a game waiting on the dreampipe.net match service under
+`[online.classic] netband_code`, 109 for the US disc.
+The Saturn on the other end needs the NetLink patches its players use, and their effect on the match
+is unchecked.
+
 The port supports one disc: Saturn Bomberman (USA), MK-81070 V1.003. `disc.json` lists every
 file on it with its size and SHA-1, and `prepare` stops before extracting anything if a file
 differs, is missing or is extra, naming each one. The check reads the disc's contents rather than
@@ -119,7 +157,8 @@ reference comparisons, and automation runs. `AGENTS.md` is the shared project en
     src/bomberman/         routes.py (the scripted runs as pad presses), run.py, prepare.py, the CLI
     src/bomberman/research/  one-off tools: stage maps from dumps, slot reel timing, the Yuna unlock
     inputs/                pad presses for the longer routes
-    tests/                 frames.py: every route replayed and its frames compared with frames.json
+    tests/                 frames.py: every route replayed and its frames compared with frames.json,
+                           dump_parity.py: machine dumps compared with another build's
     saturn-recomp/         the recompiler and runtime (submodule)
     iso/, build/           your disc and everything made from it (ignored)
 
@@ -247,8 +286,9 @@ counts as the same, since the sound's floating point rounds differently there; i
 `--saturn EXE` runs another executable as it is, without building, and `--expected FILE` compares with
 or records into that file, keeping its pictures beside it in `NAME.kept/`. Together they check a build for
 another platform against Linux's: record a Linux build of the same sources and options with
-`--update`, then run the other build against that file. `docs/PLATFORMS.md` says what each platform
-has passed.
+`--update`, then run the other build against that file. `tests/dump_parity.py` does the same with a dump of the
+whole machine near the end of `normal`, `battle-round`, `die` and `pause`, part by part.
+`docs/PLATFORMS.md` says what each platform has passed.
 
 ## Achievements
 
