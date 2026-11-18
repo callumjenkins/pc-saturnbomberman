@@ -54,6 +54,7 @@ FRAME_MAX = 0x400                # bytes of a function's stack check.py compares
 LONG_RUN_POLLS = 1_000_000        # polls after which a trial the game's code could not finish in the step limit is skipped, as one is when the host polled more than the game's code had by then: both are in a loop too long to compare
 CALLS_MAX = 2000                # calls a trial makes, answered or run, before it gives up, since an endless loop of them would fill memory
 MEMORY_GB = 6.0                 # address space a check may use, a little under the 8 GB farm run gives it; CHECK_MEM_GB overrides
+STEP_LIMIT = int(os.environ.get("CHECK_STEPS", "10000000"))   # interpreter steps the game's code gets before a trial counts as one it cannot finish
 STUBBED = 0.5                    # the share of trials in which the calls out of the function are answered without running them
 
 
@@ -68,7 +69,7 @@ class Counting(sh2emu.CPU):
     seen: set[tuple[int, bool]] | None = None     # (pc, taken) for each conditional branch of the called function's own code
     stub: list[int] | None = None                 # when set, a call out of the function's own code returns the next of these without running
 
-    def call(self, entry: int, max_steps: int = 10_000_000, **regs: int) -> int:
+    def call(self, entry: int, max_steps: int = STEP_LIMIT, **regs: int) -> int:
         self.code, self.outer = self._body(entry), []
         self.own = self.code
         self.entry_sp = regs.get("r15", self.r[15])
