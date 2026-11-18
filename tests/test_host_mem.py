@@ -94,6 +94,14 @@ def test_a_frame_lowers_the_games_stack_by_its_size_rounded_up_to_a_word_and_ret
     assert sp.value == 0x060FFF00
 
 
+def test_a_run_time_frame_sets_the_games_stack_to_its_base_less_its_size_wherever_the_stack_was(mem):
+    sp = ctypes.c_uint32.in_dll(mem, "g_sp")
+    sp.value = 0x060FFE00                       # lower than the base: the function's temporary pushes are below it
+    mem.g_alloca.restype = ctypes.c_uint32
+    mem.g_alloca.argtypes = [ctypes.c_uint32, ctypes.c_uint32]
+    assert (mem.g_alloca(0x060FFF00, 0x24), sp.value) == (0x060FFEDC, 0x060FFEDC)
+
+
 TOP = 0x060FFF00
 
 

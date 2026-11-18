@@ -12,6 +12,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass, field
+from typing import NamedTuple
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -23,8 +24,8 @@ import status  # noqa: E402
 import structure  # noqa: E402
 from returns import left_for_callers  # noqa: E402
 from saturnrecomp import sh2  # noqa: E402
-from state import (LOCAL_TYPES, MAC, NO_FLAG, VAR, Copies, State, Stmt, Unsupported, const, fold_frame, framed,  # noqa: E402
-                   number, restored, sp_change, step, strip, track)
+from state import (LOCAL_TYPES, MAC, NO_FLAG, VAR, Copies, State, Stmt, Unsupported, const, copy_move, fold_frame, framed,  # noqa: E402
+                   is_run_time_frame, loads_r15, number, restored, sp_change, step, strip, track)
 
 _CALLS = ("bsr", "jsr")
 TABLE_LOAD = re.compile(r"mov\.w @\(r0,r\d+\),r(\d+)$")     # the load of an entry of a jump table of words
@@ -33,12 +34,27 @@ MERGED = 1000                           # flag variables from here are made for 
 MAX_ROUNDS = 60                         # times read_blocks reads every block again before it gives up
 
 
-class Stops(dict):
-    """r15's offset at each leader, and in `copies` the registers that hold r15 at one offset throughout."""
+class Walked(NamedTuple):
+    """What `walk` finds: `offsets`, r15's offset at each leader; `lowest` offset r15 has at any instruction; the
+    offsets at the `tails`, the jumps out of the function; the `copies`, registers that hold r15 at one offset
+    throughout; `adjusts`, how far each of those has moved at each leader; and `run_time`, the leaders where r15 is
+    below a frame whose size the function works out as it runs, with its offset before the frame."""
+    offsets: dict[int, int]
+    lowest: int
+    tails: set[int]
+    copies: dict[int, int]
+    adjusts: dict[int, dict[int, int]]
+    run_time: dict[int, int]
 
-    def __init__(self, offsets: dict[int, int], copies: dict[int, int]) -> None:
-        super().__init__(offsets)
-        self.copies = copies
+
+class Stops(dict):
+    """r15's offset at each leader, and what `walk` found about the copies of it and the run-time frames."""
+
+    def __init__(self, walked: Walked) -> None:
+        super().__init__(walked.offsets)
+        self.copies = walked.copies
+        self.adjusts = walked.adjusts
+        self.run_time = walked.run_time
 
 
 @dataclass
@@ -111,7 +127,7 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         while args and not args[-1]:
             args.pop()
         args = [a or "0" for a in args]
-    extra = stack_arguments(st) if not tail and not st.parked else []   # a parked function's are in its frame already
+    extra = stack_arguments(st) if not tail and not st.parked and st.run_time is None else []   # a parked function's are in its frame already
     if extra:
         for r in sorted(reads or ()):
             if r > 3 + len(args):
@@ -158,54 +174,79 @@ def spill(ins: "sh2.Insn", st: State, image: "sh2.Image", functions: dict[int, s
 def leaders(image: "sh2.Image", entry: int, code: set[int] | None = None, parked: bool = False) -> Stops:
     """Entry plus every branch target and instruction that follows a branch, with r15's offset at each. A parked
     function may leave with its frame still down, by a jump to code that pops it."""
-    found, _, _, copies = walk(image, entry, code, parked)
-    return Stops(found, copies)
+    return Stops(walk(image, entry, code, parked))
 
 
 def frame_depth(image: "sh2.Image", entry: int, code: set[int] | None = None) -> int:
     """How many bytes below its entry the function's own pushes and stack adjustments take r15 at the lowest."""
-    return -walk(image, entry, code, True)[1]
+    return -walk(image, entry, code, True).lowest
 
 
 def tail_offsets(image: "sh2.Image", entry: int, code: set[int] | None = None) -> set[int]:
     """r15's offset from its entry value at each jump the function makes to code outside it."""
-    return walk(image, entry, code, True)[2]
+    return walk(image, entry, code, True).tails
 
 
-def walk(image: "sh2.Image", entry: int, code: set[int] | None,
-         parked: bool) -> tuple[dict[int, int], int, set[int], dict[int, int]]:
-    """`leaders`, the lowest offset r15 has at any instruction, its offsets at the jumps out of the function, and the
-    registers that copy it. A `mov Rm,r15` of a copy sets it back to the offset the copy was made at."""
+def walk(image: "sh2.Image", entry: int, code: set[int] | None, parked: bool,
+         spoiled: frozenset[int] = frozenset()) -> Walked:
+    """The leaders of the function and what else its r15 does. A `mov Rm,r15` of a copy sets r15 back to the offset
+    the copy was made at, plus that move, and ends a frame of a run-time size. A register moved by different
+    amounts on two paths to a leader is no copy, and the walk starts again without it, so that nothing it read
+    earlier used it."""
     found = {entry: 0}
+    run_time: dict[int, int] = {}
+    moved: dict[int, dict[int, int]] = {entry: {}}
     tables = status.jump_targets()
-    copies = Copies()
+    copies = Copies(spoiled)
     lowest = 0
     tails: set[int] = set()
-    seen: set[int] = set()
-    work = [(entry, 0)]
+    # r15, how far the copies have moved, and the base of a run-time frame, at each instruction a path has reached
+    states: dict[int, tuple[int, dict[int, int], int | None]] = {}
+    work = [(entry, 0, {}, None)]
 
-    def reach(target: int, sp: int) -> None:
-        if found.setdefault(target, sp) != sp:
-            raise Unsupported("the stack is %d bytes down on one path to %08X and %d on another"
-                              % (-found[target], target, -sp))
-        work.append((target, sp))
+    def reach(target: int, sp: int, base: int | None) -> None:
+        found.setdefault(target, sp)
+        moved.setdefault(target, dict(copies.adjust))
+        if base is not None:
+            run_time.setdefault(target, base)
+        work.append((target, sp, dict(copies.adjust), base))
+
+    def meet(at: int, sp: int, base: int | None) -> None:
+        """A second path to an instruction has to find r15 where the first did, and below a run-time frame or not. A
+        copy of r15 moved by another amount on it is no copy."""
+        was_sp, was_moves, was_base = states[at]
+        if was_sp != sp:
+            raise Unsupported("the stack is %d bytes down on one path to %08X and %d on another" % (-was_sp, at, -sp))
+        if was_base != base:
+            raise Unsupported("r15 is below a frame of a run-time size on one path to %08X and not on another" % at)
+        copies.spoiled |= {r for r in was_moves.keys() | copies.adjust.keys() if was_moves.get(r, 0) != copies.adjust.get(r, 0)}
 
     while work:
-        at, sp = work.pop()
+        at, sp, copies.adjust, base = work.pop()
         known: dict[int, int] = {}
-        while at not in seen and image.contains(at):
-            seen.add(at)
+        while image.contains(at):
+            if at in states:
+                meet(at, sp, base)
+                break
+            states[at] = (sp, dict(copies.adjust), base)
             ins = image.insn(at)
             slot = image.insn(at + 2) if ins.delay else None
             nxt = at + (4 if slot else 2)
             if ins.op in ("braf", "bsrf", "rte", "trapa", "sleep") or ins.op == ".word":
                 raise Unsupported("%s at %08X" % (ins.text, at))
             for each in (ins, slot) if slot else (ins,):
-                copies.note(each, sp)
-                restore = restored(each, copies.at, copies.adjust)
+                copies.note(each, sp, known, base is not None)
+                restore = restored(each, copies.kept(), copies.adjust)
                 if restore is not None:
-                    copies.adjust.pop(each.m, None)
-                sp = sp + sp_change(each, known) if restore is None else restore
+                    sp, base = restore, None
+                elif base is not None and loads_r15(each):
+                    sp, base = base, None
+                elif is_run_time_frame(each, known):
+                    base = sp if base is None else base
+                elif base is not None and 15 in registers.defs(each):
+                    raise Unsupported("moves r15 below a frame of a run-time size at %08X" % at)
+                else:
+                    sp += sp_change(each, known)
             track(ins, known, image)
             lowest = min(lowest, sp)
             leaves = code is not None and ins.target is not None and ins.target not in code
@@ -213,15 +254,17 @@ def walk(image: "sh2.Image", entry: int, code: set[int] | None,
                 raise Unsupported("a conditional branch out of the function at %08X" % at)
             if ins.op in ("bt", "bf", "bt/s", "bf/s", "bra") and not leaves:
                 for target in ([ins.target] if ins.op == "bra" else [ins.target, nxt]):
-                    reach(target, sp)
+                    reach(target, sp, base)
                 break
             if ins.op == "jmp" and at in tables:
                 if code is not None and (not set(tables[at]) <= code or set(tables[at]) & set(status.function_code())):
                     raise Unsupported("a jump table at %08X to code the game's build enters as functions" % at)
                 for target in dict.fromkeys(tables[at]):
-                    reach(target, sp)
+                    reach(target, sp, base)
                 break
             if ins.op in ("rts", "jmp") or leaves and ins.op == "bra":
+                if base is not None:
+                    raise Unsupported("leaves below a frame of a run-time size at %08X" % at)
                 if sp and not (parked and ins.op != "rts"):
                     raise Unsupported("returns with the stack %d bytes off at %08X: a piece of a larger function"
                                       % (sp, at))
@@ -229,8 +272,9 @@ def walk(image: "sh2.Image", entry: int, code: set[int] | None,
                     tails.add(sp)
                 break
             at = nxt
-        copies.end()
-    return found, lowest, tails, copies.kept()
+    if copies.spoiled != spoiled:
+        return walk(image, entry, code, parked, frozenset(copies.spoiled))
+    return Walked(found, lowest, tails, copies.kept(), moved, run_time)
 
 
 def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions: dict[int, set[int]] | None = None,
@@ -280,7 +324,11 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
             block.value = strip(read.term) or ("r0" if returns else "")
         blocks[at] = block
     lines = ["%s = R(%s);" % (v, v[1:]) for v in inherited]
-    lines += [fold_frame(line) for line in structure.Structurer(blocks, entry).run()]
+    try:
+        written = structure.Structurer(blocks, entry).run()
+    except structure.Unstructured:
+        written = structure.flat(blocks, entry)
+    lines += [fold_frame(line) for line in written]
     if lines and lines[-1] == "return;":
         lines.pop()
     body = "\n".join(lines)
@@ -299,15 +347,16 @@ def frame_size(image: "sh2.Image", stops: Stops) -> int:
     low = 0
     for at, sp in stops.items():
         known: dict[int, int] = {}
-        adjust: dict[int, int] = {}
+        adjust = dict(stops.adjusts[at])
         while True:
             ins = image.insn(at)
             slot = image.insn(at + 2) if ins.delay else None
             for each in (ins, slot) if slot else (ins,):
                 restore = restored(each, stops.copies, adjust)
                 sp = sp + sp_change(each, known) if restore is None else restore
-                if each.op == "add" and each.imm is not None and each.n in stops.copies:
-                    adjust[each.n] = adjust.get(each.n, 0) + each.imm
+                move = copy_move(each, known)
+                if move and move[0] in stops.copies:
+                    adjust[move[0]] = adjust.get(move[0], 0) + move[1]
             track(ins, known, image)
             low = min(low, sp)
             at += 4 if slot else 2
@@ -347,7 +396,7 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
                stored: set[int] | None = None, saved: set[int] | None = None, parked: bool = False,
                clobbered: set[int] = frozenset(), flag: str | None = None,
                merged: dict[int, str] | None = None, gives: tuple[int, ...] = ()) -> tuple[Read, int]:
-    st = State(flags=flags, sp=stops[start], copies=stops.copies, slots=slots, fresh=set(fresh), framed=framed, parked=parked,
+    st = State(flags=flags, sp=stops[start], copies=stops.copies, adjust=dict(stops.adjusts[start]), run_time=stops.run_time.get(start), slots=slots, fresh=set(fresh), framed=framed, parked=parked,
                clobbered=set(clobbered), flag=flag,
                touched=registers.written(image, code) if code is not None else frozenset(range(8, 15)),
                stored=stored if stored is not None else set(), saved=saved if saved is not None else set())

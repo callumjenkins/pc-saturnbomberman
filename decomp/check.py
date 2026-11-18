@@ -258,9 +258,12 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
             return 0
         regs = (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")
         at = ctypes.c_uint32.in_dll(lib, "g_sp").value - 4 * max(n - 4, 0)         # r15 as the callee gets it
+        try:
+            frame = [cpu.rl(a) for a in range(at, min(state.get("entry_sp", at), at + FRAME_MAX), 4)]
+        except sh2emu.MemoryError_:                 # r15 is outside the memory the check models, so a callee that runs faults
+            frame = []
         state.setdefault("snaps", []).append(
-            (list(regs[8:15]), at, [cpu.rl(a) for a in range(at, min(state.get("entry_sp", at), at + FRAME_MAX), 4)],
-             ctypes.c_uint32.in_dll(lib, "g_pr_value").value))
+            (list(regs[8:15]), at, frame, ctypes.c_uint32.in_dll(lib, "g_pr_value").value))
         if state.get("stub"):
             state["stubbed"].append((addr, list(args[:max(min(n, 4), 0)]), n))
             state["calls"].append(addr)

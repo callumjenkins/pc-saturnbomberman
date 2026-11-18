@@ -67,9 +67,10 @@ class State:
     stored: set[int] = field(default_factory=set)   # offsets from r15 on entry stored to anywhere in the function
     saved: set[int] = field(default_factory=set)    # r8 to r14 the function's prologue has pushed
     sp_set: str = ""                        # the SETSP the block last wrote, which a call after it need not repeat
+    run_time: int | None = None             # r15 is the variable `r15`, below a frame of a run-time size: its offset before it
 
     def get(self, reg: int) -> str:
-        if reg == 15 and self.framed:
+        if reg == 15 and self.framed and self.run_time is None:
             return framed(self.sp)
         return self._get(reg)
 
@@ -176,6 +177,13 @@ def const(value: int) -> str:
 def frame(ins: "sh2.Insn", st: State) -> bool:
     """Handles an instruction that uses r15 as the frame: saves and restores, and the function's locals."""
     op, fmt, n, m = ins.op, ins.fmt, ins.n, ins.m
+    ends_run_time_frame = restored(ins, st.copies, st.adjust) is not None or loads_r15(ins)
+    if st.run_time is not None and 15 in registers.defs(ins) and not (ends_run_time_frame or is_run_time_frame(ins, st.known)):
+        raise Unsupported("moves r15 below a frame of a run-time size at %08X" % ins.pc)
+    if st.run_time is not None and loads_r15(ins):
+        st.sp, st.run_time = st.run_time, None
+        st.effect("SETSP(%s);" % framed(st.sp))
+        return True
     if op == "add" and n == 15 and ins.imm is not None:
         st.sp += ins.imm
         moved(st)
@@ -184,9 +192,25 @@ def frame(ins: "sh2.Insn", st: State) -> bool:
         st.sp += st.known[m]
         moved(st)
         return True
+    if op == "sub" and fmt == "sub Rm,Rn" and n == 15 and m in st.known:
+        st.sp -= st.known[m]
+        moved(st)
+        return True
+    if is_run_time_frame(ins, st.known):
+        if st.parked:
+            raise Unsupported("a frame of a run-time size in a function a task can park in at %08X" % ins.pc)
+        if not st.framed:
+            raise Unsupported("takes the address of a local or moves r15 at %08X" % ins.pc)
+        st.put(15, "ALLOCA(%s, %s)" % (strip(st.get(15)), strip(st.get(m))), False)
+        if st.run_time is None:
+            st.run_time = st.sp
+        return True
     restore = restored(ins, st.copies, st.adjust)
     if restore is not None:
         st.sp = restore
+        if st.run_time is not None:
+            st.run_time = None
+            st.effect("SETSP(%s);" % framed(restore))
         moved(st)
         return True
     if st.parked and parked_frame(ins, st):
@@ -230,7 +254,7 @@ def frame(ins: "sh2.Insn", st: State) -> bool:
         return True
     if op.startswith("mov.") and "@" in fmt:
         source, dest = operands(fmt)
-        if dest.startswith("@") and n == 15 and dest in ("@Rn", "@(disp,Rn)"):
+        if dest.startswith("@") and n == 15 and dest in ("@Rn", "@(disp,Rn)") and st.run_time is None:
             st.stored.add(st.sp + (ins.disp or 0))
     if op.startswith("mov.") and "@" in fmt and not st.framed:
         size = _SIZES[op[-1]]
@@ -400,37 +424,61 @@ def sp_change(ins: "sh2.Insn", known: dict[int, int] | None = None) -> int:
         return ins.imm
     if ins.op == "add" and ins.n == 15 and known and ins.m in known:
         return known[ins.m]
+    if ins.op == "sub" and ins.n == 15 and known and ins.m in known:
+        return -known[ins.m]
     return 0
+
+
+def loads_r15(ins: "sh2.Insn") -> bool:
+    """`mov.l @...,r15`: a function that kept r15 in its frame before it lowered it by a run-time size takes it back."""
+    return ins.op == "mov.l" and ins.n == 15 and ins.fmt.split(",")[0].split(" ")[1].startswith("@")
+
+
+def is_run_time_frame(ins: "sh2.Insn", known: dict[int, int]) -> bool:
+    """`sub Rm,r15` of a size the function works out as it runs, which makes r15 a value the lifter cannot count."""
+    return ins.op == "sub" and ins.fmt == "sub Rm,Rn" and ins.n == 15 and ins.m not in known
 
 
 class Copies:
     """The registers a function sets to r15 with `mov r15,Rn`, and the offset from its entry value that r15 had.
     A register whose copy any other instruction overwrites, or that copies r15 at two offsets, is not kept.
-    A pop is no overwrite: it gives the register back to the caller. An `add #imm,Rn` moves the copy within a
-    straight run, which `adjust` holds, and the run has to restore r15 from it before it ends.
+    A pop is no overwrite: it gives the register back to the caller. An `add #imm,Rn` moves the copy, which `adjust`
+    holds for the path being walked, and `mov Rn,r15` sets r15 to where the copy was made plus that move.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, spoiled: frozenset[int] = frozenset()) -> None:
         self.at: dict[int, int] = {}
-        self.spoiled: set[int] = set()
+        self.spoiled = set(spoiled)
         self.adjust: dict[int, int] = {}
 
-    def end(self) -> None:
-        """A run ended with a copy moved and not restored from, so the copy's other blocks cannot count on it."""
-        self.spoiled |= self.adjust.keys()
-        self.adjust = {}
-
-    def note(self, ins: "sh2.Insn", sp: int) -> None:
+    def note(self, ins: "sh2.Insn", sp: int, known: dict[int, int], dynamic: bool) -> None:
+        move = copy_move(ins, known)
         if ins.op == "mov" and ins.fmt == "mov Rm,Rn" and ins.m == 15 and ins.n != 15:
-            if self.at.setdefault(ins.n, sp) != sp:
+            if dynamic or self.at.setdefault(ins.n, sp) != sp:
                 self.spoiled.add(ins.n)
-        elif ins.op == "add" and ins.imm is not None and ins.n in self.at:
-            self.adjust[ins.n] = self.adjust.get(ins.n, 0) + ins.imm
+        elif move and move[0] in self.at:
+            self.adjust[move[0]] = self.adjust.get(move[0], 0) + move[1]
+            self.spoiled |= registers.defs(ins) - {move[0]}
         elif not (ins.op == "mov.l" and ins.m == 15 and "@Rm+" in ins.fmt):
             self.spoiled |= registers.defs(ins)
 
     def kept(self) -> dict[int, int]:
         return {reg: sp for reg, sp in self.at.items() if reg not in self.spoiled}
+
+
+def copy_move(ins: "sh2.Insn", known: dict[int, int]) -> tuple[int, int] | None:
+    """The register an instruction moves by a number it knows, and by how much: an `add`, or a load or store that
+    steps the pointer it goes through. `known` holds the registers a straight run has set to a number."""
+    if ins.op == "add" and ins.imm is not None:
+        return ins.n, ins.imm
+    if ins.op == "add" and ins.fmt == "add Rm,Rn" and ins.m in known:
+        return ins.n, known[ins.m]
+    size = _SIZES.get(ins.op[-1]) if ins.op.startswith("mov.") else None
+    if size and "@Rm+" in ins.fmt and ins.n != ins.m:
+        return ins.m, size
+    if size and "@-Rn" in ins.fmt:
+        return ins.n, -size
+    return None
 
 
 def restored(ins: "sh2.Insn", copies: dict[int, int], adjust: dict[int, int]) -> int | None:
@@ -460,8 +508,9 @@ def track(ins: "sh2.Insn", known: dict[int, int], image: "sh2.Image") -> None:
 
 def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
     op, fmt, n, m = ins.op, ins.fmt, ins.n, ins.m
-    if op == "add" and ins.imm is not None and n in st.copies:
-        st.adjust[n] = st.adjust.get(n, 0) + ins.imm
+    move = copy_move(ins, st.known)
+    if move and move[0] in st.copies:
+        st.adjust[move[0]] = st.adjust.get(move[0], 0) + move[1]
     if n == 15 or m == 15 or "r15" in fmt:
         if frame(ins, st):
             return

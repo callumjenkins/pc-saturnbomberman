@@ -133,6 +133,12 @@ uint32_t g_frame(int size)
     return top;
 }
 
+uint32_t g_alloca(uint32_t from, uint32_t size)
+{
+    g_cur->r[15] = from - size;
+    return g_cur->r[15];
+}
+
 void g_unframe(uint32_t top)
 {
     g_cur->r[15] = top;

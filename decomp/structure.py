@@ -1,7 +1,7 @@
 """Turns a control-flow graph of basic blocks into C with if, while, break and continue.
 
 A block is a Block: statements, then a terminator. The graph must reduce to those constructs; anything
-else raises Unstructured, and the function stays for a person to write.
+else raises Unstructured, and `flat` writes it as blocks with gotos.
 """
 from dataclasses import dataclass, field
 
@@ -285,3 +285,41 @@ class Structurer:
             return ["do {"] + ["    " + line for line in polled(inner[:-5])] + ["} while (AGAIN(%s));" % condition]
         # A block that returns has no successors, so it is never in a loop body: every pass goes round again.
         return [head] + ["    " + line for line in polled(inner + ["POLL();"])] + ["}"]
+
+
+def flat(blocks: dict[int, Block], entry: int) -> list[str]:
+    """The blocks in address order with a label on each one a jump goes to, for a function that does not reduce to if
+    and while. An edge the block lists in `polls`, where the game advances time, gets POLL() before its goto."""
+    addresses = sorted(reachable(blocks, entry))
+    after = dict(zip(addresses, addresses[1:]))
+    used: set[int] = set()
+
+    def jump(block: Block, target: int, fall: bool = False) -> list[str]:
+        polls = target in block.polls
+        if fall and not polls and after.get(block.start) == target:
+            return []
+        used.add(target)
+        return (["POLL();"] if polls else []) + ["goto L%08X;" % target]
+
+    chunks: dict[int, list[str]] = {}
+    for at in addresses:
+        block = blocks[at]
+        lines = list(block.stmts)
+        if block.kind == "return":
+            lines.append("return %s;" % block.value if block.value else "return;")
+        elif block.kind == "goto":
+            lines += jump(block, block.targets[0], fall=True)
+        elif block.kind == "branch":
+            lines += ["if (%s) {" % block.value] + ["    " + line for line in jump(block, block.targets[0])] + ["}"]
+            lines += jump(block, block.targets[1], fall=True)
+        else:
+            lines.append("switch (%s) {" % block.value)
+            for target in block.targets:
+                lines += ["case %d:" % value for value in dict.fromkeys(v for v, to in block.cases if to == target)]
+                lines += ["    " + line for line in jump(block, target)]
+            lines.append("}")
+        chunks[at] = lines
+    out: list[str] = []
+    for at in addresses:
+        out += (["L%08X:" % at] if at in used else []) + chunks[at]
+    return out

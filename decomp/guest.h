@@ -43,6 +43,8 @@
  *                   stack below it, for locals whose address the function passes on. The arguments a
  *                   caller passed on the stack start at sp. The swap's wrapper and SHC free the frame on return.
  *   UNFRAME(sp)     gives the frame back before a GJUMP, whose callee finds its stack arguments at sp.
+ *   ALLOCA(from, n) sets r15 to from less n bytes, a size worked out as the function runs, and gives it. The
+ *                   function's SETSP of a fixed address ends it, and so does its return.
  */
 #ifndef DECOMP_GUEST_H
 #define DECOMP_GUEST_H
@@ -127,6 +129,8 @@ long long g_mac_w(long long acc, int a, int b);
 #define MAC_L(acc, a, b) g_mac_l((acc), (a), (b))
 #define MAC_W(acc, a, b) g_mac_w((acc), (a), (b))
 #define FRAME(sp, size) gaddr sp = g_frame(size)
+uint32_t g_alloca(uint32_t from, uint32_t size);
+#define ALLOCA(from, n) g_alloca((uint32_t)(from), (uint32_t)(n))
 #define UNFRAME(sp) g_unframe(sp)
 #define DIVS(a, b) ((int)g_routine(0x0609410C, (b), (a), 0))
 #define DIVU(a, b) ((unsigned)g_routine(0x060941C0, (b), (a), 0))
@@ -211,6 +215,7 @@ typedef volatile unsigned short *H16PTR;
 #define STRCMP(a, b) strcmp((char *)(a), (char *)(b))
 #define BITSET(p, v, spec) _bitset((p), (v), (spec))
 #define UNFRAME(sp) ((void)0)
+#define ALLOCA(from, n) ((gaddr)__builtin_alloca(n))
 #define ENTRY_SP(sp) FRAME(sp, 0)
 #define SETSP(v) ((void)(v))
 #define R(n) (0)

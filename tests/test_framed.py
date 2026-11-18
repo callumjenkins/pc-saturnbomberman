@@ -150,7 +150,7 @@ def test_r15_loaded_from_a_register_that_is_not_a_copy_of_it_is_refused():
 def test_a_copy_of_r15_that_another_instruction_overwrites_is_not_a_frame_pointer():
     words = frame_pointer(14)
     words.insert(4, encode("mov #imm,Rn", 14, low=5))
-    with pytest.raises(state.Unsupported, match="moves r15"):
+    with pytest.raises(state.Unsupported, match="stack -8 bytes off"):
         lifted(words)
 
 

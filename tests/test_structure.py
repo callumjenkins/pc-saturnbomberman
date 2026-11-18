@@ -97,3 +97,20 @@ def test_a_loop_inside_a_loop_does_not_count_as_its_outer_loop_going_back_in_two
     blocks = graph(goto(0, 1), goto(1, 2), branch(2, 3, 4), goto(3, 2, True), branch(4, 1, 5, [1]), stop(5))
     assert structure.Structurer(blocks, 0).run() == [
         "do {", "    while (c2) {", "        POLL();", "    }", "} while (AGAIN(c4));", "return;"]
+
+
+def test_a_loop_the_structure_refuses_is_written_flat_with_a_label_on_each_block_a_jump_goes_to():
+    # 1 tests and enters the body at 2 by a jump back, 2 goes back to 1: the loop goes back in two places
+    blocks = graph(goto(0, 1), branch(1, 2, 3, [2]), goto(2, 1, True), stop(3))
+    blocks[2].stmts = ["x();"]
+    assert structure.flat(blocks, 0) == [
+        "L00000001:", "if (c1) {", "    POLL();", "    goto L00000002;", "}", "goto L00000003;",
+        "L00000002:", "x();", "POLL();", "goto L00000001;",
+        "L00000003:", "return;"]
+
+
+def test_a_flat_switch_goes_to_each_target_for_every_value_that_belongs_to_it():
+    blocks = graph(switch(0, [(4, 1), (6, 2), (8, 1)]), stop(1), stop(2))
+    assert structure.flat(blocks, 0) == [
+        "switch (v) {", "case 4:", "case 8:", "    goto L00000001;", "case 6:", "    goto L00000002;", "}",
+        "L00000001:", "return;", "L00000002:", "return;"]
