@@ -154,59 +154,6 @@ int f060727E0(int r4, int r5)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-void f06072820(int r4, int r5, int r6, int r7)
-{
-    int r0;
-
-    while (1) {
-        r0 = LD32(r5 + 60);
-        ST32(r4 + 60, r0);
-        r0 = LD32(r5 + 56);
-        ST32(r4 + 56, r0);
-        r0 = LD32(r5 + 52);
-        ST32(r4 + 52, r0);
-        r0 = LD32(r5 + 48);
-        ST32(r4 + 48, r0);
-        r0 = LD32(r5 + 44);
-        ST32(r4 + 44, r0);
-        r0 = LD32(r5 + 40);
-        ST32(r4 + 40, r0);
-        r0 = LD32(r5 + 36);
-        ST32(r4 + 36, r0);
-        r0 = LD32(r5 + 32);
-        ST32(r4 + 32, r0);
-        r0 = LD32(r5 + 28);
-        ST32(r4 + 28, r0);
-        r0 = LD32(r5 + 24);
-        ST32(r4 + 24, r0);
-        r0 = LD32(r5 + 20);
-        ST32(r4 + 20, r0);
-        r0 = LD32(r5 + 16);
-        ST32(r4 + 16, r0);
-        r0 = LD32(r5 + 12);
-        ST32(r4 + 12, r0);
-        r0 = LD32(r5 + 8);
-        ST32(r4 + 8, r0);
-        r0 = LD32(r5 + 4);
-        ST32(r4 + 4, r0);
-        r0 = LD32(r5);
-        ST32(r4, r0);
-        r6 = r6 - 16;
-        if (!(r6 > 0)) {
-            POLL();
-            break;
-        } else {
-            r5 = r5 + 64;
-            r4 = r4 + 64;
-        }
-        POLL();
-    }
-    POLL();
-    r0 = GJUMP4((0x06072810 + (r6 << 2)), (r4 + 64), (r5 + 64), (r6 << 2), r7);
-    return;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
 int f06070020(int r4)
 {
     int r0, r1, r2;
@@ -9387,4 +9334,57 @@ int f06073E80(int r4, int r5)
     L06073FB0:
     L06073FB2:
     return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f06072820(int r4, int r5, int r6, int r7)
+{
+    int r0;
+
+    while (1) {
+        r0 = LD32(r5 + 60);
+        ST32(r4 + 60, r0);
+        r0 = LD32(r5 + 56);
+        ST32(r4 + 56, r0);
+        r0 = LD32(r5 + 52);
+        ST32(r4 + 52, r0);
+        r0 = LD32(r5 + 48);
+        ST32(r4 + 48, r0);
+        r0 = LD32(r5 + 44);
+        ST32(r4 + 44, r0);
+        r0 = LD32(r5 + 40);
+        ST32(r4 + 40, r0);
+        r0 = LD32(r5 + 36);
+        ST32(r4 + 36, r0);
+        r0 = LD32(r5 + 32);
+        ST32(r4 + 32, r0);
+        r0 = LD32(r5 + 28);
+        ST32(r4 + 28, r0);
+        r0 = LD32(r5 + 24);
+        ST32(r4 + 24, r0);
+        r0 = LD32(r5 + 20);
+        ST32(r4 + 20, r0);
+        r0 = LD32(r5 + 16);
+        ST32(r4 + 16, r0);
+        r0 = LD32(r5 + 12);
+        ST32(r4 + 12, r0);
+        r0 = LD32(r5 + 8);
+        ST32(r4 + 8, r0);
+        r0 = LD32(r5 + 4);
+        ST32(r4 + 4, r0);
+        r0 = LD32(r5);
+        ST32(r4, r0);
+        r6 = r6 - 16;
+        if (!(r6 > 0)) {
+            POLL();
+            break;
+        } else {
+            r5 = r5 + 64;
+            r4 = r4 + 64;
+        }
+        POLL();
+    }
+    POLL();
+    r0 = GJUMP4((0x06072810 + (r6 << 2)), (r4 + 64), (r5 + 64), (r6 << 2), r7);
+    return;
 }
