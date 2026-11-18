@@ -20475,3 +20475,89 @@ int f0605F9C0(int r4, int r5, int r6)
     L0605FE74:
     return r0;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06054010(int r4, int r5, int r6)
+{
+    int r0, r1, r2, r3, r7, r8, r9, r10, r11, r12, r13, r15, c4, c1011;
+    FRAME(sp, 32);
+
+    r12 = r4;
+    r10 = r5;
+    r8 = LD32(0x0608D854);
+    r11 = r6;
+    r13 = LD32(r8 + 60);
+    r0 = LD32(0x0608D3A0);
+    r0 = GCALL3(r0, 28, r5, r6);
+    r9 = r0;
+    r3 = r9;
+    if (!((r9 & r9) == 0)) {
+        r2 = r8 + 24;
+        r1 = LD16(r2);
+        r1 = r1 + 1;
+        ST16(r2, r1);
+        ST16((r3 + 26), r1);
+        ST32(r9 + 12, r12);
+        ST32(r9 + 16, (r10 + r11));
+        ST32(r9 + 20, r11);
+        r1 = LD8((r8 + 7));
+        r4 = r12;
+        if (!((r1 & r1) == 0)) {
+            r0 = GCALL1(0x0605DB10, (r4 + r11));
+            r7 = -1;
+            if ((r0 & r0) == 0) {
+                r7 = LD32(r8 + 52);
+                r3 = LD8((r8 + 14));
+            } else {
+                r3 = 0;
+            }
+            r2 = r9 + 4;
+            ST8(r2, 2);
+            c4 = (r3 & r3) == 0;
+            c1011 = c4;
+            if (!(c4)) {
+                r0 = LD8(r2);
+                ST8(r2, (r0 | 32));
+                c1011 = 0;
+            }
+            ST32(r9 + 8, r7);
+            ST16((r9 + 6), -1);
+            r1 = 0;
+        } else {
+            r1 = LD8((r8 + 18));
+            r2 = r9;
+            if ((r1 & r1) == 0) {
+                ST8((r2 + 4), 0);
+                r1 = 0;
+            } else {
+                ST8((r2 + 4), 1);
+                r1 = 0;
+            }
+        }
+        ST32(r9, r1);
+        r1 = LD32((r8 + 84));
+        if ((r1 & r1) == 0) {
+            r1 = r8 + 80;
+        }
+        ST32(r1, r9);
+        ST32((r8 + 84), r9);
+        r15 = ALLOCA(sp - 32, (((int)((unsigned)(r10 + 5) >> 2)) << 2));
+        r3 = r9 + 26;
+        r1 = LD8(r3);
+        ST8(r15, r1);
+        r1 = LD16(r3);
+        ST8((r15 + 1), r1);
+        SETSP(r15);
+        r0 = GCALL3(0x0604B358, (r15 + 2), (r12 + r11), r10);
+        SETSP(r15);
+        r0 = GCALL0(0x06033084);
+        SETSP((sp - 32));
+        r0 = GCALL1(0x0605B7A4, r13);
+        r0 = r10;
+    } else {
+        ST32(0x0608D844, -3);
+        r0 = 0;
+    }
+    SETSP((sp - 32));
+    return r0;
+}

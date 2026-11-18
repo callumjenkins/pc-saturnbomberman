@@ -179,7 +179,10 @@ def frame(ins: "sh2.Insn", st: State) -> bool:
     op, fmt, n, m = ins.op, ins.fmt, ins.n, ins.m
     ends_run_time_frame = restored(ins, st.copies, st.adjust) is not None or loads_r15(ins)
     if st.run_time is not None and 15 in registers.defs(ins) and not (ends_run_time_frame or is_run_time_frame(ins, st.known)):
-        raise Unsupported("moves r15 below a frame of a run-time size at %08X" % ins.pc)
+        if not steps_r15(ins):
+            raise Unsupported("moves r15 below a frame of a run-time size at %08X" % ins.pc)
+        below_run_time_frame(ins, st)
+        return True
     if st.run_time is not None and loads_r15(ins):
         st.sp, st.run_time = st.run_time, None
         st.effect("SETSP(%s);" % framed(st.sp))
@@ -429,6 +432,30 @@ def sp_change(ins: "sh2.Insn", known: dict[int, int] | None = None) -> int:
     return 0
 
 
+def steps_r15(ins: "sh2.Insn") -> bool:
+    """A push, a pop, an `add #imm` or a `mov Rm,r15` of r15, which a function does below a frame of a run-time size to
+    pass an argument and take its stack back."""
+    pushes = ins.op == "mov.l" and ins.n == 15 and "@-Rn" in ins.fmt
+    pops = ins.op == "mov.l" and ins.m == 15 and "@Rm+" in ins.fmt
+    assigned = ins.op == "mov" and ins.fmt == "mov Rm,Rn" and ins.n == 15
+    return pushes or pops or assigned or ins.op == "add" and ins.n == 15 and ins.imm is not None
+
+
+def below_run_time_frame(ins: "sh2.Insn", st: State) -> None:
+    """A push, pop or add on r15 where it is the variable `r15`."""
+    if ins.op == "add":
+        st.put(15, op2(st.get(15), "+", str(ins.imm)))
+    elif ins.op == "mov":
+        st.put(15, st.get(ins.m))
+    elif ins.n == 15:
+        value = st.get(ins.m)
+        st.put(15, op2(st.get(15), "-", "4"))
+        st.effect("ST32(r15, %s);" % strip(value))
+    else:
+        st.put(ins.n, "LD32(%s)" % st.get(15), pure=False)
+        st.put(15, op2(st.get(15), "+", "4"))
+
+
 def loads_r15(ins: "sh2.Insn") -> bool:
     """`mov.l @...,r15`: a function that kept r15 in its frame before it lowered it by a run-time size takes it back."""
     return ins.op == "mov.l" and ins.n == 15 and ins.fmt.split(",")[0].split(" ")[1].startswith("@")
@@ -611,6 +638,23 @@ def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
             st.set_flag(op2(wrapped(first, left), "|", wrapped(st.get(n), first)))
         else:
             st.set_flag(op2(wrapped(left, first), "|", wrapped(first, st.get(n))))
+    elif op == "negc":
+        carry, value = carried(ins, st), st.temp(op2("0", "-", st.get(m)))
+        st.put(n, op2(value, "-", carry))
+        st.set_flag(op2(op2(unsigned(value), "!=", "0"), "|", op2(unsigned(value), "<", unsigned(st.get(n)))))
+    elif op == "tas.b":
+        pointer = strip(st.get(n))
+        byte = st.temp("LD8(%s)" % pointer)
+        st.set_flag(op2(byte, "==", "0"))
+        st.effect("ST8(%s, %s);" % (pointer, op2(byte, "|", "0x80")))
+    elif op == "tst.b":
+        st.set_flag(op2(op2("LD8(%s)" % strip(op2(control("gbr", st), "+", st.get(0))), "&", str(ins.imm)), "==", "0"))
+    elif op == "lds.l" and fmt.endswith(("mach", "macl")):
+        value = st.temp("LD32(%s)" % strip(st.get(m)))
+        st.put(m, op2(st.get(m), "+", "4"))
+        high = fmt.endswith("mach")
+        keep = "(%s & 0xFFFFFFFFLL)" % MAC if high else "(%s & ~0xFFFFFFFFLL)" % MAC
+        set_mac(st, "(%s | %s)" % (keep, "((long long)%s << 32)" % value if high else "(unsigned)%s" % value))
     elif op == "swap.b":
         value = st.get(m)
         st.put(n, op2(op2(value, "&", "0xFFFF0000"), "|",

@@ -57,12 +57,27 @@ def test_leaving_below_a_frame_of_a_run_time_size_is_refused():
         lifted(SUB_R4_FROM_R15, RTS, NOP)
 
 
-def test_a_push_below_a_frame_of_a_run_time_size_is_refused():
-    with pytest.raises(lift.Unsupported, match="moves r15 below a frame of a run-time size"):
-        lifted(PUSH_PR, COPY_R14, SUB_R4_FROM_R15, sh2.encode("mov.l Rm,@-Rn", 15, 5, 0), RESTORE_R14, POP_PR, RTS, NOP)
+def test_a_push_below_a_frame_of_a_run_time_size_moves_the_variable_r15_and_a_call_after_it_sets_the_games_stack_to_it():
+    # r14 = r15 ; r15 -= r4 ; push r5 ; bsr callee ; nop ; r15 += 4 ; r15 = r14
+    code = lifted(PUSH_PR, COPY_R14, SUB_R4_FROM_R15, sh2.encode("mov.l Rm,@-Rn", 15, 5, 0), 0xB005, NOP,
+                  sh2.encode("add #imm,Rn", 15, 0, 4), RESTORE_R14, POP_PR, RTS, NOP, RTS, NOP)
+    assert body(code)[2:6] == ["r15 = ALLOCA(sp - 4, r4);", "r15 = r15 - 4;", "ST32(r15, r5);", "SETSP(r15);"]
+    assert body(code)[-2:] == ["SETSP((sp - 4));", "return r0;"]
 
 
-def test_r15_below_a_frame_of_a_run_time_size_on_one_path_to_a_block_and_not_the_other_is_refused():
-    # bt join ; sub r4,r15 ; join: r15 = r14
+def test_a_tail_jump_below_a_frame_of_a_run_time_size_is_refused():
+    with pytest.raises(lift.Unsupported, match="below a frame of a run-time size"):
+        lifted(PUSH_PR, COPY_R14, SUB_R4_FROM_R15, 0xA000, NOP, RTS, NOP)
+
+
+def test_r15_below_a_frame_of_a_run_time_size_on_one_path_to_a_block_and_not_the_other_is_refused_if_the_block_uses_it():
+    # bt join ; sub r4,r15 ; join: mov.l r4,@r15 ; r15 = r14
     with pytest.raises(lift.Unsupported, match="on one path"):
-        lifted(PUSH_PR, COPY_R14, TST_R4, BT_OVER_ONE, SUB_R4_FROM_R15, RESTORE_R14, POP_PR, RTS, NOP)
+        lifted(PUSH_PR, COPY_R14, TST_R4, BT_OVER_ONE, SUB_R4_FROM_R15, sh2.encode("mov.l Rm,@Rn", 15, 4, 0),
+               RESTORE_R14, POP_PR, RTS, NOP)
+
+
+def test_a_frame_of_a_run_time_size_on_one_path_only_is_given_back_where_the_paths_meet_if_the_block_takes_r15_from_its_copy():
+    # bt join ; sub r4,r15 ; join: r15 = r14
+    code = lifted(PUSH_PR, COPY_R14, TST_R4, BT_OVER_ONE, SUB_R4_FROM_R15, RESTORE_R14, POP_PR, RTS, NOP)
+    assert body(code)[-1] == "SETSP((sp - 4));"

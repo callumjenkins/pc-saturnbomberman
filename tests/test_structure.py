@@ -114,3 +114,9 @@ def test_a_flat_switch_goes_to_each_target_for_every_value_that_belongs_to_it():
     assert structure.flat(blocks, 0) == [
         "switch (v) {", "case 4:", "case 8:", "    goto L00000001;", "case 6:", "    goto L00000002;", "}",
         "L00000001:", "return;", "L00000002:", "return;"]
+
+
+def test_a_loop_that_tests_at_its_header_keeps_the_test_when_its_body_ends_in_a_test_of_its_own():
+    # 1 tests c1 and stays in the body at 2, which goes back to 1 if c2 and otherwise leaves; 3 leaves
+    blocks = graph(goto(0, 1), branch(1, 2, 3), branch(2, 1, 3, [1]), stop(3))
+    assert structure.Structurer(blocks, 0).run()[:2] == ["while (c1) {", "    if (c2) {"]

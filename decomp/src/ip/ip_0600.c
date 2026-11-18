@@ -308,3 +308,40 @@ int f06002E20(int r4, int r5, int r6, int r7)
     r0 = GJUMP4(0x06006000, r4, r5, r6, r7);
     return r0;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f06002486(int r4, int r5, int r6, int r7)
+{
+    int r0, r1, r2, r3;
+    FRAME(sp, 24);
+
+    ST32(sp - 4, r4);
+    ST16((sp - 6), r5);
+    ST32(sp - 12, r6);
+    ST32(sp - 16, r7);
+    do {
+        r2 = LD32(sp - 4);
+        ST32(sp - 24, r2);
+        r3 = LD32(sp - 12);
+        ST32(sp - 20, r3);
+        do {
+            r3 = LD32(sp - 24);
+            r0 = LD16(sp - 6);
+            ST16(r3, r0);
+            r0 = LD16(sp - 6);
+            r0 = r0 + 1;
+            ST16(sp - 6, r0);
+            r2 = LD32(sp - 24);
+            ST32(sp - 24, (r2 + 2));
+            r1 = LD32(sp - 20);
+            r1 = r1 - 1;
+            ST32(sp - 20, r1);
+        } while (AGAIN(!((r1 & r1) == 0)));
+        r2 = LD32(sp - 4);
+        ST32(sp - 4, (r2 + 128));
+        r3 = LD32(sp - 16);
+        r3 = r3 - 1;
+        ST32(sp - 16, r3);
+    } while (AGAIN(!((r3 & r3) == 0)));
+    return r0;
+}

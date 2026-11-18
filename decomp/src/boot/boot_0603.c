@@ -26489,3 +26489,63 @@ int f0603F42C(int r4, int r5)
     L0603FA52:
     return r0;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f0603D034(int r4, int r5)
+{
+    int r0, r1, r8, r9, r10, r11, r12, r13, r14, r15;
+    FRAME(sp, 44);
+
+    r14 = sp - 40;
+    r12 = r4;
+    r13 = r5;
+    ST8(r14, 0);
+    r10 = LD32((r12 + 108));
+    ST32(r14 + 4, sp - 40);
+    if ((r10 & r10) == 0) {
+        r10 = r14;
+    }
+    r9 = LD32((r12 + 116));
+    if ((r9 & r9) == 0) {
+        r9 = r14;
+    }
+    r0 = GCALL1(0x0607507C, r10);
+    r11 = r0;
+    r0 = GCALL1(0x0607507C, r9);
+    r15 = ALLOCA(sp - 40, (((int)((unsigned)((r11 + r0) + 18) >> 2)) << 2));
+    r1 = LD8(r9);
+    r8 = r15;
+    if (!((r1 & 255) == 47)) {
+        r1 = LD32(r12 + 52);
+        if (r1 == 80) {
+            r5 = 0x0603D024;
+            SETSP(r15);
+            r0 = GCALL4(0x06045264, r15, r5, r10, r9);
+        } else {
+            r15 = r15 - 4;
+            ST32(r15, r9);
+            r5 = 0x0603D014;
+            SETSP(r15);
+            r0 = GCALL4(0x06045264, r8, r5, r10, r1);
+            r15 = r15 + 4;
+        }
+    } else {
+        r1 = LD32(r12 + 52);
+        if (r1 == 80) {
+            r5 = 0x0603D008;
+            SETSP(r15);
+            r0 = GCALL4(0x06045264, r15, r5, r10, r9);
+        } else {
+            r15 = r15 - 4;
+            ST32(r15, r9);
+            r5 = 0x0603CFF8;
+            SETSP(r15);
+            r0 = GCALL4(0x06045264, r8, r5, r10, r1);
+            r15 = r15 + 4;
+        }
+    }
+    SETSP(r15);
+    r0 = GCALL2(0x0603CCE0, r13, r8);
+    SETSP((sp - 40));
+    return r0;
+}

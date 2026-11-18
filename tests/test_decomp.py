@@ -381,7 +381,7 @@ def test_a_jump_the_recompile_advances_time_at_advances_it_before_jumping_wherev
 
 
 @pytest.mark.parametrize("words, jump", [
-    pytest.param((encode("mov #imm,Rn", 5, low=2),), "GJUMP2(32, 0, 2)", id="one set after the call, behind one it overwrote"),
+    pytest.param((encode("mov #imm,Rn", 5, low=2),), "GJUMP2(32, r4, 2)", id="one set after the call, behind one it overwrote"),
     pytest.param((), "GJUMP0(32)", id="none set after the call"),
 ])
 def test_a_tail_call_after_a_call_hands_on_only_the_registers_set_since(words, jump):
@@ -464,3 +464,32 @@ def test_a_shift_sets_t_to_the_bit_it_shifts_out_for_a_later_subc():
     # shll r5 ; subc r4,r4 ; mov r4,r0 ; rts ; nop   (r4 = -T)
     code = lifted(encode("shll Rn", 5), encode("subc Rm,Rn", 4, 4), encode("mov Rm,Rn", 0, 4), RTS, NOP)
     assert "((unsigned)r5 >> 31)" in code
+
+
+def test_negc_subtracts_the_t_bit_from_the_negation_and_sets_t_on_a_borrow():
+    code = lifted(encode("sett"), encode("negc Rm,Rn", 5, 4), encode("movt Rn", 0), RTS, NOP)
+    assert body(code) == ["return ((unsigned)(0 - r4) != 0) | ((unsigned)(0 - r4) < (unsigned)((0 - r4) - 1));"]
+
+
+def test_tas_b_sets_t_when_the_byte_was_zero_and_sets_its_top_bit():
+    code = lifted(encode("tas.b @Rn", 4), encode("movt Rn", 0), RTS, NOP)
+    assert body(code) == ["int c0;", "c0 = LD8(r4);", "ST8(r4, (c0 | 0x80));", "return c0 == 0;"]
+
+
+def test_tst_b_through_gbr_tests_the_byte_at_gbr_plus_r0_against_the_mask():
+    code = lifted(encode("mov Rm,Rn", 0, 4), encode("tst.b #imm,@(r0,gbr)", low=0xCC), encode("movt Rn", 0), RTS, NOP)
+    assert body(code) == ["return (LD8(GBR() + r4) & 204) == 0;"]
+
+
+def test_lds_l_into_mach_loads_the_word_it_points_at_into_the_high_half():
+    code = lifted(encode("clrmac"), encode("lds.l @Rm+,mach", 0, 4), encode("sts mach,Rn", 0), RTS, NOP)
+    assert body(code) == ["return (int)(((0 & 0xFFFFFFFFLL) | ((long long)(LD32(r4)) << 32)) >> 32);"]
+
+
+def test_a_jump_table_of_bytes_added_to_its_address_is_a_switch_on_the_signed_byte_loaded(monkeypatch):
+    # mova table,r0 ; mov.b @(r0,r4),r1 ; add r1,r0 ; jmp @r0 ; nop ; nop ; table: 0x04 0x08 ; nop ; rts ; mov #1,r0 ; rts ; mov #2,r0
+    words = (encode("mova @T,r0", low=2), encode("mov.b @(r0,Rm),Rn", 1, 4), encode("add Rm,Rn", 0, 1), encode("jmp @Rn", 0), NOP, NOP,
+             0x0408, NOP, RTS, encode("mov #imm,Rn", 0, low=1), RTS, encode("mov #imm,Rn", 0, low=2))
+    monkeypatch.setattr(status, "jump_targets", lambda: {BASE + 6: [BASE + 16, BASE + 20]})
+    assert body(lift.lift(image(*words), BASE)) == [
+        "int r1;", "r1 = LD8(0x0600600C + r4);", "switch (r1) {", "case 4:", "return 1;", "case 8:", "return 2;", "}"]

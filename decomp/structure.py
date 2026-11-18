@@ -280,7 +280,8 @@ class Structurer:
         inner = drop_tail_continue(inner)
         if enters:
             return [head] + ["    " + line for line in polled(inner, advance=False)] + ["}"]
-        if len(inner) >= 5 and inner[-5].startswith("if (") and inner[-4:] == ["    " + BACK, "} else {", "    break;", "}"]:
+        ends_in_test = len(inner) >= 5 and inner[-5].startswith("if (") and inner[-4:] == ["    " + BACK, "} else {", "    break;", "}"]
+        if ends_in_test and not tests_only:
             condition = inner[-5][4:-3]
             return ["do {"] + ["    " + line for line in polled(inner[:-5])] + ["} while (AGAIN(%s));" % condition]
         # A block that returns has no successors, so it is never in a loop body: every pass goes round again.

@@ -7,6 +7,7 @@
 #define f002003DC fld_f002003DC
 #define f00200410 fld_f00200410
 #define f002004E6 fld_f002004E6
+#define f00200522 fld_f00200522
 #define f002005B4 fld_f002005B4
 #define f002005EE fld_f002005EE
 #define f0020060A fld_f0020060A

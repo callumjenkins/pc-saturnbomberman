@@ -1620,3 +1620,77 @@ int f00201276(int r4, int r5, int r6, int r7)
     }
     return r0;
 }
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f00200522(int r4, int r5, int r6)
+{
+    int r0, r3, r7, r9, r10, r11, r12, r13, r14, c2;
+    FRAME(sp, 36);
+
+    r14 = r6;
+    r11 = r5;
+    r12 = 0x00200DE2;
+    r9 = 0;
+    r13 = 0x000A1220;
+    ST32(sp - 36, r4);
+    r10 = 0;
+    while (1) {
+        r6 = LD32(sp - 36);
+        r7 = R(7);
+        r0 = GCALL5(r12, 0, 0, r6, r7, LD32((sp - 36)));
+        r4 = r0;
+        if ((r4 & r4) == 0) {
+            r0 = GCALL5(0x002009BC, 0, 0, 0, 0, LD32((sp - 36)));
+            if ((r0 & r0) == 0) {
+                r0 = GCALL5(0x00201040, 0, 0, 0, 0, LD32((sp - 36)));
+                r5 = r0;
+                r4 = r9;
+                if (r9 >= r11) {
+                    r0 = GCALL5(0x00200A06, (sp - 32), 0, 0, 0, LD32((sp - 36)));
+                    if ((r0 & r0) == 0) {
+                        r0 = 0;
+                        break;
+                    } else {
+                        r0 = -68;
+                        break;
+                    }
+                } else {
+                    do {
+                        r3 = LD32(r5);
+                        r4 = r4 + 1;
+                        ST32(r14, r3);
+                        r14 = r14 + 4;
+                    } while (AGAIN(!(r4 >= r11)));
+                    r0 = GCALL5(0x00200A06, (sp - 32), 0, 0, 0, LD32((sp - 36)));
+                    if ((r0 & r0) == 0) {
+                        r0 = 0;
+                        break;
+                    } else {
+                        r0 = -68;
+                        break;
+                    }
+                }
+            } else {
+                r0 = -67;
+                break;
+            }
+        } else {
+            if (r4 == -1) {
+                c2 = r10 > r13;
+                r10 = r10 + 1;
+                if (!(c2)) {
+                    POLL();
+                    continue;
+                } else {
+                    r0 = -66;
+                    break;
+                }
+            } else {
+                r0 = -65;
+                break;
+            }
+        }
+        POLL();
+    }
+    return r0;
+}

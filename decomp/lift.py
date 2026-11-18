@@ -25,10 +25,10 @@ import structure  # noqa: E402
 from returns import left_for_callers  # noqa: E402
 from saturnrecomp import sh2  # noqa: E402
 from state import (LOCAL_TYPES, MAC, NO_FLAG, VAR, Copies, State, Stmt, Unsupported, const, copy_move, fold_frame, framed,  # noqa: E402
-                   is_run_time_frame, loads_r15, number, restored, sp_change, step, strip, track)
+                   is_run_time_frame, loads_r15, number, restored, sp_change, step, steps_r15, strip, track)
 
 _CALLS = ("bsr", "jsr")
-TABLE_LOAD = re.compile(r"mov\.w @\(r0,r\d+\),r(\d+)$")     # the load of an entry of a jump table of words
+TABLE_LOAD = re.compile(r"mov\.([wb]) @\(r0,r\d+\),r(\d+)$")     # the load of an entry of a jump table of words or bytes
 SAVED = 2000                            # variables from here hold a register of the caller while a call into the middle of a function borrows it
 MERGED = 1000                           # flag variables from here are made for a block entered with T in different variables
 MAX_ROUNDS = 60                         # times read_blocks reads every block again before it gives up
@@ -77,7 +77,7 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
     those at the end that an earlier call overwrote: the callee finds there what that call left, as it does in the
     game's code. Without, a call passes those set since the last call, and a tail call hands on r4 to r7 as
     they stand, except those an earlier call overwrote: those at the end are left out, and one before a
-    register that does go in passes 0."""
+    register that does go in passes what that call left, which the context holds."""
     tail = ins.op in ("jmp", "bra")
     where = const(ins.target) if ins.op in ("bsr", "bra") else st.get(ins.n)
     through_register = ins.op == "jmp" and number(where) is None and functions is not None
@@ -103,6 +103,10 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
                 st.effect("SETR(%d, %s);" % (reg, strip(st.get(reg))))
         if st.sp and tail:
             st.effect("SETSP(%s);" % st.get(15))
+    if st.run_time is not None:
+        if tail:
+            raise Unsupported("goes to %s below a frame of a run-time size" % where)
+        st.effect("SETSP(r15);")
     helper = registers.routine(image, number(where), functions) if known and not tail else None
     if helper:
         text, changes, result = helper
@@ -126,7 +130,7 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
             args.append("" if r in st.clobbered else st.get(r))
         while args and not args[-1]:
             args.pop()
-        args = [a or "0" for a in args]
+        args = [a or st.get(4 + i) for i, a in enumerate(args)]     # what an earlier call left, which the context holds
     extra = stack_arguments(st) if not tail and not st.parked and st.run_time is None else []   # a parked function's are in its frame already
     if extra:
         for r in sorted(reads or ()):
@@ -151,6 +155,16 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         st.known.pop(r, None)
     st.known.pop(0, None)
     return tail
+
+
+def table_entry(image: "sh2.Image", table: tuple[int | None, int, int], k: int) -> int:
+    """Entry k of a jump table of words, which `mov.w` loads as it stands, or of bytes, which `mov.b` loads signed."""
+    base, _, size = table
+    if size == 2:
+        return image.u16(base + 2 * k)
+    word = image.u16((base + k) & ~1)
+    byte = (word >> 8 if (base + k) % 2 == 0 else word) & 0xFF
+    return byte - 256 if byte >= 128 else byte
 
 
 def spill(ins: "sh2.Insn", st: State, image: "sh2.Image", functions: dict[int, set[int]] | None) -> None:
@@ -187,6 +201,19 @@ def tail_offsets(image: "sh2.Image", entry: int, code: set[int] | None = None) -
     return walk(image, entry, code, True).tails
 
 
+def takes_r15_back_first(image: "sh2.Image", at: int, copies: Copies) -> bool:
+    """Whether the instructions from `at` set r15 from a copy or from memory before any of them reads or writes it, or
+    branches, so a path that arrives below a frame of a run-time size and one that does not end up the same."""
+    while image.contains(at):
+        ins = image.insn(at)
+        if restored(ins, copies.kept(), copies.adjust) is not None or loads_r15(ins):
+            return True
+        if 15 in registers.defs(ins) | registers.uses(ins) or ins.target is not None or ins.op in ("rts", "jmp", "jsr", "bsr"):
+            return False
+        at += 2
+    return False
+
+
 def walk(image: "sh2.Image", entry: int, code: set[int] | None, parked: bool,
          spoiled: frozenset[int] = frozenset()) -> Walked:
     """The leaders of the function and what else its r15 does. A `mov Rm,r15` of a copy sets r15 back to the offset
@@ -212,13 +239,15 @@ def walk(image: "sh2.Image", entry: int, code: set[int] | None, parked: bool,
         work.append((target, sp, dict(copies.adjust), base))
 
     def meet(at: int, sp: int, base: int | None) -> None:
-        """A second path to an instruction has to find r15 where the first did, and below a run-time frame or not. A
-        copy of r15 moved by another amount on it is no copy."""
+        """A second path to an instruction has to find r15 where the first did, and below a run-time frame or not, unless
+        the instruction takes r15 from a copy or from memory. A copy of r15 moved by another amount on it is no copy."""
         was_sp, was_moves, was_base = states[at]
         if was_sp != sp:
             raise Unsupported("the stack is %d bytes down on one path to %08X and %d on another" % (-was_sp, at, -sp))
         if was_base != base:
-            raise Unsupported("r15 is below a frame of a run-time size on one path to %08X and not on another" % at)
+            if not takes_r15_back_first(image, at, copies):
+                raise Unsupported("r15 is below a frame of a run-time size on one path to %08X and not on another" % at)
+            run_time[at] = was_base if was_base is not None else base          # the restore is the same on both paths
         copies.spoiled |= {r for r in was_moves.keys() | copies.adjust.keys() if was_moves.get(r, 0) != copies.adjust.get(r, 0)}
 
     while work:
@@ -244,7 +273,8 @@ def walk(image: "sh2.Image", entry: int, code: set[int] | None, parked: bool,
                 elif is_run_time_frame(each, known):
                     base = sp if base is None else base
                 elif base is not None and 15 in registers.defs(each):
-                    raise Unsupported("moves r15 below a frame of a run-time size at %08X" % at)
+                    if not steps_r15(each):
+                        raise Unsupported("moves r15 below a frame of a run-time size at %08X" % at)
                 else:
                     sp += sp_change(each, known)
             track(ins, known, image)
@@ -403,7 +433,7 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
     block = structure.Block(start)
     term = ""
     tail = False
-    table: tuple[int | None, int] | None = None     # the table address and the register of the last word loaded from it
+    table: tuple[int | None, int, int] | None = None   # the table address, the register and the size of the last entry loaded from it
     taken_flag = after_slot = None
     at = start
     while True:
@@ -444,14 +474,14 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
         if ins.op == "jmp" and ins.pc in status.jump_targets():
             targets = status.jump_targets()[ins.pc]
             if table is None or table[0] is None or image.insn(ins.pc - 2).text != "add r%d,r0" % table[1] or any(
-                    table[0] + image.u16(table[0] + 2 * k) != target for k, target in enumerate(targets)):
-                raise Unsupported("a jump table at %08X that is not words added to its address" % ins.pc)
+                    table[0] + table_entry(image, table, k) != target for k, target in enumerate(targets)):
+                raise Unsupported("a jump table at %08X that is not words or bytes added to its address" % ins.pc)
             step(slot, st, image)
             if ins.pc in status.polling_jumps():
                 st.effect("POLL();")
             term = st.get(table[1])
             block.kind, block.targets = "switch", list(dict.fromkeys(targets))
-            block.cases = [(image.u16(table[0] + 2 * k), target) for k, target in enumerate(targets)]
+            block.cases = [(table_entry(image, table, k), target) for k, target in enumerate(targets)]
             break
         if ins.op == "jmp":
             tail = call(ins, slot, st, params, image, functions)
@@ -463,7 +493,7 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
         else:
             loads = TABLE_LOAD.match(ins.text)
             if loads:
-                table = (number(st.get(0)), int(loads[1]))
+                table = (number(st.get(0)), int(loads[2]), 2 if loads[1] == "w" else 1)
             step(ins, st, image)
             if slot:
                 step(slot, st, image)
