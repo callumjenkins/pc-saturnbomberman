@@ -440,52 +440,6 @@ void f0600270A(int r4, int r5)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f060026DC(int r4, int r5, int r6)
-{
-    int r0, r1, r2, r3, r7, r8, r9, c2008, c2009;
-
-    r1 = R(1);
-    r2 = R(2);
-    r8 = R(8);
-    r7 = r6;
-    r9 = r5;
-    r3 = r4;
-    r8 = r8 ^ r8;
-    SETIN(1, r1);
-    SETIN(2, (r2 ^ r2));
-    do {
-        r6 = LD8(r3);
-        r3 = r3 + 1;
-        c2008 = R(8);
-        SETR(8, r8);
-        c2009 = R(9);
-        SETR(9, r9);
-        SETIN(0, ((int)((unsigned)((int)((unsigned)(r6 & 255) >> 2)) >> 2)));
-        r1 = R(1);
-        SETIN(1, r1);
-        r2 = R(2);
-        SETIN(2, r2);
-        r0 = GCALL0(0x0600270A);
-        SETR(8, c2008);
-        SETR(9, c2009);
-        c2008 = R(8);
-        SETR(8, r8);
-        c2009 = R(9);
-        SETR(9, r9);
-        SETIN(0, (r6 & 15));
-        r1 = R(1);
-        SETIN(1, r1);
-        r2 = R(2);
-        SETIN(2, r2);
-        r0 = GCALL0(0x0600270A);
-        SETR(8, c2008);
-        SETR(9, c2009);
-        r7 = r7 - 1;
-    } while (AGAIN(!(r7 == 0)));
-    return r0;
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
 int f06002D88(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14;
@@ -538,7 +492,7 @@ int f06002100(int r4, int r5, int r6, int r7)
     r0 = GCALL2(r2, -2, 0);
     r0 = SR();
     SETSR(((r0 & -241) | 0));
-    r0 = GCALL0(0x0600255C);
+    GCALL0(0x0600255C);
     r0 = GCALL0(0x06002594);
     r0 = GCALL0(0x060023E6);
     r0 = GCALL3(0x0600245C, 0x25E06000, 0x1000, 0);
@@ -561,7 +515,7 @@ int f06002100(int r4, int r5, int r6, int r7)
     r0 = GCALL5(0x06002486, v40, 0x200, 18, 6, v40);
     r6 = 16;
     r5 = 0x25F00000;
-    r0 = GCALL5(0x06002404, 0x060027BC, 0x25F00000, 16, 0, v40);
+    GCALL5(0x06002404, 0x060027BC, 0x25F00000, 16, 0, v40);
     r0 = GCALL5(0x06002280, 0, 0, 0, 0, v40);
     r2 = LD32(0x06002D7C);
     v8 = r2;
@@ -604,5 +558,52 @@ int f06002100(int r4, int r5, int r6, int r7)
     r6 = R(6);
     r7 = R(7);
     r0 = GCALL5(0x06002D88, 0, 0, 0, 0, v40);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f060026DC(int r4, int r5, int r6)
+{
+    int r0, r1, r2, r3, r7, r8, r9, c2008, c2009;
+
+    r1 = R(1);
+    r2 = R(2);
+    r8 = R(8);
+    r7 = r6;
+    r9 = r5;
+    r3 = r4;
+    r8 = r8 ^ r8;
+    SETIN(1, r1);
+    SETIN(2, (r2 ^ r2));
+    do {
+        r6 = LD8(r3);
+        r3 = r3 + 1;
+        c2008 = R(8);
+        SETR(8, r8);
+        c2009 = R(9);
+        SETR(9, r9);
+        SETIN(0, ((int)((unsigned)((int)((unsigned)(r6 & 255) >> 2)) >> 2)));
+        r1 = R(1);
+        SETIN(1, r1);
+        r2 = R(2);
+        SETIN(2, r2);
+        GCALL0(0x0600270A);
+        SETR(8, c2008);
+        SETR(9, c2009);
+        r0 = r6 & 15;
+        c2008 = R(8);
+        SETR(8, r8);
+        c2009 = R(9);
+        SETR(9, r9);
+        SETIN(0, r0);
+        r1 = R(1);
+        SETIN(1, r1);
+        r2 = R(2);
+        SETIN(2, r2);
+        GCALL0(0x0600270A);
+        SETR(8, c2008);
+        SETR(9, c2009);
+        r7 = r7 - 1;
+    } while (AGAIN(!(r7 == 0)));
     return r0;
 }

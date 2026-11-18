@@ -36,7 +36,7 @@ def lifted(functions: dict[int, set[int]], parked: bool) -> list[str]:
 
 def test_a_parked_function_keeps_its_pushes_and_pops_as_stores_and_loads_on_the_game_stack():
     lines = lifted(FUNCTIONS, True)
-    assert lines[:4] == ["int r0, r14;", "ENTRY_SP(sp);", "ST32((sp - 4), PR());", "SETSP((sp - 4));"]
+    assert lines[:4] == ["int r14;", "ENTRY_SP(sp);", "ST32((sp - 4), PR());", "SETSP((sp - 4));"]
     assert lines[-3:] == ["SETPR(LD32((sp - 4)));", "SETSP(sp);", "return r14;"]
 
 

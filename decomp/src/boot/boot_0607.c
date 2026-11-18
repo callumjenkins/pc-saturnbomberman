@@ -9959,6 +9959,6 @@ int f06071924(int r4)
     if (!(c1006)) {
         r0 = GCALL1(0x06071990, (r4 + 4));
     }
-    r0 = GCALL1(0x0606C32C, -3);
+    GCALL1(0x0606C32C, -3);
     return r8;
 }

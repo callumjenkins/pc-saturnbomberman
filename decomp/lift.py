@@ -149,7 +149,11 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
     if tail and st.framed and not st.sp:
         st.effect("UNFRAME(sp);")
     written = registers.writes(image, number(where), functions) - {0} if known else registers.EVERY - {0}
-    st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in written}))
+    leaves_r0 = known and not tail and 0 not in registers.writes(image, number(where), functions)    # a callee that never writes r0 gives back the caller's
+    if leaves_r0:
+        st.stmts.append(Stmt(None, text + ";", False, {"r%d" % r for r in written}))
+    else:
+        st.stmts.append(Stmt("r0", text, False, {"r%d" % r for r in written}))
     for line in restore:
         st.effect(line)
     st.clobbered |= written
@@ -163,7 +167,8 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
         if r not in written:
             continue
         st.known.pop(r, None)
-    st.known.pop(0, None)
+    if not leaves_r0:
+        st.known.pop(0, None)
     return tail
 
 
