@@ -51,7 +51,7 @@ EDGES = (0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7F
 IMAGE = MODULE.path
 TABLE_MAX = 0x100                # bytes of a jump table code_runs keeps, at most
 FRAME_MAX = 0x400                # bytes of a function's stack check.py compares at a call, at most
-LONG_RUN_POLLS = 1_000_000        # polls after which a trial the game's code could not finish in the step limit is skipped, since both sides are in an endless loop
+LONG_RUN_POLLS = 1_000_000        # polls after which a trial the game's code could not finish in the step limit is skipped, as one is when the host polled more than the game's code had by then: both are in a loop too long to compare
 CALLS_MAX = 2000                # calls a trial makes, answered or run, before it gives up, since an endless loop of them would fill memory
 MEMORY_GB = 6.0                 # address space a check may use, a little under the 8 GB farm run gives it; CHECK_MEM_GB overrides
 STUBBED = 0.5                    # the share of trials in which the calls out of the function are answered without running them
@@ -77,8 +77,12 @@ class Counting(sh2emu.CPU):
         return super().call(entry, max_steps, **regs)
 
     def frame(self, sp: int) -> list[int]:
-        """The words of the stack from sp up to where the function was entered."""
-        return [self.rl(at) for at in range(sp, min(self.entry_sp, sp + FRAME_MAX), 4)]
+        """The words of the stack from sp up to where the function was entered, none where sp is outside the memory the
+        check models, as the host's call hook reads them."""
+        try:
+            return [self.rl(at) for at in range(sp, min(self.entry_sp, sp + FRAME_MAX), 4)]
+        except sh2emu.MemoryError_:
+            return []
 
     def step(self) -> None:
         pc = self.pc
@@ -249,8 +253,8 @@ def default_spec(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
 def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
     """What the host build's g_call runs: the game's function on the interpreter that holds the host
     build's memory. Registers r8 to r15 and pr come back unchanged, as the runtime's swap does; sr, gbr and vbr go to the callee and back. r0 to r7
-    that the call does not pass hold junk, so a callee that reads one the C did not pass disagrees with
-    the game, whose registers hold something else."""
+    that the call does not pass hold junk, except r0 to r3, which are the context's, so a callee that reads one
+    the C did not pass disagrees with the game, whose registers hold something else."""
     @CALL_HOOK
     def hook(addr, args, n):
         if len(state.get("snaps", ())) > CALLS_MAX:
@@ -280,6 +284,7 @@ def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
                     cpu.mem.write(sp + 4 * (i - 4), 4, args[i])
             cpu.r[15] = sp
             cpu.r[:8] = junk
+            cpu.r[:4] = regs[:4]                                # r0 to r3 are what the C set in the context with SETIN
             if n < 0:
                 return cpu.call(addr, **{"r%d" % i: args[i] for i in range(-n)})
             return cpu.call(addr, **{"r%d" % (4 + i): args[i] for i in range(min(n, 4))})
@@ -345,8 +350,14 @@ def run(lib: ctypes.CDLL, name: str, spec: tuple[list[tuple], bool, list[tuple]]
 
 
 def spec_for(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
+    """The case for the function, or random arguments. A case written for fewer parameters than the function now
+    takes gets any value for the rest, as a caller leaves them."""
     cases.load()
-    return cases.SPEC.get(sig.name) or default_spec(sig)
+    found = cases.SPEC.get(sig.name)
+    if not found:
+        return default_spec(sig)
+    kinds, returns, plants = found
+    return kinds + [("any",)] * (len(sig.params) - len(kinds)), returns, plants
 
 
 def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: random.Random,
@@ -384,6 +395,8 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
         state["stub"] = cpu.stub = [value(("any",), answers) & 0xFFFFFFFF for _ in range(16)]
     keep = machine.point(lib, host)
     hook = hook_for(host, state, [value(("any",), r) & 0xFFFFFFFF for _ in range(8)], lib)
+    regs = {"r%d" % i: value(("any",), r) for i in range(8)} | {"r%d" % (4 + i): v for i, v in enumerate(vals)}
+    (ctypes.c_uint32 * 16).in_dll(lib, "g_regs")[:8] = [regs["r%d" % i] & 0xFFFFFFFF for i in range(8)]   # the context holds what the caller had
     ctypes.c_uint32.in_dll(lib, "g_sp").value = host.r[15]
     ctypes.c_void_p.in_dll(lib, "g_call_hook").value = ctypes.cast(hook, ctypes.c_void_p).value
     ctypes.c_int.in_dll(lib, "g_fault").value = 0
@@ -397,16 +410,15 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     polls = ctypes.c_int.in_dll(lib, "g_polls").value + host.polls
     fault = ctypes.c_int.in_dll(lib, "g_fault").value or "error" in state
 
-    regs = {"r%d" % i: value(("any",), r) for i in range(8)} | {"r%d" % (4 + i): v for i, v in enumerate(vals)}
     original_fault = False
     want = 0
     try:
         want = cpu.call(int(name[1:], 16), **regs)
     except sh2emu.MemoryError_:                          # touched memory this check does not model
-        original_fault = True
+        return vals, [], True                            # so what the C does with these arguments is not the game's to compare
     except RuntimeError:                                 # ran past the interpreter's step limit
         original_fault = True
-        if polls >= LONG_RUN_POLLS:
+        if polls >= LONG_RUN_POLLS or polls > cpu.polls:      # the host went on past where the game's code stopped
             return vals, [], True
     del keep
 

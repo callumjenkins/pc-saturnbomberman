@@ -70,14 +70,10 @@ def test_a_jump_through_a_register_loaded_from_memory_is_a_tail_call_with_the_ar
     assert body(code)[-2:] == ["r0 = GJUMP4(r1, r4, r5, r6, r7);", "return r0;"]
 
 
-def test_reading_a_register_nobody_set_is_refused():
-    with pytest.raises(lift.Unsupported, match="r3"):
-        lifted(encode("mov Rm,Rn", 0, 3), RTS, NOP)
-
-
-def test_reading_a_register_among_r8_to_r14_nobody_set_takes_the_callers_from_the_context():
-    code = lifted(encode("mov Rm,Rn", 0, 9), RTS, NOP)
-    assert "r9 = R(9);" in code
+@pytest.mark.parametrize("read", [3, 9])
+def test_reading_a_register_among_r0_to_r3_or_r8_to_r14_nobody_set_takes_the_callers_from_the_context(read):
+    code = lifted(encode("mov Rm,Rn", 0, read), RTS, NOP)
+    assert "r%d = R(%d);" % (read, read) in code
 
 
 def test_a_stack_local_is_a_variable_not_a_pointer():
@@ -422,12 +418,13 @@ def test_a_continue_in_the_middle_of_a_loop_advances_time():
     assert lines_around_continues(lines) == ["POLL();"] and lines[-3:] == ["    POLL();", "}", "return;"]
 
 
-def test_a_continue_inside_a_do_while_advances_time():
+def test_a_loop_that_goes_back_early_as_well_as_at_its_test_is_not_a_do_while_since_continue_would_run_the_test():
     blocks = {1: block(1, "branch", [1, 2], "early", stmts=["a;"]), 2: block(2, "branch", [1, 3], "again", stmts=["b;"]),
               3: block(3, "return")}
     lines = structure.Structurer(blocks, 1).run()
     assert not any(structure.BACK in line for line in lines)
-    assert set(lines_around_continues(lines)) == {"POLL();"} and any("AGAIN(" in line for line in lines)
+    assert set(lines_around_continues(lines)) == {"POLL();"}
+    assert lines[0] == "while (1) {" and not any("AGAIN(" in line for line in lines)
 
 
 def test_an_empty_endless_loop_still_advances_time():
@@ -493,3 +490,50 @@ def test_a_jump_table_of_bytes_added_to_its_address_is_a_switch_on_the_signed_by
     monkeypatch.setattr(status, "jump_targets", lambda: {BASE + 6: [BASE + 16, BASE + 20]})
     assert body(lift.lift(image(*words), BASE)) == [
         "int r1;", "r1 = LD8(0x0600600C + r4);", "switch (r1) {", "case 4:", "return 1;", "case 8:", "return 2;", "}"]
+
+
+def test_or_of_a_register_with_itself_is_a_filler_that_reads_and_writes_nothing():
+    assert body(lifted(encode("or Rm,Rn", 0, 0, 0), RTS, NOP)) == []
+
+
+def test_pr_read_before_any_call_is_the_callers_return_address():
+    assert "r3 = PR();" in lifted(encode("sts pr,Rn", 3), RTS, NOP)
+
+
+def test_pr_read_after_a_call_is_refused():
+    with pytest.raises(lift.Unsupported, match="sts pr,r3"):
+        lifted(0xB000, NOP, encode("sts pr,Rn", 3), RTS, NOP)
+
+
+def test_a_local_read_before_any_write_reads_the_frame_the_game_left():
+    lower, raise_ = encode("add #imm,Rn", 15, 0, 0xFC), encode("add #imm,Rn", 15, 0, 4)
+    code = lifted(lower, encode("mov.l @Rm,Rn", 0, 15, 0), raise_, RTS, NOP)
+    assert body(code) == ["int r0;", "FRAME(sp, 4);", "r0 = LD32(sp - 4);", "return r0;"]
+
+
+def test_mach_and_macl_read_before_they_are_written_are_the_contexts():
+    code = lifted(encode("sts macl,Rn", 0), RTS, NOP)
+    assert body(code)[1:] == ["m0 = ((long long)MACH() << 32) | (unsigned)MACL();", "return (int)m0;"]
+
+
+def test_mach_saved_and_loaded_back_leaves_the_context_alone():
+    assert body(lifted(encode("sts mach,Rn", 1), encode("lds Rm,mach", 0, 1), RTS, NOP)) == []
+
+
+@pytest.mark.parametrize("fmt, expected", [("and #imm,r0", "r4 & 240"), ("or #imm,r0", "r4 | 240")])
+def test_a_logical_op_with_an_immediate_on_r0_is_not_the_register_filler(fmt, expected):
+    assert expected in lifted(encode("mov Rm,Rn", 0, 4), encode(fmt, 0, 0, 240), RTS, NOP)
+
+
+def test_lds_into_pr_sets_the_context_and_a_later_read_of_pr_is_refused():
+    assert "SETPR(r4);" in lifted(encode("lds Rm,pr", 0, 4), RTS, NOP)
+    with pytest.raises(lift.Unsupported, match="sts pr,r3"):
+        lifted(encode("lds Rm,pr", 0, 4), encode("sts pr,Rn", 3), RTS, NOP)
+
+
+def test_a_jump_table_of_words_that_go_back_before_the_table_is_a_switch_on_the_negative_offset_loaded(monkeypatch):
+    # mova table,r0 ; mov.w @(r0,r4),r1 ; add r1,r0 ; jmp @r0 ; nop ; rts ; mov #1,r0 ; rts ; mov #2,r0 ; nop ; table: -10 -6
+    words = (encode("mova @T,r0", low=4), encode("mov.w @(r0,Rm),Rn", 1, 4), encode("add Rm,Rn", 0, 1), encode("jmp @Rn", 0), NOP,
+             RTS, encode("mov #imm,Rn", 0, low=1), RTS, encode("mov #imm,Rn", 0, low=2), NOP, 0xFFF6, 0xFFFA)
+    monkeypatch.setattr(status, "jump_targets", lambda: {BASE + 6: [BASE + 10, BASE + 14]})
+    assert body(lift.lift(image(*words), BASE))[-6:] == ["switch (r1) {", "case -10:", "return 1;", "case -6:", "return 2;", "}"]

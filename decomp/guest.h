@@ -36,6 +36,8 @@
  *                   v before each call that can switch tasks, as the code after it reads it.
  *   R(n) SETR(n,v)  r8 to r14 in the context, which a task resumed after a call has: set before each call that
  *                   can switch tasks, for the ones the code after the call reads, and by the pops of the epilogue.
+ *   SETIN(n,v)      r0 to r7 in the context, for a callee that reads one the calling convention does not pass, and for the
+ *                   path that made no call before a block that reads what a call left: it is not a result the function gives back.
  *   PR() SETPR(v)   pr, which the prologue pushes and the epilogue pops.
  *   MACH() MACL()   MACH and MACL in the context, which a function a task can park in saves and restores as it does pr.
  *   SETMACH(v) SETMACL(v)
@@ -102,12 +104,14 @@ uint32_t g_entry_sp(void);
 void g_set_sp(uint32_t sp);
 uint32_t g_reg(int n);
 void g_reg_set(int n, uint32_t value);
+void g_reg_in(int n, uint32_t value);
 uint32_t g_pr(void);
 void g_pr_set(uint32_t value);
 #define ENTRY_SP(sp) gaddr sp = g_entry_sp()
 #define SETSP(v) g_set_sp((uint32_t)(v))
 #define R(n) ((int)g_reg(n))
 #define SETR(n, v) g_reg_set((n), (uint32_t)(v))
+#define SETIN(n, v) g_reg_in((n), (uint32_t)(v))
 #define PR() ((int)g_pr())
 #define SETPR(v) g_pr_set((uint32_t)(v))
 uint32_t g_mac_reg(int high);
@@ -220,6 +224,7 @@ typedef volatile unsigned short *H16PTR;
 #define SETSP(v) ((void)(v))
 #define R(n) (0)
 #define SETR(n, v) ((void)(v))
+#define SETIN(n, v) ((void)(v))
 #define PR() (0)
 #define SETPR(v) ((void)(v))
 #define MACH() (0)

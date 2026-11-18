@@ -1622,9 +1622,21 @@ int f00201276(int r4, int r5, int r6, int r7)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-int f00200522(int r4, int r5, int r6)
+int f002006FA(int r4, int r5, int r6, int r7)
 {
-    int r0, r3, r7, r9, r10, r11, r12, r13, r14, c2;
+    int r0, r1;
+
+    r1 = R(1);
+    r1 = LD32(r1);
+    POLL();
+    r0 = GJUMP4(r1, r4, r5, r6, r7);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f00200522(int r4, int r5, int r6, int r7)
+{
+    int r0, r3, r9, r10, r11, r12, r13, r14, c2;
     FRAME(sp, 36);
 
     r14 = r6;
@@ -1634,6 +1646,7 @@ int f00200522(int r4, int r5, int r6)
     r13 = 0x000A1220;
     ST32(sp - 36, r4);
     r10 = 0;
+    SETIN(7, r7);
     while (1) {
         r6 = LD32(sp - 36);
         r7 = R(7);
@@ -1693,4 +1706,32 @@ int f00200522(int r4, int r5, int r6)
         POLL();
     }
     return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f002006E8(int r4, int r5, int r6, int r7)
+{
+    int r0;
+
+    SETIN(1, 0x06000300);
+    r0 = GCALL4(0x002006FA, 64, 0x00200700, r6, r7);
+    return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+int f002012D8(int r4)
+{
+    int r0, r1, r5;
+
+    r0 = SR();
+    r0 = SR();
+    SETSR(((r0 & -241) | 240));
+    SETIN(0, 12);
+    SETIN(1, r4);
+    SETIN(2, 0x0020137C);
+    r0 = GCALL0(0x0020010C);
+    r5 = R(5);
+    r1 = SR();
+    SETSR(((((r5 & 15) << 2) << 2) | (r1 & -241)));
+    return 0;
 }

@@ -202,6 +202,7 @@ def run_one(seed, trials=40):
         vals=[0x060B0000+rr.randrange(0,0x80,4)]+[rr.choice([0,1,2,3,0x7f,0x80,0xff,0x7fff,0x8000,0xffff,0x7fffffff,0x80000000,0xffffffff,0xfffffffe,rr.getrandbits(32)]) for _ in range(3)]
         keep=machine.point(lib,host)
         ctypes.c_int.in_dll(lib,'g_fault').value=0
+        (ctypes.c_uint32*16).in_dll(lib,'g_regs')[:8]=[0,0,0,0]+vals
         sv=[v-(1<<32) if v>=1<<31 else v for v in vals[:nparams]]
         got=fn(*sv)
         try: want=cpu.call(BASE,max_steps=100000,**{'r%d'%(4+i):v for i,v in enumerate(vals)})

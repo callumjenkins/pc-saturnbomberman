@@ -59,6 +59,11 @@ void g_reg_set(int n, uint32_t value)
     g_cur->r[n] = value;
 }
 
+void g_reg_in(int n, uint32_t value)
+{
+    g_cur->r[n] = value;
+}
+
 uint32_t g_pr(void)
 {
     return g_cur->pr;

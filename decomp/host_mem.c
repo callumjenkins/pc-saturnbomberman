@@ -77,6 +77,12 @@ void g_reg_set(int n, uint32_t value)
     g_regs_set |= 1u << n;
 }
 
+/* The same register, but not one the function gives back, so check.py leaves it out of the comparison. */
+void g_reg_in(int n, uint32_t value)
+{
+    g_regs[n] = value;
+}
+
 uint32_t g_pr(void)
 {
     return g_pr_value;

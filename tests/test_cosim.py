@@ -443,3 +443,23 @@ def test_a_function_that_reads_a_register_its_callee_left_has_its_calls_run(tmp_
     monkeypatch.setattr(status, "sources", lambda folder=None: [str(source)])
     monkeypatch.setattr(check, "_reading", None)
     assert check.reads_callee_registers() == {"f06006000"}
+
+
+def test_a_case_written_for_fewer_parameters_than_the_function_takes_gets_any_value_for_the_rest(tmp_path, monkeypatch):
+    path = tmp_path / "f.c"
+    path.write_text('#include "krnl.h"\nint f0600B934(int r4, int r5, int r6)\n{\n    return r4 + r5 + r6;\n}\n')
+    sig = gen.signatures([str(path)])[0x0600B934]
+    monkeypatch.setattr(cases, "load", lambda: None)
+    monkeypatch.setitem(cases.SPEC, sig.name, ([("any",)], True, []))
+    assert check.spec_for(sig) == ([("any",)] * 3, True, [])
+
+
+def test_a_trial_in_which_the_games_code_touches_memory_the_check_lacks_is_skipped_whatever_the_host_does(monkeypatch, tmp_path):
+    def faults(self, *args, **regs):
+        raise sh2emu.MemoryError_("unmapped 4-byte access at 00000000")
+    monkeypatch.setattr(check.Counting, "call", faults)
+    path = tmp_path / "f.c"
+    path.write_text(SCALE % ("int", "int"))
+    sig = gen.signatures([str(path)])[0x0600B934]
+    fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 5, 1, sig)
+    assert (fails, ran) == ([], 0)

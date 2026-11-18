@@ -60,10 +60,26 @@ registers its callee reads; one whose last registers an earlier call overwrote l
 there what that call left, as it does in the game's code. A jump through a register is a tail call, `GJUMPn`
 with the pointer; `SR()`, `GBR()` and `VBR()` read the control registers and `SETSR(x)` and the others write
 them (a write to sr advances time, as `ldc` does); `m0` is MACH:MACL as one `long long`, and `MAC_L` and `MAC_W`
-accumulate into it. A `jmp` through a table of word offsets inside the function is a `switch` on the loaded offset; the lifter refuses one whose arm
-leaves a loop, or whose table goes to other functions. It also refuses a register read after a call that may have written it,
-a call into the middle of a function (code that reads r8 to r14 from its caller), and code that reads a
-register it never set (a piece of a larger function or a task's entry). A draft that would write its blocks out
+accumulate into it. A `jmp` through a table of word or byte offsets inside the function is a `switch` on the loaded offset; the lifter refuses one whose arm
+leaves a loop, or whose table goes to other functions.
+
+A register read after a call is `R(n)`, what the callee left in the context. Where one path made the call and another did not,
+the path that made none sets the context first (`SETIN(n, rn)`), so the join reads the same on both. A call through a
+register passes the r4 to r7 the function never writes, which the callee finds as its caller left them. A callee that reads
+r0 to r3 gets them from `SETIN(n, x)` before the call, and the cosim runs it with the context's r0 to r3. A register
+among r0 to r3, r8 to r14 or MACH:MACL that the function reads before writing is its caller's: `rn = R(n)`, and
+`m0 = ((long long)MACH() << 32) | (unsigned)MACL()`. `sts pr,rn` before the first call is `PR()`. A call whose
+return address is followed by data never returns, and ends its block.
+
+A frame pointer copy (`mov r15,r14`) is followed along each path, with how far each path has moved it, and gives r15 its
+offset back at a `mov r14,r15`. A frame whose size is a register, `sub r1,r15`, is `r15 = ALLOCA(from, n)`, r15 is a C
+variable below it, and a call there is preceded by `SETSP(r15)`. A block that one path reaches below such a frame and
+another reaches with r15 at the frame's base has r15 set to the base on the second path. A local read before it is
+written is a load from the frame, which the game's stack keeps. A function that does not reduce to `if` and `while` is written with gotos
+(`structure.flat`), with `POLL()` where the game advances time.
+
+The lifter refuses a call into the middle of a function (code that reads r8 to r14 from its caller), code that sets r15
+from anything but a copy, a frame or memory, `rte`, `div0s`, `div0u` and a `sts.l` through a register other than r15. A draft that would write its blocks out
 more than twelve times over is refused too. Its drafts are for reading and rewriting, and the cosim decides
 whether they are right.
 
@@ -276,6 +292,6 @@ every module.
 BOOT is 2,148 functions, IP 18 and FLD 82. They go through the same steps as KRNL's: `draft.py` lifts them, `adapt.py`
 checks the drafts, `status.py` and `gen.py` write the table and the build's files. The cosim's random memory starts the
 module's variables where its code ends when that is below the kernel's (`machine.variables`), and fills them mostly
-with pointers to each other. What the lifter still refuses in BOOT is a `jmp` through a table, a register read after a
-call that overwrote it, a branch whose T bit two blocks set differently, and a tail jump into the middle of
-another function.
+with pointers to each other. What the lifter still refuses in BOOT is the reset entries and the register save and restore
+routines (`setjmp`, `longjmp`, the exception stubs), the `rte` handlers, `div0s` and `div0u`, and a call with a run-time count of
+stack arguments. In FLD it is the copy routine and its jump-table entries, and in IP the runtime routines that pass state in r0 to r9.

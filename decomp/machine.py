@@ -63,11 +63,13 @@ def attach(cpu: sh2emu.CPU) -> None:
 
 
 def control_differences(lib: ctypes.CDLL, game: sh2emu.CPU) -> list[str]:
-    """How the host build left sr, gbr and vbr against the game's, leaving out the T bit, which a caller may not read."""
+    """How the host build left sr, gbr and vbr against the game's, leaving out the T bit, which a caller may not read, and
+    the M and Q bits, which only a division step reads and `div0s` and `div0u` set again."""
     problems = []
     host = (ctypes.c_uint32 * 3).in_dll(lib, "g_ctl")
-    for name, mine, theirs in zip(("sr", "gbr", "vbr"), host, (game.sr & ~1, game.gbr, game.vbr)):
-        if (mine & ~1 if name == "sr" else mine) != theirs:
+    for name, mine, theirs in zip(("sr", "gbr", "vbr"), host, (game.sr, game.gbr, game.vbr)):
+        mask = ~0x301 if name == "sr" else ~0
+        if mine & mask != theirs & mask:
             problems.append("%s is %08X, the game's code %08X" % (name, mine, theirs))
     return problems
 

@@ -67,9 +67,8 @@ def test_mac_l_accumulates_what_two_pointers_hold_and_steps_past_them():
     assert lines[:2] == ["m0 = MAC_L(0, (LD32(r5)), (LD32(r4)));", "return (int)m0;"]
 
 
-def test_a_mac_read_before_any_write_is_refused():
-    with pytest.raises(lift.Unsupported, match="m0"):
-        lifted(encode("sts mach,Rn", 0), RTS, NOP)
+def test_a_mac_read_before_any_write_is_the_contexts():
+    assert "m0 = ((long long)MACH() << 32) | (unsigned)MACL();" in lifted(encode("sts mach,Rn", 0), RTS, NOP)
 
 
 @pytest.mark.parametrize("words, expected", [

@@ -67,6 +67,15 @@ def written(image: sh2.Image, code: set[int]) -> frozenset[int]:
     return frozenset(r for r in found if 8 <= r <= 14)
 
 
+def kept(image: sh2.Image, code: set[int]) -> frozenset[int]:
+    """r4 to r7 that the instructions at `code`, delay slots included, never write: they reach a call still holding
+    what the function's caller passed."""
+    found: set[int] = set()
+    for pc in code:
+        found |= _operands(image.insn(pc))[1]
+    return frozenset(range(4, 8)) - found
+
+
 def defs(ins: sh2.Insn) -> frozenset[int]:
     """The registers the instruction writes."""
     return _operands(ins)[1]
@@ -215,6 +224,8 @@ def _operands(ins: sh2.Insn) -> tuple[frozenset[int], frozenset[int]]:
     operands = re.split(r",(?![^(]*\))", parts[1]) if len(parts) > 1 else []
     uses: set[int] = set()
     defs: set[int] = set()
+    if ins.op in ("and", "or") and len(operands) == 2 and operands[0] == operands[1] and _REG.fullmatch(operands[0]):
+        return frozenset(), frozenset()
     if ins.op in _CLEARS and len(operands) == 2 and operands[0] == operands[1] and _REG.fullmatch(operands[0]):
         return frozenset(), frozenset({int(operands[0][1:])})
     for i, operand in enumerate(operands):

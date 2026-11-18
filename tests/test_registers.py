@@ -117,11 +117,10 @@ def test_a_branch_into_the_middle_of_a_function_sets_the_registers_it_has_writte
     assert "SETR(14, 1);" in lift.lift(image, BASE, code[BASE], code)
 
 
-def test_a_call_to_a_helper_that_takes_r0_is_refused():
+def test_a_call_to_a_helper_that_takes_r0_is_given_r0_in_the_context():
     # caller: bsr helper ; mov r4,r0 ; rts ; nop                   helper: shar r0 ; rts ; nop
     image, code = program((0xB002, encode("mov Rm,Rn", 0, 4), RTS, NOP), (encode("shar Rn", 0), RTS, NOP))
-    with pytest.raises(lift.Unsupported, match="r0"):
-        lift.lift(image, BASE, code[BASE], code)
+    assert "SETIN(0, r4);" in lift.lift(image, BASE, code[BASE], code)
 
 
 def test_a_register_passed_on_to_a_callee_untouched_is_a_parameter():

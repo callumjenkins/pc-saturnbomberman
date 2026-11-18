@@ -11,6 +11,8 @@
 #define f002005B4 fld_f002005B4
 #define f002005EE fld_f002005EE
 #define f0020060A fld_f0020060A
+#define f002006E8 fld_f002006E8
+#define f002006FA fld_f002006FA
 #define f00200700 fld_f00200700
 #define f00200724 fld_f00200724
 #define f00200764 fld_f00200764
@@ -62,5 +64,6 @@
 #define f00201260 fld_f00201260
 #define f00201264 fld_f00201264
 #define f00201276 fld_f00201276
+#define f002012D8 fld_f002012D8
 #define f00201310 fld_f00201310
 #define f0020132E fld_f0020132E

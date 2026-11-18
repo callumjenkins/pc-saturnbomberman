@@ -66,6 +66,10 @@ class Read:
     tail: bool = False                      # it ends by jumping to another function
     fresh: set[int] = field(default_factory=set)         # State.fresh where the block ends
     clobbered: set[int] = field(default_factory=set)     # State.clobbered where the block ends
+    r0_defined: bool = False                             # State.r0_defined where the block ends
+    ctx_reads: set[int] = field(default_factory=set)     # State.ctx_reads
+    loaded: set[int] = field(default_factory=set)        # State.loaded
+    passes: set[int] = field(default_factory=set)        # State.entry_clobbered where the block ends
     lacks: str = ""                         # State.lacks: the block reads a T bit nothing before it set
     flag: str | None = None                 # State.flag where the block ends: what T holds on the way to its fall-through
     taken: str | None = None                # what T holds on the way to the target of its branch
@@ -75,7 +79,8 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
          functions: dict[int, set[int]] | None = None) -> bool:
     """Writes the call as a statement. With `functions`, the arguments are the registers the callee reads, except
     those at the end that an earlier call overwrote: the callee finds there what that call left, as it does in the
-    game's code. Without, a call passes those set since the last call, and a tail call hands on r4 to r7 as
+    game's code. A call to a callee nobody can read passes as well the r4 to r7 the function never writes, which the
+    callee finds as its caller left them. Without `functions`, a call passes those set since the last call, and a tail call hands on r4 to r7 as
     they stand, except those an earlier call overwrote: those at the end are left out, and one before a
     register that does go in passes what that call left, which the context holds."""
     tail = ins.op in ("jmp", "bra")
@@ -118,14 +123,12 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
     reads = registers.reads(image, number(where), functions) if known else None
     args: list[str] = []
     if reads is not None:
-        helper = sorted(reads & {0, 1, 2, 3})
-        if helper:
-            raise Unsupported("calls %s, which takes r%d, as a runtime routine does: write its operator in HELPER()"
-                              % (where, helper[0]))
+        for r in sorted(reads & {0, 1, 2, 3}):          # a callee that takes an argument in a register the calling convention does not pass
+            st.effect("SETIN(%d, %s);" % (r, strip(st.get(r))))
         top = max((r for r in reads if r not in st.clobbered), default=3)
         args = [st.get(r) if r in reads else "0" for r in range(4, top + 1)]
     else:
-        top = 7 if tail else max((r for r in range(4, 8) if r in st.fresh or r in params), default=3)
+        top = 7 if tail else max((r for r in range(4, 8) if r in st.fresh or r in params or r in st.kept), default=3)
         for r in range(4, top + 1):
             args.append("" if r in st.clobbered else st.get(r))
         while args and not args[-1]:
@@ -138,6 +141,10 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
                 st.get(r)                       # overwritten by a call: it cannot be left out before a stack argument
         args += [st.get(r) for r in range(4 + len(args), 8)] if reads is None else ["0"] * (4 - len(args))
         args += extra
+    if reads is None:                           # a callee nobody can read may leave a register it does not write as it found it
+        for r in sorted(st.ctx_wanted - st.clobbered - set(range(4, 4 + len(args)))):
+            if r or st.r0_defined:
+                st.effect("SETIN(%d, %s);" % (r, strip(st._get(r))))
     text = "%s%d(%s%s)" % ("GJUMP" if tail else "GCALL", len(args), where, "".join(", " + a for a in args))
     if tail and st.framed and not st.sp:
         st.effect("UNFRAME(sp);")
@@ -146,6 +153,9 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
     for line in restore:
         st.effect(line)
     st.clobbered |= written
+    st.r0_defined = True
+    st.pr_intact = False
+    st.entry_clobbered -= written
     st.callee = where
     st.clobbered.discard(0)
     st.fresh &= set(range(1, 8)) - written
@@ -158,10 +168,11 @@ def call(ins: "sh2.Insn", slot: "sh2.Insn", st: State, params: set[int], image: 
 
 
 def table_entry(image: "sh2.Image", table: tuple[int | None, int, int], k: int) -> int:
-    """Entry k of a jump table of words, which `mov.w` loads as it stands, or of bytes, which `mov.b` loads signed."""
+    """Entry k of a jump table of words or of bytes, which `mov.w` and `mov.b` load signed."""
     base, _, size = table
     if size == 2:
-        return image.u16(base + 2 * k)
+        word = image.u16(base + 2 * k)
+        return word - 0x10000 if word >= 0x8000 else word
     word = image.u16((base + k) & ~1)
     byte = (word >> 8 if (base + k) % 2 == 0 else word) & 0xFF
     return byte - 256 if byte >= 128 else byte
@@ -215,11 +226,13 @@ def takes_r15_back_first(image: "sh2.Image", at: int, copies: Copies) -> bool:
 
 
 def walk(image: "sh2.Image", entry: int, code: set[int] | None, parked: bool,
-         spoiled: frozenset[int] = frozenset()) -> Walked:
+         spoiled: frozenset[int] = frozenset(), joins: tuple[tuple[int, int], ...] = ()) -> Walked:
     """The leaders of the function and what else its r15 does. A `mov Rm,r15` of a copy sets r15 back to the offset
     the copy was made at, plus that move, and ends a frame of a run-time size. A register moved by different
     amounts on two paths to a leader is no copy, and the walk starts again without it, so that nothing it read
-    earlier used it."""
+    earlier used it. A leader that one path reaches below a frame of a run-time size and another reaches with r15 at
+    that frame's base is a join of the two: the walk starts again with r15 below the frame there, and the other path
+    sets r15 to the base."""
     found = {entry: 0}
     run_time: dict[int, int] = {}
     moved: dict[int, dict[int, int]] = {entry: {}}
@@ -227,6 +240,8 @@ def walk(image: "sh2.Image", entry: int, code: set[int] | None, parked: bool,
     copies = Copies(spoiled)
     lowest = 0
     tails: set[int] = set()
+    forced = dict(joins)                        # the leaders that are joins, and the base of the frame below them
+    found_joins: dict[int, int] = {}
     # r15, how far the copies have moved, and the base of a run-time frame, at each instruction a path has reached
     states: dict[int, tuple[int, dict[int, int], int | None]] = {}
     work = [(entry, 0, {}, None)]
@@ -242,18 +257,27 @@ def walk(image: "sh2.Image", entry: int, code: set[int] | None, parked: bool,
         """A second path to an instruction has to find r15 where the first did, and below a run-time frame or not, unless
         the instruction takes r15 from a copy or from memory. A copy of r15 moved by another amount on it is no copy."""
         was_sp, was_moves, was_base = states[at]
-        if was_sp != sp:
+        restores = takes_r15_back_first(image, at, copies)
+        if was_sp != sp and not restores:
             raise Unsupported("the stack is %d bytes down on one path to %08X and %d on another" % (-was_sp, at, -sp))
         if was_base != base:
-            if not takes_r15_back_first(image, at, copies):
+            below = was_base if was_base is not None else base
+            at_base = (sp if base is None else was_sp) == below
+            if restores:
+                run_time[at] = below                                    # the restore is the same on both paths
+            elif at_base and at not in forced:
+                found_joins[at] = below
+            else:
                 raise Unsupported("r15 is below a frame of a run-time size on one path to %08X and not on another" % at)
-            run_time[at] = was_base if was_base is not None else base          # the restore is the same on both paths
         copies.spoiled |= {r for r in was_moves.keys() | copies.adjust.keys() if was_moves.get(r, 0) != copies.adjust.get(r, 0)}
 
     while work:
         at, sp, copies.adjust, base = work.pop()
         known: dict[int, int] = {}
         while image.contains(at):
+            if at in forced:
+                base = forced[at]
+                run_time[at] = base
             if at in states:
                 meet(at, sp, base)
                 break
@@ -301,9 +325,11 @@ def walk(image: "sh2.Image", entry: int, code: set[int] | None, parked: bool,
                 if ins.op != "rts" and (leaves or ins.op == "jmp"):
                     tails.add(sp)
                 break
+            if ins.op in ("jsr", "bsr") and code is not None and nxt not in code:
+                break                           # the callee never returns: what follows the call is data
             at = nxt
-    if copies.spoiled != spoiled:
-        return walk(image, entry, code, parked, frozenset(copies.spoiled))
+    if copies.spoiled != spoiled or found_joins:
+        return walk(image, entry, code, parked, frozenset(copies.spoiled), tuple(sorted((forced | found_joins).items())))
     return Walked(found, lowest, tails, copies.kept(), moved, run_time)
 
 
@@ -322,10 +348,13 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
         try:
             read_blocks(image, entry, stops, params, code, functions, gives=gives)
         except Unsupported as e:
-            if "address of a local" not in str(e) and "argument passed on the stack" not in str(e):
+            if not any(why in str(e) for why in ("address of a local", "argument passed on the stack", "two sizes")):
                 raise
             framed = True
-    for attempt in range(2):
+    attempts = 2
+    attempt = -1
+    while attempt + 1 < attempts:
+        attempt += 1
         reads, slots = read_blocks(image, entry, stops, params, code, functions, framed, parked, gives)
         returns = any(s.var == "r0" for r in reads.values() for s in r.stmts)
         live_in, live_out = liveness(reads, returns)
@@ -333,9 +362,13 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
             returns = False
             live_in, live_out = liveness(reads, returns)
         stray = sorted(v for v in live_in[entry] if not (v[0] == "r" and 4 <= int(v[1:]) <= 7))
-        inherited = [v for v in stray if v[0] == "r" and 8 <= int(v[1:]) <= 14]     # its caller's, which the context holds
+        if not framed and not parked and any(v[0] == "v" for v in stray):
+            framed = True                       # a local read before it is written holds what the frame had, which only guest memory keeps
+            attempts += 1
+            continue
+        inherited = [v for v in stray if v == MAC or v[0] == "r" and (int(v[1:]) <= 3 or 8 <= int(v[1:]) <= 14)]     # its caller's, which the context holds
         stray = [v for v in stray if v not in inherited]
-        if stray and attempt == 1:
+        if stray and attempt == attempts - 1:
             raise Unsupported("reads %s before writing it: a piece of a larger function, or a task entry" % ", ".join(stray))
         params = {int(v[1:]) for v in live_in[entry] if v[0] == "r" and 4 <= int(v[1:]) <= 7}
         if any(r.tail for r in reads.values()):
@@ -353,12 +386,15 @@ def lift(image: "sh2.Image", entry: int, code: set[int] | None = None, functions
         elif block.kind == "return":
             block.value = strip(read.term) or ("r0" if returns else "")
         blocks[at] = block
-    lines = ["%s = R(%s);" % (v, v[1:]) for v in inherited]
+    lines = [("%s = ((long long)MACH() << 32) | (unsigned)MACL();" % MAC) if v == MAC else "%s = R(%s);" % (v, v[1:])
+             for v in inherited]
     try:
         written = structure.Structurer(blocks, entry).run()
     except structure.Unstructured:
         written = structure.flat(blocks, entry)
     lines += [fold_frame(line) for line in written]
+    if inherited[:1] == [MAC] and not any(MAC in line for line in lines[len(inherited):]):
+        lines.pop(0)                            # the function only saves and restores MACH:MACL, which the context keeps
     if lines and lines[-1] == "return;":
         lines.pop()
     body = "\n".join(lines)
@@ -420,15 +456,18 @@ def stack_arguments(st: State) -> list[str]:
     return [("LD32(%s)" % framed(off)) if st.framed else "v%d" % -off for off in words]
 
 
-def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], flags: int,
+def read_block(image: "sh2.Image", entry: int, start: int, stops: Stops, params: set[int], flags: int,
                slots: dict[int, int], fresh: set[int], code: set[int] | None,
                functions: dict[int, set[int]] | None = None, framed: bool = False,
                stored: set[int] | None = None, saved: set[int] | None = None, parked: bool = False,
                clobbered: set[int] = frozenset(), flag: str | None = None,
-               merged: dict[int, str] | None = None, gives: tuple[int, ...] = ()) -> tuple[Read, int]:
+               merged: dict[int, str] | None = None, gives: tuple[int, ...] = (),
+               sync: set[int] = frozenset(), wanted: frozenset[int] = frozenset(), r0_defined: bool = False) -> tuple[Read, int]:
     st = State(flags=flags, sp=stops[start], copies=stops.copies, adjust=dict(stops.adjusts[start]), run_time=stops.run_time.get(start), slots=slots, fresh=set(fresh), framed=framed, parked=parked,
-               clobbered=set(clobbered), flag=flag,
+               clobbered=set(clobbered), entry_clobbered=set(clobbered), flag=flag,
                touched=registers.written(image, code) if code is not None else frozenset(range(8, 15)),
+               kept=registers.kept(image, code) if code is not None and functions is not None else frozenset(),
+               pr_intact=start == entry, ctx_wanted=wanted, r0_defined=r0_defined,
                stored=stored if stored is not None else set(), saved=saved if saved is not None else set())
     block = structure.Block(start)
     term = ""
@@ -490,6 +529,9 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
         if ins.op in _CALLS:
             call(ins, slot, st, params, image, functions)
             st.flag = None
+            if ins.op in ("jsr", "bsr") and code is not None and nxt not in code:
+                block.kind = "return"           # the callee never returns: what follows the call is data
+                break
         else:
             loads = TABLE_LOAD.match(ins.text)
             if loads:
@@ -501,13 +543,17 @@ def read_block(image: "sh2.Image", start: int, stops: Stops, params: set[int], f
         if at in stops:
             block.kind, block.targets = "goto", [at]
             break
+    if st.run_time is None and st.framed and any(stops.run_time.get(target) is not None for target in block.targets):
+        st.put(15, st.get(15))                  # the block after has r15 as a variable, which the way in that made no frame sets here
+    for reg in sorted(sync - st.clobbered):         # the block after reads it from the context, where a path that made no call left nothing
+        st.effect("SETIN(%d, %s);" % (reg, st.get(reg)))
     if merged and block.kind in ("goto", "branch"):
         # the variable T is in once the block ends is what T holds on every way out, a branch's own two ways included
         holds = after_slot if block.kind == "branch" else st.flag
         for target in dict.fromkeys(block.targets):
             if target in merged and holds is not None:
                 st.stmts.append(Stmt(merged[target], holds))
-    return Read(block, st.stmts, term, tail, st.fresh, st.clobbered, st.lacks, st.flag, taken_flag), st.flags
+    return Read(block, st.stmts, term, tail, st.fresh, st.clobbered, st.r0_defined, st.ctx_reads, st.loaded, st.entry_clobbered, st.lacks, st.flag, taken_flag), st.flags
 
 
 def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], code: set[int] | None,
@@ -520,6 +566,9 @@ def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], 
     clobbered: dict[int, set[int]] = {at: set() for at in stops}
     carried: dict[int, str | None] = {at: None for at in stops}
     merged: dict[int, str] = {}                 # blocks entered with T in different variables, to the one the ways in copy it to
+    wanted: frozenset[int] = frozenset()        # the registers some block reads from the context
+    defined = {at: at != entry for at in stops}  # r0 holds a value on every path into the block
+    syncs: dict[int, set[int]] = {at: set() for at in stops}    # per block, the registers it sets in the context for what follows to read
     for _ in range(MAX_ROUNDS):
         flags = 0
         reads: dict[int, Read] = {}
@@ -527,8 +576,8 @@ def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], 
         stored: set[int] = set()
         saved: set[int] = set()
         for at in sorted(stops):
-            reads[at], flags = read_block(image, at, stops, params, flags, slots, fresh[at], code, functions, framed,
-                                          stored, saved, parked, clobbered[at], carried[at], merged, gives)
+            reads[at], flags = read_block(image, entry, at, stops, params, flags, slots, fresh[at], code, functions, framed,
+                                          stored, saved, parked, clobbered[at], carried[at], merged, gives, syncs[at], wanted, defined[at])
         into: dict[int, list[set[int]]] = {at: [] for at in stops}
         after: dict[int, list[set[int]]] = {at: [] for at in stops}
         holding: dict[int, list[str | None]] = {at: [] for at in stops}
@@ -547,12 +596,28 @@ def read_blocks(image: "sh2.Image", entry: int, stops: Stops, params: set[int], 
         for number, at in enumerate(sorted(stops)):
             if at != entry and len(set(holding[at])) > 1 and None not in holding[at] and set(ways[at]) <= {"goto", "branch"}:
                 merges[at] = leaving[at] = "c%d" % (MERGED + number)
-        if settled == fresh and spoiled == clobbered and leaving == carried and merges == merged:
+        # a block's registers read from the context, and those it passes on to the blocks after it
+        reading = {at: set(read.loaded) for at, read in reads.items()}
+        for _ in range(len(reads)):
+            for at, read in reads.items():
+                reading[at] |= {r for target in read.block.targets for r in reading[target] if r in read.passes}
+        needs = {at: set().union(*(reading[t] for t in read.block.targets)) if read.block.targets else set()
+                 for at, read in reads.items()}
+        reading_now = frozenset().union(*(read.ctx_reads for read in reads.values()))
+        if any(s.var == "r0" and s.pure for read in reads.values() for s in read.stmts):
+            reading_now |= {0}                  # a callee that leaves r0 alone gives it back, so r0 reaches it in the context
+        coming: dict[int, list[bool]] = {at: [] for at in stops}
+        for read in reads.values():
+            for target in read.block.targets:
+                coming[target].append(read.r0_defined)
+        defined_now = {at: at != entry and bool(coming[at]) and all(coming[at]) for at in stops}
+        if (settled == fresh and spoiled == clobbered and leaving == carried and merges == merged and needs == syncs
+                and reading_now == wanted and defined_now == defined):
             for read in reads.values():
                 if read.lacks:
                     raise Unsupported(read.lacks)
             return reads, slots
-        fresh, clobbered, carried, merged = settled, spoiled, leaving, merges
+        fresh, clobbered, carried, merged, syncs, wanted, defined = settled, spoiled, leaving, merges, needs, reading_now, defined_now
     raise Unsupported("what the blocks leave in registers and T does not settle")
 
 

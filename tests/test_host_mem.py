@@ -2,10 +2,14 @@ import ctypes
 import os
 import shutil
 import subprocess
+import sys
 
 import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "decomp"))
+sys.path.insert(0, os.path.join(ROOT, "saturn-recomp", "src"))
+import machine  # noqa: E402
 
 pytestmark = pytest.mark.skipif(shutil.which("clang") is None, reason="needs clang")
 
@@ -146,3 +150,21 @@ def test_a_function_that_never_read_its_entry_r15_has_no_frame_to_protect(mem):
     mem.g_wr(TOP - 4, 4, 1)
     mem.g_poll()
     assert unprotected(mem) == 0
+
+
+@pytest.mark.parametrize("host_sr, game_sr, differs", [
+    pytest.param(0x0F3, 0x0F2, False, id="T"),
+    pytest.param(0x0F0, 0x3F0, False, id="M and Q, which a division sets"),
+    pytest.param(0x0F0, 0x0D0, True, id="the interrupt mask"),
+])
+def test_the_status_register_compares_without_t_m_and_q(mem, host_sr, game_sr, differs):
+    (ctypes.c_uint32 * 3).in_dll(mem, "g_ctl")[:] = [host_sr, 0, 0]
+    game = type("Game", (), {"sr": game_sr, "gbr": 0, "vbr": 0})()
+    assert bool(machine.control_differences(mem, game)) == differs
+
+
+def test_a_register_set_as_an_input_is_not_one_the_function_gives_back(mem):
+    mem.g_reg_in(3, 7)
+    mem.g_reg_set(4, 9)
+    assert ctypes.c_uint32.in_dll(mem, "g_regs_set").value == 1 << 4
+    assert (ctypes.c_uint32 * 16).in_dll(mem, "g_regs")[3:5][:] == [7, 9]

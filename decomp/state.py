@@ -67,6 +67,13 @@ class State:
     stored: set[int] = field(default_factory=set)   # offsets from r15 on entry stored to anywhere in the function
     saved: set[int] = field(default_factory=set)    # r8 to r14 the function's prologue has pushed
     sp_set: str = ""                        # the SETSP the block last wrote, which a call after it need not repeat
+    entry_clobbered: set[int] = field(default_factory=set)  # r1 to r7 a call on some path in overwrote, and the block has not set since
+    ctx_reads: set[int] = field(default_factory=set)        # every register the block reads from the context after a call
+    ctx_wanted: frozenset[int] = frozenset()                # those the function reads from the context anywhere, which a call it cannot read has to find in the context too
+    loaded: set[int] = field(default_factory=set)           # those the block reads from the context, which the other paths into it must set
+    pr_intact: bool = False                 # no call has run yet in the function, so pr still holds its return address
+    r0_defined: bool = False                # r0 holds a value on every path here, which a callee that leaves it alone gives back
+    kept: frozenset[int] = frozenset()      # r4 to r7 the function never writes
     run_time: int | None = None             # r15 is the variable `r15`, below a frame of a run-time size: its offset before it
 
     def get(self, reg: int) -> str:
@@ -76,6 +83,9 @@ class State:
 
     def _get(self, reg: int) -> str:
         if reg in self.clobbered and 1 <= reg <= 7:
+            self.ctx_reads.add(reg)
+            if reg in self.entry_clobbered:
+                self.loaded.add(reg)
             self.put(reg, "R(%d)" % reg, False)         # what the callee left in the context, which the game's code reads
         if reg in self.clobbered:
             raise Unsupported("r%d is read after a call%s overwrote it" % (reg, " to " + self.callee if self.callee else ""))
@@ -83,6 +93,9 @@ class State:
 
     def put(self, reg: int, expr: str, pure: bool = True) -> None:
         self.clobbered.discard(reg)
+        if reg == 0:
+            self.r0_defined = True
+        self.entry_clobbered.discard(reg)
         self.fresh.add(reg)
         if _NUMBER.match(expr):
             self.known[reg] = int(expr, 0)
@@ -565,6 +578,8 @@ def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
         st.put(n, op2(st.get(n), "+", st.get(m)))
     elif op == "add":
         st.put(n, op2(st.get(n), "+" if ins.imm >= 0 else "-", str(abs(ins.imm))))
+    elif op in ("and", "or") and fmt in ("and Rm,Rn", "or Rm,Rn") and m == n:
+        pass                                    # SHC's filler for a delay slot: it reads and writes nothing
     elif op in ("sub", "and", "or", "xor") and ins.m is not None:
         st.put(n, op2(st.get(n), {"sub": "-", "and": "&", "or": "|", "xor": "^"}[op], st.get(m)))
     elif op in ("and", "or", "xor") and ins.imm is not None:
@@ -676,12 +691,17 @@ def step(ins: "sh2.Insn", st: State, image: "sh2.Image") -> None:
             st.stmts.append(Stmt(MAC, "(unsigned)%s" % st.macl))      # for a `sts macl` in a later block
     elif op in ("stc", "sts") and fmt.split(" ")[1].split(",")[0] in _CONTROL:
         st.put(n, control(fmt.split(" ")[1].split(",")[0], st), pure=False)
+    elif op == "sts" and fmt.startswith("sts pr,") and st.pr_intact:
+        st.put(n, "PR()", pure=False)
     elif op == "sts" and fmt.startswith("sts macl") and st.macl is not None:
         st.put(n, st.macl)
     elif op == "sts" and fmt.startswith(("sts mach", "sts macl")):
         st.put(n, "(int)(%s >> 32)" % MAC if fmt.startswith("sts mach") else "(int)%s" % MAC)
     elif op in ("ldc", "ldc.l") and fmt.rsplit(",", 1)[1] in _CONTROL:
         set_control(fmt.rsplit(",", 1)[1], load_operand(ins, st), st)
+    elif op == "lds" and fmt.endswith(",pr"):
+        st.effect("SETPR(%s);" % strip(st.get(m)))
+        st.pr_intact = False
     elif op == "lds" and fmt.endswith(("mach", "macl")):
         high = fmt.endswith("mach")
         keep = "(%s & 0xFFFFFFFFLL)" % MAC if high else "(%s & ~0xFFFFFFFFLL)" % MAC

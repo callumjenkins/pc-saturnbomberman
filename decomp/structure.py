@@ -281,7 +281,8 @@ class Structurer:
         if enters:
             return [head] + ["    " + line for line in polled(inner, advance=False)] + ["}"]
         ends_in_test = len(inner) >= 5 and inner[-5].startswith("if (") and inner[-4:] == ["    " + BACK, "} else {", "    break;", "}"]
-        if ends_in_test and not tests_only:
+        goes_back_early = any(line.strip() == BACK for line in inner[:-5])     # a continue in a do-while runs its test, not the body
+        if ends_in_test and not tests_only and not goes_back_early:
             condition = inner[-5][4:-3]
             return ["do {"] + ["    " + line for line in polled(inner[:-5])] + ["} while (AGAIN(%s));" % condition]
         # A block that returns has no successors, so it is never in a loop body: every pass goes round again.
