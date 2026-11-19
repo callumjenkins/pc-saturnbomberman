@@ -4102,6 +4102,7 @@ int boot_f06019538(int);
 int boot_f060195B0(int);
 int boot_f06019620(int);
 int boot_f06019680(int);
+int boot_f06019734(int, int);
 int boot_f06019968(int, int);
 int boot_f06019A08(int, int);
 int boot_f06019AA8(int, int);
@@ -4136,6 +4137,7 @@ int boot_f0601ABA8(int);
 int boot_f0601ABB8(int);
 int boot_f0601AC78(int);
 int boot_f0601ACC8(int);
+int boot_f0601AD0C(int, int);
 int boot_f0601AF78(int);
 int boot_f0601AFA8(int);
 int boot_f0601AFF8(int);
@@ -4249,6 +4251,7 @@ void boot_f0602443C(int, int, int, int);
 int boot_f0602448C(int);
 int boot_f0602450C(int, int, int, int);
 void boot_f0602464C(int, int, int, int);
+int boot_f06024730(void);
 int boot_f06025530(int, int);
 int boot_f060255E0(int);
 int boot_f06025608(int);
@@ -4471,7 +4474,10 @@ int boot_f06033F6C(int);
 int boot_f06033FE0(void);
 int boot_f06034000(void);
 int boot_f06034024(void);
+int boot_f0603407C(int, int, int);
+int boot_f060342CC(int, int, int);
 int boot_f0603486C(int, int, int);
+int boot_f06034990(int, int, int);
 int boot_f06034CEC(int);
 void boot_f06034D08(int);
 void boot_f06034D24(int);
@@ -4578,6 +4584,7 @@ int boot_f0603A338(int);
 int boot_f0603A394(int, int);
 int boot_f0603A3E8(int);
 int boot_f0603A458(int, int, int, int);
+int boot_f0603A68C(int, int, int, int);
 int boot_f0603A710(int, int, int, int);
 int boot_f0603A76C(int, int);
 int boot_f0603A890(int, int);
@@ -4594,6 +4601,7 @@ int boot_f0603AF04(int, int, int, int);
 int boot_f0603B1DC(int, int, int, int);
 int boot_f0603B390(int);
 int boot_f0603B41C(int);
+int boot_f0603B6E0(int, int);
 int boot_f0603BA4C(int);
 int boot_f0603BAF8(int);
 int boot_f0603BC80(int, int);
@@ -4679,12 +4687,15 @@ int boot_f060425D4(int, int, int);
 int boot_f0604266C(int, int);
 int boot_f060426AC(int);
 int boot_f060426FC(int);
+void boot_f0604274C(int, int, int, int);
+void boot_f06042804(int, int, int, int);
 int boot_f06042A20(int, int);
 void boot_f06042B28(void);
 void boot_f06042B84(int, int, int, int);
 int boot_f06042D14(int);
 int boot_f06042D28(int, int);
 int boot_f06042D88(int, int, int, int);
+int boot_f06043050(int, int, int, int);
 int boot_f0604326C(int, int, int, int);
 void boot_f060432EC(int, int, int, int);
 int boot_f06043310(int, int);
@@ -4940,6 +4951,7 @@ int boot_f060582D0(int, int);
 int boot_f060583A4(int, int);
 int boot_f06058454(int, int);
 int boot_f060585D8(int);
+int boot_f0605864C(int);
 int boot_f06058784(int, int, int, int);
 int boot_f060587DC(int, int);
 int boot_f06058838(int, int, int, int);
@@ -5128,6 +5140,7 @@ int boot_f0605EFC8(int, int, int, int);
 int boot_f0605F0E4(int, int);
 int boot_f0605F150(int, int, int, int);
 int boot_f0605F1D4(int, int, int, int);
+int boot_f0605F354(int, int, int, int);
 int boot_f0605F490(void);
 int boot_f0605F4CC(void);
 int boot_f0605F538(int, int);
@@ -5718,6 +5731,7 @@ int boot_f0606EBC8(int);
 int boot_f0606EBD4(int, int);
 void boot_f0606EBE0(int);
 void boot_f0606EBEC(int);
+int boot_f0606EBF8(int, int);
 int boot_f0606ECB0(int, int);
 int boot_f0606ED34(int, int, int, int);
 int boot_f0606EDAC(int, int, int, int);
@@ -5802,6 +5816,7 @@ int boot_f060708EC(int);
 void boot_f06070974(int, int, int, int);
 void boot_f06070A18(int);
 int boot_f06070A2C(void);
+int boot_f06070A68(int);
 int boot_f06070C2C(int);
 int boot_f06070CBC(int);
 int boot_f06070E10(int);
@@ -10143,6 +10158,7 @@ void swap_boot_f06019538(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f060195B0(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f060195B0((int)c.r[4]); }
 void swap_boot_f06019620(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06019620((int)c.r[4]); }
 void swap_boot_f06019680(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06019680((int)c.r[4]); }
+void swap_boot_f06019734(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06019734((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f06019968(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06019968((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f06019A08(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06019A08((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f06019AA8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06019AA8((int)c.r[4], (int)c.r[5]); }
@@ -10177,6 +10193,7 @@ void swap_boot_f0601ABA8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f0601ABB8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0601ABB8((int)c.r[4]); }
 void swap_boot_f0601AC78(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0601AC78((int)c.r[4]); }
 void swap_boot_f0601ACC8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0601ACC8((int)c.r[4]); }
+void swap_boot_f0601AD0C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0601AD0C((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f0601AF78(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0601AF78((int)c.r[4]); }
 void swap_boot_f0601AFA8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0601AFA8((int)c.r[4]); }
 void swap_boot_f0601AFF8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0601AFF8((int)c.r[4]); }
@@ -10290,6 +10307,7 @@ void swap_boot_f0602443C(SH2Context& c) { InSwap in(c); boot_f0602443C((int)c.r[
 void swap_boot_f0602448C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0602448C((int)c.r[4]); }
 void swap_boot_f0602450C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0602450C((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f0602464C(SH2Context& c) { InSwap in(c); boot_f0602464C((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
+void swap_boot_f06024730(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06024730(); }
 void swap_boot_f06025530(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06025530((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f060255E0(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f060255E0((int)c.r[4]); }
 void swap_boot_f06025608(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06025608((int)c.r[4]); }
@@ -10512,7 +10530,10 @@ void swap_boot_f06033F6C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f06033FE0(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06033FE0(); }
 void swap_boot_f06034000(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06034000(); }
 void swap_boot_f06034024(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06034024(); }
+void swap_boot_f0603407C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603407C((int)c.r[4], (int)c.r[5], (int)c.r[6]); }
+void swap_boot_f060342CC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f060342CC((int)c.r[4], (int)c.r[5], (int)c.r[6]); }
 void swap_boot_f0603486C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603486C((int)c.r[4], (int)c.r[5], (int)c.r[6]); }
+void swap_boot_f06034990(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06034990((int)c.r[4], (int)c.r[5], (int)c.r[6]); }
 void swap_boot_f06034CEC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06034CEC((int)c.r[4]); }
 void swap_boot_f06034D08(SH2Context& c) { InSwap in(c); boot_f06034D08((int)c.r[4]); }
 void swap_boot_f06034D24(SH2Context& c) { InSwap in(c); boot_f06034D24((int)c.r[4]); }
@@ -10619,6 +10640,7 @@ void swap_boot_f0603A338(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f0603A394(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603A394((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f0603A3E8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603A3E8((int)c.r[4]); }
 void swap_boot_f0603A458(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603A458((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
+void swap_boot_f0603A68C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603A68C((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f0603A710(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603A710((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f0603A76C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603A76C((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f0603A890(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603A890((int)c.r[4], (int)c.r[5]); }
@@ -10635,6 +10657,7 @@ void swap_boot_f0603AF04(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f0603B1DC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603B1DC((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f0603B390(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603B390((int)c.r[4]); }
 void swap_boot_f0603B41C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603B41C((int)c.r[4]); }
+void swap_boot_f0603B6E0(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603B6E0((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f0603BA4C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603BA4C((int)c.r[4]); }
 void swap_boot_f0603BAF8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603BAF8((int)c.r[4]); }
 void swap_boot_f0603BC80(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0603BC80((int)c.r[4], (int)c.r[5]); }
@@ -10720,12 +10743,15 @@ void swap_boot_f060425D4(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f0604266C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0604266C((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f060426AC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f060426AC((int)c.r[4]); }
 void swap_boot_f060426FC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f060426FC((int)c.r[4]); }
+void swap_boot_f0604274C(SH2Context& c) { InSwap in(c); boot_f0604274C((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
+void swap_boot_f06042804(SH2Context& c) { InSwap in(c); boot_f06042804((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f06042A20(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06042A20((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f06042B28(SH2Context& c) { InSwap in(c); boot_f06042B28(); }
 void swap_boot_f06042B84(SH2Context& c) { InSwap in(c); boot_f06042B84((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f06042D14(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06042D14((int)c.r[4]); }
 void swap_boot_f06042D28(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06042D28((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f06042D88(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06042D88((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
+void swap_boot_f06043050(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06043050((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f0604326C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0604326C((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f060432EC(SH2Context& c) { InSwap in(c); boot_f060432EC((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f06043310(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06043310((int)c.r[4], (int)c.r[5]); }
@@ -10981,6 +11007,7 @@ void swap_boot_f060582D0(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f060583A4(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f060583A4((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f06058454(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06058454((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f060585D8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f060585D8((int)c.r[4]); }
+void swap_boot_f0605864C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0605864C((int)c.r[4]); }
 void swap_boot_f06058784(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06058784((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f060587DC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f060587DC((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f06058838(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06058838((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
@@ -11169,6 +11196,7 @@ void swap_boot_f0605EFC8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f0605F0E4(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0605F0E4((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f0605F150(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0605F150((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f0605F1D4(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0605F1D4((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
+void swap_boot_f0605F354(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0605F354((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f0605F490(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0605F490(); }
 void swap_boot_f0605F4CC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0605F4CC(); }
 void swap_boot_f0605F538(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0605F538((int)c.r[4], (int)c.r[5]); }
@@ -11759,6 +11787,7 @@ void swap_boot_f0606EBC8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f0606EBD4(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0606EBD4((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f0606EBE0(SH2Context& c) { InSwap in(c); boot_f0606EBE0((int)c.r[4]); }
 void swap_boot_f0606EBEC(SH2Context& c) { InSwap in(c); boot_f0606EBEC((int)c.r[4]); }
+void swap_boot_f0606EBF8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0606EBF8((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f0606ECB0(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0606ECB0((int)c.r[4], (int)c.r[5]); }
 void swap_boot_f0606ED34(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0606ED34((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f0606EDAC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f0606EDAC((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
@@ -11843,6 +11872,7 @@ void swap_boot_f060708EC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_
 void swap_boot_f06070974(SH2Context& c) { InSwap in(c); boot_f06070974((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_boot_f06070A18(SH2Context& c) { InSwap in(c); boot_f06070A18((int)c.r[4]); }
 void swap_boot_f06070A2C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06070A2C(); }
+void swap_boot_f06070A68(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06070A68((int)c.r[4]); }
 void swap_boot_f06070C2C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06070C2C((int)c.r[4]); }
 void swap_boot_f06070CBC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06070CBC((int)c.r[4]); }
 void swap_boot_f06070E10(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)boot_f06070E10((int)c.r[4]); }
