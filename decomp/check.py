@@ -50,6 +50,7 @@ EDGES = (0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7F
          0xFFFFFFFE, 0xFFFFFF80, 0xFFFF8000)
 IMAGE = MODULE.path
 TABLE_MAX = 0x100                # bytes of a jump table code_runs keeps, at most
+STACK_BELOW = 0x1000             # bytes below a function's entry r15 in which a read of what nothing wrote is the C's to disagree on
 PROLOGUE = 16                    # instructions at the function's entry in which a push of r8 to r14 or pr is one of its saved registers
 FRAME_MAX = 0x400                # bytes of a function's stack check.py compares at a call, at most
 LONG_RUN_POLLS = 1_000_000        # polls after which a trial the game's code could not finish in the step limit is skipped, as one is when the host polled more than the game's code had by then: both are in a loop too long to compare
@@ -76,6 +77,8 @@ class Counting(sh2emu.CPU):
         self.own = self.code
         self.entry_sp = regs.get("r15", self.r[15])
         self.saved_slots = set()
+        self.mem.stack_written = set()
+        self.mem.stack_span = (self.entry_sp - STACK_BELOW, self.entry_sp)
         self._popping = False
         self.mem.saved_slots = self.saved_slots
         self.executed = 0
@@ -85,6 +88,7 @@ class Counting(sh2emu.CPU):
             return super().call(entry, max_steps, **regs)
         finally:
             self.saved_slots.clear()
+            self.mem.stack_written = None
 
     @staticmethod
     def _saves_register(ins: sh2.Insn) -> bool:
@@ -102,18 +106,23 @@ class Counting(sh2emu.CPU):
     _popping = False
 
     def rb(self, a: int) -> int:
-        return super().rb(self._unsaved(a))
+        return super().rb(self._unsaved(a, 1))
 
     def rl(self, a: int) -> int:
-        return super().rl(self._unsaved(a))
+        return super().rl(self._unsaved(a, 4))
 
     def rw(self, a: int) -> int:
-        return super().rw(self._unsaved(a))
+        return super().rw(self._unsaved(a, 2))
 
-    def _unsaved(self, a: int) -> int:
-        """`a` unless it is a slot where the function saved a register, which only a pop reads: the C keeps the register in a local."""
+    def _unsaved(self, a: int, size: int) -> int:
+        """`a` unless the read is of what the C has no counterpart for: a slot where the function saved a register, which only a
+        pop reads, or stack below the function's entry that nothing wrote in this call, which holds whatever an earlier call left."""
         if (a & ~3) in self.saved_slots and not self._popping:
             raise sh2emu.MemoryError_("the function read a register it saved at %08X" % a)
+        written = getattr(self.mem, "stack_written", None)
+        if written is not None and not self._popping and self.entry_sp - STACK_BELOW <= a < self.entry_sp and any(
+                at not in written for at in range(a, a + size)):
+            raise sh2emu.MemoryError_("the function read stack nothing wrote at %08X" % a)
         return a
 
     def step(self) -> None:
@@ -121,8 +130,11 @@ class Counting(sh2emu.CPU):
         ins = self.fetch(pc)
         slot = self.fetch(pc + 2) if ins.delay else ins       # a branch executes its delay slot, a pop there included
         self._popping = ins.m == 15 and "@Rm+" in ins.fmt or slot.m == 15 and "@Rm+" in slot.fmt
+        low = self.r[15]
         super().step()
         self.executed += 1
+        if low < self.r[15] <= low + STACK_BELOW and self.mem.stack_written:     # what a returned call pushed is stale: a later read of it is of leftovers
+            self.mem.stack_written.difference_update(range(low, self.r[15]))
         if self.executed <= PROLOGUE and self.code is self.own and self._saves_register(ins):
             self.saved_slots.add(self.r[15])
         op = ins.op
@@ -285,6 +297,12 @@ def default_spec(sig: gen.Signature) -> tuple[list[tuple], bool, list[tuple]]:
     kinds = [cases.ptr(0x060C0000, 0x400) if t == "uint32_t" else ("address",) if i in sig.addressed else ("any",)
              for i, t in enumerate(sig.params)]
     return kinds, sig.returns != "void", []
+
+
+def on_stack(address: int) -> bool:
+    """Whether a returned address is in the stack, where a callee that returns the address of its own frame lies as deep as
+    the frames above it, which the C does not have the game's depth of."""
+    return machine.STACK - 0x1000 <= address & 0xFFFFFFFF < machine.STACK + 0x1000
 
 
 def hook_for(cpu, state, junk: list[int], lib: ctypes.CDLL):
@@ -455,6 +473,8 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     got = returns_type(lib.g_run(ctypes.cast(fn, ctypes.c_void_p), (ctypes.c_uint64 * 16)(*words))).value
     polls = ctypes.c_int.in_dll(lib, "g_polls").value + host.polls
     fault = ctypes.c_int.in_dll(lib, "g_fault").value or "error" in state
+    if state.get("error", "").startswith("more than"):      # the host made more calls than a trial answers, which the game's code may still finish
+        return vals, [], True
 
     original_fault = False
     want = 0
@@ -479,7 +499,7 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     if name in CALLS and state["calls"] != CALLS[name]:
         problems.append("called %s, expected %s" % ([hex(a) for a in state["calls"]],
                                                   [hex(a) for a in CALLS.get(name, [])]))
-    if returns and (got & 0xFFFFFFFF) != want:
+    if returns and (got & 0xFFFFFFFF) != want and not (on_stack(got) and on_stack(want)):
         problems.append("returned %08X, the game's code %08X" % (got & 0xFFFFFFFF, want))
     problems += machine.differences(host, cpu)
     problems += machine.control_differences(lib, cpu)

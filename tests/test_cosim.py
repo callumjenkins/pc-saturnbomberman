@@ -510,3 +510,13 @@ def test_a_word_the_game_waits_on_reads_back_one_more_at_each_load_only_when_the
     mem.ticking = frozenset({0x06000010})
     assert [mem.read(0x06000010, 4) for _ in range(3)] == [5, 6, 7]
     assert mem.read(0x06000010, 2) == 0
+
+
+def test_a_trial_in_which_the_host_makes_more_calls_than_a_trial_answers_is_skipped(monkeypatch, tmp_path):
+    path = tmp_path / "f.c"
+    path.write_text('#include "krnl.h"\nint f0600B934(int n, int m)\n{\n    GCALL0(0x0600B934);\n    GCALL0(0x0600B934);\n'
+                    '    GCALL0(0x0600B934);\n    GCALL0(0x0600B934);\n    return 0;\n}\n')
+    monkeypatch.setattr(check, "CALLS_MAX", 2)
+    sig = gen.signatures([str(path)])[0x0600B934]
+    fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 5, 1, sig)
+    assert (len(fails), ran) == (0, 0)

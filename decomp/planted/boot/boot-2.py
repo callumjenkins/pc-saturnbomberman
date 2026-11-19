@@ -27,8 +27,10 @@ case("f0606CDAC", [span(0, 40)], True,
      [plant(0x0608F008, 4, [8, 30, 100], 1.0), plant(0x0608EFEC, 4, [OBJ], 1.0), plant(0x0608EFD8, 4, [NODE], 1.0)])
 # Assumes a target word that sits in the work area or in one of the two address ranges the code tests.
 case("f0606F3F0", [pick(OBJ)], True,
-     [plant(OBJ + 56, 4, [0, 1, 2, 3, 4, 5, 6], 1.0), plant(OBJ + 16, 4, [NODE], 1.0),
-      plant(NODE, 4, [0x06000000, 0x00250000, 0x02100000, 0x00300000], 1.0)])
+     [plant(OBJ + 56, 4, [0, 1, 2, 3, 4], 1.0), plant(OBJ + 16, 4, [NODE], 1.0),
+      plant(NODE, 4, [0x06000000, 0x00250000, 0x02100000, 0x00300000], 1.0)]
+     + [plant(0x0608F030 + 4 * k, 4, [0, 0x060290A8], 1.0) for k in range(-100, 100)]    # the handlers dispatch through this table
+     + [plant(0x0606EAFC + 12 * k, 4, [handler], 1.0) for k, handler in enumerate((0x0606F040, 0x0606F1E4, 0x0606F238, 0x0606F29C))])
 case("f06071924", [pick(0, 1, 2)], True)
 # Assumes at most 8 entries to clear and a work-area pointer for the two tables.
 case("f060682E8", [], False,

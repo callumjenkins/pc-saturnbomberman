@@ -49,6 +49,9 @@ class Devices(sh2emu.Memory):
     ticking: frozenset[int] = frozenset()                   # the words (`cases.ticks`) that read back one more at each load
     saved_slots: frozenset[int] | set[int] = frozenset()    # where the function pushed the registers it gives back, which only the game's code holds
 
+    stack_written: set[int] | None = None                   # the bytes written since the call began in stack_span, which a read below its entry r15 must be of
+    stack_span: tuple[int, int] = (0, 0)
+
     def read(self, addr: int, size: int) -> int:
         value = super().read(addr, size)
         if size == 4 and addr & 0x1FFFFFFF in self.ticking:
@@ -58,6 +61,8 @@ class Devices(sh2emu.Memory):
     def write(self, addr: int, size: int, value: int) -> None:
         if (addr & ~3) in self.saved_slots:
             raise sh2emu.MemoryError_("the function overwrote a register it saved at %08X" % addr)
+        if self.stack_written is not None and self.stack_span[0] <= addr < self.stack_span[1]:
+            self.stack_written.update(range(addr, addr + size))
         a = addr & 0x1FFFFFFF
         if a == HIRQ and size == 2:
             value = (self.read(addr, 2) & value) | 1
