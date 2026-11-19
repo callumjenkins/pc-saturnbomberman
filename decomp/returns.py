@@ -45,10 +45,11 @@ def readers(image: sh2.Image, code: dict[int, set[int]], voids: set[int]) -> dic
 
 
 def outputs(image: sh2.Image, code: dict[int, set[int]], swapped: set[int],
-            given: dict[int, set[int]] | None = None) -> dict[int, list[tuple[int, list[int]]]]:
+            given: dict[int, set[int]] | None = None, through_calls: bool = False) -> dict[int, list[tuple[int, list[int]]]]:
     """For each swapped function with code that writes r1 to r7, the return addresses after which an instruction of the
     caller's reads one of them before writing it, with those registers. A register the function's C sets in the
-    context (`SETR`, `given`) is its own to give, so it does not count."""
+    context (`SETR`, `given`) is its own to give, so it does not count. With `through_calls`, what the next callee reads of them
+    counts too, as the callee finds the register in the context."""
     written = {}
     given = given_registers() if given is None else given
     for a in swapped & code.keys():
@@ -59,7 +60,7 @@ def outputs(image: sh2.Image, code: dict[int, set[int]], swapped: set[int],
     found: dict[int, list[tuple[int, list[int]]]] = {}
     for callee, afters in _call_sites(image, pcs, set(written)).items():
         for after in sorted(afters):
-            reading = _read_first(image, pcs, after, written[callee])
+            reading = _read_first(image, pcs, after, written[callee], code if through_calls else None)
             if reading:
                 found.setdefault(callee, []).append((after, sorted(reading)))
     return found
@@ -75,7 +76,7 @@ def left_for_callers(image: sh2.Image, code: dict[int, set[int]]) -> dict[int, f
     """The registers r1 to r7 that callers read after a call to each function, as the function leaves them."""
     key = id(code)
     if _LEFT.get(key, (None,))[0] is not code:
-        sites = outputs(image, code, set(code), {})
+        sites = outputs(image, code, set(code), {}, through_calls=True)
         _LEFT[key] = (code, {callee: frozenset(r for _, regs in found for r in regs) for callee, found in sites.items()})
     return _LEFT[key][1]
 
@@ -111,9 +112,11 @@ def _call_sites(image: sh2.Image, pcs: set[int], callees: set[int]) -> dict[int,
     return sites
 
 
-def _read_first(image: sh2.Image, pcs: set[int], start: int, wanted: frozenset[int]) -> set[int]:
+def _read_first(image: sh2.Image, pcs: set[int], start: int, wanted: frozenset[int],
+                callees: dict[int, set[int]] | None = None) -> set[int]:
     """The registers of `wanted` that an instruction from `start` on reads before any instruction writes them,
-    along every path to a call or a return. What a callee would read does not count."""
+    along every path to a call or a return. What a callee would read does not count, unless `callees` holds the
+    function's code, in which case a call to one of them counts what it reads."""
     found: set[int] = set()
     seen: set[tuple[int, frozenset[int]]] = set()
     work = [(start, frozenset())]
@@ -129,6 +132,8 @@ def _read_first(image: sh2.Image, pcs: set[int], start: int, wanted: frozenset[i
                 found |= (registers.uses(each) & wanted) - written
                 written |= registers.defs(each)
             if ins.op in _ENDS:
+                if callees is not None and ins.op == "bsr" and ins.target in callees:
+                    found |= registers.reads(image, ins.target, callees) & wanted - written
                 break
             if ins.op in _BRANCHES:
                 work.append((ins.target, written))

@@ -30399,8 +30399,18 @@ symbol = "swap_ip_f060024D8"
 
 [[replace]]
 module = "IP"
+at = 0x06002510
+symbol = "swap_ip_f06002510"
+
+[[replace]]
+module = "IP"
 at = 0x0600255C
 symbol = "swap_ip_f0600255C"
+
+[[replace]]
+module = "IP"
+at = 0x0600270A
+symbol = "swap_ip_f0600270A"
 
 [[replace]]
 module = "FLD"
@@ -30416,6 +30426,11 @@ symbol = "swap_fld_f002001BE"
 module = "FLD"
 at = 0x00200208
 symbol = "swap_fld_f00200208"
+
+[[replace]]
+module = "FLD"
+at = 0x002002F2
+symbol = "swap_fld_f002002F2"
 
 [[replace]]
 module = "FLD"
@@ -30436,6 +30451,11 @@ symbol = "swap_fld_f00200410"
 module = "FLD"
 at = 0x002004E6
 symbol = "swap_fld_f002004E6"
+
+[[replace]]
+module = "FLD"
+at = 0x00200522
+symbol = "swap_fld_f00200522"
 
 [[replace]]
 module = "FLD"

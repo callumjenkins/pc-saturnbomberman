@@ -6032,14 +6032,18 @@ void ip_f06002404(int, int, int);
 void ip_f06002430(int, int, int);
 int ip_f0600245C(int, int, int);
 int ip_f060024D8(int);
+int ip_f06002510(int);
 void ip_f0600255C(void);
+void ip_f0600270A(int, int);
 int fld_f002001A4(int, int, int, int);
 int fld_f002001BE(int, int, int, int);
 int fld_f00200208(int, int);
+int fld_f002002F2(void);
 int fld_f0020033E(int, int);
 int fld_f002003DC(int, int);
 int fld_f00200410(int, int, int);
 int fld_f002004E6(int, int);
+int fld_f00200522(int, int, int, int);
 int fld_f002005B4(int);
 int fld_f002005EE(int);
 int fld_f0020060A(int);
@@ -12130,14 +12134,18 @@ void swap_ip_f06002404(SH2Context& c) { InSwap in(c); ip_f06002404((int)c.r[4], 
 void swap_ip_f06002430(SH2Context& c) { InSwap in(c); ip_f06002430((int)c.r[4], (int)c.r[5], (int)c.r[6]); }
 void swap_ip_f0600245C(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)ip_f0600245C((int)c.r[4], (int)c.r[5], (int)c.r[6]); }
 void swap_ip_f060024D8(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)ip_f060024D8((int)c.r[4]); }
+void swap_ip_f06002510(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)ip_f06002510((int)c.r[4]); }
 void swap_ip_f0600255C(SH2Context& c) { InSwap in(c); ip_f0600255C(); }
+void swap_ip_f0600270A(SH2Context& c) { InSwap in(c); ip_f0600270A((int)c.r[4], (int)c.r[5]); }
 void swap_fld_f002001A4(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f002001A4((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_fld_f002001BE(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f002001BE((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_fld_f00200208(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f00200208((int)c.r[4], (int)c.r[5]); }
+void swap_fld_f002002F2(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f002002F2(); }
 void swap_fld_f0020033E(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f0020033E((int)c.r[4], (int)c.r[5]); }
 void swap_fld_f002003DC(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f002003DC((int)c.r[4], (int)c.r[5]); }
 void swap_fld_f00200410(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f00200410((int)c.r[4], (int)c.r[5], (int)c.r[6]); }
 void swap_fld_f002004E6(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f002004E6((int)c.r[4], (int)c.r[5]); }
+void swap_fld_f00200522(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f00200522((int)c.r[4], (int)c.r[5], (int)c.r[6], (int)c.r[7]); }
 void swap_fld_f002005B4(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f002005B4((int)c.r[4]); }
 void swap_fld_f002005EE(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f002005EE((int)c.r[4]); }
 void swap_fld_f0020060A(SH2Context& c) { InSwap in(c); c.r[0] = (uint32_t)fld_f0020060A((int)c.r[4]); }

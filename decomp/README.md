@@ -300,4 +300,6 @@ checks the drafts, `status.py` and `gen.py` write the table and the build's file
 module's variables where its code ends when that is below the kernel's (`machine.variables`), and fills them mostly
 with pointers to each other. What the lifter still refuses in BOOT is the reset entries and the register save and restore
 routines (`setjmp`, `longjmp`, the exception stubs), the `rte` handlers, `div0s` and `div0u`, and a call with a run-time count of
-stack arguments. In FLD it is the copy routine and its jump-table entries, and in IP the runtime routines that pass state in r0 to r9.
+stack arguments. In FLD it is the copy routine and its jump-table entries, and in IP the runtime routines that pass state in r0 to r9. A routine that gives r8 or r9 back to its caller without pushing them
+(`0600270A`) is lifted with a `SETR` for each at its returns, so the game's code that calls it finds them. A function of C that
+calls such a routine does not get them back, since the swap puts r8 to r14 back after every call: `060026DC` stays `drafted`.

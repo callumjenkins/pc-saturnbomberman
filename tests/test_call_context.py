@@ -69,3 +69,14 @@ def test_a_call_followed_by_data_never_returns_and_ends_the_function():
 def test_a_call_through_a_register_after_r0_was_set_gives_the_callee_r0_in_the_context_to_leave_alone():
     code = lifted(LOAD_R2, sh2.encode("mov #imm,Rn", 0, low=4), CALL_R2, NOP, RTS, NOP)
     assert "SETIN(0, 4);" in code
+
+
+def test_a_function_that_writes_a_saved_register_it_never_pushed_hands_it_on_where_it_returns():
+    code = lifted(sh2.encode("mov #imm,Rn", 8, low=1), RTS, NOP)
+    assert body(code)[-1] == "SETR(8, 1);"
+
+
+def test_a_function_that_pushes_and_pops_a_saved_register_gives_back_the_callers_value():
+    push_r8, pop_r8 = sh2.encode("mov.l Rm,@-Rn", 15, 8, 0), sh2.encode("mov.l @Rm+,Rn", 8, 15, 0)
+    code = lifted(push_r8, sh2.encode("mov #imm,Rn", 8, low=1), RTS, pop_r8)
+    assert "SETR(8, 1);" not in code

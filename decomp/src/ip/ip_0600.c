@@ -382,64 +382,6 @@ int f06002280(void)
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */
-void f0600270A(int r4, int r5)
-{
-    int r0, r1, r2, r8, r9, c6, c8;
-
-    r0 = R(0);
-    r1 = R(1);
-    r2 = R(2);
-    r8 = R(8);
-    r9 = R(9);
-    if (r5 > 0) {
-        r2 = ((r2 << 2) << 2) + r0;
-        if ((r5 - 1) == 0) {
-            r2 = r2 + 2;
-            do {
-                c6 = r8 & 1;
-                r8 = (int)((unsigned)r8 >> 1);
-                if (c6) {
-                    r1 = r1 | r4;
-                    ST8(r9, r1);
-                    r9 = r9 + 1;
-                } else {
-                    r8 = r8 + 1;
-                    r1 = (r4 << 2) << 2;
-                }
-                r2 = r2 - 1;
-            } while (AGAIN(!(r2 == 0)));
-        }
-        return;
-    } else {
-        if (r0 == 12) {
-            return;
-        } else {
-            if (r0 == 14) {
-                return;
-            } else {
-                if (r0 == 13) {
-                    return;
-                } else {
-                    r5 = 2;
-                    if (r0 == 15) {
-                        return;
-                    } else {
-                        c8 = r8 & 1;
-                        r8 = (int)((unsigned)r8 >> 1);
-                        if (c8) {
-                            ST8(r9, (r1 | r0));
-                            return;
-                        } else {
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-/* Lifted by decomp/lift.py, not yet rewritten by hand. */
 int f06002D88(int r4, int r5, int r6, int r7)
 {
     int r0, r1, r2, r3, r8, r9, r10, r11, r12, r13, r14;
@@ -472,6 +414,114 @@ int f06002D88(int r4, int r5, int r6, int r7)
     SETSR(r0);
     r0 = GJUMP3(0x06002E20, 0, 0, r6);
     return r0;
+}
+
+/* Lifted by decomp/lift.py, not yet rewritten by hand. */
+void f0600270A(int r4, int r5)
+{
+    int r0, r1, r2, r8, r9, c6, c8;
+
+    r0 = R(0);
+    r1 = R(1);
+    r2 = R(2);
+    r8 = R(8);
+    r9 = R(9);
+    if (r5 > 0) {
+        r5 = r5 - 1;
+        r2 = ((r2 << 2) << 2) + r0;
+        if (r5 == 0) {
+            r2 = r2 + 2;
+            do {
+                c6 = r8 & 1;
+                r8 = (int)((unsigned)r8 >> 1);
+                if (c6) {
+                    r1 = r1 | r4;
+                    ST8(r9, r1);
+                    r9 = r9 + 1;
+                } else {
+                    r8 = r8 + 1;
+                    r1 = (r4 << 2) << 2;
+                }
+                r2 = r2 - 1;
+            } while (AGAIN(!(r2 == 0)));
+        }
+        SETR(1, r1);
+        SETR(2, r2);
+        SETR(4, r4);
+        SETR(5, r5);
+        SETR(8, r8);
+        SETR(9, r9);
+        return;
+    } else {
+        r4 = 0;
+        r5 = 1;
+        if (r0 == 12) {
+            SETR(1, r1);
+            SETR(2, r2);
+            SETR(4, r4);
+            SETR(5, r5);
+            SETR(8, r8);
+            SETR(9, r9);
+            return;
+        } else {
+            r5 = 2;
+            if (r0 == 14) {
+                SETR(1, r1);
+                SETR(2, r2);
+                SETR(4, r4);
+                SETR(5, r5);
+                SETR(8, r8);
+                SETR(9, r9);
+                return;
+            } else {
+                r4 = 8;
+                r5 = 1;
+                if (r0 == 13) {
+                    SETR(1, r1);
+                    SETR(2, r2);
+                    SETR(4, r4);
+                    SETR(5, r5);
+                    SETR(8, r8);
+                    SETR(9, r9);
+                    return;
+                } else {
+                    r5 = 2;
+                    if (r0 == 15) {
+                        SETR(1, r1);
+                        SETR(2, r2);
+                        SETR(4, r4);
+                        SETR(5, r5);
+                        SETR(8, r8);
+                        SETR(9, r9);
+                        return;
+                    } else {
+                        r5 = r5 ^ r5;
+                        c8 = r8 & 1;
+                        r8 = (int)((unsigned)r8 >> 1);
+                        if (c8) {
+                            r1 = r1 | r0;
+                            ST8(r9, r1);
+                            SETR(1, r1);
+                            SETR(2, r2);
+                            SETR(4, r4);
+                            SETR(5, r5);
+                            SETR(8, r8);
+                            SETR(9, (r9 + 1));
+                            return;
+                        } else {
+                            SETR(1, ((r0 << 2) << 2));
+                            SETR(2, r2);
+                            SETR(4, r4);
+                            SETR(5, r5);
+                            SETR(8, (r8 + 1));
+                            SETR(9, r9);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 /* Lifted by decomp/lift.py, not yet rewritten by hand. */

@@ -513,6 +513,8 @@ def read_block(image: "sh2.Image", entry: int, start: int, stops: Stops, params:
             step(slot, st, image)
             for reg in gives:                   # what callers read of r1 to r7 after the call, which the context carries back
                 st.effect("SETR(%d, %s);" % (reg, strip(st.get(reg))))
+            for reg in sorted(st.touched - st.saved if code is not None else ()):   # r8 to r14 written and not pushed: the function hands them on
+                st.effect("SETR(%d, %s);" % (reg, strip(st.get(reg))))
             block.kind = "return"
             break
         if ins.op == "jmp" and ins.pc in status.jump_targets():
