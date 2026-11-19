@@ -46,7 +46,11 @@ class Devices(sh2emu.Memory):
     """The memory of a trial once it is filled, with the three writes host_mem.c's `g_wr` answers the same way:
     HIRQ keeps the flags written as 1 and sets CMOK, CR1 keeps what a plant gave it, and SF reads back 0."""
 
+    saved_slots: frozenset[int] | set[int] = frozenset()    # where the function pushed the registers it gives back, which only the game's code holds
+
     def write(self, addr: int, size: int, value: int) -> None:
+        if (addr & ~3) in self.saved_slots:
+            raise sh2emu.MemoryError_("the function overwrote a register it saved at %08X" % addr)
         a = addr & 0x1FFFFFFF
         if a == HIRQ and size == 2:
             value = (self.read(addr, 2) & value) | 1

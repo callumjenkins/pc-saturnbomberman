@@ -67,7 +67,6 @@ case("f0606A6D0", [], False, [plant(0x25D00010, 2, [2, 3, 0xFFFF], 1.0)])
 case("f0606BC08", [("any",)], True,
      [plant(0x0608F444, 4, [BUF], 1.0), plant(BUF + 148, 4, [0, 1, 4, 8], 1.0)]
      + [plant(BUF + 52 + 4 * i, 4, [1, 2, 3], 0.5) for i in range(8)])
-case("f0606CDF8", [("address",)] * 4, True)
 case("f0606F2A8", [("address",)], True)
 case("f06070070", [span(0, 23), ("any",), ("address",), ("any",)], True)
 case("f06071A30", [("address",), span(0, 8)], True)

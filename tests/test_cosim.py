@@ -463,3 +463,39 @@ def test_a_trial_in_which_the_games_code_touches_memory_the_check_lacks_is_skipp
     sig = gen.signatures([str(path)])[0x0600B934]
     fails, ran = check.run(check.build([str(path)]), sig.name, check.default_spec(sig), 5, 1, sig)
     assert (fails, ran) == ([], 0)
+
+
+PUSH_R8 = sh2.encode("mov.l Rm,@-Rn", 15, 8, 0)
+POP_R8 = sh2.encode("mov.l @Rm+,Rn", 8, 15, 0)
+
+
+def run_with_a_saved_register(monkeypatch, *body: int) -> check.Counting:
+    words = [PUSH_R8, *body, RTS, POP_R8]
+    mem = sh2emu.Memory()
+    ram = mem.add(0x06000000, 0x100000)
+    for i, word in enumerate(words):
+        ram[BASE - 0x06000000 + 2 * i:BASE - 0x06000000 + 2 * i + 2] = word.to_bytes(2, "big")
+    cpu = sh2emu.CPU(mem)
+    cpu.r[15] = 0x060FFFF0
+    machine.attach(cpu)
+    monkeypatch.setattr(check.Counting, "_code", {BASE: {BASE + 2 * i for i in range(len(words))}})
+    counting = check.counting(cpu)
+    counting.call(BASE)
+    return counting
+
+
+def test_a_function_that_pops_what_it_pushed_in_its_prologue_runs_to_the_end(monkeypatch):
+    run_with_a_saved_register(monkeypatch)
+
+
+@pytest.mark.parametrize("access", [
+    pytest.param(sh2.encode("mov.l Rm,@Rn", 15, 1, 0), id="a store over it"),
+    pytest.param(sh2.encode("mov.l @Rm,Rn", 1, 15, 0), id="a load of it"),
+])
+def test_a_trial_in_which_the_function_touches_a_register_it_saved_other_than_to_pop_it_is_skipped(monkeypatch, access):
+    with pytest.raises(sh2emu.MemoryError_, match="saved"):
+        run_with_a_saved_register(monkeypatch, access)
+
+
+def test_the_slots_a_call_saved_are_forgotten_when_it_returns(monkeypatch):
+    assert not run_with_a_saved_register(monkeypatch).saved_slots

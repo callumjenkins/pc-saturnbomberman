@@ -29,7 +29,7 @@ import machine  # noqa: E402
 import modules  # noqa: E402
 import registers  # noqa: E402
 import status  # noqa: E402
-from saturnrecomp import sh2emu  # noqa: E402
+from saturnrecomp import sh2, sh2emu  # noqa: E402
 
 MODULE = modules.current()        # the module of game.toml the functions belong to: DECOMP_MODULE, or KRNL
 BASE = MODULE.base
@@ -50,6 +50,7 @@ EDGES = (0, 1, 2, 0x7F, 0x80, 0xFF, 0x100, 0x7FFF, 0x8000, 0xFFFF, 0x10000, 0x7F
          0xFFFFFFFE, 0xFFFFFF80, 0xFFFF8000)
 IMAGE = MODULE.path
 TABLE_MAX = 0x100                # bytes of a jump table code_runs keeps, at most
+PROLOGUE = 16                    # instructions at the function's entry in which a push of r8 to r14 or pr is one of its saved registers
 FRAME_MAX = 0x400                # bytes of a function's stack check.py compares at a call, at most
 LONG_RUN_POLLS = 1_000_000        # polls after which a trial the game's code could not finish in the step limit is skipped, as one is when the host polled more than the game's code had by then: both are in a loop too long to compare
 CALLS_MAX = 2000                # calls a trial makes, answered or run, before it gives up, since an endless loop of them would fill memory
@@ -67,28 +68,63 @@ class Counting(sh2emu.CPU):
     _jumps: set[int] | None = None
     _operators: dict[int, bool] = {}
     seen: set[tuple[int, bool]] | None = None     # (pc, taken) for each conditional branch of the called function's own code
+    saved_slots: set[int] | frozenset[int] = frozenset()   # where the function pushed the registers it gives back, as it was entered
     stub: list[int] | None = None                 # when set, a call out of the function's own code returns the next of these without running
 
     def call(self, entry: int, max_steps: int = STEP_LIMIT, **regs: int) -> int:
         self.code, self.outer = self._body(entry), []
         self.own = self.code
         self.entry_sp = regs.get("r15", self.r[15])
+        self.saved_slots = set()
+        self._popping = False
+        self.mem.saved_slots = self.saved_slots
+        self.executed = 0
         self.calls: list[tuple[int, list[int], list[int]]] = []
         self.stubbed: list[tuple[int, list[int]]] = []
-        return super().call(entry, max_steps, **regs)
+        try:
+            return super().call(entry, max_steps, **regs)
+        finally:
+            self.saved_slots.clear()
+
+    @staticmethod
+    def _saves_register(ins: sh2.Insn) -> bool:
+        """The push of a register the function gives back, which the C keeps in no stack slot."""
+        return ins.n == 15 and (ins.fmt == "sts.l pr,@-Rn" or ins.fmt == "mov.l Rm,@-Rn" and 8 <= ins.m <= 14)
 
     def frame(self, sp: int) -> list[int]:
         """The words of the stack from sp up to where the function was entered, none where sp is outside the memory the
         check models, as the host's call hook reads them."""
         try:
-            return [self.rl(at) for at in range(sp, min(self.entry_sp, sp + FRAME_MAX), 4)]
+            return [self.mem.read(at, 4) for at in range(sp, min(self.entry_sp, sp + FRAME_MAX), 4)]
         except sh2emu.MemoryError_:
             return []
+
+    _popping = False
+
+    def rb(self, a: int) -> int:
+        return super().rb(self._unsaved(a))
+
+    def rl(self, a: int) -> int:
+        return super().rl(self._unsaved(a))
+
+    def rw(self, a: int) -> int:
+        return super().rw(self._unsaved(a))
+
+    def _unsaved(self, a: int) -> int:
+        """`a` unless it is a slot where the function saved a register, which only a pop reads: the C keeps the register in a local."""
+        if (a & ~3) in self.saved_slots and not self._popping:
+            raise sh2emu.MemoryError_("the function read a register it saved at %08X" % a)
+        return a
 
     def step(self) -> None:
         pc = self.pc
         ins = self.fetch(pc)
+        slot = self.fetch(pc + 2) if ins.delay else ins       # a branch executes its delay slot, a pop there included
+        self._popping = ins.m == 15 and "@Rm+" in ins.fmt or slot.m == 15 and "@Rm+" in slot.fmt
         super().step()
+        self.executed += 1
+        if self.executed <= PROLOGUE and self.code is self.own and self._saves_register(ins):
+            self.saved_slots.add(self.r[15])
         op = ins.op
         if self.seen is not None and op in CONDITIONAL and pc in self.own and self.code is self.own:
             self.seen.add((pc, self.pc != pc + (4 if ins.delay else 2)))
