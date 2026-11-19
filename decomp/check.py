@@ -405,9 +405,13 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     ctypes.c_uint32.in_dll(lib, "g_top").value = 0
     ctypes.c_int.in_dll(lib, "g_unprotected").value = 0
     fn = getattr(lib, name)
-    fn.restype = C_TYPES.get(sig.returns if sig else "int", ctypes.c_int32)
-    fn.argtypes = [C_TYPES[t] for t in sig.params] if sig else [ctypes.c_int32] * len(vals)
-    got = fn(*[t(v).value for t, v in zip(fn.argtypes, vals)])
+    returns_type = C_TYPES.get(sig.returns if sig else "int", ctypes.c_int32)
+    param_types = [C_TYPES[t] for t in sig.params] if sig else [ctypes.c_int32] * len(vals)
+    words = [t(v).value & 0xFFFFFFFFFFFFFFFF for t, v in zip(param_types, vals)]
+    ctypes.c_int.in_dll(lib, "g_poll_limit").value = min(STEP_LIMIT, 3_000_000)
+    lib.g_run.restype = ctypes.c_uint64
+    lib.g_run.argtypes = [ctypes.c_void_p, ctypes.c_uint64 * 16]
+    got = returns_type(lib.g_run(ctypes.cast(fn, ctypes.c_void_p), (ctypes.c_uint64 * 16)(*words))).value
     polls = ctypes.c_int.in_dll(lib, "g_polls").value + host.polls
     fault = ctypes.c_int.in_dll(lib, "g_fault").value or "error" in state
 

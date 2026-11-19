@@ -168,3 +168,35 @@ def test_a_register_set_as_an_input_is_not_one_the_function_gives_back(mem):
     mem.g_reg_set(4, 9)
     assert ctypes.c_uint32.in_dll(mem, "g_regs_set").value == 1 << 4
     assert (ctypes.c_uint32 * 16).in_dll(mem, "g_regs")[3:5][:] == [7, 9]
+
+
+@pytest.fixture
+def run(tmp_path):
+    source = tmp_path / "functions.c"
+    source.write_text("#include <stdint.h>\nint g_poll(void);\n"
+                      "uint64_t sum(uint64_t a, uint64_t b) { return a + b; }\n"
+                      "uint64_t spin(uint64_t a) { for (;;) g_poll(); return a; }\n")
+    out = tmp_path / "run.so"
+    subprocess.check_call(["clang", "-shared", "-fPIC", "-o", str(out), str(source), os.path.join(ROOT, "decomp", "host_mem.c")])
+    lib = ctypes.CDLL(str(out))
+    lib.g_run.restype = ctypes.c_uint64
+    lib.g_run.argtypes = [ctypes.c_void_p, ctypes.c_uint64 * 16]
+    return lib
+
+
+def test_g_run_returns_what_the_function_returns_from_the_words_it_is_given(run):
+    words = (ctypes.c_uint64 * 16)(5, 0x100000000, 9)
+    assert run.g_run(ctypes.cast(run.sum, ctypes.c_void_p), words) == 0x100000005
+
+
+def test_g_run_leaves_a_loop_that_polls_past_the_limit_with_the_fault_set(run):
+    ctypes.c_int.in_dll(run, "g_poll_limit").value = 100
+    run.g_run(ctypes.cast(run.spin, ctypes.c_void_p), (ctypes.c_uint64 * 16)())
+    assert fault(run) == 1
+    assert ctypes.c_int.in_dll(run, "g_polls").value == 101
+
+
+def test_a_poll_past_the_limit_outside_g_run_returns_to_its_caller(run):
+    ctypes.c_int.in_dll(run, "g_poll_limit").value = 0
+    assert run.g_poll() == 0
+    assert fault(run) == 1

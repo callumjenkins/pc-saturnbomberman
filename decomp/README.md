@@ -129,7 +129,9 @@ that reads a register its last callee leaves, which an answered call does not se
 through memory the host build does not hold (`f06008ECA`, `f06008ECE`, `f060ABB80`, `f06021190`, `f06021888`,
 `f06022C9C`). Neither kind checks the call count or the arguments. A trial in which the game's code passes the
 interpreter's step limit is skipped once the host build has polled `LONG_RUN_POLLS` times, since both sides are then
-in an endless loop.
+in an endless loop. The host build stops at `CHECK_STEPS` polls too (3,000,000 at most): `g_run` calls the function and
+leaves it by `longjmp` from the poll that passes the limit, so a loop over a pointer read from noise ends with
+`g_fault` set where it used to run for minutes.
 
 `shc_compare.py` is a second, separate measure. The game was built with Hitachi SHC, and these
 functions are the ones whose SHC 5.0 output has the same instructions as the game's, some in another

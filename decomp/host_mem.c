@@ -2,6 +2,7 @@
  * g_region_base, g_region_size and g_region, big-endian, with the cache-through mirror folded onto the
  * cached address. check.py points them at the buffers of the SH-2 interpreter it runs the callees on, so
  * a function and the code it calls see the same bytes. An access outside them sets g_fault and reads zero. */
+#include <setjmp.h>
 #include <stdint.h>
 
 #define MAX_REGIONS 16
@@ -27,14 +28,34 @@ int g_poll_limit = 3000000; /* g_poll()s after which a loop that tests with AGAI
 
 static void safe_point(void);
 
+static jmp_buf g_bail;
+static int g_armed;         /* g_run is on the stack, so the poll that passes the limit can leave the function */
+
 int g_poll(void)
 {
     safe_point();
     if (++g_polls > g_poll_limit) {
         g_fault = 1;
+        if (g_armed)
+            longjmp(g_bail, 1);
         return 0;
     }
     return 1;
+}
+
+/* Calls fn with sixteen words, which a function of fewer parameters ignores, and returns what it returns; the
+ * poll that passes g_poll_limit ends the call with g_fault set, as a loop the C writes without AGAIN needs. */
+uint64_t g_run(uint64_t (*fn)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
+                              uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t),
+               const uint64_t *a)
+{
+    uint64_t result = 0;
+    if (setjmp(g_bail) == 0) {
+        g_armed = 1;
+        result = fn(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15]);
+    }
+    g_armed = 0;
+    return result;
 }
 
 /* Where a function a task can park in keeps its frame. An interrupt at a safe point pushes at r15, so what the
