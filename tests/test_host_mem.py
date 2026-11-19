@@ -200,3 +200,18 @@ def test_a_poll_past_the_limit_outside_g_run_returns_to_its_caller(run):
     ctypes.c_int.in_dll(run, "g_poll_limit").value = 0
     assert run.g_poll() == 0
     assert fault(run) == 1
+
+
+def test_a_word_that_ticks_reads_back_one_more_at_each_load(mem):
+    ctypes.c_int.in_dll(mem, "g_ticks").value = 1
+    (ctypes.c_uint32 * 4).in_dll(mem, "g_tick")[0] = 0x06000100
+    mem.g_wr(0x06000100, 4, 7)
+    assert [mem.g_rd(0x06000100, 4) for _ in range(3)] == [7, 8, 9]
+
+
+def test_a_load_of_a_halfword_of_the_ticking_word_leaves_it_as_it_was(mem):
+    ctypes.c_int.in_dll(mem, "g_ticks").value = 1
+    (ctypes.c_uint32 * 4).in_dll(mem, "g_tick")[0] = 0x06000100
+    mem.g_wr(0x06000100, 4, 7)
+    mem.g_rd(0x06000102, 2)
+    assert mem.g_rd(0x06000100, 2) == 0 and mem.g_rd(0x06000102, 2) == 7

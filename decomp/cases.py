@@ -20,6 +20,7 @@ FIX = 0x060C0100
 
 SPEC: dict[str, tuple[list[tuple], bool, list[tuple]]] = {}
 UNSTUBBED: set[str] = set()      # the functions whose trials never answer their calls themselves
+TICKS: dict[str, tuple[int, ...]] = {}   # the words a function waits on that an interrupt advances, which read back one more at each load
 
 
 def bomber(i: int) -> int:
@@ -48,13 +49,17 @@ def slot(k: int) -> int:
     return 0x060D7B48 + 24 * k
 
 
-def case(name: str, args: list[tuple], returns: bool, plants: list[tuple] = (), stubbed: bool = True) -> None:
-    """`stubbed` False for a function that reads a register its last callee leaves, which an answered call does not set."""
+def case(name: str, args: list[tuple], returns: bool, plants: list[tuple] = (), stubbed: bool = True,
+         ticks: tuple[int, ...] = ()) -> None:
+    """`stubbed` False for a function that reads a register its last callee leaves, which an answered call does not set.
+    `ticks` are the addresses of words it waits on until they change, which no plant can do."""
     if name in SPEC:
         raise ValueError("%s has two cases" % name)
     SPEC[name] = (args, returns, list(plants))
     if not stubbed:
         UNSTUBBED.add(name)
+    if ticks:
+        TICKS[name] = ticks
 
 
 def objs(offset: int, values: list[int], ids: tuple[int, ...] = (3, 4), chance: float = 0.9) -> list[tuple]:

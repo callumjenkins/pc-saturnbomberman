@@ -24,6 +24,9 @@ uint32_t g_ctl[3];          /* sr, gbr and vbr, which check.py sets before each 
 /* Runs the game's function at addr with the arguments; check.py sets it. */
 uint32_t (*g_call_hook)(uint32_t addr, const uint32_t *args, int n);
 
+uint32_t g_tick[4];         /* words that read back one more each time they are loaded, as a counter an interrupt advances does */
+int g_ticks;
+
 int g_poll_limit = 3000000; /* g_poll()s after which a loop that tests with AGAIN ends and the trial counts as one that faulted */
 
 static void safe_point(void);
@@ -256,6 +259,16 @@ uint32_t g_rd(uint32_t addr, int size)
         return 0;
     for (i = 0; i < size; i++)
         v = v << 8 | p[i];
+    if (size == 4) {
+        for (i = 0; i < g_ticks; i++) {
+            if (g_tick[i] == (addr & 0x1FFFFFFF)) {
+                p[0] = (v + 1) >> 24;
+                p[1] = (v + 1) >> 16;
+                p[2] = (v + 1) >> 8;
+                p[3] = v + 1;
+            }
+        }
+    }
     return v;
 }
 

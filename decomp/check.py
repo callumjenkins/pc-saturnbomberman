@@ -407,6 +407,11 @@ def trial(lib: ctypes.CDLL, name: str, args: list[tuple], returns: bool, r: rand
     machine.copy(cpu, host)
     machine.attach(cpu)
     machine.attach(host)
+    ticks = cases.TICKS.get(name, ())
+    for side in (cpu, host):
+        side.mem.ticking = frozenset(ticks)
+    ctypes.c_int.in_dll(lib, "g_ticks").value = len(ticks)
+    (ctypes.c_uint32 * 4).in_dll(lib, "g_tick")[:len(ticks)] = ticks
     vals = [value(a, r) for a in args]
     sr, gbr, vbr = machine.controls(vals)
     for side in (cpu, host):

@@ -133,6 +133,10 @@ in an endless loop. The host build stops at `CHECK_STEPS` polls too (3,000,000 a
 leaves it by `longjmp` from the poll that passes the limit, so a loop over a pointer read from noise ends with
 `g_fault` set where it used to run for minutes.
 
+A function that waits for a RAM word to change, a counter an interrupt advances, never leaves its loop in a trial, so
+no plant lets it run. Its `case()` gives `ticks=(address,)`: that word reads back one more at each longword load, on the
+game's side (`Devices.read`) and the host's (`g_rd`), so both leave the loop after the same reads.
+
 `shc_compare.py` is a second, separate measure. The game was built with Hitachi SHC, and these
 functions are the ones whose SHC 5.0 output has the same instructions as the game's, some in another
 order. SHC is not included and is not freely available.

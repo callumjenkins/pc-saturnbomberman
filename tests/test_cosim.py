@@ -499,3 +499,14 @@ def test_a_trial_in_which_the_function_touches_a_register_it_saved_other_than_to
 
 def test_the_slots_a_call_saved_are_forgotten_when_it_returns(monkeypatch):
     assert not run_with_a_saved_register(monkeypatch).saved_slots
+
+
+def test_a_word_the_game_waits_on_reads_back_one_more_at_each_load_only_when_the_case_says_so():
+    mem = sh2emu.Memory()
+    mem.add(0x06000000, 0x100)
+    machine.attach(types.SimpleNamespace(mem=mem))
+    mem.write(0x06000010, 4, 5)
+    assert [mem.read(0x06000010, 4) for _ in range(2)] == [5, 5]
+    mem.ticking = frozenset({0x06000010})
+    assert [mem.read(0x06000010, 4) for _ in range(3)] == [5, 6, 7]
+    assert mem.read(0x06000010, 2) == 0

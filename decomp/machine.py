@@ -46,7 +46,14 @@ class Devices(sh2emu.Memory):
     """The memory of a trial once it is filled, with the three writes host_mem.c's `g_wr` answers the same way:
     HIRQ keeps the flags written as 1 and sets CMOK, CR1 keeps what a plant gave it, and SF reads back 0."""
 
+    ticking: frozenset[int] = frozenset()                   # the words (`cases.ticks`) that read back one more at each load
     saved_slots: frozenset[int] | set[int] = frozenset()    # where the function pushed the registers it gives back, which only the game's code holds
+
+    def read(self, addr: int, size: int) -> int:
+        value = super().read(addr, size)
+        if size == 4 and addr & 0x1FFFFFFF in self.ticking:
+            super().write(addr, 4, value + 1)
+        return value
 
     def write(self, addr: int, size: int, value: int) -> None:
         if (addr & ~3) in self.saved_slots:
